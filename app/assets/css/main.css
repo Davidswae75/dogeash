@@ -1,0 +1,162 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "./tokens.css";
+
+/* Night watch is data-theme="dark" on <html> (set by @nuxtjs/color-mode) */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* Dogeash tokens as Tailwind utilities (bg-marigold, text-ink-muted, rounded-xl, font-display ...) */
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-sunk: var(--surface-sunk);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-night: var(--night);
+  --color-on-night: var(--on-night);
+  --color-action: var(--action);
+  --color-action-hover: var(--action-hover);
+  --color-on-action: var(--on-action);
+  --color-ash: var(--ash);
+  --color-ash-soft: var(--ash-soft);
+  --color-on-ash: var(--on-ash);
+  --color-marigold: var(--marigold);
+  --color-on-marigold: var(--on-marigold);
+  --color-marigold-ink: var(--marigold-ink);
+  --color-marigold-soft: var(--marigold-soft);
+  --color-verified: var(--verified);
+  --color-verified-soft: var(--verified-soft);
+  --color-danger: var(--danger);
+  --color-focus: var(--focus);
+
+  /* shadcn-vue semantic names, pointed at the same tokens */
+  --color-background: var(--canvas);
+  --color-foreground: var(--ink);
+  --color-card: var(--surface);
+  --color-card-foreground: var(--ink);
+  --color-popover: var(--surface);
+  --color-popover-foreground: var(--ink);
+  --color-primary: var(--action);
+  --color-primary-foreground: var(--on-action);
+  --color-secondary: var(--ash-soft);
+  --color-secondary-foreground: var(--ink);
+  --color-muted: var(--surface-sunk);
+  --color-muted-foreground: var(--ink-muted);
+  --color-accent: var(--surface-sunk);
+  --color-accent-foreground: var(--ink);
+  --color-destructive: var(--danger);
+  --color-border: var(--line);
+  --color-input: var(--line-strong);
+  --color-ring: var(--focus);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+
+  --font-display: var(--font-display);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  --container-page: var(--container);
+  --spacing-header: var(--header-height);
+
+  --ease-calm: var(--ease-calm);
+
+  --animate-rise: dg-rise var(--dur-calm) var(--ease-calm) backwards;
+  --animate-march: dg-march 1.4s linear infinite;
+  --animate-spin-slow: dg-spin 24s linear infinite;
+  --animate-beacon: dg-pulse 1.8s ease-out infinite;
+  --animate-shimmer: dg-shimmer 1.6s linear infinite;
+
+  @keyframes dg-rise {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes dg-march {
+    to { stroke-dashoffset: -24; }
+  }
+  @keyframes dg-spin {
+    from { transform: rotate(-12deg); }
+    to { transform: rotate(348deg); }
+  }
+  @keyframes dg-pulse {
+    0% { box-shadow: 0 0 0 0 var(--marigold); }
+    100% { box-shadow: 0 0 0 10px transparent; }
+  }
+  @keyframes dg-shimmer {
+    from { background-position: -200% 0; }
+    to { background-position: 200% 0; }
+  }
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-canvas text-ink font-sans antialiased;
+    font-size: 16px;
+    line-height: 26px;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  h1, h2, h3 {
+    text-wrap: balance;
+  }
+}
+
+/* Signature details that Tailwind has no single utility for */
+
+/* Archivo, widest and heaviest: hero and section headings on Home */
+@utility mega {
+  font-family: var(--font-display);
+  font-stretch: 125%;
+  font-weight: 900;
+  letter-spacing: -0.035em;
+}
+
+/* Archivo expanded, for titles and dog names */
+@utility font-stretch-expanded {
+  font-stretch: 115%;
+}
+
+@utility text-outline {
+  color: transparent;
+  -webkit-text-stroke: 2px var(--ink);
+  paint-order: stroke;
+}
+
+/* Security-tape stripes: under the Home header (14px) and under K9 file tabs (4px) */
+@utility hazard {
+  background: repeating-linear-gradient(-45deg, var(--marigold) 0 14px, var(--night) 14px 28px);
+}
+
+@utility hazard-thin {
+  background: repeating-linear-gradient(-45deg, var(--marigold) 0 6px, var(--night) 6px 12px);
+}
+
+/* Stagger siblings that rise in on load */
+@utility rise-stagger {
+  & > :nth-child(2) { animation-delay: 80ms; }
+  & > :nth-child(3) { animation-delay: 160ms; }
+  & > :nth-child(4) { animation-delay: 240ms; }
+  & > :nth-child(5) { animation-delay: 320ms; }
+  & > :nth-child(6) { animation-delay: 400ms; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
