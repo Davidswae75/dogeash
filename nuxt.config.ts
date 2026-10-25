@@ -28,6 +28,13 @@ export default defineNuxtConfig({
     storageKey: 'dogeash-watch',
   },
 
+  // Static build: these pages are linked but not built yet (PLAN.md Phase 1); remove each one once its page exists
+  nitro: {
+    prerender: {
+      ignore: ['/protection-levels', '/sellers', '/sell', '/sign-in'],
+    },
+  },
+
   app: {
     head: {
       htmlAttrs: { lang: 'en' },
