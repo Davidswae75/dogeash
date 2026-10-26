@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-10-26T04:56:38.697Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-10-26T09:05:40.281Z
 > Files: 545 tracked | Anatomy hits: 0 | Misses: 0
 
 > Project structure index. Auto-maintained by OpenWolf hooks and daemon.
@@ -12,7 +12,7 @@
 - `.gitignore` — Git ignore rules (~52 tok)
 - `CLAUDE.md` — OpenWolf (~99 tok)
 - `components.json` (~126 tok)
-- `nuxt.config.ts` — Nuxt configuration (~464 tok)
+- `nuxt.config.ts` — https://nuxt.com/docs/api/configuration/nuxt-config (~469 tok)
 - `package.json` — Node.js package manifest (~339 tok)
 - `PLAN.md` — Dogeash project plan (~3364 tok)
 - `README.md` — Project documentation (~206 tok)

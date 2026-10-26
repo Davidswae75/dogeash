@@ -1,13 +1,13 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-10-26T04:56:38.697Z",
+    "lastScanned": "2026-10-26T09:05:40.281Z",
     "fileCount": 545,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "42e52192f452a6b70aed055d3f99a4bca11db0523e17ade2174bfe3e2a2ba044",
-    "storeUpdatedAt": "2026-10-26T04:56:38.812Z",
-    "rootHash": "7cb9f0a29538c0e7"
+    "renderedHash": "7413a50bf55c35d604b622363a6b12165989f36e12b53bd5bf39405268353b54",
+    "storeUpdatedAt": "2026-10-26T09:05:40.381Z",
+    "rootHash": "1d8c71efa7f38541"
   },
   "files": {
     ".gitignore": {
@@ -6130,14 +6130,13 @@
       "importance": 0.4429
     },
     "nuxt.config.ts": {
-      "description": "Nuxt configuration",
-      "tokens": 464,
-      "hash": "42a726de6e3215cf",
-      "size": 1623,
-      "mtimeMs": 1792907405424.1636,
-      "updatedAt": "2026-10-26T02:55:55.689Z",
-      "source": "scan",
-      "importance": 0.4429
+      "description": "https://nuxt.com/docs/api/configuration/nuxt-config",
+      "tokens": 469,
+      "hash": "106e28ced1315ba5",
+      "size": 1641,
+      "mtimeMs": 1793005539935.0757,
+      "updatedAt": "2026-10-26T09:05:40.279Z",
+      "source": "hook"
     },
     "package.json": {
       "description": "Node.js package manifest",

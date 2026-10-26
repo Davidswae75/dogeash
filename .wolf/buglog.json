@@ -18,10 +18,29 @@
       "last_seen": "2026-10-26T03:47:27.156Z",
       "occurrences": 1,
       "related_bugs": []
+    },
+    {
+      "error_message": "Incorrect value in code",
+      "file": "nuxt.config.ts",
+      "root_cause": "Had '/sellers'",
+      "fix": "Changed to '/sell'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "ts"
+      ],
+      "status": "candidate",
+      "observed_worktree": "/Users/dave/Documents/personalProjects/dogeash",
+      "id": "bug-002",
+      "timestamp": "2026-10-26T09:05:40.433Z",
+      "last_seen": "2026-10-26T09:05:40.433Z",
+      "occurrences": 1,
+      "related_bugs": []
     }
   ],
   "applied_observations": {
-    "002d7988-3ba3-4215-bdad-636d420696df": true
+    "002d7988-3ba3-4215-bdad-636d420696df": true,
+    "1a9d344b-76f0-4dfb-b51c-f0063ef5f046": true
   },
-  "next_id": 2
+  "next_id": 3
 }
