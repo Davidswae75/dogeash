@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { PropertyType } from '~/utils/protection'
 
+definePageMeta({ footer: 'full' })
+
 useSeoMeta({
   title: 'Dogeash · Trained guard dogs from verified kennels',
   description: 'Protection dogs for homes, compounds and estates. Every kennel inspected in person, every dog delivered with a K9 file and handover training.',

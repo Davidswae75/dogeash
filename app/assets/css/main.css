@@ -70,6 +70,8 @@
   --animate-spin-slow: dg-spin 24s linear infinite;
   --animate-beacon: dg-pulse 1.8s ease-out infinite;
   --animate-shimmer: dg-shimmer 1.6s linear infinite;
+  --animate-kenburns: dg-kenburns 20s ease-in-out infinite alternate;
+  --animate-field-shake: dg-field-shake 400ms ease-out;
 
   @keyframes dg-rise {
     from { opacity: 0; transform: translateY(14px); }
@@ -85,6 +87,17 @@
   @keyframes dg-pulse {
     0% { box-shadow: 0 0 0 0 var(--marigold); }
     100% { box-shadow: 0 0 0 10px transparent; }
+  }
+  @keyframes dg-field-shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(5px); }
+    60% { transform: translateX(-3px); }
+    80% { transform: translateX(2px); }
+  }
+  @keyframes dg-kenburns {
+    from { transform: scale(1) translate(0, 0); }
+    to { transform: scale(1.08) translate(-1.5%, -1%); }
   }
   @keyframes dg-shimmer {
     from { background-position: -200% 0; }

@@ -8,7 +8,8 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "render:patrol": "node scripts/render-patrol-chase.mjs"
+    "render:patrol": "node scripts/render-patrol-chase.mjs",
+    "render:kennel": "node scripts/render-kennel-watch.mjs"
   },
   "dependencies": {
     "@lucide/vue": "^1.61.0",

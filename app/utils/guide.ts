@@ -45,14 +45,14 @@ export const guideImages = {
     brief: 'A Belgian Malinois walking along the inside of a tall painted compound wall at night, lit by a single security floodlight. Razor wire on top of the wall, a generator shed in the background. The dog is mid-stride, ears up, attentive. Moody but not menacing.',
   },
   vet: {
-    file: 'guide-vet.jpg',
-    ready: false,
+    file: guideVet,
+    ready: true,
     ratio: '4/3',
     alt: 'A vet scans a Dobermann for its microchip during a health check',
     brief: 'Inside a clean veterinary clinic in Lagos, a vet in scrubs scans the shoulder of a calm Dobermann with a handheld microchip reader while the owner holds the lead. Vaccination card and stethoscope on the steel table. Bright, clinical light.',
   },
   feeding: {
-    file: guideTraining,
+    file: guideFeeding,
     ready: true,
     ratio: '1/1',
     alt: 'A guard dog eats from a steel bowl inside a shaded kennel run',

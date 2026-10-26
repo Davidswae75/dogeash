@@ -3,7 +3,7 @@ import type { Dog } from './dogs'
 
 // The full K9 profile: everything a kennel lists, Dogeash inspects and a buyer reads.
 // Zod schemas are the single source of truth: types are inferred from them, and the
-// same schemas validate seller forms (vee-validate + @vee-validate/zod) and API payloads.
+// same schemas validate store forms (vee-validate + @vee-validate/zod) and API payloads.
 
 // ── Option lists ────────────────────────────────────────────────────────────
 
@@ -253,7 +253,7 @@ export const reservationSchema = z.object({
 export const dogProfileSchema = z.object({
   id: z.string().uuid(), // database key; fileNo is the public number
   identity: identitySchema,
-  sellerId: z.string(),
+  storeId: z.string(),
   pedigree: pedigreeSchema,
   health: healthSchema,
   temperament: temperamentSchema,
@@ -322,7 +322,7 @@ export function toDogCard(p: DogProfile): Dog | null {
     photo: p.media.photos.find(ph => ph.kind === 'profile')?.url,
     property: p.suitability.properties,
     safeWithChildren: p.suitability.safeWithChildren,
-    sellerId: p.sellerId,
+    storeId: p.storeId,
   }
 }
 
@@ -331,7 +331,7 @@ export function toDogCard(p: DogProfile): Dog | null {
 export const sampleProfile: DogProfile = {
   id: '3f6c2a1e-8b4d-4c7a-9e21-5d0b7a4f1c93',
   identity: { fileNo: 'KD-2026-070', name: 'Kaiser', breed: 'Belgian Malinois', sex: 'Male', born: '2024-06', neutered: false, microchip: '985 112 004 731 920', sizeClass: 'large', weightKg: 31, heightCm: 64 },
-  sellerId: 'SLR-001',
+  storeId: 'STR-001',
   pedigree: {
     registry: 'KCN',
     registrationNo: 'KCN-MAL-24-0193',

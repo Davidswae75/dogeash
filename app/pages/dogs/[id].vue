@@ -4,7 +4,7 @@ const route = useRoute()
 const dog = findDog(String(route.params.id))
 if (!dog) throw createError({ statusCode: 404, statusMessage: 'No K9 file with that number' })
 
-const seller = getSeller(dog.sellerId)
+const store = getStore(dog.storeId)
 const file = dog.file
 
 useSeoMeta({ title: `${dog.name}, ${dog.breed} · ${dog.fileNo} · Dogeash` })
@@ -66,10 +66,10 @@ const facts = [
           <span class="text-xs leading-4 font-bold tracking-[.08em] text-marigold uppercase">Price</span>
           <div class="font-display text-[40px] leading-none font-extrabold font-stretch-expanded">₦{{ dog.priceNaira.toLocaleString('en-NG') }}</div>
           <p class="m-0 text-sm leading-[21px]">Includes handover training at your gate and 30 days of trainer support.</p>
-          <Button variant="marigold">Contact seller</Button>
+          <Button variant="marigold">Contact store</Button>
           <Button variant="night">Book a visit</Button>
         </div>
-        <SellerCard v-if="seller" :seller="seller" compact />
+        <StoreCard v-if="store" :store="store" compact />
       </aside>
     </div>
   </div>

@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "bugs": [
+    {
+      "error_message": "Incorrect value in code",
+      "file": "app/components/StoreListItem.vue",
+      "root_cause": "Had \"Inspected\"",
+      "fix": "Changed to \"inline-flex items-center gap-1.5\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "vue"
+      ],
+      "status": "candidate",
+      "observed_worktree": "/Users/dave/Documents/personalProjects/dogeash",
+      "id": "bug-001",
+      "timestamp": "2026-10-26T03:47:27.156Z",
+      "last_seen": "2026-10-26T03:47:27.156Z",
+      "occurrences": 1,
+      "related_bugs": []
+    }
+  ],
+  "applied_observations": {
+    "002d7988-3ba3-4215-bdad-636d420696df": true
+  },
+  "next_id": 2
+}

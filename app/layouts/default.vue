@@ -1,3 +1,9 @@
+<script setup lang="ts">
+// Pages opt into the full footer with definePageMeta({ footer: 'full' }); the rest get quick links only
+const route = useRoute()
+const fullFooter = computed(() => route.meta.footer === 'full')
+</script>
+
 <template>
   <div class="flex min-h-screen flex-col">
     <a
@@ -8,6 +14,7 @@
     <main id="main" class="flex-1 pb-12">
       <slot />
     </main>
-    <SiteFooter />
+    <SiteFooter v-if="fullFooter" />
+    <SiteFooterMinimal v-else />
   </div>
 </template>

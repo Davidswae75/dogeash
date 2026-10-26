@@ -2,7 +2,7 @@
 const links = [
   { label: 'Find a guard dog', to: '/dogs' },
   { label: 'Protection levels', to: '/protection-levels' },
-  { label: 'Sellers', to: '/sellers' },
+  { label: 'Stores', to: '/stores' },
   { label: "Buyer's guide", to: '/guide' },
 ]
 

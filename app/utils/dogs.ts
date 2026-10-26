@@ -1,6 +1,6 @@
 import type { PropertyType, ProtectionLevel } from './protection'
 import type { hipGrades } from './k9'
-import { sampleSellers } from './sellers'
+import { sampleStores } from './stores'
 import sargePhoto from "@/assets/dogs/sarge-gsd.jpg";
 import novaPhoto from "@/assets/dogs/nova-gsd.jpg";
 import ramboPhoto from "@/assets/dogs/rambo-malinois.jpg";
@@ -35,7 +35,7 @@ export interface Dog {
   photo?: string
   property: PropertyType[]
   safeWithChildren: boolean
-  sellerId: string
+  storeId: string
   // Full K9 file, shown on the profile page
   file?: {
     summary: string
@@ -52,7 +52,7 @@ export interface Dog {
   }
 }
 
-// Example listings until the seller dashboard and API exist.
+// Example listings until the store dashboard and API exist.
 // level is the Dogeash protection scale (1–5); property uses the picker's four types.
 export const sampleDogs: Dog[] = [
   {
@@ -70,7 +70,7 @@ export const sampleDogs: Dog[] = [
     photo: ramboPhoto,
     property: ["home", "estate", "compound"],
     safeWithChildren: true,
-    sellerId: "SLR-001",
+    storeId: "STR-001",
     file: {
       summary:
         "Imported Belgian working line male with full IGP-3 training. A serious deterrent for high-profile households: explosive drive on the field, calm and social indoors.",
@@ -102,7 +102,7 @@ export const sampleDogs: Dog[] = [
     photo: sargePhoto,
     property: ["home", "estate", "compound"],
     safeWithChildren: true,
-    sellerId: "SLR-001",
+    storeId: "STR-001",
     file: {
       summary:
         "Deep-pigmented saddle male with an on/off switch most families ask for: full alert at the gate, gentle with the children he was raised beside.",
@@ -134,7 +134,7 @@ export const sampleDogs: Dog[] = [
     photo: novaPhoto,
     property: ["home", "estate"],
     safeWithChildren: true,
-    sellerId: "SLR-002",
+    storeId: "STR-002",
     file: {
       summary:
         "Sable female with an exceptional nose and a soft mouth around small children. Barks early, bites only when commanded — the ideal first protection dog.",
@@ -166,7 +166,7 @@ export const sampleDogs: Dog[] = [
     photo: flashPhoto,
     property: ["home", "estate", "compound"],
     safeWithChildren: true,
-    sellerId: "SLR-003",
+    storeId: "STR-003",
     file: {
       summary:
         "Fast, precise young female already performing full bitework. Reserved pending home inspection — her next family wants a night-shift deterrent.",
@@ -197,7 +197,7 @@ export const sampleDogs: Dog[] = [
     photo: tankPhoto,
     property: ["home", "compound"],
     safeWithChildren: true,
-    sellerId: "SLR-004",
+    storeId: "STR-004",
     file: {
       summary:
         "A physical wall of a dog. Tank holds a doorway by presence alone; his deep bark has ended three break-in attempts at his current home without contact.",
@@ -228,7 +228,7 @@ export const sampleDogs: Dog[] = [
     photo: bellaPhoto,
     property: ["home", "estate"],
     safeWithChildren: true,
-    sellerId: "SLR-002",
+    storeId: "STR-002",
     file: {
       summary:
         "Compact female that suits a duplex lifestyle: quiet through the day, tireless through the night. Alert-bark trained and housebroken.",
@@ -259,7 +259,7 @@ export const sampleDogs: Dog[] = [
     photo: dieselPhoto,
     property: ["home", "estate"],
     safeWithChildren: true,
-    sellerId: "SLR-003",
+    storeId: "STR-003",
     file: {
       summary:
         "Sleek perimeter patroller with European bloodlines. Covers a fence line faster than any dog in our kennel and shadows his handler room to room.",
@@ -290,7 +290,7 @@ export const sampleDogs: Dog[] = [
     photo: kaiaPhoto,
     property: ["home"],
     safeWithChildren: true,
-    sellerId: "SLR-001",
+    storeId: "STR-001",
     file: {
       summary:
         "Sweet-natured female finishing her alert-bark program. Reserved for a family in Maitama; contact the kennel to join the waiting list for her littermate.",
@@ -321,7 +321,7 @@ export const sampleDogs: Dog[] = [
     photo: kingPhoto,
     property: ["home", "estate", "compound"],
     safeWithChildren: true,
-    sellerId: "SLR-002",
+    storeId: "STR-002",
     file: {
       summary:
         "Black brindle corso with a chest like a barrel and the judgement to match. Property-aware: he distinguishes the gardener from a stranger within two visits.",
@@ -352,7 +352,7 @@ export const sampleDogs: Dog[] = [
     photo: duchessPhoto,
     property: ["home", "estate"],
     safeWithChildren: true,
-    sellerId: "SLR-004",
+    storeId: "STR-004",
     file: {
       summary:
         "Blue female with a watchful streak and a soft spot for teenagers. Trained to sleep across the front door corridor and challenge after dark.",
@@ -383,7 +383,7 @@ export const sampleDogs: Dog[] = [
     photo: boulderPhoto,
     property: ["home", "compound"],
     safeWithChildren: true,
-    sellerId: "SLR-005",
+    storeId: "STR-005",
     file: {
       summary:
         "Homegrown brindle Boerboel bred for our climate — thick skin, low coat care and relentless loyalty to the whole household, from grandfather to toddler.",
@@ -414,7 +414,7 @@ export const sampleDogs: Dog[] = [
     photo: zaraPhoto,
     property: ["home", "compound"],
     safeWithChildren: true,
-    sellerId: "SLR-005",
+    storeId: "STR-005",
     file: {
       summary:
         "Fawn puppy with 12 weeks of foundational guard training already banked: crate, lead, recall and bark-on-command foundation. Grows into a 55 kg guardian.",
@@ -445,7 +445,7 @@ export const sampleDogs: Dog[] = [
     photo: onyxPhoto,
     property: ["home", "estate", "compound"],
     safeWithChildren: true,
-    sellerId: "SLR-001",
+    storeId: "STR-001",
     file: {
       summary:
         "Wiry-coated sentinel from German show-and-work lines. Onyx hears a visitor at the gate long before the gate bell rings and announces with a single decisive bark.",
@@ -477,7 +477,7 @@ export const sampleDogs: Dog[] = [
     photo: cobraPhoto,
     property: ["home", "compound"],
     safeWithChildren: true,
-    sellerId: "SLR-005",
+    storeId: "STR-005",
     file: {
       summary:
         "Brindle KNPV-bred male with an off-switch that surprises everyone. Cobra works the fence line at a trot for hours, then lies under the dining table through dinner.",
@@ -508,7 +508,7 @@ export const sampleDogs: Dog[] = [
     photo: titusPhoto,
     property: ["compound"],
     safeWithChildren: true,
-    sellerId: "SLR-002",
+    storeId: "STR-002",
     file: {
       summary:
         "A fawn mountain with a black mask and the calm authority of a much older dog. Reserved for a consulate residence after a two-week trial; join the list for his half-brother.",
@@ -539,7 +539,7 @@ export const sampleDogs: Dog[] = [
     photo: blitzPhoto,
     property: ["home", "estate"],
     safeWithChildren: true,
-    sellerId: "SLR-004",
+    storeId: "STR-004",
     file: {
       summary:
         "Solid black male from east-German working lines. Blitz tracks, alerts and holds — a natural with children and merciless on a trail.",
@@ -570,7 +570,7 @@ export const sampleDogs: Dog[] = [
     photo: mambaPhoto,
     property: ["home", "estate", "compound"],
     safeWithChildren: true,
-    sellerId: "SLR-001",
+    storeId: "STR-001",
     file: {
       summary:
         "Veteran of two embassy security contracts, now ready for a family that can keep up with her. Mamba reads a room in seconds and holds a perimeter like a drone with teeth.",
@@ -601,7 +601,7 @@ export const sampleDogs: Dog[] = [
     photo: aresPhoto,
     property: ["home", "compound"],
     safeWithChildren: true,
-    sellerId: "SLR-003",
+    storeId: "STR-003",
     file: {
       summary:
         "Youthful male with heavyweight genetics still filling out. Ares has finished his alert-bark program and is ready to bond with a family and grow into the role.",
@@ -619,8 +619,8 @@ export const sampleDogs: Dog[] = [
   },
 ];
 
-export function getSeller(sellerId: string) {
-  return sampleSellers.find(s => s.id === sellerId)
+export function getStore(storeId: string) {
+  return sampleStores.find(s => s.id === storeId)
 }
 
 export function formatNaira(value: number) {

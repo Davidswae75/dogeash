@@ -34,7 +34,7 @@ This file is the build guide and checklist. Work through it phase by phase, tick
 - [x] Nuxt project with tokens, fonts, Tailwind and shadcn-vue
 - [x] Day watch / Night watch with `@nuxtjs/color-mode`
 - [x] Default layout: header, footer, skip link
-- [x] Core components: K9 card, protection scale, property picker, patrol map, sticker, big numbers, search bar, seller card
+- [x] Core components: K9 card, protection scale, property picker, patrol map, sticker, big numbers, search bar, store card
 - [x] Approved sizing and centred page column
 - [ ] First git commit (the repo has no commits yet)
 - [ ] Push to a remote (GitHub) and protect `main`
@@ -51,8 +51,10 @@ The goal: someone can land, understand Dogeash, browse dogs and read a full K9 f
 - [~] Browse (`/dogs`): built; review filters against the design
 - [~] Dog profile (`/dogs/[id]`): built; show temperament, health, training and incident history
 - [ ] Protection levels (`/protection-levels`): the five levels explained, with example dogs per level
-- [ ] Sellers directory (`/sellers`)
-- [ ] Seller store (`/sellers/[id]`): kennel profile, inspection date, their dogs
+- [x] Stores directory (`/stores`): search, filters (city, breeds, protection levels, services, trust), sort, how we check stores
+- [x] Store page (`/stores/[slug]`): dogs for sale with filters, about and services, history, owner, inspection record, vets and trainers, reviews
+  - [ ] Store cover and kennel photos (image briefs, like the guide)
+  - [ ] "Contact store" and "Book a kennel visit" buttons do nothing yet (need accounts and messaging)
 - [ ] Buyer's guide (`/guide`): choosing a level, costs, care, what handover involves
 - [ ] Sell with us (`/sell`): pitch to kennels and how verification works
 - [ ] Sign in / sign up pages (UI only until Phase 2)
@@ -84,15 +86,36 @@ The goal: someone can land, understand Dogeash, browse dogs and read a full K9 f
 - [ ] Separate database `id` (uuid) from the public `fileNo` (done in the model; carry into the schema)
 - [ ] Image and video storage for dog photos and training videos
 - [ ] Accounts and sign-in (email + phone OTP)
-- [ ] Roles: buyer, seller, inspector, admin
+- [~] One sign-in page (`/sign-in`) for everyone: buyers, store owners and staff, care providers, inspectors and admins
+  - UI built (`app/layouts/auth.vue`): email + password, phone or email one-time code, validation, resend timer; ends on a preview of where buyers and stores land
+  - [ ] Connect to real accounts, then remove the preview step
+  - [x] Sign-in fields built with `<Fields>` + vee-validate + Zod schemas (`app/utils/auth.ts`)
+  - [x] Sign-up page (`/sign-up`): what brings you here, name, email, phone, password with strength meter, terms; phone code step; welcome with next steps (preview, nothing saved)
+  - [ ] Forgot-password page (use `<Fields>` and the `KennelWatch` animation, like sign-in)
+  - [ ] Terms of use and privacy policy pages (linked from sign-up)
+  - [ ] Line under the form: "Selling on Dogeash? Sign in here with the account you used to apply."
+  - [ ] After sign-in, send each person where they belong: buyers back to where they were, stores to the dashboard, providers to their bookings, staff to admin
+- [ ] Roles: buyer, store member, care provider, inspector, admin (one account can hold several)
+- [ ] Account menu switch between "Buying" and "My store" for people who do both
+- [ ] Route guards: dashboard and admin pages need the right role; everyone else is sent to sign-in or their profile
+- [ ] Required one-time code (SMS or authenticator app) for store and provider accounts; optional for buyers
 - [ ] API routes validated with the `k9.ts` Zod schemas
 - [ ] Replace sample data with the database on every page
 - [ ] Seed script with the sample kennels and dogs for development
 
-## Phase 3 · Sellers
+## Phase 3 · Stores (sellers)
 
-- [ ] Seller sign-up and verification: ID, CAC registration, bank account, kennel address
-- [ ] Seller dashboard layout (`app/layouts/dashboard.vue`)
+Sellers are called **stores** everywhere buyers can see them. A store is a kennel; its owner is the seller.
+
+
+- [ ] Store application (from "List a dog" and "Sell with us"): creates the account and starts verification (ID, CAC registration, bank account, kennel address), then books the inspection
+- [ ] Pending stores can sign in and prepare their profile and dogs; nothing goes public until the inspection passes
+- [x] Store dashboard layout (`app/layouts/dashboard.vue`): sidebar with Overview, Dogs, Enquiries, Bookings, Care team, Store profile, Payouts, Team, Settings; store switcher menu; top bar with search, notifications, theme and "Add a dog"; phone menu sheet
+- [~] Dashboard overview (`/dashboard`): weekly numbers with trends, needs your attention, coming up, your dogs table, store profile checklist (example figures)
+- [ ] Dashboard sections: Dogs, Enquiries, Bookings, Care team, Store profile, Payouts, Team, Settings (each shows a "Coming next" page for now)
+- [ ] Store staff: invite members with roles (Owner: everything incl. payouts · Manager: dogs, enquiries, bookings · Handler: their own dogs)
+- [ ] Store dashboard: edit store profile (about, history, owner, services, hours, delivery areas)
+- [ ] Store dashboard: manage the care team (add or remove linked vets and trainers)
 - [ ] Add a dog: multi-step form using `dogSubmissionSchema` + vee-validate
 - [ ] Edit, withdraw and mark sold
 - [ ] Listing statuses: draft → pending review → available → reserved → sold / withdrawn
@@ -118,6 +141,35 @@ The goal: someone can land, understand Dogeash, browse dogs and read a full K9 f
 - [ ] Buyer–seller messaging
 - [ ] Book a kennel visit or viewing
 - [ ] Match quiz results saved to the profile
+
+## Phase 5b · Care network and bookings
+
+Vets, trainers, groomers and cleaners, kennel builders, equipment suppliers and boarding. Each provider exists once. Stores link to the providers they work with, and anyone can find providers in a public directory. Buyers can book appointments with them from either place.
+
+### Providers
+- [~] Provider model: name, type, city and areas covered, services and prices, contact, opening hours, verification status (sample data in `app/utils/care.ts`; contact and hours still to add)
+- [x] Store ↔ provider link with the relationship in words ("Our vet", "Our handover trainer", "Equipment we use")
+- [ ] Stores add their own providers (goes to review); providers can also apply directly
+- [ ] Verification: vets checked against the veterinary council register; "Verified" badge only on providers Dogeash has checked
+- [x] Store page panel: "Vets and trainers" with a booking button per provider
+- [ ] K9 file shows the vet who signed the vaccinations and the trainer who trained the dog, where known
+- [ ] Public directory (`/care`): filter by service and city, each provider has its own page listing the kennels they work with
+- [ ] After purchase: suggest providers near the buyer's address ("Vets within 10 km of you")
+
+### Bookings
+- [ ] Provider availability: working hours, appointment length per service, days off
+- [ ] Book from a provider's page in the directory
+- [~] Book from a store page (preview dialog built: service, day, time, home or premises, dog name; requests are not sent yet)
+- [ ] Book from a K9 file (the store's own vet or trainer)
+- [ ] Booking types: vet check-up, vaccination, training session, grooming or cleaning, kennel build quote, equipment fitting, boarding stay
+- [ ] Choose a home visit or a visit to the provider, where the provider offers both
+- [ ] Link a booking to the buyer's dog, so the provider sees its K9 file
+- [ ] Confirmation, reschedule and cancel, with reminders by SMS and email
+- [ ] Provider dashboard: upcoming appointments, accept or decline, mark done, notes
+- [ ] Booking history on the buyer's profile and on the dog's record (vaccinations, training sessions)
+- [ ] Pay a deposit or the full fee online, or pay on the day (see Open decisions)
+- [ ] Reviews only from buyers who completed a booking
+- [ ] Featured placement in the directory (paid, later; store links are never paid)
 
 ## Phase 6 · Transactions
 
@@ -176,12 +228,19 @@ The goal: someone can land, understand Dogeash, browse dogs and read a full K9 f
 - [ ] Platform fee: percentage, flat fee, or seller subscription?
 - [ ] Who inspects kennels: Dogeash staff, or approved third-party inspectors?
 - [ ] Launch cities: Abuja and Lagos first, or nationwide?
+- [ ] Bookings: pay online at booking, a deposit only, or pay the provider on the day?
+- [ ] Bookings: does Dogeash take a fee per booking, charge providers a subscription, or keep bookings free?
+- [ ] Bookings: cancellation window and no-show policy
+- [ ] Calendars: build availability in Dogeash, or sync with Google Calendar?
 
 ## Decisions made
 
 - 2026-10-23 · Design direction: ash and marigold, with the hazard stripe, night patrol map, sticker, big numbers, mega headings and photo reveal from the bold edition
 - 2026-10-23 · Light and dark mode named Day watch and Night watch; default follows the device
 - 2026-10-24 · Tailwind CSS v4 + shadcn-vue for components
+- 2026-10-26 · Sellers are called stores in the product and the code (`storeId`, `app/utils/stores.ts`, `/stores`)
+- 2026-10-26 · Full footer on Home only; every other page gets a one-row quick-links footer (`definePageMeta({ footer: 'full' })` to opt in)
+- 2026-10-26 · One sign-in page for buyers, stores, providers and staff; stores land on a separate dashboard layout
 
 ## Inbox
 
