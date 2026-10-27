@@ -9,6 +9,10 @@ const file = dog.file
 
 useSeoMeta({ title: `${dog.name}, ${dog.breed} · ${dog.fileNo} · Dogeash` })
 
+// Remembered for the "Recently viewed" row on Home
+const { add: addRecentlyViewed } = useRecentlyViewed()
+onMounted(() => addRecentlyViewed(dog.fileNo))
+
 const facts = [
   { label: 'Age', value: file ? `${dog.age} · born ${file.born}` : dog.age },
   { label: 'Weight', value: `${dog.weightKg} kg` },
@@ -69,6 +73,7 @@ const facts = [
           <Button variant="marigold">Contact store</Button>
           <Button variant="night">Book a visit</Button>
         </div>
+        <ShortlistButton :file-no="dog.fileNo" :name="dog.name" variant="button" />
         <StoreCard v-if="store" :store="store" compact />
       </aside>
     </div>

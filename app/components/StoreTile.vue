@@ -2,7 +2,7 @@
 import { Clock, MapPin, Star, Truck, UserRound } from '@lucide/vue'
 import type { Store } from '~/utils/stores'
 
-// A store in the directory: banner, who runs it, what it sells and why to trust it
+// A store in the directory: banner, who runs it, what it lists and why to trust it
 const props = defineProps<{ store: Store }>()
 const summary = computed(() => storeSummary(props.store))
 
@@ -82,7 +82,7 @@ const delivery = computed(() => props.store.services.includes('delivery')
         </div>
       </dl>
 
-      <!-- What they sell and do -->
+      <!-- What they list and do -->
       <div class="flex flex-col gap-2.5">
         <div v-if="summary.breeds.length" class="flex flex-wrap gap-1.5">
           <span v-for="breed in summary.breeds" :key="breed" class="rounded-full bg-ash-soft px-2.5 py-1 text-xs font-semibold text-ink">{{ breed }}</span>

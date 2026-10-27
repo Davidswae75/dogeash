@@ -47,18 +47,26 @@ This file is the build guide and checklist. Work through it phase by phase, tick
 The goal: someone can land, understand Dogeash, browse dogs and read a full K9 file, all without an account.
 
 ### Pages
-- [~] Home (`/`): built; review content and the 3D dog
+- [~] Home (`/`) as a marketplace with a thin intro (dogs on the first screen, like Jumia and Amazon, but with enough trust and context for a new site)
+  - [x] Compact top band: one line on what Dogeash is, search, property quick filters, and the patrol chase GIF (keep it: it catches buyers' attention)
+  - [x] Trust strip right under the search: inspected kennels, vet-checked, microchipped, handover training
+  - [x] Sideways-scrolling rows with "See all": available now, family protection, for compounds, by city, top-rated stores, recently viewed
+  - [x] First-visit intro card ("New to guard dogs?"), dismissible and shown once
+  - [x] How it works and the protection scale move lower, as compact sections
+  - [ ] Big numbers, the property tiles and the 3D dog now live nowhere: reuse them on the "How Dogeash works" page
+- [ ] "How Dogeash works" page for the full story (big numbers, inspections, handover)
+- [ ] Search landing pages by breed and city ("German Shepherds for sale in Abuja"): listings first, a short intro on top, for people arriving from Google
 - [~] Browse (`/dogs`): built; review filters against the design
 - [~] Dog profile (`/dogs/[id]`): built; show temperament, health, training and incident history
-- [ ] Protection levels (`/protection-levels`): the five levels explained, with example dogs per level
+- [~] Protection levels (`/protection-levels`): the five levels at a glance, then each one with what it does and won't do, who it suits, owner needs, price range and its dogs (details in `protectionLevelDetails`)
 - [x] Stores directory (`/stores`): search, filters (city, breeds, protection levels, services, trust), sort, how we check stores
 - [x] Store page (`/stores/[slug]`): dogs for sale with filters, about and services, history, owner, inspection record, vets and trainers, reviews
   - [ ] Store cover and kennel photos (image briefs, like the guide)
   - [ ] "Contact store" and "Book a kennel visit" buttons do nothing yet (need accounts and messaging)
 - [ ] Buyer's guide (`/guide`): choosing a level, costs, care, what handover involves
-- [ ] Sell with us (`/sell`): pitch to kennels and how verification works
+- [~] Open a store (`/open-a-store`, old `/sell` redirects): pitch to kennels, why open a store here, verification in four steps, what to have ready, questions. "Apply to open a store" goes to `/sign-up?as=store`. No fees quoted (undecided)
 - [ ] Sign in / sign up pages (UI only until Phase 2)
-- [ ] 404 and error pages in the Dogeash style
+- [~] 404 and error pages in the Dogeash style (`app/error.vue`, with the patrol chase)
 - [ ] About, contact, FAQ
 
 ### Discovery
@@ -91,8 +99,8 @@ The goal: someone can land, understand Dogeash, browse dogs and read a full K9 f
   - [ ] Connect to real accounts, then remove the preview step
   - [x] Sign-in fields built with `<Fields>` + vee-validate + Zod schemas (`app/utils/auth.ts`)
   - [x] Sign-up page (`/sign-up`): what brings you here, name, email, phone, password with strength meter, terms; phone code step; welcome with next steps (preview, nothing saved)
-  - [ ] Forgot-password page (use `<Fields>` and the `KennelWatch` animation, like sign-in)
-  - [ ] Terms of use and privacy policy pages (linked from sign-up)
+  - [~] Forgot-password page (`/forgot-password`): email, code, new password, done (preview: nothing sent)
+  - [~] Terms of use and privacy policy pages (`/terms`, `/privacy`): plain-words drafts marked as drafts; need a lawyer's review (Phase 8)
   - [ ] Line under the form: "Selling on Dogeash? Sign in here with the account you used to apply."
   - [ ] After sign-in, send each person where they belong: buyers back to where they were, stores to the dashboard, providers to their bookings, staff to admin
 - [ ] Roles: buyer, store member, care provider, inspector, admin (one account can hold several)
@@ -108,7 +116,7 @@ The goal: someone can land, understand Dogeash, browse dogs and read a full K9 f
 Sellers are called **stores** everywhere buyers can see them. A store is a kennel; its owner is the seller.
 
 
-- [ ] Store application (from "List a dog" and "Sell with us"): creates the account and starts verification (ID, CAC registration, bank account, kennel address), then books the inspection
+- [~] Store application (from "Open a store" in the header, footer and `/open-a-store`): sign-up with the "Open a store" intent asks for the kennel name and city and ends on a draft-store welcome (preview). Still to do: documents, then booking the inspection. Creates the account and starts verification (ID, CAC registration, bank account, kennel address), then books the inspection
 - [ ] Pending stores can sign in and prepare their profile and dogs; nothing goes public until the inspection passes
 - [x] Store dashboard layout (`app/layouts/dashboard.vue`): sidebar with Overview, Dogs, Enquiries, Bookings, Care team, Store profile, Payouts, Team, Settings; store switcher menu; top bar with search, notifications, theme and "Add a dog"; phone menu sheet
 - [~] Dashboard overview (`/dashboard`): weekly numbers with trends, needs your attention, coming up, your dogs table, store profile checklist (example figures)
@@ -136,11 +144,48 @@ Sellers are called **stores** everywhere buyers can see them. A store is a kenne
 ## Phase 5 · Buyers
 
 - [ ] Buyer profile: property type, handler experience, children, other pets (used for matching)
-- [ ] Save dogs to a shortlist
+- [x] Shortlist instead of a cart for dogs (every dog is one of a kind, sold by different stores, and needs a visit before buying)
+  - [x] Save button (heart) on every K9 card and dog page
+  - [x] Shortlist page (`/shortlist`): saved dogs grouped by store, with live status (available, reserved)
+  - [~] Works before sign-in (saved in the browser); merged into the account on sign-in (see Phase 5a)
+  - [x] Header shows how many dogs are shortlisted
+  - [x] Compare 2–3 shortlisted dogs side by side (`/shortlist/compare`): protection level, price, age, weight, hips, safe with children, suits, titles, store, city, status
+  - [ ] Add distance from the buyer once we know their location
+  - [~] From the shortlist: book one kennel visit covering every shortlisted dog at that store (preview dialog; nothing sent yet). "Ask a question" links to the store until messaging exists
 - [ ] Alerts when a matching dog is listed
 - [ ] Buyer–seller messaging
 - [ ] Book a kennel visit or viewing
 - [ ] Match quiz results saved to the profile
+
+## Phase 5a · Signed-in buyers
+
+Once a buyer signs in, Dogeash stops introducing itself and becomes their marketplace. Same layout and pages; the header, Home and an account area change. Browsing stays open to everyone; booking, reserving and messaging need an account.
+
+1. Signed-in header and guest data
+   - [~] Header: account menu (avatar) in place of "Sign in", notifications bell, "Open a store" hidden for buyers; phone menu shows the account and Sign out (sample session until accounts are connected)
+   - [~] Shortlist, compare picks and recently viewed are kept per account; on sign-in the guest's are merged in and the buyer is told how many moved
+   - [ ] One person, two roles: switch between Buyer and Store from the account menu
+2. Account area (`/account`): sidebar on desktop, tabs on phones
+   - [~] Shell (`app/pages/account.vue`): sidebar with who's signed in, tabs on phones, `signed-in` middleware sends visitors to sign in and back; unbuilt sections show a Coming next page
+   - [~] Overview: activity tiles, my dogs, coming up, shortlist changes, ready-to-reserve checklist, home profile
+   - [ ] Shortlist and compare (moves in from `/shortlist`)
+   - [ ] Visits and bookings, with status
+   - [ ] Reservations: deposit, countdown, escrow status, handover checklist
+   - [~] My dogs: a record per dog after handover (vaccinations, training, care bookings, reminders, health guarantee). Built with one sample dog in `app/utils/myDogs.ts`; photos and adding a dog you already own still to do
+   - [ ] Messages with stores and care providers
+   - [ ] Saved searches and alerts ("a Level 4 dog listed in Abuja")
+   - [ ] Reviews to write, gear orders
+   - [ ] Profile: property type, household, handler experience (used for matching)
+   - [ ] Settings: payments, security, notifications (email, SMS, WhatsApp)
+   - [ ] First visit: set up the property profile, then show matched dogs (no empty sections)
+3. Signed-in Home
+   - [x] Drop the intro card, trust explainers, protection levels, how it works, sign-up prompts and big hero (`HomeGuest` keeps them for visitors; `HomeSignedIn` for buyers)
+   - [~] Add: welcome with search, activity tiles (shortlist, compare, next visit, saved search), coming up, shortlist changes (reserved, price drops), your shortlist, matched to your property, saved search, recently viewed, top stores. Sample profile, bookings and price drops in `app/utils/account.ts` until accounts are connected
+   - [x] A smaller patrol chase GIF in the welcome card on wide screens
+4. Trust and messaging (needs the backend)
+   - [ ] In-app messaging; notifications by email, SMS and WhatsApp
+   - [ ] Light buyer check (ID plus handler experience) before a store takes a deposit
+   - [ ] Disputes: "not as described", report a store, refund and return policy, escrow status at each step
 
 ## Phase 5b · Care network and bookings
 
@@ -171,10 +216,16 @@ Vets, trainers, groomers and cleaners, kennel builders, equipment suppliers and 
 - [ ] Reviews only from buyers who completed a booking
 - [ ] Featured placement in the directory (paid, later; store links are never paid)
 
+### Gear cart
+A normal cart and checkout, but only for equipment, never for dogs.
+- [ ] Gear listings from equipment suppliers: harnesses, collars, kennel runs, bowls, starter food packs, tick treatment
+- [ ] Cart with quantities, delivery address and checkout
+- [ ] Suggest the right gear when a dog is reserved ("Kaiser is 31 kg: this harness size fits")
+
 ## Phase 6 · Transactions
 
 - [ ] **Decide** the payment provider: Paystack or Flutterwave
-- [ ] Reserve a dog with an escrow deposit
+- [ ] Reserve a dog with an escrow deposit (one dog at a time; takes it off the market for a set time while the visit and checks happen)
 - [ ] Full payment, platform fee and seller payouts
 - [ ] Refunds and cancellations
 - [ ] Health guarantee terms per listing
@@ -232,6 +283,7 @@ Vets, trainers, groomers and cleaners, kennel builders, equipment suppliers and 
 - [ ] Bookings: does Dogeash take a fee per booking, charge providers a subscription, or keep bookings free?
 - [ ] Bookings: cancellation window and no-show policy
 - [ ] Calendars: build availability in Dogeash, or sync with Google Calendar?
+- [ ] Reservations: how long a deposit holds a dog (48 or 72 hours?), and whether it's refundable if the visit doesn't work out
 
 ## Decisions made
 
@@ -239,8 +291,12 @@ Vets, trainers, groomers and cleaners, kennel builders, equipment suppliers and 
 - 2026-10-23 · Light and dark mode named Day watch and Night watch; default follows the device
 - 2026-10-24 · Tailwind CSS v4 + shadcn-vue for components
 - 2026-10-26 · Sellers are called stores in the product and the code (`storeId`, `app/utils/stores.ts`, `/stores`)
+- 2026-10-27 · No "sell"/"seller" wording for stores: kennels "open a store" on Dogeash (`/open-a-store`, header "Open a store"). Only the terms keep "seller", where the law needs it
 - 2026-10-26 · Full footer on Home only; every other page gets a one-row quick-links footer (`definePageMeta({ footer: 'full' })` to opt in)
 - 2026-10-26 · One sign-in page for buyers, stores, providers and staff; stores land on a separate dashboard layout
+- 2026-10-26 · No shopping cart for dogs: buyers shortlist and compare, then reserve one dog at a time with a deposit. A normal cart is only for gear
+- 2026-10-26 · Home is a marketplace with a thin, trust-first intro rather than a landing page; the patrol chase GIF stays
+- 2026-10-27 · Toasts use vue-toastification, always through `useNotify()` (never `useToast()` directly). One helper per action, four types: success (marigold) for done, info (charcoal, with Undo) for removals, warning (marigold soft) for limits and reserved dogs, error (red) for failed forms. Time left shows as a ring around the close button that empties, then the toast closes. Styles in `app/assets/css/toast.css`, built on tokens so Day and Night watch both work.
 
 ## Inbox
 

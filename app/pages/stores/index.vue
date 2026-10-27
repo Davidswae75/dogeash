@@ -5,7 +5,7 @@ import type { StoreService } from '~/utils/stores'
 
 useSeoMeta({
   title: 'Guard dog stores · Dogeash',
-  description: 'Kennels selling trained guard dogs in Nigeria. Every store is inspected in person before its dogs are listed.',
+  description: 'Inspected kennels with trained guard dogs in Nigeria. Every store is inspected in person before its dogs are listed.',
 })
 
 const route = useRoute()
@@ -154,7 +154,7 @@ const eyebrow = 'text-xs leading-4 font-bold tracking-[.08em] uppercase'
             </SheetHeader>
             <div class="flex flex-1 flex-col gap-7 overflow-y-auto px-6 py-6">
               <div class="flex flex-col gap-2.5">
-                <span :class="[eyebrow, 'text-ink-muted']">Breeds they sell</span>
+                <span :class="[eyebrow, 'text-ink-muted']">Breeds they keep</span>
                 <FilterChips v-model="breeds" :options="breedOptions" label="Breed" />
               </div>
               <div class="flex flex-col gap-2.5">

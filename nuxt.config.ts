@@ -2,10 +2,20 @@
 import tailwindcss from '@tailwindcss/vite'
 
 export default defineNuxtConfig({
+  // Renamed pages keep their old links working
+  routeRules: {
+    '/sell': { redirect: { to: '/open-a-store', statusCode: 301 } },
+  },
+
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
 
   modules: ['@nuxtjs/color-mode', 'shadcn-nuxt'],
+
+  // Listen on the LAN so `npm run dev` prints a Network URL for testing on a phone
+  devServer: {
+    host: '0.0.0.0',
+  },
 
   css: ['~/assets/css/main.css'],
 

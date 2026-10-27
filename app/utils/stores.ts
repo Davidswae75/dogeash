@@ -1,7 +1,7 @@
 import type { ProtectionLevel } from './protection'
 import { sampleDogs } from './dogs'
 
-// A store is a kennel that sells guard dogs on Dogeash. Dogs link to it by storeId;
+// A store is an inspected kennel listing guard dogs on Dogeash. Dogs link to it by storeId;
 // care providers link to it through `care`.
 
 export type StoreService = 'handover' | 'delivery' | 'boarding' | 'puppies' | 'imports' | 'training'
@@ -10,7 +10,7 @@ export const storeServices: Record<StoreService, { label: string, hint: string }
   handover: { label: 'Handover at your gate', hint: 'A trainer delivers the dog and teaches your household the commands' },
   delivery: { label: 'Nationwide delivery', hint: 'Delivers outside its own state' },
   boarding: { label: 'Boarding', hint: 'Looks after your dog while you travel' },
-  puppies: { label: 'Puppies', hint: 'Breeds and sells litters, not only trained adults' },
+  puppies: { label: 'Puppies', hint: 'Breeds and lists litters, not only trained adults' },
   imports: { label: 'Imported lines', hint: 'Brings in dogs or bloodlines from Europe' },
   training: { label: 'Training for your dog', hint: 'Trains dogs you already own' },
 }
@@ -323,7 +323,7 @@ export const sampleStores: Store[] = [
     about: 'A training academy in Enugu. Its dogs will appear here once Dogeash has inspected the kennel.',
     history: [
       { year: 2021, text: 'Opened as a training school for privately owned dogs' },
-      { year: 2026, text: 'Applied to sell on Dogeash' },
+      { year: 2026, text: 'Applied to open a store on Dogeash' },
     ],
     inspection: {
       status: 'booked',

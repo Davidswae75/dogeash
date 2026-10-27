@@ -48,8 +48,21 @@ export const signUpSchema = z.object({
 
 export type SignUp = z.infer<typeof signUpSchema>
 
+// Opening a store: the same account, plus the kennel's name and city
+export const storeSignUpSchema = signUpSchema.extend({
+  storeName: z.string({ required_error: 'Enter your store or kennel name.' })
+    .trim()
+    .min(2, 'Enter your store or kennel name.'),
+  city: z.string({ required_error: 'Enter the city your kennel is in.' })
+    .trim()
+    .min(2, 'Enter the city your kennel is in.'),
+})
+
 // 0–4: length, a number, upper and lower case, a symbol
 export function passwordStrength(pw: string) {
   if (!pw) return 0
   return [pw.length >= 8, /\d/.test(pw), /[a-z]/.test(pw) && /[A-Z]/.test(pw), /[^A-Za-z0-9]/.test(pw)].filter(Boolean).length
 }
+
+// Forgot password: a new password follows the same rules as sign-up
+export const newPasswordSchema = signUpSchema.pick({ password: true })

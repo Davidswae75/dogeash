@@ -6,7 +6,7 @@ const links = [
   { label: 'Find a guard dog', to: '/dogs' },
   { label: 'Stores', to: '/stores' },
   { label: "Buyer's guide", to: '/guide' },
-  { label: 'Sell with us', to: '/sell' },
+  { label: 'Open a store', to: '/open-a-store' },
 ]
 </script>
 

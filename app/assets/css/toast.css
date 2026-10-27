@@ -1,0 +1,139 @@
+/* vue-toastification in Dogeash style: a quiet surface card, the tone carried by the icon tile and
+   a timer ring around the close button. Built only from tokens, so Day watch and Night watch both work.
+   Top right on larger screens, top centre on phones. */
+
+.Vue-Toastification__container {
+  padding: 16px;
+  padding-top: max(16px, env(safe-area-inset-top, 0px));
+}
+.Vue-Toastification__container.top-right {
+  top: 64px; /* clears the 72px site header (plus the container padding) */
+}
+
+.Vue-Toastification__container .Vue-Toastification__toast {
+  --toast-timer: var(--ink);
+
+  position: relative;
+  align-items: flex-start;
+  gap: 12px;
+  min-height: 0;
+  width: 372px;
+  min-width: 0;
+  max-width: 372px;
+  margin-bottom: 10px;
+  padding: 14px;
+  border-radius: var(--radius-lg);
+  font-family: var(--font-sans);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow:
+    0 0 0 1px var(--line),
+    0 1px 2px rgb(0 0 0 / 0.06),
+    0 16px 36px -18px rgb(0 0 0 / 0.38);
+}
+
+.Vue-Toastification__container .Vue-Toastification__toast--default,
+.Vue-Toastification__container .Vue-Toastification__toast--success,
+.Vue-Toastification__container .Vue-Toastification__toast--info,
+.Vue-Toastification__container .Vue-Toastification__toast--warning,
+.Vue-Toastification__container .Vue-Toastification__toast--error {
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.Vue-Toastification__container .Vue-Toastification__toast--success { --toast-timer: var(--marigold); }
+.Vue-Toastification__container .Vue-Toastification__toast--info { --toast-timer: var(--ink-muted); }
+.Vue-Toastification__container .Vue-Toastification__toast--warning { --toast-timer: var(--marigold); }
+.Vue-Toastification__container .Vue-Toastification__toast--error { --toast-timer: var(--danger); }
+
+.Vue-Toastification__container .Vue-Toastification__toast-component-body {
+  min-width: 0;
+  margin: 0;
+}
+
+/* Close: a small round button at the top of the row, the same 14px from the edge as the content beside it */
+.Vue-Toastification__container .Vue-Toastification__close-button {
+  flex: none;
+  align-self: flex-start;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border-radius: 999px;
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1;
+  color: var(--ink-muted);
+  opacity: 1;
+  transition: background-color 0.15s, color 0.15s;
+}
+.Vue-Toastification__container .Vue-Toastification__close-button:hover,
+.Vue-Toastification__container .Vue-Toastification__close-button:focus-visible {
+  background: var(--surface-sunk);
+  color: var(--ink);
+}
+
+/* Timer: a ring around the close button that empties clockwise until the toast closes.
+   It is the library's own progress bar restyled, so its timing, pause on hover and close at the end
+   still apply (the library sets the duration and play state inline; only the animation is swapped). */
+@property --toast-left {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 100;
+}
+@keyframes dogeash-toast-ring {
+  from { --toast-left: 100; }
+  to { --toast-left: 0; }
+}
+.Vue-Toastification__container .Vue-Toastification__progress-bar {
+  /* Around the close button: 2px larger all round, inside the toast's 14px padding */
+  top: 12px;
+  right: 12px;
+  bottom: auto;
+  left: auto;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  pointer-events: none;
+  transform: none;
+  animation-name: dogeash-toast-ring;
+  background: conic-gradient(var(--toast-timer) calc(var(--toast-left) * 1%), var(--line) 0);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2.5px), #000 calc(100% - 2px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 2.5px), #000 calc(100% - 2px));
+}
+
+/* Phones: one column across the top, centred, with breathing room */
+@media only screen and (max-width: 600px) {
+  .Vue-Toastification__container,
+  .Vue-Toastification__container.top-right {
+    top: 0;
+    padding: 10px 12px;
+    padding-top: max(10px, env(safe-area-inset-top, 0px));
+  }
+  .Vue-Toastification__container .Vue-Toastification__toast {
+    width: 100%;
+    max-width: 440px;
+    margin: 0 auto 8px;
+    border-radius: var(--radius-lg);
+  }
+}
+
+/* Enter: drop in from above. Leave: lift and fade. */
+@keyframes dogeash-toast-in {
+  from { opacity: 0; transform: translateY(-10px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes dogeash-toast-out {
+  from { opacity: 1; transform: none; }
+  to { opacity: 0; transform: translateY(-6px) scale(0.98); }
+}
+.dogeash-toast-enter-active { animation: dogeash-toast-in 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.dogeash-toast-leave-active:not(.disable-transition) { animation: dogeash-toast-out 0.2s ease-in both; }
+.dogeash-toast-move { transition: transform 0.25s ease; }
+
+@media (prefers-reduced-motion: reduce) {
+  .dogeash-toast-enter-active,
+  .dogeash-toast-leave-active { animation-duration: 0.01s !important; }
+  .dogeash-toast-move { transition: none; }
+}

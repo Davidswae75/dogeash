@@ -28,7 +28,7 @@ const totalHigh = guideFirstYearCosts.reduce((s, c) => s + c.high, 0)
     <div class="flex flex-wrap gap-x-6 gap-y-2 text-[13px] text-ink-muted">
       <span class="inline-flex items-center gap-2"><span class="inline-block h-2.5 w-6 rounded-full bg-night" aria-hidden="true" />Lowest you should expect</span>
       <span class="inline-flex items-center gap-2"><span class="inline-block h-2.5 w-6 rounded-full bg-marigold" aria-hidden="true" />Range up to the highest</span>
-      <span class="font-mono">Example figures for the design. Confirm with your seller and vet.</span>
+      <span class="font-mono">Example figures for the design. Confirm with the store and your vet.</span>
     </div>
   </div>
 </template>

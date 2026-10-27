@@ -37,22 +37,42 @@ function sendCode() {
   step.value = 'code'
 }
 
-const submit = handleSubmit(() => (method.value === 'phone' ? sendCode() : (step.value = 'landing')))
+const notify = useNotify()
+const submit = handleSubmit(
+  () => {
+    if (method.value === 'phone') return sendCode()
+    destination.value = values.email ?? ''
+    step.value = 'landing'
+  },
+  ({ errors }) => notify.formErrors(errors),
+)
+
+// Reaching the landing signs in the sample buyer and carries this browser's saved dogs into the account
+const session = useSession()
+watch(step, (s) => {
+  if (s !== 'landing') return
+  const moved = session.signIn(method.value === 'email' && destination.value ? { email: destination.value } : {})
+  notify.signedIn(session.firstName.value, moved)
+})
 
 // "Email me a code" only needs a valid email, not the password
 async function emailCode() {
   if ((await validateField('email')).valid) sendCode()
 }
 
+// Where a buyer was heading before being asked to sign in (only paths on this site)
+const redirectParam = String(useRoute().query.redirect ?? '')
+const redirect = redirectParam.startsWith('/') && !redirectParam.startsWith('//') ? redirectParam : '/'
+
 const landing: AuthLinkCard[] = [
   { to: '/dashboard', title: 'Continue as a store', text: 'Straight to the K9 Guardian Kennels dashboard', icon: LayoutDashboard },
-  { to: '/dogs', title: 'Continue as a buyer', text: 'Back to where you were, with your shortlist and bookings', icon: ShoppingBag },
+  { to: redirect, title: 'Continue as a buyer', text: 'Back to where you were, with your shortlist and bookings', icon: ShoppingBag },
 ]
 </script>
 
 <template>
   <template v-if="step === 'credentials'">
-    <AuthHeading title="Sign" outline="in" text="One account for buying, selling and booking on Dogeash." />
+    <AuthHeading title="Sign" outline="in" text="One account for buying, running a store and booking on Dogeash." />
 
     <ToggleGroup v-model="method" type="single" variant="watch" aria-label="Sign in with" class="inline-flex w-full gap-0.5 rounded-full bg-surface-sunk p-[3px]">
       <ToggleGroupItem value="email" class="flex-1 rounded-full!"><Mail aria-hidden="true" />Email</ToggleGroupItem>
@@ -73,11 +93,11 @@ const landing: AuthLinkCard[] = [
     </form>
 
     <div class="flex flex-col gap-4 border-t border-line pt-6">
-      <HelpPanel title="Selling on Dogeash?">
+      <HelpPanel title="Run a store on Dogeash?">
         Sign in here with the account you used to apply. Your store dashboard opens straight after.
       </HelpPanel>
       <p class="m-0 text-sm text-ink-muted">
-        New here? <NuxtLink to="/sign-up" class="font-bold text-ink">Create an account</NuxtLink> or <NuxtLink to="/sell" class="font-bold text-ink">apply to sell</NuxtLink>.
+        New here? <NuxtLink to="/sign-up" class="font-bold text-ink">Create an account</NuxtLink> or <NuxtLink to="/open-a-store" class="font-bold text-ink">open a store</NuxtLink>.
       </p>
     </div>
   </template>

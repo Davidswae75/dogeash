@@ -6,6 +6,7 @@ const links = [
   { label: "Buyer's guide", to: '/guide' },
 ]
 
+const { user, initials, signOut } = useSession()
 const menuOpen = ref(false)
 const route = useRoute()
 watch(() => route.fullPath, () => { menuOpen.value = false })
@@ -28,13 +29,22 @@ watch(() => route.fullPath, () => { menuOpen.value = false })
       </nav>
 
       <div class="ml-auto flex items-center gap-2.5">
-        <ThemeToggle />
-        <Button as-child variant="ghost" size="sm" class="hidden xl:inline-flex">
-          <NuxtLink to="/sign-in">Sign in</NuxtLink>
-        </Button>
-        <Button as-child size="sm" class="hidden xl:inline-flex">
-          <NuxtLink to="/sell">List a dog</NuxtLink>
-        </Button>
+        <ShortlistLink />
+        <!-- Signed in: the marketplace header. Bell and avatar in place of Sign in and Open a store. -->
+        <template v-if="user">
+          <AccountNotifications />
+          <span class="hidden sm:inline-flex"><ThemeToggle /></span>
+          <AccountMenu />
+        </template>
+        <template v-else>
+          <ThemeToggle />
+          <Button as-child variant="ghost" size="sm" class="hidden xl:inline-flex">
+            <NuxtLink to="/sign-in">Sign in</NuxtLink>
+          </Button>
+          <Button as-child size="sm" class="hidden xl:inline-flex">
+            <NuxtLink to="/open-a-store">Open a store</NuxtLink>
+          </Button>
+        </template>
         <Button
           variant="outline"
           size="icon"
@@ -64,9 +74,17 @@ watch(() => route.fullPath, () => { menuOpen.value = false })
         {{ link.label }}
       </NuxtLink>
       <ThemeToggle variant="segmented" />
-      <div class="mt-3 flex gap-2">
+      <div v-if="user" class="mt-3 flex items-center gap-3 rounded-lg bg-surface p-3 ring-1 ring-line">
+        <AccountAvatar :initials="initials" />
+        <span class="flex min-w-0 flex-1 flex-col">
+          <strong class="truncate text-sm">{{ user.name }}</strong>
+          <span class="truncate text-[13px] text-ink-muted">{{ user.email }}</span>
+        </span>
+        <Button variant="outline" size="sm" @click="signOut">Sign out</Button>
+      </div>
+      <div v-else class="mt-3 flex gap-2">
         <Button as-child variant="outline" size="sm"><NuxtLink to="/sign-in">Sign in</NuxtLink></Button>
-        <Button as-child size="sm"><NuxtLink to="/sell">List a dog</NuxtLink></Button>
+        <Button as-child size="sm"><NuxtLink to="/open-a-store">Open a store</NuxtLink></Button>
       </div>
     </nav>
   </header>

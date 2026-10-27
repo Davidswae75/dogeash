@@ -1,13 +1,13 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-10-26T09:05:40.281Z",
-    "fileCount": 545,
+    "lastScanned": "2026-10-27T02:22:59.063Z",
+    "fileCount": 607,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "7413a50bf55c35d604b622363a6b12165989f36e12b53bd5bf39405268353b54",
-    "storeUpdatedAt": "2026-10-26T09:05:40.381Z",
-    "rootHash": "1d8c71efa7f38541"
+    "renderedHash": "d7328238ea7b91a1d59fb9e03a41a92c9ac43eb0befa7d58a4b71b6835fb5a47",
+    "storeUpdatedAt": "2026-10-27T02:22:59.127Z",
+    "rootHash": "baa8a13edb2e6264"
   },
   "files": {
     ".gitignore": {
@@ -201,14 +201,13 @@
       "importance": 0.4429
     },
     "app/components/K9Card.vue": {
-      "description": "Vue: setup, TS, 1 props",
-      "tokens": 715,
-      "hash": "7df5e289fe15ba50",
-      "size": 2684,
-      "mtimeMs": 1792778712841.2717,
-      "updatedAt": "2026-10-26T02:55:55.565Z",
-      "source": "scan",
-      "importance": 0.4429
+      "description": "Vue: setup",
+      "tokens": 822,
+      "hash": "33cbc76f91fb44c4",
+      "size": 3084,
+      "mtimeMs": 1793027169583.5386,
+      "updatedAt": "2026-10-26T15:06:09.773Z",
+      "source": "hook"
     },
     "app/components/K9CardSkeleton.vue": {
       "description": "Vue component",
@@ -6131,22 +6130,21 @@
     },
     "nuxt.config.ts": {
       "description": "https://nuxt.com/docs/api/configuration/nuxt-config",
-      "tokens": 469,
-      "hash": "106e28ced1315ba5",
-      "size": 1641,
-      "mtimeMs": 1793005539935.0757,
-      "updatedAt": "2026-10-26T09:05:40.279Z",
+      "tokens": 505,
+      "hash": "ab87ac66ecffb861",
+      "size": 1767,
+      "mtimeMs": 1793022608047.2134,
+      "updatedAt": "2026-10-26T13:50:08.241Z",
       "source": "hook"
     },
     "package.json": {
       "description": "Node.js package manifest",
-      "tokens": 339,
-      "hash": "bb798af3e0bd6f04",
-      "size": 1186,
-      "mtimeMs": 1792903117952.617,
-      "updatedAt": "2026-10-26T02:55:55.689Z",
-      "source": "scan",
-      "importance": 0.4429
+      "tokens": 356,
+      "hash": "bc46daa53437b536",
+      "size": 1246,
+      "mtimeMs": 1793022609287.6248,
+      "updatedAt": "2026-10-26T13:50:09.523Z",
+      "source": "hook"
     },
     "PLAN.md": {
       "description": "Dogeash project plan",
@@ -6286,11 +6284,11 @@
     },
     "app/components/CareBookingDialog.vue": {
       "description": "Vue: setup",
-      "tokens": 1753,
-      "hash": "922d7904452418fe",
-      "size": 6573,
-      "mtimeMs": 1792986471616.531,
-      "updatedAt": "2026-10-26T03:47:51.894Z",
+      "tokens": 188,
+      "hash": "155c58a59970fd05",
+      "size": 706,
+      "mtimeMs": 1793027129148.5254,
+      "updatedAt": "2026-10-26T15:05:29.516Z",
       "source": "hook"
     },
     "app/pages/stores/index.vue": {
@@ -6577,11 +6575,11 @@
     },
     "app/pages/sign-up.vue": {
       "description": "Vue: setup",
-      "tokens": 1166,
-      "hash": "4fc6b5fe0cb09fc9",
-      "size": 4372,
-      "mtimeMs": 1792990578504.0264,
-      "updatedAt": "2026-10-26T04:56:18.730Z",
+      "tokens": 1370,
+      "hash": "37ab48dd38b49dd8",
+      "size": 5137,
+      "mtimeMs": 1793067778603.9846,
+      "updatedAt": "2026-10-27T02:22:59.059Z",
       "source": "hook"
     },
     "app/types/page-meta.d.ts": {
@@ -6655,6 +6653,709 @@
       "mtimeMs": 1792990545859.3132,
       "updatedAt": "2026-10-26T04:55:46.196Z",
       "source": "hook"
+    },
+    "app/composables/useRecentlyViewed.ts": {
+      "description": "Dogs this browser has opened, newest first. Kept on the device until accounts exist.",
+      "tokens": 147,
+      "hash": "bea8a342441b6fd8",
+      "size": 512,
+      "mtimeMs": 1793026158236.0781,
+      "updatedAt": "2026-10-26T14:49:18.964Z",
+      "source": "hook"
+    },
+    "app/composables/useFirstVisit.ts": {
+      "description": "Whether this browser has dismissed a one-time message, e.g. the \"New to guard dogs?\" intro",
+      "tokens": 107,
+      "hash": "83ecc6f5a076057c",
+      "size": 374,
+      "mtimeMs": 1793026159625.6833,
+      "updatedAt": "2026-10-26T14:49:20.024Z",
+      "source": "hook"
+    },
+    "app/utils/market.ts": {
+      "description": "The marketplace rows on Home: which dogs and stores each one shows",
+      "tokens": 234,
+      "hash": "64d6187d0230906a",
+      "size": 818,
+      "mtimeMs": 1793026160622.4983,
+      "updatedAt": "2026-10-26T14:49:21.000Z",
+      "source": "hook"
+    },
+    "app/components/MarketRow.vue": {
+      "description": "Vue: setup",
+      "tokens": 655,
+      "hash": "282d407026297fc8",
+      "size": 2453,
+      "mtimeMs": 1793026161813.365,
+      "updatedAt": "2026-10-26T14:49:22.043Z",
+      "source": "hook"
+    },
+    "app/components/home/HomeIntroCard.vue": {
+      "description": "Vue: setup",
+      "tokens": 454,
+      "hash": "0b7076f2ab61e9ef",
+      "size": 1702,
+      "mtimeMs": 1793026162982.7146,
+      "updatedAt": "2026-10-26T14:49:23.285Z",
+      "source": "hook"
+    },
+    "app/components/home/HomeHero.vue": {
+      "description": "Vue: setup",
+      "tokens": 521,
+      "hash": "a3c1031b7981c9c5",
+      "size": 1955,
+      "mtimeMs": 1793026163956.9377,
+      "updatedAt": "2026-10-26T14:49:24.470Z",
+      "source": "hook"
+    },
+    "app/pages/index.vue": {
+      "description": "Vue: setup",
+      "tokens": 979,
+      "hash": "bd26ebb0567ab03c",
+      "size": 3670,
+      "mtimeMs": 1793026189140.8428,
+      "updatedAt": "2026-10-26T14:49:49.747Z",
+      "source": "hook"
+    },
+    "app/composables/useShortlist.ts": {
+      "description": "The buyer's shortlist: dogs they're considering, and up to three picked to compare.",
+      "tokens": 562,
+      "hash": "c6b6c0fb64dc9d85",
+      "size": 1967,
+      "mtimeMs": 1793027127487.8064,
+      "updatedAt": "2026-10-26T15:05:28.012Z",
+      "source": "hook"
+    },
+    "app/components/BookingDialog.vue": {
+      "description": "Offer \"At my home\" as well as the other party's premises",
+      "tokens": 1786,
+      "hash": "af51c771f1c4577e",
+      "size": 6694,
+      "mtimeMs": 1793027128423.9133,
+      "updatedAt": "2026-10-26T15:05:28.672Z",
+      "source": "hook"
+    },
+    "app/components/ShortlistButton.vue": {
+      "description": "Vue: setup",
+      "tokens": 518,
+      "hash": "27ffc941827f8cf3",
+      "size": 1939,
+      "mtimeMs": 1793027149452.0483,
+      "updatedAt": "2026-10-26T15:05:49.861Z",
+      "source": "hook"
+    },
+    "app/components/shortlist/ShortlistItem.vue": {
+      "description": "Vue: setup",
+      "tokens": 824,
+      "hash": "274d49758d997327",
+      "size": 3090,
+      "mtimeMs": 1793027225156.4363,
+      "updatedAt": "2026-10-26T15:07:05.487Z",
+      "source": "hook"
+    },
+    "app/components/shortlist/ShortlistStoreGroup.vue": {
+      "description": "Vue: setup",
+      "tokens": 638,
+      "hash": "8e149242cd0f4063",
+      "size": 2391,
+      "mtimeMs": 1793027226062.9395,
+      "updatedAt": "2026-10-26T15:07:06.342Z",
+      "source": "hook"
+    },
+    "app/components/shortlist/ShortlistCompareBar.vue": {
+      "description": "Vue: setup",
+      "tokens": 467,
+      "hash": "e9e1b6c9285f2e5a",
+      "size": 1749,
+      "mtimeMs": 1793027226934.2815,
+      "updatedAt": "2026-10-26T15:07:07.167Z",
+      "source": "hook"
+    },
+    "app/pages/shortlist/index.vue": {
+      "description": "Vue: setup",
+      "tokens": 658,
+      "hash": "42ed3f8e3e622cb6",
+      "size": 2466,
+      "mtimeMs": 1793027227654.6958,
+      "updatedAt": "2026-10-26T15:07:08.106Z",
+      "source": "hook"
+    },
+    "app/utils/compare.ts": {
+      "description": "Numeric key for picking the best dog on this row; lower wins unless `higherIsBetter`",
+      "tokens": 439,
+      "hash": "3d2c3bfeb2aea74e",
+      "size": 1538,
+      "mtimeMs": 1793027252386.7673,
+      "updatedAt": "2026-10-26T15:07:32.782Z",
+      "source": "hook"
+    },
+    "app/pages/shortlist/compare.vue": {
+      "description": "Vue: setup",
+      "tokens": 1000,
+      "hash": "7d0e1048bd8b810d",
+      "size": 3749,
+      "mtimeMs": 1793027253173.0813,
+      "updatedAt": "2026-10-26T15:07:33.588Z",
+      "source": "hook"
+    },
+    "app/plugins/toast.client.ts": {
+      "description": "Toasts confirm what a buyer just did. Use them through useNotify(), not useToast() directly,",
+      "tokens": 206,
+      "hash": "6caee07febff69b9",
+      "size": 720,
+      "mtimeMs": 1793027671902.9485,
+      "updatedAt": "2026-10-26T15:14:32.406Z",
+      "source": "hook"
+    },
+    "app/assets/css/toast.css": {
+      "description": "Styles: 26 rules, 7 vars",
+      "tokens": 1366,
+      "hash": "060f1c5936366adc",
+      "size": 4780,
+      "mtimeMs": 1793065612303.335,
+      "updatedAt": "2026-10-27T01:46:52.520Z",
+      "source": "hook"
+    },
+    "app/components/ToastContent.vue": {
+      "description": "Vue: setup",
+      "tokens": 849,
+      "hash": "625eaa349bb2af82",
+      "size": 3184,
+      "mtimeMs": 1793061122498.0945,
+      "updatedAt": "2026-10-27T00:32:02.814Z",
+      "source": "hook"
+    },
+    "app/composables/useNotify.ts": {
+      "description": "Every toast in the app goes through here, so the same action always looks and reads the same.",
+      "tokens": 1090,
+      "hash": "9771ad6fef83cdf1",
+      "size": 3819,
+      "mtimeMs": 1793061139005.6392,
+      "updatedAt": "2026-10-27T00:32:19.275Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "Message",
+          "kind": "section",
+          "startLine": 10,
+          "endLine": 13,
+          "tokens": 64
+        },
+        {
+          "name": "useNotify",
+          "kind": "fn",
+          "startLine": 14,
+          "endLine": 61,
+          "tokens": 851
+        }
+      ]
+    },
+    "app/utils/account.ts": {
+      "description": "The signed-in buyer, until accounts are connected: one sample account, plus what the",
+      "tokens": 678,
+      "hash": "61e5c35d6729cf7c",
+      "size": 2375,
+      "mtimeMs": 1793062689051.8145,
+      "updatedAt": "2026-10-27T00:58:09.401Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "Account",
+          "kind": "section",
+          "startLine": 4,
+          "endLine": 19,
+          "tokens": 77
+        },
+        {
+          "name": "firstNameOf",
+          "kind": "fn",
+          "startLine": 20,
+          "endLine": 20,
+          "tokens": 23
+        },
+        {
+          "name": "initialsOf",
+          "kind": "fn",
+          "startLine": 21,
+          "endLine": 23,
+          "tokens": 61
+        },
+        {
+          "name": "AccountMenuItem",
+          "kind": "section",
+          "startLine": 24,
+          "endLine": 41,
+          "tokens": 219
+        },
+        {
+          "name": "AccountNotification",
+          "kind": "section",
+          "startLine": 42,
+          "endLine": 58,
+          "tokens": 257
+        }
+      ]
+    },
+    "app/composables/useAccountList.ts": {
+      "description": "Lists of dog file numbers kept in this browser per person: one for the guest, one per account.",
+      "tokens": 636,
+      "hash": "316201d8c80f9634",
+      "size": 2223,
+      "mtimeMs": 1793062708800.238,
+      "updatedAt": "2026-10-27T00:58:29.273Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "storeFor",
+          "kind": "fn",
+          "startLine": 15,
+          "endLine": 19,
+          "tokens": 50
+        },
+        {
+          "name": "owners",
+          "kind": "fn",
+          "startLine": 20,
+          "endLine": 24,
+          "tokens": 42
+        },
+        {
+          "name": "write",
+          "kind": "fn",
+          "startLine": 25,
+          "endLine": 30,
+          "tokens": 69
+        },
+        {
+          "name": "useAccountList",
+          "kind": "fn",
+          "startLine": 31,
+          "endLine": 41,
+          "tokens": 126
+        },
+        {
+          "name": "mergeGuestLists",
+          "kind": "fn",
+          "startLine": 42,
+          "endLine": 55,
+          "tokens": 145
+        }
+      ]
+    },
+    "app/composables/useSession.ts": {
+      "description": "Who is signed in. A sample session in a cookie (so the server renders the right header)",
+      "tokens": 335,
+      "hash": "6d84b2df2fa2511d",
+      "size": 1171,
+      "mtimeMs": 1793062709802.086,
+      "updatedAt": "2026-10-27T00:58:30.302Z",
+      "source": "hook"
+    },
+    "app/components/account/AccountAvatar.vue": {
+      "description": "Vue: setup",
+      "tokens": 153,
+      "hash": "1b5a03c256608246",
+      "size": 572,
+      "mtimeMs": 1793062779700.7698,
+      "updatedAt": "2026-10-27T00:59:40.152Z",
+      "source": "hook"
+    },
+    "app/components/account/AccountMenu.vue": {
+      "description": "Vue: setup",
+      "tokens": 908,
+      "hash": "fb919cd4a1248415",
+      "size": 3404,
+      "mtimeMs": 1793062780603.6638,
+      "updatedAt": "2026-10-27T00:59:40.927Z",
+      "source": "hook"
+    },
+    "app/components/account/AccountNotifications.vue": {
+      "description": "Vue: setup",
+      "tokens": 989,
+      "hash": "57e86794d9035890",
+      "size": 3708,
+      "mtimeMs": 1793062781345.2341,
+      "updatedAt": "2026-10-27T00:59:41.816Z",
+      "source": "hook"
+    },
+    "app/components/home/HomeWelcome.vue": {
+      "description": "Vue: setup",
+      "tokens": 412,
+      "hash": "4a54b43a5329456f",
+      "size": 1546,
+      "mtimeMs": 1793063597492.6204,
+      "updatedAt": "2026-10-27T01:13:17.919Z",
+      "source": "hook"
+    },
+    "app/components/home/HomeGlance.vue": {
+      "description": "Vue: setup",
+      "tokens": 731,
+      "hash": "359e677c08120f3a",
+      "size": 2740,
+      "mtimeMs": 1793063598195.6082,
+      "updatedAt": "2026-10-27T01:13:18.368Z",
+      "source": "hook"
+    },
+    "app/components/home/HomePanel.vue": {
+      "description": "Vue: setup",
+      "tokens": 283,
+      "hash": "59d2d84228dec920",
+      "size": 1059,
+      "mtimeMs": 1793063620765.1938,
+      "updatedAt": "2026-10-27T01:13:41.077Z",
+      "source": "hook"
+    },
+    "app/components/home/HomeComingUp.vue": {
+      "description": "Vue: setup",
+      "tokens": 614,
+      "hash": "5cb3126fded9b193",
+      "size": 2304,
+      "mtimeMs": 1793063621403.6304,
+      "updatedAt": "2026-10-27T01:13:41.770Z",
+      "source": "hook"
+    },
+    "app/components/home/HomeShortlistChanges.vue": {
+      "description": "Vue: setup",
+      "tokens": 698,
+      "hash": "0d66bde3c72fcad4",
+      "size": 2619,
+      "mtimeMs": 1793063622183.948,
+      "updatedAt": "2026-10-27T01:13:42.386Z",
+      "source": "hook"
+    },
+    "app/components/home/HomeSignedIn.vue": {
+      "description": "Vue: setup",
+      "tokens": 750,
+      "hash": "bb4569135838a4ac",
+      "size": 2813,
+      "mtimeMs": 1793063638322.056,
+      "updatedAt": "2026-10-27T01:13:58.507Z",
+      "source": "hook"
+    },
+    "app/utils/myDogs.ts": {
+      "description": "Dogs a buyer owns after handover: a living record of health, training and care.",
+      "tokens": 928,
+      "hash": "57c62a264eb2699a",
+      "size": 3247,
+      "mtimeMs": 1793064053858.4683,
+      "updatedAt": "2026-10-27T01:20:54.351Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "OwnedDog",
+          "kind": "section",
+          "startLine": 8,
+          "endLine": 65,
+          "tokens": 708
+        },
+        {
+          "name": "findOwnedDog",
+          "kind": "fn",
+          "startLine": 66,
+          "endLine": 69,
+          "tokens": 53
+        },
+        {
+          "name": "nextReminder",
+          "kind": "fn",
+          "startLine": 70,
+          "endLine": 74,
+          "tokens": 62
+        },
+        {
+          "name": "ownedDogLink",
+          "kind": "fn",
+          "startLine": 75,
+          "endLine": 76,
+          "tokens": 26
+        }
+      ]
+    },
+    "app/middleware/signed-in.ts": {
+      "description": "Pages that need an account: send visitors to sign in, then back to where they were going",
+      "tokens": 80,
+      "hash": "7b1bf4b135611153",
+      "size": 279,
+      "mtimeMs": 1793064067346.9973,
+      "updatedAt": "2026-10-27T01:21:07.811Z",
+      "source": "hook"
+    },
+    "app/components/ComingNext.vue": {
+      "description": "Vue: setup",
+      "tokens": 330,
+      "hash": "48acd39960233eb7",
+      "size": 1236,
+      "mtimeMs": 1793064068462.8025,
+      "updatedAt": "2026-10-27T01:21:08.771Z",
+      "source": "hook"
+    },
+    "app/components/account/AccountNav.vue": {
+      "description": "Vue: setup",
+      "tokens": 886,
+      "hash": "a2aa37ee42f61f6d",
+      "size": 3320,
+      "mtimeMs": 1793064085993.3953,
+      "updatedAt": "2026-10-27T01:21:26.593Z",
+      "source": "hook"
+    },
+    "app/pages/account.vue": {
+      "description": "Vue: setup",
+      "tokens": 119,
+      "hash": "3d996b295a49384b",
+      "size": 443,
+      "mtimeMs": 1793064087016.8782,
+      "updatedAt": "2026-10-27T01:21:27.416Z",
+      "source": "hook"
+    },
+    "app/components/account/AccountHeading.vue": {
+      "description": "Vue: setup",
+      "tokens": 221,
+      "hash": "723b33b6902d00a8",
+      "size": 827,
+      "mtimeMs": 1793064120676.552,
+      "updatedAt": "2026-10-27T01:22:00.939Z",
+      "source": "hook"
+    },
+    "app/components/account/AccountDogPortrait.vue": {
+      "description": "Vue: setup",
+      "tokens": 386,
+      "hash": "0b8cca8ce45387eb",
+      "size": 1444,
+      "mtimeMs": 1793064856537.4316,
+      "updatedAt": "2026-10-27T01:34:16.699Z",
+      "source": "hook"
+    },
+    "app/components/account/AccountMyDogs.vue": {
+      "description": "Vue: setup",
+      "tokens": 400,
+      "hash": "1ee9b9b6c3527150",
+      "size": 1500,
+      "mtimeMs": 1793064146895.1636,
+      "updatedAt": "2026-10-27T01:22:27.367Z",
+      "source": "hook"
+    },
+    "app/components/account/AccountReadiness.vue": {
+      "description": "Vue: setup",
+      "tokens": 387,
+      "hash": "a34d568ce38938a2",
+      "size": 1450,
+      "mtimeMs": 1793064147786.0674,
+      "updatedAt": "2026-10-27T01:22:28.191Z",
+      "source": "hook"
+    },
+    "app/components/account/AccountHomeProfile.vue": {
+      "description": "Vue: setup",
+      "tokens": 286,
+      "hash": "7c81ebbc97364315",
+      "size": 1069,
+      "mtimeMs": 1793064148708.8801,
+      "updatedAt": "2026-10-27T01:22:29.145Z",
+      "source": "hook"
+    },
+    "app/pages/account/index.vue": {
+      "description": "Vue: setup",
+      "tokens": 194,
+      "hash": "5f70fff4919f753b",
+      "size": 726,
+      "mtimeMs": 1793064149571.0747,
+      "updatedAt": "2026-10-27T01:22:29.784Z",
+      "source": "hook"
+    },
+    "app/components/account/AccountDogCard.vue": {
+      "description": "Vue: setup",
+      "tokens": 579,
+      "hash": "a82925a852f5fefd",
+      "size": 2175,
+      "mtimeMs": 1793064168799.6934,
+      "updatedAt": "2026-10-27T01:22:49.167Z",
+      "source": "hook"
+    },
+    "app/pages/account/dogs/index.vue": {
+      "description": "Vue: setup",
+      "tokens": 396,
+      "hash": "458c7be8ec304de8",
+      "size": 1483,
+      "mtimeMs": 1793064169639.5435,
+      "updatedAt": "2026-10-27T01:22:50.147Z",
+      "source": "hook"
+    },
+    "app/components/account/AccountDogHeader.vue": {
+      "description": "Vue: setup",
+      "tokens": 788,
+      "hash": "9ddaf984b17d4934",
+      "size": 2958,
+      "mtimeMs": 1793064208240.9026,
+      "updatedAt": "2026-10-27T01:23:28.487Z",
+      "source": "hook"
+    },
+    "app/components/account/AccountCareChip.vue": {
+      "description": "Vue: setup",
+      "tokens": 150,
+      "hash": "f734537572fb08b4",
+      "size": 559,
+      "mtimeMs": 1793064208963.8674,
+      "updatedAt": "2026-10-27T01:23:29.249Z",
+      "source": "hook"
+    },
+    "app/components/account/AccountDogHealth.vue": {
+      "description": "Vue: setup",
+      "tokens": 395,
+      "hash": "884694b66c91b03d",
+      "size": 1481,
+      "mtimeMs": 1793064209670.9578,
+      "updatedAt": "2026-10-27T01:23:29.907Z",
+      "source": "hook"
+    },
+    "app/components/account/AccountDogCare.vue": {
+      "description": "Vue: setup",
+      "tokens": 554,
+      "hash": "d1af45418424cbe9",
+      "size": 2074,
+      "mtimeMs": 1793064210269.0718,
+      "updatedAt": "2026-10-27T01:23:30.613Z",
+      "source": "hook"
+    },
+    "app/components/account/AccountDogTraining.vue": {
+      "description": "Vue: setup",
+      "tokens": 314,
+      "hash": "2881cae5fc290916",
+      "size": 1175,
+      "mtimeMs": 1793064211149.4036,
+      "updatedAt": "2026-10-27T01:23:31.456Z",
+      "source": "hook"
+    },
+    "app/pages/account/dogs/[id].vue": {
+      "description": "Vue: setup",
+      "tokens": 282,
+      "hash": "d785f2b2e28d891b",
+      "size": 1059,
+      "mtimeMs": 1793064211999.9136,
+      "updatedAt": "2026-10-27T01:23:32.483Z",
+      "source": "hook"
+    },
+    "app/pages/account/[section].vue": {
+      "description": "Vue: setup",
+      "tokens": 140,
+      "hash": "71ac2c54d79058fe",
+      "size": 526,
+      "mtimeMs": 1793064212938.908,
+      "updatedAt": "2026-10-27T01:23:33.302Z",
+      "source": "hook"
+    },
+    "app/components/ProtectionLevelDetail.vue": {
+      "description": "Vue: setup",
+      "tokens": 1152,
+      "hash": "b49bb21ed8f51e07",
+      "size": 4320,
+      "mtimeMs": 1793066986290.6401,
+      "updatedAt": "2026-10-27T02:09:46.573Z",
+      "source": "hook"
+    },
+    "app/pages/protection-levels.vue": {
+      "description": "Vue: setup",
+      "tokens": 732,
+      "hash": "c84ba3e96302d8b5",
+      "size": 2747,
+      "mtimeMs": 1793066987070.194,
+      "updatedAt": "2026-10-27T02:09:47.443Z",
+      "source": "hook"
+    },
+    "app/utils/sell.ts": {
+      "description": "The Sell with us page: why kennels list on Dogeash, how verification works, what to have ready, and ",
+      "tokens": 915,
+      "hash": "4939b5542b385c63",
+      "size": 3202,
+      "mtimeMs": 1793067019478.586,
+      "updatedAt": "2026-10-27T02:10:19.794Z",
+      "source": "hook"
+    },
+    "app/pages/sell.vue": {
+      "description": "Vue: setup",
+      "tokens": 1528,
+      "hash": "1847bcc38bda3a54",
+      "size": 5730,
+      "mtimeMs": 1793067050077.603,
+      "updatedAt": "2026-10-27T02:10:50.342Z",
+      "source": "hook"
+    },
+    "app/pages/forgot-password.vue": {
+      "description": "Vue: setup",
+      "tokens": 1003,
+      "hash": "51ecc06ddfc45959",
+      "size": 3761,
+      "mtimeMs": 1793067075786.6978,
+      "updatedAt": "2026-10-27T02:11:16.166Z",
+      "source": "hook"
+    },
+    "app/utils/legal.ts": {
+      "description": "Terms of use and privacy policy, in plain words. DRAFTS: both must be reviewed by a Nigerian lawyer",
+      "tokens": 1282,
+      "hash": "52c8b663f2d17f6f",
+      "size": 4484,
+      "mtimeMs": 1793067122030.771,
+      "updatedAt": "2026-10-27T02:12:02.329Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "LegalDoc",
+          "kind": "section",
+          "startLine": 4,
+          "endLine": 42,
+          "tokens": 1233
+        }
+      ]
+    },
+    "app/components/LegalDocument.vue": {
+      "description": "Vue: setup",
+      "tokens": 664,
+      "hash": "a5e779c7faa03574",
+      "size": 2488,
+      "mtimeMs": 1793067122739.5273,
+      "updatedAt": "2026-10-27T02:12:03.024Z",
+      "source": "hook"
+    },
+    "app/error.vue": {
+      "description": "Vue: setup",
+      "tokens": 806,
+      "hash": "b494b02c76a2b66e",
+      "size": 3022,
+      "mtimeMs": 1793067138975.0774,
+      "updatedAt": "2026-10-27T02:12:19.410Z",
+      "source": "hook"
+    },
+    "app/composables/useAuthPanel.ts": {
+      "description": "Lets an auth page swap its side panel while it's open (sign-up shows a store panel for \"Open a store",
+      "tokens": 180,
+      "hash": "2b52df5da4a14c2d",
+      "size": 628,
+      "mtimeMs": 1793067713292.0322,
+      "updatedAt": "2026-10-27T02:21:53.605Z",
+      "source": "hook"
+    },
+    "app/utils/signUpIntents.ts": {
+      "description": "\"What brings you here?\" on sign-up. Each answer changes the heading, the fields, the side panel",
+      "tokens": 1043,
+      "hash": "7185a36acb5b4bbd",
+      "size": 3649,
+      "mtimeMs": 1793067737033.5188,
+      "updatedAt": "2026-10-27T02:22:17.327Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "SignUpIntentCopy",
+          "kind": "section",
+          "startLine": 10,
+          "endLine": 69,
+          "tokens": 859
+        },
+        {
+          "name": "findSignUpIntent",
+          "kind": "fn",
+          "startLine": 70,
+          "endLine": 72,
+          "tokens": 34
+        }
+      ]
     }
   },
   "preamble": [

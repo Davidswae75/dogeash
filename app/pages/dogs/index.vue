@@ -6,18 +6,21 @@ useSeoMeta({ title: 'Find a guard dog · Dogeash' })
 const route = useRoute()
 
 const properties = ref<PropertyType[]>(route.query.property ? [route.query.property as PropertyType] : [])
-const levels = ref<ProtectionLevel[]>([])
+const levels = ref<ProtectionLevel[]>(route.query.level ? [Number(route.query.level) as ProtectionLevel] : [])
+const cities = ref<string[]>(route.query.city ? [String(route.query.city)] : [])
 const household = ref<string[]>([])
 const breeds = ref<string[]>([])
 
 const propertyOptions = propertyTypes.map(p => ({ value: p.value, label: p.label }))
 const levelOptions = ([1, 2, 3, 4, 5] as const).map(n => ({ value: n, label: String(n) }))
+const cityOptions = marketCities.map(c => ({ value: c, label: c }))
 const householdOptions = [{ value: 'children', label: 'Safe with children' }]
 const breedOptions = [...new Set(sampleDogs.map(d => d.breed))].map(b => ({ value: b, label: b }))
 
 const dogs = computed(() => sampleDogs.filter(dog =>
   (!properties.value.length || properties.value.some(p => dog.property.includes(p)))
   && (!levels.value.length || levels.value.includes(dog.level))
+  && (!cities.value.length || cities.value.includes(dog.city))
   && (!household.value.includes('children') || dog.safeWithChildren)
   && (!breeds.value.length || breeds.value.includes(dog.breed)),
 ))
@@ -34,6 +37,7 @@ const levelSummary = computed(() => [...levels.value].sort().map(n => `${n} ${pr
 function clearFilters() {
   properties.value = []
   levels.value = []
+  cities.value = []
   household.value = []
   breeds.value = []
 }
@@ -59,6 +63,10 @@ function clearFilters() {
           <span class="text-xs leading-4 font-bold tracking-[.08em] text-ink-muted uppercase">Protection level</span>
           <FilterChips v-model="levels" :options="levelOptions" label="Protection level" class="gap-1.5" item-class="w-10 justify-center px-0" />
           <span v-if="levels.length" class="text-sm leading-[22px] text-ink-muted">{{ levelSummary }}</span>
+        </div>
+        <div class="flex flex-col gap-2.5">
+          <span class="text-xs leading-4 font-bold tracking-[.08em] text-ink-muted uppercase">City</span>
+          <FilterChips v-model="cities" :options="cityOptions" label="City" />
         </div>
         <div class="flex flex-col gap-2.5">
           <span class="text-xs leading-4 font-bold tracking-[.08em] text-ink-muted uppercase">Household</span>

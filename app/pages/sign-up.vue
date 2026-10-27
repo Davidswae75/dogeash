@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { BookOpen, Search, Store } from '@lucide/vue'
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
-import type { AuthLinkCard } from '~/components/auth/AuthLinkCards.vue'
 
-// Create an account: details, confirm the phone with a code, then a welcome with next steps.
+// Create an account: what brings you here, details, confirm the phone with a code, then a welcome with next steps.
+// "Open a store" (/sign-up?as=store) asks for the kennel's name and city too and changes the copy and panel.
 // Accounts aren't connected yet, so nothing is saved and the welcome is a preview.
 definePageMeta({
   layout: 'auth',
@@ -17,52 +16,69 @@ definePageMeta({
 })
 useSeoMeta({ title: 'Create an account · Dogeash', robots: 'noindex' })
 
+const route = useRoute()
 const step = ref<'details' | 'code' | 'welcome'>('details')
 const showPassword = ref(false)
-const intent = ref('buy')
-const firstName = ref('')
+const intentValue = ref<SignUpIntent>(findSignUpIntent(route.query.as).value)
+// ToggleGroup emits an empty value when the chosen chip is clicked again; keep the current choice
+const intentModel = computed({
+  get: () => intentValue.value,
+  set: (v) => { if (v) intentValue.value = v },
+})
+const intent = computed(() => findSignUpIntent(intentValue.value))
+const isStore = computed(() => intent.value.value === 'store')
+useAuthPanel(() => intent.value.panel)
+
+const account = ref({ name: '', email: '', storeName: '' })
+const firstName = computed(() => firstNameOf(account.value.name))
 const phoneShown = ref('')
 
-const { handleSubmit, values } = useForm({ validationSchema: toTypedSchema(signUpSchema) })
+const { handleSubmit, values } = useForm({
+  validationSchema: computed(() => toTypedSchema(isStore.value ? storeSignUpSchema : signUpSchema)),
+})
 
 const fields = computed(() => [
-  authFields.fullName(),
+  authFields.fullName(isStore.value ? 'The owner or manager of the kennel.' : undefined),
+  ...(isStore.value ? [authFields.storeName(), authFields.city()] : []),
   authFields.email(),
-  authFields.phone('We\'ll text you a code to confirm it. Stores use it to reach you about a dog.'),
+  authFields.phone(isStore.value
+    ? 'We\'ll text you a code to confirm it. Buyers reach your store through Dogeash, not this number.'
+    : 'We\'ll text you a code to confirm it. Stores use it to reach you about a dog.'),
   authFields.password({ visible: showPassword.value, isNew: true }),
 ])
 
 // Saved before the step changes: the form forgets values once their fields leave the screen
+const notify = useNotify()
 const submit = handleSubmit((v) => {
-  firstName.value = v.fullName.split(/\s+/)[0] ?? ''
+  account.value = { name: v.fullName, email: v.email, storeName: 'storeName' in v ? String(v.storeName) : '' }
   phoneShown.value = formatNigerianPhone(v.phone)
   step.value = 'code'
+}, ({ errors }) => notify.formErrors(errors))
+
+// Confirming the code creates (a preview of) the account, signs in and carries over this browser's saved dogs
+const session = useSession()
+watch(step, (s) => {
+  if (s !== 'welcome') return
+  const moved = session.signIn({ name: account.value.name, email: account.value.email, id: `BYR-${String(Math.floor(1000 + Math.random() * 9000))}` })
+  if (isStore.value) notify.storeStarted(firstName.value, account.value.storeName)
+  else notify.accountCreated(firstName.value, moved)
 })
-
-const intents = [
-  { value: 'buy', label: 'Buy a guard dog', icon: Search },
-  { value: 'care', label: 'Book a vet or trainer', icon: BookOpen },
-]
-
-const nextSteps: AuthLinkCard[] = [
-  { to: '/dogs', title: 'Find a guard dog', text: 'Browse dogs from inspected kennels by protection level and city.', icon: Search },
-  { to: '/guide', title: 'Read the buyer\'s guide', text: 'What a guard dog does for your home, what it costs, and the risks.', icon: BookOpen },
-  { to: '/stores', title: 'Meet the stores', text: 'Every kennel, its owner, its history and its vets.', icon: Store },
-]
 </script>
 
 <template>
   <template v-if="step === 'details'">
-    <AuthHeading title="Create an" outline="account" text="Save dogs, message stores and book kennel visits. Free, and it takes a minute." />
+    <AuthHeading :title="intent.heading.title" :outline="intent.heading.outline" :text="intent.heading.text" />
 
     <div class="flex flex-col gap-2.5">
       <span id="intent-label" class="text-sm font-bold">What brings you here?</span>
-      <ToggleGroup v-model="intent" type="single" variant="chip" aria-labelledby="intent-label" class="flex w-auto flex-wrap justify-start gap-2">
-        <ToggleGroupItem v-for="i in intents" :key="i.value" :value="i.value" class="rounded-full!">
+      <ToggleGroup v-model="intentModel" type="single" variant="chip" aria-labelledby="intent-label" class="flex w-auto flex-wrap justify-start gap-2">
+        <ToggleGroupItem v-for="i in signUpIntents" :key="i.value" :value="i.value" class="rounded-full!">
           <component :is="i.icon" aria-hidden="true" />{{ i.label }}
         </ToggleGroupItem>
       </ToggleGroup>
-      <span class="text-[13px] text-ink-muted">Selling dogs? <NuxtLink to="/sell" class="font-bold text-ink">Apply as a store</NuxtLink> instead.</span>
+      <span v-if="isStore" class="text-[13px] text-ink-muted">
+        One account does both: you can still buy and book with it. <NuxtLink to="/open-a-store" class="font-bold text-ink">How stores are verified</NuxtLink>
+      </span>
     </div>
 
     <!-- method="post" keeps typed values out of the URL if someone submits before the page loads -->
@@ -76,7 +92,7 @@ const nextSteps: AuthLinkCard[] = [
       <CheckboxField name="terms">
         I agree to the <NuxtLink to="/terms" class="font-bold text-ink">terms of use</NuxtLink> and the <NuxtLink to="/privacy" class="font-bold text-ink">privacy policy</NuxtLink>.
       </CheckboxField>
-      <Button type="submit" class="h-12 w-full">Create account</Button>
+      <Button type="submit" class="h-12 w-full">{{ intent.submitLabel }}</Button>
     </form>
 
     <p class="m-0 border-t border-line pt-6 text-sm text-ink-muted">
@@ -84,10 +100,10 @@ const nextSteps: AuthLinkCard[] = [
     </p>
   </template>
 
-  <AuthCodeStep v-else-if="step === 'code'" title="Confirm with your" :destination="phoneShown" submit-label="Confirm and create account" @verified="step = 'welcome'" @back="step = 'details'" />
+  <AuthCodeStep v-else-if="step === 'code'" title="Confirm with your" :destination="phoneShown" :submit-label="isStore ? 'Confirm and start my store' : 'Confirm and create account'" @verified="step = 'welcome'" @back="step = 'details'" />
 
   <template v-else>
-    <AuthHeading title="Welcome," :outline="firstName" done text="This is a preview: accounts aren't connected yet, so nothing was saved. Here's where you'd go next." />
-    <AuthLinkCards :items="nextSteps" />
+    <AuthHeading title="Welcome," :outline="firstName" done :text="intent.welcome({ storeName: account.storeName })" />
+    <AuthLinkCards :items="intent.nextSteps" />
   </template>
 </template>

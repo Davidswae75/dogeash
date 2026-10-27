@@ -23,8 +23,12 @@ budget_tokens: 2000
 
 <!-- Mistakes made and corrected. Each entry prevents the same mistake recurring. -->
 <!-- Format: [YYYY-MM-DD] Description of what went wrong and what to do instead. -->
+- [2026-10-26] A new component file can be missed by the running dev server's watcher (renders as an unknown <Tag>, not in .nuxt/components.d.ts). Move the file out and back in to make Nuxt register it.
 - [2026-10-26] After adding a new layout file, the running dev server may not generate its Tailwind classes (page renders unstyled grid). Touch `app/assets/css/main.css` to force a rebuild instead of debugging the markup.
 
 ## Decision Log
 
 <!-- Significant technical decisions with rationale. Why X was chosen over Y. -->
+- [2026-10-27] Toasts: call `useNotify()` helpers (shortlistSaved, shortlistRemoved, compareFull, bookingRequested, signedIn, accountCreated, formErrors), add a new helper for a new action. Never call vue-toastification's `useToast()` directly, so type, icon and wording stay consistent.
+- [2026-10-27] Who is signed in: `useSession()` (sample account in the `dogeash-session` cookie, so SSR renders the right header). Per-person saved lists: `useAccountList(name)` stores `{ guest: [...], <accountId>: [...] }`; `signIn()` merges the guest's lists into the account. Don't use `useLocalStorage` directly for anything that belongs to a person.
+- [2026-10-27] Wording: Dogeash is a store-enlistment marketplace. Never "sell with us", "seller" or "list a dog" for stores; say "open a store", "store", "apply to open a store". Store sign-up is `/sign-up?as=store` (intent copy in `app/utils/signUpIntents.ts`).

@@ -84,3 +84,100 @@ description: chronological action log per session, consolidated weekly
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
 | 10:05 | Edited nuxt.config.ts | inline fix | ~26 |
+| 14:45 | Edited package.json | 1→2 lines | ~19 |
+<!-- session:ODBmMzU1NzgtNmVhZS00ODJkLTkzODYtMDNiYzQ5YjdlMGM1 -->
+| 2026-10-26T13:47:47.019Z | Fixed nuxt generate 404 failure by syncing nitro.prerender.ignore with unbuilt linked pages (/terms, /privacy, /forgot-password added; /sign-in, /sellers removed). Added dev:lan script (nuxt dev --host 0.0.0.0) for phone testing over Wi-Fi. | nuxt.config.ts,package.json | nuxt generate prerendered 80 routes, no errors; LAN URL returned 200 |
+| 14:50 | Edited nuxt.config.ts | 1→6 lines | ~46 |
+| 14:50 | Edited package.json | — | ~0 |
+| 15:49 | Created app/composables/useRecentlyViewed.ts | — | ~147 |
+| 15:49 | Created app/composables/useFirstVisit.ts | — | ~107 |
+| 15:49 | Created app/utils/market.ts | — | ~234 |
+| 15:49 | Created app/components/MarketRow.vue | — | ~655 |
+| 15:49 | Created app/components/home/HomeIntroCard.vue | — | ~454 |
+| 15:49 | Created app/components/home/HomeHero.vue | — | ~521 |
+| 15:49 | Created app/pages/index.vue | — | ~979 |
+<!-- session:MDQ2MmZjM2MtODMwNS00ZDMxLWE1Y2UtMDM4ZmQ5ODdjNmE0 -->
+| 2026-10-26T14:52:48.915Z | Home rebuilt as a marketplace with a thin intro: HomeHero (compact, search, property quick links, patrol chase GIF kept), PromiseStrip, one-time HomeIntroCard (useFirstVisit), MarketRow sideways rows (available now, family protection, for compounds, near you with city switch, top-rated stores, recently viewed via useRecentlyViewed), protection levels and how it works lower; browse page now reads ?level and ?city and has a City filter; PLAN.md updated | app/pages/index.vue,app/components/home/HomeHero.vue,app/components/home/HomeIntroCard.vue,app/components/MarketRow.vue,app/composables/useRecentlyViewed.ts,app/composables/useFirstVisit.ts,app/utils/market.ts,app/pages/dogs/index.vue,app/pages/dogs/[id].vue,PLAN.md,.wolf/cerebrum.md | Checked at 1440px both themes and 375px; intro dismiss persists; recently viewed shows after visiting a dog |
+| 16:05 | Created app/composables/useShortlist.ts | — | ~562 |
+| 16:05 | Created app/components/BookingDialog.vue | — | ~1786 |
+| 16:05 | Created app/components/CareBookingDialog.vue | — | ~188 |
+| 16:05 | Created app/components/ShortlistButton.vue | — | ~518 |
+| 16:06 | Created app/components/K9Card.vue | — | ~822 |
+| 16:07 | Created app/components/shortlist/ShortlistItem.vue | — | ~824 |
+| 16:07 | Created app/components/shortlist/ShortlistStoreGroup.vue | — | ~638 |
+| 16:07 | Created app/components/shortlist/ShortlistCompareBar.vue | — | ~467 |
+| 16:07 | Created app/pages/shortlist/index.vue | — | ~658 |
+| 16:07 | Created app/utils/compare.ts | — | ~439 |
+| 16:07 | Created app/pages/shortlist/compare.vue | — | ~1000 |
+<!-- session:MDQ2MmZjM2MtODMwNS00ZDMxLWE1Y2UtMDM4ZmQ5ODdjNmE0 -->
+| 2026-10-26T15:10:52.136Z | Built shortlist and compare instead of a cart: useShortlist (createGlobalState + localStorage, grouped by store, compare up to 3), ShortlistButton on K9 cards (now a wrapper div so the button isn't inside the link) and dog page, ShortlistLink with count in header, /shortlist grouped by store with one kennel visit per store, ShortlistCompareBar, /shortlist/compare driven by utils/compare.ts rows with lowest-price highlight; generalised CareBookingDialog into BookingDialog; theme toggle icon-only on phones | app/composables/useShortlist.ts,app/components/ShortlistButton.vue,app/components/ShortlistLink.vue,app/components/shortlist/,app/components/BookingDialog.vue,app/components/CareBookingDialog.vue,app/components/K9Card.vue,app/components/SiteHeader.vue,app/components/ThemeToggle.vue,app/pages/shortlist/,app/pages/dogs/[id].vue,app/utils/compare.ts,PLAN.md | Save, count, grouping, compare limit, kennel visit booking, compare table, care booking after refactor all checked in browser; no overflow at 375px; typecheck clean outside components/ui |
+| 16:14 | Created app/plugins/toast.client.ts | — | ~206 |
+| 16:14 | Created app/assets/css/toast.css | — | ~934 |
+| 16:14 | Created app/components/ToastContent.vue | — | ~269 |
+| 16:14 | Created app/composables/useNotify.ts | — | ~847 |
+| 01:24 | Edited app/assets/css/toast.css | CSS: watch, --toast-accent, --toast-icon-bg | ~82 |
+<!-- session:MDQ2MmZjM2MtODMwNS00ZDMxLWE1Y2UtMDM4ZmQ5ODdjNmE0 -->
+| 2026-10-27T00:27:19.628Z | Wired vue-toastification via useNotify into shortlist heart/remove (undo restores compare tick), compare-full warning, booking requests, sign-in, sign-up and invalid forms; dark-mode info toast edge; fixed toast width | app/composables/useShortlist.ts,app/components/ShortlistButton.vue,app/components/shortlist/ShortlistItem.vue,app/components/BookingDialog.vue,app/pages/sign-in.vue,app/pages/sign-up.vue,app/assets/css/toast.css,PLAN.md | verified in browser, Day and Night watch |
+| 01:32 | Created app/components/ToastContent.vue | — | ~849 |
+| 01:32 | Created app/composables/useNotify.ts | — | ~1090 |
+| 01:32 | Created app/assets/css/toast.css | — | ~1184 |
+<!-- session:MDQ2MmZjM2MtODMwNS00ZDMxLWE1Y2UtMDM4ZmQ5ODdjNmE0 -->
+| 2026-10-27T00:35:03.333Z | Redesigned toasts: top-right desktop / top-centre phone, mono kicker+meta, dog photo with badge, pill actions, hairline timer (hazard stripe on warnings), custom drop-in transition | app/components/ToastContent.vue,app/composables/useNotify.ts,app/assets/css/toast.css,app/plugins/toast.client.ts | verified in browser, light desktop and dark phone |
+| 01:58 | Created app/utils/account.ts | — | ~678 |
+| 01:58 | Created app/composables/useAccountList.ts | — | ~636 |
+| 01:58 | Created app/composables/useSession.ts | — | ~335 |
+| 01:59 | Created app/components/account/AccountAvatar.vue | — | ~153 |
+| 01:59 | Created app/components/account/AccountMenu.vue | — | ~908 |
+| 01:59 | Created app/components/account/AccountNotifications.vue | — | ~989 |
+<!-- session:MDQ2MmZjM2MtODMwNS00ZDMxLWE1Y2UtMDM4ZmQ5ODdjNmE0 -->
+| 2026-10-27T01:03:32.315Z | PLAN Phase 5a (signed-in buyers). Built sample session (useSession, cookie), per-account lists with guest merge on sign-in (useAccountList), signed-in header: AccountMenu, AccountNotifications, AccountAvatar, phone menu account card; sign-in/sign-up sign in, sign-out toast | PLAN.md,app/utils/account.ts,app/composables/useSession.ts,app/composables/useAccountList.ts,app/composables/useShortlist.ts,app/composables/useRecentlyViewed.ts,app/utils/compare.ts,app/components/account/,app/components/SiteHeader.vue,app/composables/useNotify.ts,app/pages/sign-in.vue,app/pages/sign-up.vue | verified in browser: guest save, merge on sign-in, menu, bell, sign out, phone dark |
+| 02:13 | Created app/components/home/HomeWelcome.vue | — | ~412 |
+| 02:13 | Created app/components/home/HomeGlance.vue | — | ~731 |
+| 02:13 | Created app/components/home/HomePanel.vue | — | ~283 |
+| 02:13 | Created app/components/home/HomeComingUp.vue | — | ~614 |
+| 02:13 | Created app/components/home/HomeShortlistChanges.vue | — | ~698 |
+| 02:13 | Created app/components/home/HomeSignedIn.vue | — | ~750 |
+<!-- session:MDQ2MmZjM2MtODMwNS00ZDMxLWE1Y2UtMDM4ZmQ5ODdjNmE0 -->
+| 2026-10-27T01:17:15.803Z | Signed-in Home: index.vue switches HomeSignedIn/HomeGuest on session. New HomeWelcome, HomeGlance, HomePanel, HomeComingUp, HomeShortlistChanges; sample buyer profile, bookings, price drops, saved search in utils/account.ts; marketRows.matchedTo/savedSearch; homeSection const. Fixed phone overflow (grid minmax) | app/pages/index.vue,app/components/home/,app/utils/account.ts,app/utils/market.ts,PLAN.md | verified in browser desktop light, phone dark; SSR both states |
+| 02:20 | Created app/utils/myDogs.ts | — | ~928 |
+| 02:21 | Created app/middleware/signed-in.ts | — | ~80 |
+| 02:21 | Created app/components/ComingNext.vue | — | ~330 |
+| 02:21 | Created app/components/account/AccountNav.vue | — | ~886 |
+| 02:21 | Created app/pages/account.vue | — | ~119 |
+| 02:22 | Created app/components/account/AccountHeading.vue | — | ~221 |
+| 02:22 | Created app/components/account/AccountDogPortrait.vue | — | ~272 |
+| 02:22 | Created app/components/account/AccountDogPortrait.vue | — | ~291 |
+| 02:22 | Created app/components/account/AccountMyDogs.vue | — | ~400 |
+| 02:22 | Created app/components/account/AccountReadiness.vue | — | ~387 |
+| 02:22 | Created app/components/account/AccountHomeProfile.vue | — | ~286 |
+| 02:22 | Created app/pages/account/index.vue | — | ~194 |
+| 02:22 | Created app/components/account/AccountDogCard.vue | — | ~579 |
+| 02:22 | Created app/pages/account/dogs/index.vue | — | ~396 |
+| 02:23 | Created app/components/account/AccountDogHeader.vue | — | ~788 |
+| 02:23 | Created app/components/account/AccountCareChip.vue | — | ~150 |
+| 02:23 | Created app/components/account/AccountDogHealth.vue | — | ~395 |
+| 02:23 | Created app/components/account/AccountDogCare.vue | — | ~554 |
+| 02:23 | Created app/components/account/AccountDogTraining.vue | — | ~314 |
+| 02:23 | Created app/pages/account/dogs/[id].vue | — | ~282 |
+| 02:23 | Created app/pages/account/[section].vue | — | ~140 |
+<!-- session:MDQ2MmZjM2MtODMwNS00ZDMxLWE1Y2UtMDM4ZmQ5ODdjNmE0 -->
+| 2026-10-27T01:31:28.402Z | Built /account shell (account.vue + AccountNav, signed-in middleware, sign-in redirect), Overview (reuses AccountGlance/ComingUp/ShortlistChanges moved from home/, plus AccountMyDogs, AccountReadiness, AccountHomeProfile), My dogs list + record (/account/dogs/[id]) with sample Bruno in utils/myDogs.ts, ComingNext shared with dashboard sections, avatar menu driven by accountNav | app/pages/account.vue,app/pages/account/,app/components/account/,app/components/ComingNext.vue,app/middleware/signed-in.ts,app/utils/account.ts,app/utils/myDogs.ts,app/pages/sign-in.vue,app/pages/dashboard/[section].vue,PLAN.md | typecheck clean; browser check blocked: dev server on :3000 hung (all routes time out), not restarted |
+| 02:34 | Created app/components/account/AccountDogPortrait.vue | — | ~386 |
+<!-- session:MDQ2MmZjM2MtODMwNS00ZDMxLWE1Y2UtMDM4ZmQ5ODdjNmE0 -->
+| 2026-10-27T01:37:28.165Z | Dev server came back; verified /account routes (guard 302 to sign-in with redirect, 404 for unknown section) and desktop Day watch layout of Overview and Bruno's record. Reworked AccountDogPortrait (store-banner style, compact for thumbnails), moved add-photo label, facts grid 2 cols | app/components/account/AccountDogPortrait.vue,app/components/account/AccountDogHeader.vue,app/components/account/AccountMyDogs.vue | desktop verified; phone + Night watch not checked (browser pane hidden) |
+| 02:46 | Edited app/assets/css/toast.css | expanded (+17 lines) | ~293 |
+| 03:09 | Created app/components/ProtectionLevelDetail.vue | — | ~1152 |
+| 03:09 | Created app/pages/protection-levels.vue | — | ~732 |
+| 03:10 | Created app/utils/sell.ts | — | ~915 |
+| 03:10 | Created app/pages/sell.vue | — | ~1528 |
+| 03:11 | Created app/pages/forgot-password.vue | — | ~1003 |
+| 03:12 | Created app/utils/legal.ts | — | ~1282 |
+| 03:12 | Created app/components/LegalDocument.vue | — | ~664 |
+| 03:12 | Created app/error.vue | — | ~806 |
+<!-- session:MDQ2MmZjM2MtODMwNS00ZDMxLWE1Y2UtMDM4ZmQ5ODdjNmE0 -->
+| 2026-10-27T02:14:11.779Z | Fixed dead links: /protection-levels (ProtectionLevelDetail + protectionLevelDetails), /sell (utils/sell.ts, HowItWorks now takes steps), /forgot-password (one step-driven form; authFields.password label option; newPasswordSchema), /terms + /privacy (LegalDocument + utils/legal.ts, marked drafts), app/error.vue 404 with patrol chase | app/pages/protection-levels.vue,app/pages/sell.vue,app/pages/forgot-password.vue,app/pages/terms.vue,app/pages/privacy.vue,app/error.vue,app/components/ProtectionLevelDetail.vue,app/components/LegalDocument.vue,app/components/HowItWorks.vue,app/utils/protection.ts,app/utils/sell.ts,app/utils/legal.ts,app/utils/auth.ts,app/utils/authFields.ts,PLAN.md | typecheck clean, all routes 200, unknown paths 404 with styled page; not checked visually (browser pane hidden) |
+| 03:21 | Created app/composables/useAuthPanel.ts | — | ~180 |
+| 03:22 | Created app/utils/signUpIntents.ts | — | ~1043 |
+| 03:22 | Created app/pages/sign-up.vue | — | ~1370 |
+<!-- session:MDQ2MmZjM2MtODMwNS00ZDMxLWE1Y2UtMDM4ZmQ5ODdjNmE0 -->
+| 2026-10-27T02:27:44.306Z | Renamed sell → Open a store (/open-a-store, /sell 301 redirect, utils/openStore.ts, header/footers/sign-in wording, buyer-facing 'seller' → 'store'). Sign-up intents (buy/care/store) in utils/signUpIntents.ts; store intent adds store name + city (storeSignUpSchema), swaps heading, button, side panel (useAuthPanel override in auth layout), welcome and toast (notify.storeStarted) | app/pages/open-a-store.vue,app/utils/openStore.ts,app/pages/sign-up.vue,app/utils/signUpIntents.ts,app/composables/useAuthPanel.ts,app/layouts/auth.vue,app/utils/auth.ts,app/utils/authFields.ts,app/composables/useNotify.ts,nuxt.config.ts,PLAN.md | typecheck clean; server checks pass; store sign-up flow run end to end in browser via scripts |

@@ -217,7 +217,7 @@ const lead = 'm-0 max-w-[40em] text-[17px] leading-[28px] text-ink-muted'
           <GuideCostBars />
           <div class="grid gap-4 md:grid-cols-2">
             <GuideImageSlot :image="guideImages.vet" />
-            <HelpPanel title="Ask the seller before you pay">
+            <HelpPanel title="Ask the store before you pay">
               What the dog eats and how much, when its next vaccines are due, which vet it sees now, and whether the price includes handover training. Every Dogeash K9 file lists vaccinations and the last inspection date.
             </HelpPanel>
           </div>

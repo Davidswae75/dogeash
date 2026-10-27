@@ -150,7 +150,7 @@ export const guideDrawbacks: GuidePoint[] = [
     icon: 'monthly-cost',
     title: 'It is a monthly cost for a decade',
     body: 'The purchase price is only the start. Food, vaccines, tick and worm treatment, vet visits and refresher training continue for the dog\'s whole life, usually 10 to 13 years.',
-    note: 'Budget monthly before you buy. Ask the seller what the dog eats now.',
+    note: 'Budget monthly before you buy. Ask the store what the dog eats now.',
   },
   {
     icon: 'clock',
@@ -192,12 +192,12 @@ export const guideDrawbacks: GuidePoint[] = [
     icon: 'travel',
     title: 'Travel gets harder',
     body: 'Holidays and long trips need a plan. Not every kennel will board a protection-trained dog, and not every friend can handle one.',
-    note: 'Ask your seller about boarding before you buy. Some kennels take back their own dogs.',
+    note: 'Ask the store about boarding before you buy. Some kennels take back their own dogs.',
   },
 ]
 
 export const guidePoisoningSteps = [
-  { title: 'Train food refusal', body: 'The dog should refuse food from anyone except its handlers, and ignore anything thrown over the wall. Ask the seller to show you this, not just describe it.' },
+  { title: 'Train food refusal', body: 'The dog should refuse food from anyone except its handlers, and ignore anything thrown over the wall. Ask the store to show you this, not just describe it.' },
   { title: 'Feed at set times, in one place', body: 'Feed in the kennel run or a fixed bowl, never scattered on the ground. A dog that expects food in one place is less tempted elsewhere.' },
   { title: 'Check the wall line every morning', body: 'Walk the perimeter and remove anything thrown in overnight: meat, bread, sweets, bones.' },
   { title: 'Know the signs and your nearest vet', body: 'Vomiting, shaking, drooling, collapse or bleeding gums need a vet immediately. Save an emergency vet number before the dog arrives.' },
