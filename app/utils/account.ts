@@ -2,6 +2,7 @@ import type { Component } from 'vue'
 import { BellRing, CalendarCheck, Dog as DogIcon, Heart, House, LayoutGrid, MessageSquare, Package, Settings, ShieldCheck, Star } from '@lucide/vue'
 import type { Dog } from './dogs'
 import type { PropertyType } from './protection'
+import type { StoreMembership } from './storeRoles'
 
 // The signed-in buyer, until accounts are connected: one sample account, what the header shows
 // them (the account menu and notifications) and what their Home is built from.
@@ -12,6 +13,8 @@ export interface Account {
   email: string
   city: string
   memberSince: string
+  /** Stores this person works at, and their role in each */
+  stores?: StoreMembership[]
 }
 
 export const sampleAccount: Account = {
@@ -20,6 +23,8 @@ export const sampleAccount: Account = {
   email: 'adaeze@example.com',
   city: 'Abuja',
   memberSince: '2026',
+  // Manages K9 Guardian Kennels (owned by Col. Ibrahim Danjuma), and buys on Dogeash too
+  stores: [{ storeId: 'STR-001', role: 'manager' }],
 }
 
 export const firstNameOf = (name: string) => name.trim().split(/\s+/)[0] ?? ''

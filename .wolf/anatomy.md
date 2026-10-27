@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-10-27T02:22:59.063Z
-> Files: 607 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-10-27T22:09:22.338Z
+> Files: 630 tracked | Anatomy hits: 0 | Misses: 0
 
 > Project structure index. Auto-maintained by OpenWolf hooks and daemon.
 > Run `openwolf scan` to generate, or wait for the first Claude Code session.
@@ -31,6 +31,7 @@
 
 ## app/components/
 
+- `AccountGateDialog.vue` — Vue: setup (~655 tok)
 - `AppIcon.vue` — Vue: setup, TS, 3 props (~2222 tok)
 - `AppLogo.vue` — Vue: setup, TS, 1 props (~160 tok)
 - `AppToast.vue` — Vue component (~67 tok)
@@ -43,6 +44,7 @@
 - `CareProviderCard.vue` — Vue: setup (~504 tok)
 - `CheckboxField.vue` — Vue: setup (~294 tok)
 - `ComingNext.vue` — Vue: setup (~330 tok)
+- `ContactStoreDialog.vue` — Vue: setup (~1039 tok)
 - `DashboardNav.vue` — Vue: setup (~1090 tok)
 - `EmptyState.vue` — Vue: setup, TS, 2 props, emits (~240 tok)
 - `FactRow.vue` — Vue: setup, TS (~184 tok)
@@ -56,9 +58,12 @@
 - `K9CardSkeleton.vue` — Vue component (~107 tok)
 - `K9FileTab.vue` — Vue: setup, TS, 4 props (~205 tok)
 - `KennelSticker.vue` — Vue: setup, TS, 1 props (~173 tok)
+- `KennelVisitDialog.vue` — Vue: setup (~427 tok)
 - `KennelWatch.vue` — Vue: setup (~315 tok)
 - `LegalDocument.vue` — Vue: setup (~664 tok)
 - `MarketRow.vue` — Vue: setup (~655 tok)
+- `OwnListingActions.vue` — Vue: setup (~521 tok)
+- `OwnListingBanner.vue` — Vue: setup (~276 tok)
 - `PatrolMap.vue` — Vue: setup, TS, 1 props (~325 tok)
 - `PromiseStrip.vue` — Vue: setup, TS (~145 tok)
 - `PropertyPicker.vue` — Vue: setup, TS, emits (~316 tok)
@@ -70,7 +75,7 @@
 - `ShortlistButton.vue` — Vue: setup (~518 tok)
 - `SiteFooter.vue` — Vue: setup, TS (~400 tok)
 - `SiteFooterMinimal.vue` — Vue: setup (~302 tok)
-- `SiteHeader.vue` — Vue: setup, TS (~676 tok)
+- `SiteHeader.vue` — Vue: setup (~1557 tok)
 - `StatusDot.vue` — Vue: setup, TS, 1 props (~98 tok)
 - `StoreAvatar.vue` — Vue: setup (~131 tok)
 - `StoreBanner.vue` — Vue: setup (~659 tok)
@@ -85,7 +90,7 @@
 
 ## app/components/account/
 
-- `AccountAvatar.vue` — Vue: setup (~153 tok)
+- `AccountAvatar.vue` — Vue: setup (~262 tok)
 - `AccountCareChip.vue` — Vue: setup (~150 tok)
 - `AccountDogCard.vue` — Vue: setup (~579 tok)
 - `AccountDogCare.vue` — Vue: setup (~554 tok)
@@ -100,6 +105,8 @@
 - `AccountNav.vue` — Vue: setup (~886 tok)
 - `AccountNotifications.vue` — Vue: setup (~989 tok)
 - `AccountReadiness.vue` — Vue: setup (~387 tok)
+- `AccountStoreCard.vue` — Vue: setup (~392 tok)
+- `AccountStorePill.vue` — Vue: setup (~288 tok)
 
 ## app/components/auth/
 
@@ -108,6 +115,18 @@
 - `AuthPanel.vue` — Vue: setup (~447 tok)
 - `AuthPasswordStrength.vue` — Vue: setup (~246 tok)
 - `AuthPasswordToggle.vue` — Vue: setup (~158 tok)
+
+## app/components/dashboard/
+
+- `DashboardAgenda.vue` — Vue: setup (~678 tok)
+- `DashboardAttention.vue` — Vue: setup (~571 tok)
+- `DashboardDogs.vue` — Vue: setup (~1172 tok)
+- `DashboardGreeting.vue` — Vue: setup (~448 tok)
+- `DashboardStats.vue` — Vue: setup (~576 tok)
+- `DashboardStoreHealth.vue` — Vue: setup (~867 tok)
+- `InboxDetail.vue` — Vue: setup (~1198 tok)
+- `InboxList.vue` — Vue: setup (~1022 tok)
+- `InboxReply.vue` — Vue: setup (~559 tok)
 
 ## app/components/guide/
 
@@ -803,6 +822,7 @@
 
 ## app/composables/
 
+- `useAccountGate.ts` — Unique per action and target, e.g. `visit:STR-001` (~550 tok)
 - `useAccountList.ts` — Lists of dog file numbers kept in this browser per person: one for the guest, one per account. (~636 tok)
 - `useAuthPanel.ts` — Lets an auth page swap its side panel while it's open (sign-up shows a store panel for "Open a store (~180 tok)
 - `useFirstVisit.ts` — Whether this browser has dismissed a one-time message, e.g. the "New to guard dogs?" intro (~107 tok)
@@ -810,6 +830,8 @@
 - `useRecentlyViewed.ts` — Dogs this browser has opened, newest first. Kept on the device until accounts exist. (~147 tok)
 - `useSession.ts` — Who is signed in. A sample session in a cookie (so the server renders the right header) (~335 tok)
 - `useShortlist.ts` — The buyer's shortlist: dogs they're considering, and up to three picked to compare. (~562 tok)
+- `useStoreContext.ts` — The store the dashboard is showing, and what the signed-in person may do there. (~178 tok)
+- `useStoreInbox.ts` — The store inbox as one shared list: what this person's role may see, unread counts for the bell (~397 tok)
 
 ## app/layouts/
 
@@ -820,6 +842,7 @@
 ## app/middleware/
 
 - `signed-in.ts` — Pages that need an account: send visitors to sign in, then back to where they were going (~80 tok)
+- `store-member.ts` — Store dashboard pages: only people who work at a store. Visitors sign in first; (~115 tok)
 
 ## app/pages/
 
@@ -844,7 +867,8 @@
 ## app/pages/dashboard/
 
 - `[section].vue` — Vue: setup (~394 tok)
-- `index.vue` — Vue: setup (~2798 tok)
+- `inbox.vue` — Vue: setup (~783 tok)
+- `index.vue` — Vue: setup (~228 tok)
 
 ## app/pages/shortlist/
 
@@ -873,11 +897,13 @@
 - `compare.ts` — Numeric key for picking the best dog on this row; lower wins unless `higherIsBetter` (~439 tok)
 - `dashboard.ts` — Store dashboard: navigation and example figures until accounts and the API exist. (~1396 tok)
 - `gen.ts` — Read and write values on nested objects by dotted path ("owner.name") (~181 tok)
+- `inbox.ts` — How the buyer hears about replies, besides Dogeash itself (~1864 tok)
 - `legal.ts` — Terms of use and privacy policy, in plain words. DRAFTS: both must be reviewed by a Nigerian lawyer (~1282 tok)
 - `market.ts` — The marketplace rows on Home: which dogs and stores each one shows (~234 tok)
 - `myDogs.ts` — Dogs a buyer owns after handover: a living record of health, training and care. (~928 tok)
-- `sell.ts` — The Sell with us page: why kennels list on Dogeash, how verification works, what to have ready, and  (~915 tok)
+- `sell.ts` — The Sell with us page: why kennels list on Dogeash, how verification works, what to have ready, and (~915 tok)
 - `signUpIntents.ts` — "What brings you here?" on sign-up. Each answer changes the heading, the fields, the side panel (~1043 tok)
+- `storeRoles.ts` — People who work at a store, and what each role may do in the store dashboard. (~442 tok)
 - `stores.ts` — A store is a kennel that sells guard dogs on Dogeash. Dogs link to it by storeId; (~3985 tok)
 
 ## scripts/

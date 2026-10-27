@@ -2,7 +2,7 @@
 import { LogOut } from '@lucide/vue'
 
 // The avatar in the header: who is signed in, their account pages and Sign out
-const { user, initials, signOut } = useSession()
+const { user, initials, memberships, hasStore, signOut } = useSession()
 const { count } = useShortlist()
 
 const groups = accountNav.map(g => g.items.filter(i => i.inMenu)).filter(g => g.length)
@@ -16,7 +16,7 @@ const groups = accountNav.map(g => g.items.filter(i => i.inMenu)).filter(g => g.
         class="cursor-pointer rounded-full border-0 bg-transparent p-0 ring-offset-2 ring-offset-canvas transition-shadow hover:ring-2 hover:ring-ink data-[state=open]:ring-2 data-[state=open]:ring-ink"
         :aria-label="`Your account, ${user.name}`"
       >
-        <AccountAvatar :initials="initials" />
+        <AccountAvatar :initials="initials" :store="hasStore" />
       </button>
     </DropdownMenuTrigger>
 
@@ -28,6 +28,11 @@ const groups = accountNav.map(g => g.items.filter(i => i.inMenu)).filter(g => g.
           <span class="truncate text-[13px] text-ink-muted">{{ user.email }}</span>
           <span class="mt-1 font-mono text-[10.5px] font-semibold tracking-[.12em] text-ink-muted uppercase">Buyer · {{ user.city }} · {{ user.id }}</span>
         </div>
+      </div>
+
+      <!-- Store members: their store first, one click into the dashboard -->
+      <div v-for="m in memberships" :key="m.storeId" class="px-1 pb-2">
+        <AccountStoreCard :store="m.store" :role="m.role" />
       </div>
 
       <template v-for="(group, g) in groups" :key="g">

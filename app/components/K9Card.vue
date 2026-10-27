@@ -5,6 +5,9 @@ import type { Dog } from '~/utils/dogs'
 // The save button sits beside the link, not inside it: a button can't live inside a link.
 const props = defineProps<{ dog: Dog }>()
 const reserved = computed(() => props.dog.status === 'reserved')
+// Dogs from a store you work at: a "Your store" tag instead of the save heart
+const { memberOf } = useSession()
+const isOwn = computed(() => !!memberOf(props.dog.storeId))
 </script>
 
 <template>
@@ -55,7 +58,10 @@ const reserved = computed(() => props.dog.status === 'reserved')
       </div>
     </NuxtLink>
 
-    <div class="absolute top-[46px] right-3 z-[2]">
+    <span v-if="isOwn" class="absolute top-[52px] right-3 z-[2] inline-flex items-center gap-1.5 rounded-full bg-night px-2.5 py-1 text-[11px] font-bold text-on-night shadow-[0_2px_8px_rgba(0,0,0,.18)]">
+      <span class="size-1.5 rounded-full bg-marigold" aria-hidden="true" />Your store
+    </span>
+    <div v-else class="absolute top-[46px] right-3 z-[2]">
       <ShortlistButton :file-no="props.dog.fileNo" :name="props.dog.name" />
     </div>
   </div>

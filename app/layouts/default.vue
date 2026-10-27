@@ -16,5 +16,6 @@ const fullFooter = computed(() => route.meta.footer === 'full')
     </main>
     <SiteFooter v-if="fullFooter" />
     <SiteFooterMinimal v-else />
+    <AccountGateDialog />
   </div>
 </template>

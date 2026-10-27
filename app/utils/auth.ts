@@ -66,3 +66,9 @@ export function passwordStrength(pw: string) {
 
 // Forgot password: a new password follows the same rules as sign-up
 export const newPasswordSchema = signUpSchema.pick({ password: true })
+
+// `?redirect=` after signing in or up: only paths on this site, never another domain
+export function safeRedirect(value: unknown, fallback = '/') {
+  const path = String(value ?? '')
+  return path.startsWith('/') && !path.startsWith('//') ? path : fallback
+}

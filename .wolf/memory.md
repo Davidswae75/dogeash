@@ -181,3 +181,38 @@ description: chronological action log per session, consolidated weekly
 | 03:22 | Created app/pages/sign-up.vue | — | ~1370 |
 <!-- session:MDQ2MmZjM2MtODMwNS00ZDMxLWE1Y2UtMDM4ZmQ5ODdjNmE0 -->
 | 2026-10-27T02:27:44.306Z | Renamed sell → Open a store (/open-a-store, /sell 301 redirect, utils/openStore.ts, header/footers/sign-in wording, buyer-facing 'seller' → 'store'). Sign-up intents (buy/care/store) in utils/signUpIntents.ts; store intent adds store name + city (storeSignUpSchema), swaps heading, button, side panel (useAuthPanel override in auth layout), welcome and toast (notify.storeStarted) | app/pages/open-a-store.vue,app/utils/openStore.ts,app/pages/sign-up.vue,app/utils/signUpIntents.ts,app/composables/useAuthPanel.ts,app/layouts/auth.vue,app/utils/auth.ts,app/utils/authFields.ts,app/composables/useNotify.ts,nuxt.config.ts,PLAN.md | typecheck clean; server checks pass; store sign-up flow run end to end in browser via scripts |
+| 21:42 | Created app/composables/useAccountGate.ts | — | ~550 |
+| 21:42 | Created app/components/AccountGateDialog.vue | — | ~655 |
+| 21:43 | Created app/components/ContactStoreDialog.vue | — | ~1039 |
+| 21:43 | Created app/components/KennelVisitDialog.vue | — | ~427 |
+<!-- session:MDQ2MmZjM2MtODMwNS00ZDMxLWE1Y2UtMDM4ZmQ5ODdjNmE0 -->
+| 2026-10-27T20:52:08.421Z | Sign-in at point of action: useAccountGate + AccountGateDialog (in default layout), resume via ?resume after sign-in/up; ContactStoreDialog (new), KennelVisitDialog (shared), BookingDialog gate prop, CareBookingDialog gated; wired dog page, store page, store card, shortlist. safeRedirect util; sign-up 'Carry on where you were'. Header Sign in at all widths; guest nudge on 3rd save | app/composables/useAccountGate.ts,app/components/AccountGateDialog.vue,app/components/ContactStoreDialog.vue,app/components/KennelVisitDialog.vue,app/components/BookingDialog.vue,app/components/CareBookingDialog.vue,app/components/shortlist/ShortlistStoreGroup.vue,app/pages/dogs/[id].vue,app/pages/stores/[slug].vue,app/components/StoreCard.vue,app/components/SiteHeader.vue,app/components/ShortlistButton.vue,app/pages/sign-in.vue,app/pages/sign-up.vue,app/utils/auth.ts,app/utils/stores.ts,app/layouts/default.vue,app/composables/useNotify.ts,PLAN.md | verified in browser: gate dialog, sign-in round trip resumes message dialog, signed-in visit opens directly, phone header, nudge |
+<!-- session:MDQ2MmZjM2MtODMwNS00ZDMxLWE1Y2UtMDM4ZmQ5ODdjNmE0 -->
+| 2026-10-27T21:07:36.447Z | Phone menu animation: hamburger folds into X, drawer opens via grid-rows transition, hazard stripe draws across, links stagger in (animate-menu-in keyframe), current page marigold with arrows, Escape closes, inert when closed | app/components/SiteHeader.vue,app/assets/css/main.css | checked in browser at phone width; typecheck clean |
+| 22:45 | Created app/utils/storeRoles.ts | — | ~442 |
+| 22:46 | Created app/middleware/store-member.ts | — | ~115 |
+| 22:46 | Created app/composables/useStoreContext.ts | — | ~178 |
+| 22:47 | Created app/components/account/AccountAvatar.vue | — | ~262 |
+| 22:47 | Created app/components/account/AccountStoreCard.vue | — | ~392 |
+| 22:47 | Created app/components/account/AccountStorePill.vue | — | ~288 |
+| 22:49 | Created app/components/OwnListingBanner.vue | — | ~276 |
+| 22:49 | Created app/components/OwnListingActions.vue | — | ~521 |
+<!-- session:MDQ2MmZjM2MtODMwNS00ZDMxLWE1Y2UtMDM4ZmQ5ODdjNmE0 -->
+| 2026-10-27T21:51:45.365Z | Store roles: utils/storeRoles.ts (owner/manager/handler permissions, storeActivity), Account.stores memberships (sample Adaeze = manager at STR-001), useSession memberships/hasStore/memberOf/can, useStoreContext; store-member middleware on dashboard; dashboard nav + sections filtered by role with owner-only notice; header AccountStorePill, avatar store badge, AccountStoreCard in avatar + phone menus; OwnListingBanner/OwnListingActions on own dog/store pages, K9Card 'Your store' tag | app/utils/storeRoles.ts,app/utils/account.ts,app/composables/useSession.ts,app/composables/useStoreContext.ts,app/middleware/store-member.ts,app/utils/dashboard.ts,app/components/DashboardNav.vue,app/pages/dashboard/index.vue,app/pages/dashboard/[section].vue,app/layouts/dashboard.vue,app/components/account/AccountAvatar.vue,app/components/account/AccountStoreCard.vue,app/components/account/AccountStorePill.vue,app/components/account/AccountMenu.vue,app/components/SiteHeader.vue,app/components/OwnListingBanner.vue,app/components/OwnListingActions.vue,app/pages/dogs/[id].vue,app/pages/stores/[slug].vue,app/components/K9Card.vue | server checks pass for guard/roles/own pages; header + own actions seen in browser |
+| 22:56 | Created app/components/dashboard/DashboardGreeting.vue | — | ~448 |
+| 22:56 | Created app/components/dashboard/DashboardStats.vue | — | ~576 |
+| 22:56 | Created app/components/dashboard/DashboardAttention.vue | — | ~571 |
+| 22:56 | Created app/components/dashboard/DashboardAgenda.vue | — | ~678 |
+| 22:57 | Created app/components/dashboard/DashboardDogs.vue | — | ~1172 |
+| 22:57 | Created app/components/dashboard/DashboardStoreHealth.vue | — | ~867 |
+| 22:57 | Created app/pages/dashboard/index.vue | — | ~228 |
+<!-- session:MDQ2MmZjM2MtODMwNS00ZDMxLWE1Y2UtMDM4ZmQ5ODdjNmE0 -->
+| 2026-10-27T22:00:08.487Z | Dashboard redesign: overview split into components/dashboard (Greeting, Stats strip, Attention, Dogs table w/ filters, Agenda by day, StoreHealth); AccountPanel → shared SectionPanel with actions slot; top bar store/title breadcrumb, theme moved to sidebar footer with user, role, Switch to buying | app/pages/dashboard/index.vue,app/components/dashboard/,app/components/SectionPanel.vue,app/layouts/dashboard.vue,app/components/DashboardNav.vue,app/utils/dashboard.ts,PLAN.md | checked in browser at laptop size in both themes and phone width; typecheck clean |
+| 23:08 | Created app/utils/inbox.ts | — | ~1864 |
+| 23:08 | Created app/composables/useStoreInbox.ts | — | ~397 |
+| 23:09 | Created app/components/dashboard/InboxList.vue | — | ~1022 |
+| 23:09 | Created app/components/dashboard/InboxReply.vue | — | ~559 |
+| 23:09 | Created app/components/dashboard/InboxDetail.vue | — | ~1198 |
+| 23:09 | Created app/pages/dashboard/inbox.vue | — | ~783 |
+<!-- session:MDQ2MmZjM2MtODMwNS00ZDMxLWE1Y2UtMDM4ZmQ5ODdjNmE0 -->
+| 2026-10-27T22:13:42.207Z | Dashboard: fixed phone sheet hiding nav links in short windows (whole column scrolls) and close button over Store label (SheetContent hideClose + own close in DashboardNav header). New store inbox /dashboard/inbox: utils/inbox.ts sample items, useStoreInbox (role-filtered, unread, reply, act), DashboardInboxList/Detail/Reply; bell + sidebar Inbox with live unread; /dashboard/enquiries 301 to inbox | app/components/ui/sheet/SheetContent.vue,app/components/DashboardNav.vue,app/layouts/dashboard.vue,app/utils/inbox.ts,app/composables/useStoreInbox.ts,app/components/dashboard/DashboardInboxList.vue,app/components/dashboard/DashboardInboxDetail.vue,app/components/dashboard/DashboardInboxReply.vue,app/pages/dashboard/inbox.vue,app/utils/dashboard.ts,app/composables/useNotify.ts,nuxt.config.ts,PLAN.md | verified in browser: sheet links visible, inbox reply + booking action + unread counts, phone list/detail |

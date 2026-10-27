@@ -5,6 +5,7 @@ export default defineNuxtConfig({
   // Renamed pages keep their old links working
   routeRules: {
     '/sell': { redirect: { to: '/open-a-store', statusCode: 301 } },
+    '/dashboard/enquiries': { redirect: { to: '/dashboard/inbox?type=message', statusCode: 301 } },
   },
 
   compatibilityDate: '2025-07-15',

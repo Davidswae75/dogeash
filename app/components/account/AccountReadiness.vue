@@ -8,7 +8,7 @@ const done = items.filter(i => i.done).length
 </script>
 
 <template>
-  <AccountPanel title="Ready to reserve" :meta="`${done} of ${items.length}`">
+  <SectionPanel title="Ready to reserve" :meta="`${done} of ${items.length}`">
     <div class="flex flex-col gap-4 p-3">
       <div class="flex gap-1" role="progressbar" :aria-valuenow="done" aria-valuemin="0" :aria-valuemax="items.length" aria-label="Reservation checklist">
         <span v-for="(item, i) in items" :key="i" :class="cn('h-1.5 flex-1 rounded-full', item.done ? 'bg-marigold' : 'bg-ash')" />
@@ -25,5 +25,5 @@ const done = items.filter(i => i.done).length
         </li>
       </ul>
     </div>
-  </AccountPanel>
+  </SectionPanel>
 </template>

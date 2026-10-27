@@ -8,7 +8,7 @@ const link = (fileNo: string) => `/dogs/${fileNo.toLowerCase()}`
 </script>
 
 <template>
-  <AccountPanel title="On your shortlist" :meta="changes.length ? `${changes.length} changed` : undefined" see-all="/shortlist" see-all-label="Open shortlist">
+  <SectionPanel title="On your shortlist" :meta="changes.length ? `${changes.length} changed` : undefined" see-all="/shortlist" see-all-label="Open shortlist">
     <ClientOnly>
       <ul v-if="changes.length" class="m-0 flex list-none flex-col p-0">
         <li v-for="c in changes" :key="c.dog.fileNo">
@@ -36,5 +36,5 @@ const link = (fileNo: string) => `/dogs/${fileNo.toLowerCase()}`
       <p v-else-if="dogs.length" class="m-0 p-4 text-sm text-ink-muted">Nothing has changed on the {{ dogs.length }} {{ dogs.length === 1 ? 'dog' : 'dogs' }} you saved. We'll tell you if one is reserved or its price drops.</p>
       <p v-else class="m-0 p-4 text-sm text-ink-muted">Save dogs with the heart and we'll tell you here when one is reserved or its price drops.</p>
     </ClientOnly>
-  </AccountPanel>
+  </SectionPanel>
 </template>

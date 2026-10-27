@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// A titled card on the signed-in Home and account pages, with an optional count and "See all"
+// A titled card used across Home, the account area and the store dashboard: title, optional count, "See all" and header actions
 const props = defineProps<{ title: string, meta?: string, seeAll?: string, seeAllLabel?: string }>()
 </script>
 
@@ -10,6 +10,7 @@ const props = defineProps<{ title: string, meta?: string, seeAll?: string, seeAl
         <h2 class="m-0 truncate font-display text-lg leading-6 font-extrabold font-stretch-expanded">{{ props.title }}</h2>
         <span v-if="props.meta" class="font-mono text-[10.5px] font-semibold tracking-[.12em] whitespace-nowrap text-ink-muted uppercase">{{ props.meta }}</span>
       </div>
+      <slot name="actions" />
       <NuxtLink v-if="props.seeAll" :to="props.seeAll" class="shrink-0 text-[13px] font-bold whitespace-nowrap text-ink underline decoration-marigold decoration-2 underline-offset-4 hover:decoration-ink">
         {{ props.seeAllLabel ?? 'See all' }}
       </NuxtLink>

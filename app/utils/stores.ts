@@ -358,3 +358,6 @@ export function storeSummary(store: Store) {
     priceFrom: dogs.length ? Math.min(...dogs.map(d => d.priceNaira)) : undefined,
   }
 }
+
+// What a buyer can ask for when booking a kennel visit
+export const kennelVisitServices = ['Meet the dogs', 'Meet the dogs and see protection work']

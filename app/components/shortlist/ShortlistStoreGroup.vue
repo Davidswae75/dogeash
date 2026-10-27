@@ -6,8 +6,6 @@ import type { Store } from '~/utils/stores'
 // Shortlisted dogs from one store, with one kennel visit to see them all
 const props = defineProps<{ store: Store, dogs: Dog[] }>()
 
-const names = computed(() => props.dogs.map(d => d.name).join(', '))
-const visitServices = ['Meet the dogs', 'Meet the dogs and see protection work']
 </script>
 
 <template>
@@ -24,18 +22,12 @@ const visitServices = ['Meet the dogs', 'Meet the dogs and see protection work']
         </span>
       </div>
       <div class="flex flex-wrap gap-2">
-        <Button as-child variant="ghost" size="sm">
-          <NuxtLink :to="`/stores/${props.store.slug}`">Ask a question</NuxtLink>
-        </Button>
-        <BookingDialog
-          :title="props.store.name"
-          :description="`Kennel visit in ${props.store.area}, ${props.store.city} · ${props.store.hours}`"
-          :services="visitServices"
-          premises-label="At the kennel"
-          :summary="[{ label: props.dogs.length === 1 ? 'Dog' : 'Dogs', value: names }]"
-          :trigger-label="props.dogs.length === 1 ? 'Book a kennel visit' : `Book one visit for ${props.dogs.length} dogs`"
-          trigger-variant="default"
-          price-note="Kennel visits are free. The store confirms the time with you."
+        <ContactStoreDialog :store="props.store" :dog="props.dogs.length === 1 ? props.dogs[0] : undefined" label="Ask a question" variant="ghost" size="sm" />
+        <KennelVisitDialog
+          :store="props.store"
+          :dogs="props.dogs"
+          :label="props.dogs.length === 1 ? 'Book a kennel visit' : `Book one visit for ${props.dogs.length} dogs`"
+          variant="default"
         />
       </div>
     </header>

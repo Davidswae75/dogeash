@@ -10,7 +10,7 @@ const dayParts = (day: string) => {
 </script>
 
 <template>
-  <AccountPanel title="Coming up" :meta="`${bookings.length} booked`">
+  <SectionPanel title="Coming up" :meta="`${bookings.length} booked`">
     <ul v-if="bookings.length" class="m-0 flex list-none flex-col p-0">
       <li v-for="b in bookings" :key="b.id">
         <NuxtLink :to="b.to" class="flex items-center gap-4 rounded-lg p-3 text-ink no-underline hover:bg-surface-sunk">
@@ -35,5 +35,5 @@ const dayParts = (day: string) => {
       </li>
     </ul>
     <p v-else class="m-0 p-4 text-sm text-ink-muted">Nothing booked yet. Book a kennel visit from your shortlist to meet the dogs.</p>
-  </AccountPanel>
+  </SectionPanel>
 </template>

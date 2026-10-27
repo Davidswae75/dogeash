@@ -62,7 +62,7 @@ The goal: someone can land, understand Dogeash, browse dogs and read a full K9 f
 - [x] Stores directory (`/stores`): search, filters (city, breeds, protection levels, services, trust), sort, how we check stores
 - [x] Store page (`/stores/[slug]`): dogs for sale with filters, about and services, history, owner, inspection record, vets and trainers, reviews
   - [ ] Store cover and kennel photos (image briefs, like the guide)
-  - [ ] "Contact store" and "Book a kennel visit" buttons do nothing yet (need accounts and messaging)
+  - [~] "Contact store" opens a message dialog and "Book a kennel visit" the booking dialog, both behind sign-in (previews until accounts and messaging exist)
 - [ ] Buyer's guide (`/guide`): choosing a level, costs, care, what handover involves
 - [~] Open a store (`/open-a-store`, old `/sell` redirects): pitch to kennels, why open a store here, verification in four steps, what to have ready, questions. "Apply to open a store" goes to `/sign-up?as=store`. No fees quoted (undecided)
 - [ ] Sign in / sign up pages (UI only until Phase 2)
@@ -119,7 +119,7 @@ Sellers are called **stores** everywhere buyers can see them. A store is a kenne
 - [~] Store application (from "Open a store" in the header, footer and `/open-a-store`): sign-up with the "Open a store" intent asks for the kennel name and city and ends on a draft-store welcome (preview). Still to do: documents, then booking the inspection. Creates the account and starts verification (ID, CAC registration, bank account, kennel address), then books the inspection
 - [ ] Pending stores can sign in and prepare their profile and dogs; nothing goes public until the inspection passes
 - [x] Store dashboard layout (`app/layouts/dashboard.vue`): sidebar with Overview, Dogs, Enquiries, Bookings, Care team, Store profile, Payouts, Team, Settings; store switcher menu; top bar with search, notifications, theme and "Add a dog"; phone menu sheet
-- [~] Dashboard overview (`/dashboard`): weekly numbers with trends, needs your attention, coming up, your dogs table, store profile checklist (example figures)
+- [~] Dashboard overview (`/dashboard`): greeting with today's status, a connected numbers strip with trends, needs your attention (by urgency and role), your dogs with status filters, coming up grouped by day, store health (inspection, rating, replies, profile). One component per section in `app/components/dashboard/` (example figures)
 - [ ] Dashboard sections: Dogs, Enquiries, Bookings, Care team, Store profile, Payouts, Team, Settings (each shows a "Coming next" page for now)
 - [ ] Store staff: invite members with roles (Owner: everything incl. payouts · Manager: dogs, enquiries, bookings · Handler: their own dogs)
 - [ ] Store dashboard: edit store profile (about, history, owner, services, hours, delivery areas)
@@ -129,7 +129,7 @@ Sellers are called **stores** everywhere buyers can see them. A store is a kenne
 - [ ] Listing statuses: draft → pending review → available → reserved → sold / withdrawn
 - [ ] Puppy and litter listings (separate shape, no training section)
 - [ ] Stud and breeding listings
-- [ ] Seller enquiries inbox
+- [~] Store inbox (`/dashboard/inbox`, from the bell and the sidebar): messages, booking requests, payments, reviews and Dogeash updates in one list, filtered by kind and role; conversations with a reply box ("Sending as" the store), bookings and payments with actions. Messages will live in the database; email, SMS or WhatsApp tell the other person, with a link back (`?id=`). Reply-by-email later via inbound email
 
 ## Phase 4 · Inspections and trust
 
@@ -164,7 +164,11 @@ Once a buyer signs in, Dogeash stops introducing itself and becomes their market
 1. Signed-in header and guest data
    - [~] Header: account menu (avatar) in place of "Sign in", notifications bell, "Open a store" hidden for buyers; phone menu shows the account and Sign out (sample session until accounts are connected)
    - [~] Shortlist, compare picks and recently viewed are kept per account; on sign-in the guest's are merged in and the buyer is told how many moved
-   - [ ] One person, two roles: switch between Buyer and Store from the account menu
+   - [~] One person, two roles: the session carries store memberships and roles (`app/utils/storeRoles.ts`: owner, manager, handler). Store members see a store badge on their avatar, a "Your store" card in the avatar and phone menus, and a store pill with waiting enquiries in the header; the dashboard is guarded (`store-member` middleware) and shows only what the role allows
+   - [~] Your own listings: on your store's own store and dog pages, a "This is your listing" strip and management actions replace Contact, Book and Save; your dogs' cards say "Your store" instead of the heart
+   - [ ] Still to do for roles: matching avatar menu in the dashboard (Buying section), Buying / My store tabs in the bell, "Sending as" in messages, a store switcher for people in several stores, store sign-up creating a draft membership
+   - [~] Sign in at the point of action: browsing, saving and comparing stay free; Contact store, Ask a question, Book a visit and Book care open a "Sign in to …" dialog for guests (`useAccountGate`, `AccountGateDialog`). After signing in or up you return to the same page and the action reopens (`?resume=`). Reserve gets the same gate when it exists
+   - [x] "Sign in" visible in the header at every screen size; guests get a one-time "keep your shortlist" nudge on their third save
 2. Account area (`/account`): sidebar on desktop, tabs on phones
    - [~] Shell (`app/pages/account.vue`): sidebar with who's signed in, tabs on phones, `signed-in` middleware sends visitors to sign in and back; unbuilt sections show a Coming next page
    - [~] Overview: activity tiles, my dogs, coming up, shortlist changes, ready-to-reserve checklist, home profile

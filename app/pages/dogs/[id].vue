@@ -6,6 +6,9 @@ if (!dog) throw createError({ statusCode: 404, statusMessage: 'No K9 file with t
 
 const store = getStore(dog.storeId)
 const file = dog.file
+// People who work at this dog's store see management actions instead of Contact, Book and Save
+const { memberOf } = useSession()
+const isOwn = computed(() => !!memberOf(dog.storeId))
 
 useSeoMeta({ title: `${dog.name}, ${dog.breed} · ${dog.fileNo} · Dogeash` })
 
@@ -28,6 +31,7 @@ const facts = [
 
 <template>
   <div v-if="dog" class="mx-auto flex max-w-page flex-col gap-6 px-4 pt-5 pb-16 sm:px-8">
+    <OwnListingBanner v-if="store" :store="store" what="listing" />
     <K9FileTab :file-no="dog.fileNo" :detail="dog.breed" :reserved="dog.status === 'reserved'" class="rounded-md px-[18px] py-3" />
 
     <!-- Gallery: main photo, two videos (obedience and protection), more photos -->
@@ -70,10 +74,15 @@ const facts = [
           <span class="text-xs leading-4 font-bold tracking-[.08em] text-marigold uppercase">Price</span>
           <div class="font-display text-[40px] leading-none font-extrabold font-stretch-expanded">₦{{ dog.priceNaira.toLocaleString('en-NG') }}</div>
           <p class="m-0 text-sm leading-[21px]">Includes handover training at your gate and 30 days of trainer support.</p>
-          <Button variant="marigold">Contact store</Button>
-          <Button variant="night">Book a visit</Button>
+          <template v-if="store">
+            <OwnListingActions v-if="isOwn" :store="store" :dog="dog" tone="night" />
+            <template v-else>
+              <ContactStoreDialog :store="store" :dog="dog" trigger-class="w-full" />
+              <KennelVisitDialog :store="store" :dogs="[dog]" label="Book a visit" variant="night" trigger-class="h-10 w-full" />
+            </template>
+          </template>
         </div>
-        <ShortlistButton :file-no="dog.fileNo" :name="dog.name" variant="button" />
+        <ShortlistButton v-if="!isOwn" :file-no="dog.fileNo" :name="dog.name" variant="button" />
         <StoreCard v-if="store" :store="store" compact />
       </aside>
     </div>

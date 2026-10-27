@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ArrowRight } from '@lucide/vue'
+import { useEventListener } from '@vueuse/core'
 const links = [
   { label: 'Find a guard dog', to: '/dogs' },
   { label: 'Protection levels', to: '/protection-levels' },
@@ -6,9 +8,15 @@ const links = [
   { label: "Buyer's guide", to: '/guide' },
 ]
 
-const { user, initials, signOut } = useSession()
+const { user, initials, memberships, hasStore, signOut } = useSession()
 const menuOpen = ref(false)
 const route = useRoute()
+useEventListener('keydown', (e: KeyboardEvent) => { if (e.key === 'Escape') menuOpen.value = false })
+// Links slide in one after another; the account row comes last
+const stagger = (i: number) => ({ animationDelay: `${80 + i * 45}ms` })
+const lastDelay = computed(() => stagger(links.length + 1))
+// Signing in from the header brings you back to the page you were on
+const signInQuery = computed(() => (['/', '/sign-in', '/sign-up'].includes(route.path) ? {} : { redirect: route.fullPath }))
 watch(() => route.fullPath, () => { menuOpen.value = false })
 </script>
 
@@ -32,14 +40,16 @@ watch(() => route.fullPath, () => { menuOpen.value = false })
         <ShortlistLink />
         <!-- Signed in: the marketplace header. Bell and avatar in place of Sign in and Open a store. -->
         <template v-if="user">
+          <AccountStorePill />
           <AccountNotifications />
           <span class="hidden sm:inline-flex"><ThemeToggle /></span>
           <AccountMenu />
         </template>
         <template v-else>
-          <ThemeToggle />
-          <Button as-child variant="ghost" size="sm" class="hidden xl:inline-flex">
-            <NuxtLink to="/sign-in">Sign in</NuxtLink>
+          <!-- Phones: the theme switch lives in the menu, so Sign in always fits -->
+          <span class="hidden sm:inline-flex"><ThemeToggle /></span>
+          <Button as-child variant="ghost" size="sm" class="px-2.5 sm:px-3">
+            <NuxtLink :to="{ path: '/sign-in', query: signInQuery }">Sign in</NuxtLink>
           </Button>
           <Button as-child size="sm" class="hidden xl:inline-flex">
             <NuxtLink to="/open-a-store">Open a store</NuxtLink>
@@ -51,41 +61,58 @@ watch(() => route.fullPath, () => { menuOpen.value = false })
           class="border-[1.5px] border-line-strong xl:hidden"
           :aria-expanded="menuOpen"
           aria-controls="dg-mobile-nav"
-          aria-label="Menu"
+          :aria-label="menuOpen ? 'Close menu' : 'Menu'"
           @click="menuOpen = !menuOpen"
         >
-          <AppIcon name="menu" :size="22" />
+          <!-- Three lines that fold into an X -->
+          <span class="relative block h-3.5 w-5" aria-hidden="true">
+            <span :class="['absolute left-0 h-0.5 w-5 rounded-full bg-current transition-all duration-300 ease-calm', menuOpen ? 'top-1.5 rotate-45' : 'top-0']" />
+            <span :class="['absolute top-1.5 left-0 h-0.5 rounded-full bg-current transition-all duration-200 ease-calm', menuOpen ? 'w-0 opacity-0' : 'w-3.5']" />
+            <span :class="['absolute left-0 h-0.5 w-5 rounded-full bg-current transition-all duration-300 ease-calm', menuOpen ? 'top-1.5 -rotate-45' : 'top-3']" />
+          </span>
         </Button>
       </div>
     </div>
 
-    <nav
-      v-show="menuOpen"
+    <!-- Phone menu: the drawer opens to its height, a hazard stripe draws across, then the links slide in one by one -->
+    <div
       id="dg-mobile-nav"
-      class="flex flex-col gap-1 border-t border-line px-4 pt-2 pb-5 xl:hidden!"
-      aria-label="Main"
+      :class="['grid transition-[grid-template-rows] duration-300 ease-calm xl:hidden', menuOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]']"
+      :inert="!menuOpen"
     >
-      <NuxtLink
-        v-for="link in links"
-        :key="link.to"
-        :to="link.to"
-        class="py-2.5 font-display text-[22px] leading-[1.2] font-extrabold text-ink no-underline [font-stretch:112%]"
-      >
-        {{ link.label }}
-      </NuxtLink>
-      <ThemeToggle variant="segmented" />
-      <div v-if="user" class="mt-3 flex items-center gap-3 rounded-lg bg-surface p-3 ring-1 ring-line">
-        <AccountAvatar :initials="initials" />
-        <span class="flex min-w-0 flex-1 flex-col">
-          <strong class="truncate text-sm">{{ user.name }}</strong>
-          <span class="truncate text-[13px] text-ink-muted">{{ user.email }}</span>
-        </span>
-        <Button variant="outline" size="sm" @click="signOut">Sign out</Button>
+      <div class="overflow-hidden">
+        <span :class="['block h-1 origin-left hazard-thin transition-transform duration-500 ease-calm', menuOpen ? 'scale-x-100' : 'scale-x-0']" aria-hidden="true" />
+        <nav class="flex flex-col gap-1 px-4 pt-2 pb-5" aria-label="Main">
+          <NuxtLink
+            v-for="(link, i) in links"
+            :key="link.to"
+            :to="link.to"
+            :class="['group flex items-center justify-between py-2.5 font-display text-[22px] leading-[1.2] font-extrabold text-ink no-underline [font-stretch:112%] [&.router-link-active]:text-marigold-ink', menuOpen && 'animate-menu-in']"
+            :style="stagger(i)"
+          >
+            {{ link.label }}
+            <ArrowRight class="size-5 text-ink-muted transition-transform group-hover:translate-x-1" aria-hidden="true" />
+          </NuxtLink>
+          <div :class="menuOpen && 'animate-menu-in'" :style="stagger(links.length)">
+            <ThemeToggle variant="segmented" />
+          </div>
+          <div v-if="user" :class="['mt-3 flex items-center gap-3 rounded-lg bg-surface p-3 ring-1 ring-line', menuOpen && 'animate-menu-in']" :style="lastDelay">
+            <AccountAvatar :initials="initials" :store="hasStore" />
+            <span class="flex min-w-0 flex-1 flex-col">
+              <strong class="truncate text-sm">{{ user.name }}</strong>
+              <span class="truncate text-[13px] text-ink-muted">{{ user.email }}</span>
+            </span>
+            <Button variant="outline" size="sm" @click="signOut">Sign out</Button>
+          </div>
+          <div v-for="m in memberships" :key="m.storeId" :class="menuOpen && 'animate-menu-in'" :style="lastDelay">
+            <AccountStoreCard :store="m.store" :role="m.role" />
+          </div>
+          <div v-if="!user" :class="['mt-3 flex gap-2', menuOpen && 'animate-menu-in']" :style="lastDelay">
+            <Button as-child variant="outline" size="sm"><NuxtLink to="/sign-in">Sign in</NuxtLink></Button>
+            <Button as-child size="sm"><NuxtLink to="/open-a-store">Open a store</NuxtLink></Button>
+          </div>
+        </nav>
       </div>
-      <div v-else class="mt-3 flex gap-2">
-        <Button as-child variant="outline" size="sm"><NuxtLink to="/sign-in">Sign in</NuxtLink></Button>
-        <Button as-child size="sm"><NuxtLink to="/open-a-store">Open a store</NuxtLink></Button>
-      </div>
-    </nav>
+    </div>
   </header>
 </template>

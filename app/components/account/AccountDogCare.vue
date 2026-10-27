@@ -11,7 +11,7 @@ const g = computed(() => props.dog.guarantee)
 
 <template>
   <div class="flex flex-col gap-4 sm:gap-5">
-    <AccountPanel title="Reminders" :meta="`${reminders.length} set`">
+    <SectionPanel title="Reminders" :meta="`${reminders.length} set`">
       <ul class="m-0 flex list-none flex-col p-0">
         <li v-for="r in reminders" :key="r.title" class="flex items-center gap-3 rounded-lg px-3 py-2.5">
           <span class="flex min-w-0 flex-1 flex-col">
@@ -21,7 +21,7 @@ const g = computed(() => props.dog.guarantee)
           <AccountCareChip :status="r.status" />
         </li>
       </ul>
-    </AccountPanel>
+    </SectionPanel>
 
     <section class="flex flex-col gap-3 rounded-xl bg-night p-5 text-on-night">
       <span class="flex items-center justify-between font-mono text-[10.5px] font-semibold tracking-[.12em] uppercase opacity-80">

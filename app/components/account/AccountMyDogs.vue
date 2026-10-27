@@ -4,7 +4,7 @@ const dogs = sampleOwnedDogs
 </script>
 
 <template>
-  <AccountPanel title="My dogs" :meta="`${dogs.length} at home`" see-all="/account/dogs" see-all-label="All records">
+  <SectionPanel title="My dogs" :meta="`${dogs.length} at home`" see-all="/account/dogs" see-all-label="All records">
     <ul v-if="dogs.length" class="m-0 flex list-none flex-col p-0">
       <li v-for="dog in dogs" :key="dog.fileNo">
         <NuxtLink :to="ownedDogLink(dog)" class="flex items-center gap-4 rounded-lg p-3 text-ink no-underline hover:bg-surface-sunk">
@@ -20,5 +20,5 @@ const dogs = sampleOwnedDogs
       </li>
     </ul>
     <p v-else class="m-0 p-4 text-sm text-ink-muted">After handover, each dog you buy gets a record here: vaccinations, training and care.</p>
-  </AccountPanel>
+  </SectionPanel>
 </template>

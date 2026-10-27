@@ -1,4 +1,5 @@
 import type { Account } from '~/utils/account'
+import type { StorePermission } from '~/utils/storeRoles'
 
 // Who is signed in. A sample session in a cookie (so the server renders the right header)
 // until accounts are connected; signing in merges the guest's saved dogs into the account.
@@ -11,6 +12,17 @@ export function useSession() {
   const signedIn = computed(() => !!user.value)
   const firstName = computed(() => (user.value ? firstNameOf(user.value.name) : ''))
   const initials = computed(() => (user.value ? initialsOf(user.value.name) : ''))
+
+  // Stores this person works at, with the store itself; empty for buyers only
+  const memberships = computed(() => (user.value?.stores ?? [])
+    .map(m => ({ ...m, store: getStore(m.storeId)! }))
+    .filter(m => m.store))
+  const hasStore = computed(() => memberships.value.length > 0)
+  const memberOf = (storeId: string) => memberships.value.find(m => m.storeId === storeId)
+  const can = (storeId: string, permission: StorePermission) => {
+    const m = memberOf(storeId)
+    return !!m && roleCan(m.role, permission)
+  }
 
   // Returns how many shortlisted dogs moved from this browser into the account
   function signIn(details: Partial<Account> = {}) {
@@ -27,5 +39,5 @@ export function useSession() {
     return navigateTo('/')
   }
 
-  return { user, signedIn, firstName, initials, signIn, signOut }
+  return { user, signedIn, firstName, initials, memberships, hasStore, memberOf, can, signIn, signOut }
 }

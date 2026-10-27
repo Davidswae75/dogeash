@@ -17,7 +17,10 @@ const props = withDefaults(defineProps<{
   summary?: BookingSummaryRow[]
   askDogName?: boolean
   triggerLabel?: string
-  triggerVariant?: 'outline' | 'default' | 'marigold'
+  triggerVariant?: 'outline' | 'default' | 'marigold' | 'night'
+  triggerClass?: string
+  /** Ask signed-out visitors to sign in first (see useAccountGate) */
+  gate?: AccountGate
 }>(), {
   homeVisits: false,
   premisesLabel: 'At their premises',
@@ -28,6 +31,9 @@ const props = withDefaults(defineProps<{
 })
 
 const open = ref(false)
+const { guard } = useAccountGate(() => props.gate ?? { key: '', action: '', reason: '' }, () => { open.value = true })
+// Ungated dialogs (inside the account area) just open
+const openDialog = () => (props.gate ? guard() : (open.value = true))
 const step = ref<'form' | 'done'>('form')
 const service = ref('')
 const day = ref('')
@@ -83,11 +89,9 @@ const chips = 'flex w-auto flex-wrap justify-start gap-2'
 
 <template>
   <Dialog v-model:open="open">
-    <DialogTrigger as-child>
-      <Button :variant="props.triggerVariant" size="sm" class="w-fit">
-        <CalendarCheck aria-hidden="true" />{{ props.triggerLabel }}
-      </Button>
-    </DialogTrigger>
+    <Button :variant="props.triggerVariant" size="sm" :class="props.triggerClass ?? 'w-fit'" @click="openDialog">
+      <CalendarCheck aria-hidden="true" />{{ props.triggerLabel }}
+    </Button>
 
     <DialogContent class="max-h-[90vh] overflow-y-auto border-line bg-surface sm:max-w-[520px]">
       <template v-if="step === 'form'">

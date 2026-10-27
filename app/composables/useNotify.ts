@@ -1,8 +1,9 @@
-import { CalendarCheck, CircleX, Heart, HeartOff, Info, LogIn, LogOut, Scale, Store, TriangleAlert, UserRoundCheck } from '@lucide/vue'
+import { CalendarCheck, CircleX, Heart, HeartOff, Info, LogIn, LogOut, MessageSquare, Scale, Store, TriangleAlert, UserRoundCheck } from '@lucide/vue'
 import type { Component } from 'vue'
 import { TYPE, useToast } from 'vue-toastification'
 import ToastContent, { type ToastAction, type ToastTone } from '~/components/ToastContent.vue'
 import type { Dog } from '~/utils/dogs'
+import type { InboxChannel } from '~/utils/inbox'
 
 // Every toast in the app goes through here, so the same action always looks and reads the same.
 // Tones: success (marigold) for things done, info (ash) for neutral changes and undo,
@@ -56,6 +57,20 @@ export function useNotify() {
 
     storeStarted: (firstName: string, storeName: string) =>
       show('success', Store, { kicker: 'Store', meta: 'Draft', title: `Welcome, ${firstName}`, text: `${storeName} is saved as a draft. Next: your documents and the inspection.` }),
+
+    messageSent: (storeName: string, replies: string) =>
+      show('success', MessageSquare, { kicker: 'Message', meta: 'Preview', title: `Message to ${storeName} ready`, text: `They usually reply in ${replies}. Messages aren't sent until accounts are connected.` }),
+
+    // A guest who has saved a few dogs: offer an account once, never blocking anything
+    keepShortlist: (count: number, path: string) =>
+      show('info', Heart, { kicker: 'Shortlist', meta: `${count} saved`, title: 'Keep your shortlist on any device', text: 'Create a free account and your saved dogs come with you.', action: { label: 'Create account', onClick: () => navigateTo({ path: '/sign-up', query: { redirect: path } }) } }),
+
+    // Store inbox: the reply is saved in Dogeash; the buyer also hears by their chosen channels
+    storeReplySent: (to: string, channels: InboxChannel[]) =>
+      show('success', MessageSquare, { kicker: 'Inbox', meta: 'Preview', title: `Reply to ${to} sent`, text: channels.length ? `Saved in Dogeash. ${to} also gets it by ${channels.map(c => channelLabels[c]).join(' and ')}.` : 'Saved in Dogeash.' }),
+
+    storeActionDone: (text: string) =>
+      show('success', CalendarCheck, { kicker: 'Inbox', meta: 'Preview', title: 'Done', text }),
 
     signedOut: () =>
       show('info', LogOut, { kicker: 'Account', meta: 'Signed out', title: 'You\'re signed out', text: 'Your saved dogs stay in your account for next time.' }),

@@ -4,17 +4,26 @@ import { Heart } from '@lucide/vue'
 // Save a dog to the shortlist. "icon" sits on a card's photo; "button" is a full button on the dog page.
 const props = withDefaults(defineProps<{ fileNo: string, name: string, variant?: 'icon' | 'button' }>(), { variant: 'icon' })
 
-const { has, toggle, remove } = useShortlist()
+const { has, toggle, remove, count } = useShortlist()
+const { signedIn } = useSession()
 const notify = useNotify()
+const route = useRoute()
 const saved = computed(() => has(props.fileNo))
+
+// Guests who save a third dog are offered an account, once per browser; saving never needs one
+const NUDGE_AT = 3
+const nudge = useFirstVisit('shortlist-account-nudge')
+
 function onToggle() {
   const dog = findDog(props.fileNo)
   if (!dog) return toggle(props.fileNo)
-  if (saved.value) notify.shortlistRemoved(dog, remove(props.fileNo))
-  else {
-    toggle(props.fileNo)
-    notify.shortlistSaved(dog)
+  if (saved.value) return notify.shortlistRemoved(dog, remove(props.fileNo))
+  toggle(props.fileNo)
+  if (!signedIn.value && count.value === NUDGE_AT && nudge.isFirstVisit.value) {
+    nudge.dismiss()
+    notify.keepShortlist(count.value, route.fullPath)
   }
+  else notify.shortlistSaved(dog)
 }
 
 const label = computed(() => saved.value ? `Remove ${props.name} from your shortlist` : `Save ${props.name} to your shortlist`)

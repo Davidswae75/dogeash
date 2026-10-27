@@ -30,7 +30,7 @@ const summary = computed(() => storeSummary(props.store))
     />
 
     <div class="flex flex-wrap gap-2">
-      <Button v-if="!props.compact" size="sm">Contact store</Button>
+      <ContactStoreDialog v-if="!props.compact" :store="props.store" variant="default" size="sm" />
       <Button as-child variant="outline" size="sm">
         <NuxtLink :to="`/stores/${props.store.slug}`">Visit store <AppIcon name="arrow-right" :size="16" /></NuxtLink>
       </Button>

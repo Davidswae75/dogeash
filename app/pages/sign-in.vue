@@ -61,8 +61,7 @@ async function emailCode() {
 }
 
 // Where a buyer was heading before being asked to sign in (only paths on this site)
-const redirectParam = String(useRoute().query.redirect ?? '')
-const redirect = redirectParam.startsWith('/') && !redirectParam.startsWith('//') ? redirectParam : '/'
+const redirect = safeRedirect(useRoute().query.redirect)
 
 const landing: AuthLinkCard[] = [
   { to: '/dashboard', title: 'Continue as a store', text: 'Straight to the K9 Guardian Kennels dashboard', icon: LayoutDashboard },

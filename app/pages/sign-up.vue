@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import { Undo2 } from '@lucide/vue'
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
+import type { AuthLinkCard } from '~/components/auth/AuthLinkCards.vue'
 
 // Create an account: what brings you here, details, confirm the phone with a code, then a welcome with next steps.
 // "Open a store" (/sign-up?as=store) asks for the kennel's name and city too and changes the copy and panel.
@@ -26,6 +28,12 @@ const intentModel = computed({
   set: (v) => { if (v) intentValue.value = v },
 })
 const intent = computed(() => findSignUpIntent(intentValue.value))
+
+// Sent here from a gated action ("Sign in to message …"): the welcome leads straight back to it
+const redirect = route.query.redirect ? safeRedirect(route.query.redirect) : undefined
+const nextSteps = computed<AuthLinkCard[]>(() => redirect && !isStore.value
+  ? [{ to: redirect, title: 'Carry on where you were', text: 'Back to the page you were on, to finish what you started.', icon: Undo2 }, ...intent.value.nextSteps.slice(0, 2)]
+  : intent.value.nextSteps)
 const isStore = computed(() => intent.value.value === 'store')
 useAuthPanel(() => intent.value.panel)
 
@@ -104,6 +112,6 @@ watch(step, (s) => {
 
   <template v-else>
     <AuthHeading title="Welcome," :outline="firstName" done :text="intent.welcome({ storeName: account.storeName })" />
-    <AuthLinkCards :items="intent.nextSteps" />
+    <AuthLinkCards :items="nextSteps" />
   </template>
 </template>

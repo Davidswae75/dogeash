@@ -8,6 +8,9 @@ const title = computed(() => (route.meta.title as string | undefined)
   ?? dashboardSections[String(route.params.section)]?.title
   ?? 'Dashboard')
 const navOpen = ref(false)
+const { can, store } = useStoreContext()
+const { unread } = useStoreInbox()
+const canAddDogs = computed(() => can('dogs'))
 watch(() => route.fullPath, () => { navOpen.value = false })
 </script>
 
@@ -30,28 +33,32 @@ watch(() => route.fullPath, () => { navOpen.value = false })
                 <Menu aria-hidden="true" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" class="w-[288px] border-line bg-surface p-0">
+            <SheetContent side="left" hide-close class="w-[288px] border-line bg-surface p-0">
               <SheetTitle class="sr-only">Dashboard menu</SheetTitle>
               <SheetDescription class="sr-only">Store dashboard sections</SheetDescription>
-              <DashboardNav />
+              <DashboardNav in-sheet />
             </SheetContent>
           </Sheet>
 
-          <h1 class="m-0 truncate font-display text-xl leading-none font-extrabold font-stretch-expanded">{{ title }}</h1>
+          <div class="flex min-w-0 flex-col">
+            <span class="hidden truncate font-mono text-[10px] font-semibold tracking-[.12em] text-ink-muted uppercase sm:block">{{ store.name }}</span>
+            <h1 class="m-0 truncate font-display text-xl leading-6 font-extrabold font-stretch-expanded">{{ title }}</h1>
+          </div>
 
-          <label class="ml-auto hidden h-10 w-[300px] items-center gap-2 rounded-full bg-surface px-4 ring-1 ring-line focus-within:ring-2 focus-within:ring-ink md:flex">
+          <label class="ml-auto hidden h-10 w-full max-w-[320px] min-w-0 items-center gap-2 rounded-full bg-surface px-4 ring-1 ring-line focus-within:ring-2 focus-within:ring-ink md:flex">
             <Search class="size-4 text-ink-muted" aria-hidden="true" />
             <span class="sr-only">Search the dashboard</span>
             <input type="search" placeholder="Search dogs, enquiries, bookings" class="min-w-0 flex-1 border-0 bg-transparent text-sm outline-none placeholder:text-ink-muted">
           </label>
 
           <div class="ml-auto flex items-center gap-2 md:ml-0">
-            <Button variant="outline" size="icon" class="relative border-[1.5px] border-line-strong" aria-label="Notifications, 4 new">
-              <Bell aria-hidden="true" />
-              <span class="absolute top-2 right-2 size-2 rounded-full bg-marigold ring-2 ring-canvas" aria-hidden="true" />
+            <Button as-child variant="outline" size="icon" class="relative border-[1.5px] border-line-strong">
+              <NuxtLink to="/dashboard/inbox" :aria-label="`Inbox${unread ? `, ${unread} unread` : ''}`">
+                <Bell aria-hidden="true" />
+                <span v-if="unread" class="absolute -top-1.5 -right-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-marigold px-1 text-[11px] font-bold text-on-marigold ring-2 ring-canvas" aria-hidden="true">{{ unread }}</span>
+              </NuxtLink>
             </Button>
-            <span class="hidden sm:inline-flex"><ThemeToggle /></span>
-            <Button as-child variant="marigold" size="sm" class="hidden sm:inline-flex">
+            <Button v-if="canAddDogs" as-child variant="marigold" size="sm" class="hidden sm:inline-flex">
               <NuxtLink to="/dashboard/dogs"><Plus aria-hidden="true" />Add a dog</NuxtLink>
             </Button>
           </div>

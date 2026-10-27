@@ -7,7 +7,7 @@ const attention = computed(() => props.dog.vaccinations.filter(v => v.status !==
 </script>
 
 <template>
-  <AccountPanel title="Vaccinations and treatments" :meta="attention ? `${attention} need attention` : 'All up to date'">
+  <SectionPanel title="Vaccinations and treatments" :meta="attention ? `${attention} need attention` : 'All up to date'">
     <div class="overflow-x-auto">
       <table class="w-full border-collapse text-sm">
         <thead>
@@ -28,5 +28,5 @@ const attention = computed(() => props.dog.vaccinations.filter(v => v.status !==
         </tbody>
       </table>
     </div>
-  </AccountPanel>
+  </SectionPanel>
 </template>

@@ -6,7 +6,7 @@ const props = defineProps<{ dog: OwnedDog }>()
 </script>
 
 <template>
-  <AccountPanel title="Training log" :meta="`${props.dog.training.length} sessions`">
+  <SectionPanel title="Training log" :meta="`${props.dog.training.length} sessions`">
     <ol class="m-0 flex list-none flex-col p-3">
       <li v-for="(t, i) in props.dog.training" :key="t.title" class="relative flex gap-4 pb-5 last:pb-0">
         <span class="relative flex w-3 shrink-0 justify-center" aria-hidden="true">
@@ -20,5 +20,5 @@ const props = defineProps<{ dog: OwnedDog }>()
         </div>
       </li>
     </ol>
-  </AccountPanel>
+  </SectionPanel>
 </template>

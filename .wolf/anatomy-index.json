@@ -1,13 +1,13 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-10-27T02:22:59.063Z",
-    "fileCount": 607,
+    "lastScanned": "2026-10-27T22:09:22.338Z",
+    "fileCount": 630,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "d7328238ea7b91a1d59fb9e03a41a92c9ac43eb0befa7d58a4b71b6835fb5a47",
-    "storeUpdatedAt": "2026-10-27T02:22:59.127Z",
-    "rootHash": "baa8a13edb2e6264"
+    "renderedHash": "b9f33215262d87a0d2be4f948a7ec7edd4755f7e28d4abaf321140e32c39de9b",
+    "storeUpdatedAt": "2026-10-27T22:09:22.436Z",
+    "rootHash": "674b41d6a0e30e93"
   },
   "files": {
     ".gitignore": {
@@ -320,13 +320,13 @@
       "importance": 0.4429
     },
     "app/components/SiteHeader.vue": {
-      "description": "Vue: setup, TS",
-      "tokens": 676,
+      "description": "Vue: setup",
+      "tokens": 1557,
       "hash": "df405f7691d306e8",
       "size": 2535,
       "mtimeMs": 1792778732347.9111,
-      "updatedAt": "2026-10-26T02:55:55.568Z",
-      "source": "scan",
+      "updatedAt": "2026-10-27T21:45:42.665Z",
+      "source": "md-import",
       "importance": 0.4429
     },
     "app/components/StatusDot.vue": {
@@ -6392,11 +6392,11 @@
     },
     "app/pages/dashboard/index.vue": {
       "description": "Vue: setup",
-      "tokens": 2798,
-      "hash": "062d193ac15cfd4a",
-      "size": 10496,
-      "mtimeMs": 1792988955773.331,
-      "updatedAt": "2026-10-26T04:29:16.171Z",
+      "tokens": 228,
+      "hash": "8bbeebb72895e3be",
+      "size": 854,
+      "mtimeMs": 1793138246878.8547,
+      "updatedAt": "2026-10-27T21:57:27.334Z",
       "source": "hook"
     },
     "app/pages/dashboard/[section].vue": {
@@ -6953,11 +6953,11 @@
     },
     "app/components/account/AccountAvatar.vue": {
       "description": "Vue: setup",
-      "tokens": 153,
-      "hash": "1b5a03c256608246",
-      "size": 572,
-      "mtimeMs": 1793062779700.7698,
-      "updatedAt": "2026-10-27T00:59:40.152Z",
+      "tokens": 262,
+      "hash": "1f24641d198b3bbd",
+      "size": 981,
+      "mtimeMs": 1793137623317.399,
+      "updatedAt": "2026-10-27T21:47:03.585Z",
       "source": "hook"
     },
     "app/components/account/AccountMenu.vue": {
@@ -7261,13 +7261,13 @@
       "source": "hook"
     },
     "app/utils/sell.ts": {
-      "description": "The Sell with us page: why kennels list on Dogeash, how verification works, what to have ready, and ",
+      "description": "The Sell with us page: why kennels list on Dogeash, how verification works, what to have ready, and",
       "tokens": 915,
       "hash": "4939b5542b385c63",
       "size": 3202,
       "mtimeMs": 1793067019478.586,
-      "updatedAt": "2026-10-27T02:10:19.794Z",
-      "source": "hook"
+      "updatedAt": "2026-10-27T21:45:42.669Z",
+      "source": "md-import"
     },
     "app/pages/sell.vue": {
       "description": "Vue: setup",
@@ -7356,6 +7356,266 @@
           "tokens": 34
         }
       ]
+    },
+    "app/composables/useAccountGate.ts": {
+      "description": "Unique per action and target, e.g. `visit:STR-001`",
+      "tokens": 550,
+      "hash": "d733dc4296a08448",
+      "size": 1928,
+      "mtimeMs": 1793133752220.5278,
+      "updatedAt": "2026-10-27T20:42:32.551Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "AccountGate",
+          "kind": "section",
+          "startLine": 7,
+          "endLine": 16,
+          "tokens": 98
+        },
+        {
+          "name": "useAccountGateDialog",
+          "kind": "fn",
+          "startLine": 17,
+          "endLine": 18,
+          "tokens": 29
+        },
+        {
+          "name": "useAccountGate",
+          "kind": "fn",
+          "startLine": 19,
+          "endLine": 41,
+          "tokens": 195
+        },
+        {
+          "name": "accountGateLinks",
+          "kind": "fn",
+          "startLine": 42,
+          "endLine": 52,
+          "tokens": 107
+        }
+      ]
+    },
+    "app/components/AccountGateDialog.vue": {
+      "description": "Vue: setup",
+      "tokens": 655,
+      "hash": "b1f046b4951a1f8b",
+      "size": 2457,
+      "mtimeMs": 1793133753047.5417,
+      "updatedAt": "2026-10-27T20:42:33.385Z",
+      "source": "hook"
+    },
+    "app/components/ContactStoreDialog.vue": {
+      "description": "Vue: setup",
+      "tokens": 1039,
+      "hash": "e1af0168b3018bab",
+      "size": 3895,
+      "mtimeMs": 1793133787368.8794,
+      "updatedAt": "2026-10-27T20:43:07.593Z",
+      "source": "hook"
+    },
+    "app/components/KennelVisitDialog.vue": {
+      "description": "Vue: setup",
+      "tokens": 427,
+      "hash": "eb000b5974070756",
+      "size": 1601,
+      "mtimeMs": 1793133822788.115,
+      "updatedAt": "2026-10-27T20:43:43.066Z",
+      "source": "hook"
+    },
+    "app/utils/storeRoles.ts": {
+      "description": "People who work at a store, and what each role may do in the store dashboard.",
+      "tokens": 442,
+      "hash": "b3ea06d44d7786e4",
+      "size": 1545,
+      "mtimeMs": 1793137542086.7986,
+      "updatedAt": "2026-10-27T21:45:42.669Z",
+      "source": "hook"
+    },
+    "app/middleware/store-member.ts": {
+      "description": "Store dashboard pages: only people who work at a store. Visitors sign in first;",
+      "tokens": 115,
+      "hash": "5bc362fa9388fcc9",
+      "size": 401,
+      "mtimeMs": 1793137562101.4182,
+      "updatedAt": "2026-10-27T21:46:02.427Z",
+      "source": "hook"
+    },
+    "app/composables/useStoreContext.ts": {
+      "description": "The store the dashboard is showing, and what the signed-in person may do there.",
+      "tokens": 178,
+      "hash": "b5177ab1338cede6",
+      "size": 622,
+      "mtimeMs": 1793137563021.0596,
+      "updatedAt": "2026-10-27T21:46:03.653Z",
+      "source": "hook"
+    },
+    "app/components/account/AccountStoreCard.vue": {
+      "description": "Vue: setup",
+      "tokens": 392,
+      "hash": "a59acb974604a6d4",
+      "size": 1469,
+      "mtimeMs": 1793137624088.7056,
+      "updatedAt": "2026-10-27T21:47:04.739Z",
+      "source": "hook"
+    },
+    "app/components/account/AccountStorePill.vue": {
+      "description": "Vue: setup",
+      "tokens": 288,
+      "hash": "e3c1fcc1840e2f84",
+      "size": 1080,
+      "mtimeMs": 1793137625318.3132,
+      "updatedAt": "2026-10-27T21:47:05.737Z",
+      "source": "hook"
+    },
+    "app/components/OwnListingBanner.vue": {
+      "description": "Vue: setup",
+      "tokens": 276,
+      "hash": "88d66bca0128cd03",
+      "size": 1034,
+      "mtimeMs": 1793137741966.4119,
+      "updatedAt": "2026-10-27T21:49:02.389Z",
+      "source": "hook"
+    },
+    "app/components/OwnListingActions.vue": {
+      "description": "Vue: setup",
+      "tokens": 521,
+      "hash": "be7a6c81bbeb3db1",
+      "size": 1953,
+      "mtimeMs": 1793137743025.7698,
+      "updatedAt": "2026-10-27T21:49:03.449Z",
+      "source": "hook"
+    },
+    "app/components/dashboard/DashboardGreeting.vue": {
+      "description": "Vue: setup",
+      "tokens": 448,
+      "hash": "64738af55e8623f7",
+      "size": 1681,
+      "mtimeMs": 1793138201584.8208,
+      "updatedAt": "2026-10-27T21:56:41.905Z",
+      "source": "hook"
+    },
+    "app/components/dashboard/DashboardStats.vue": {
+      "description": "Vue: setup",
+      "tokens": 576,
+      "hash": "69da06b873443fff",
+      "size": 2162,
+      "mtimeMs": 1793138202142.3071,
+      "updatedAt": "2026-10-27T21:56:42.317Z",
+      "source": "hook"
+    },
+    "app/components/dashboard/DashboardAttention.vue": {
+      "description": "Vue: setup",
+      "tokens": 571,
+      "hash": "9d3614ef8777be5d",
+      "size": 2141,
+      "mtimeMs": 1793138202611.459,
+      "updatedAt": "2026-10-27T21:56:42.759Z",
+      "source": "hook"
+    },
+    "app/components/dashboard/DashboardAgenda.vue": {
+      "description": "Vue: setup",
+      "tokens": 678,
+      "hash": "92257c3226fa6a5d",
+      "size": 2542,
+      "mtimeMs": 1793138203000.8462,
+      "updatedAt": "2026-10-27T21:56:43.175Z",
+      "source": "hook"
+    },
+    "app/components/dashboard/DashboardDogs.vue": {
+      "description": "Vue: setup",
+      "tokens": 1172,
+      "hash": "a21880796303ca48",
+      "size": 4397,
+      "mtimeMs": 1793138221382.3408,
+      "updatedAt": "2026-10-27T21:57:01.634Z",
+      "source": "hook"
+    },
+    "app/components/dashboard/DashboardStoreHealth.vue": {
+      "description": "Vue: setup",
+      "tokens": 867,
+      "hash": "6dbc07369a9b3970",
+      "size": 3250,
+      "mtimeMs": 1793138245469.9805,
+      "updatedAt": "2026-10-27T21:57:26.209Z",
+      "source": "hook"
+    },
+    "app/utils/inbox.ts": {
+      "description": "How the buyer hears about replies, besides Dogeash itself",
+      "tokens": 1864,
+      "hash": "57df73a18746e2b1",
+      "size": 6536,
+      "mtimeMs": 1793138895973.5007,
+      "updatedAt": "2026-10-27T22:08:16.512Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "InboxMessage",
+          "kind": "section",
+          "startLine": 12,
+          "endLine": 12,
+          "tokens": 28
+        },
+        {
+          "name": "InboxAction",
+          "kind": "section",
+          "startLine": 13,
+          "endLine": 14,
+          "tokens": 27
+        },
+        {
+          "name": "InboxItem",
+          "kind": "section",
+          "startLine": 15,
+          "endLine": 167,
+          "tokens": 1631
+        }
+      ]
+    },
+    "app/composables/useStoreInbox.ts": {
+      "description": "The store inbox as one shared list: what this person's role may see, unread counts for the bell",
+      "tokens": 397,
+      "hash": "56425778384d6f89",
+      "size": 1387,
+      "mtimeMs": 1793138909845.8765,
+      "updatedAt": "2026-10-27T22:08:30.268Z",
+      "source": "hook"
+    },
+    "app/components/dashboard/InboxList.vue": {
+      "description": "Vue: setup",
+      "tokens": 1022,
+      "hash": "94ed6b34eb9bee82",
+      "size": 3833,
+      "mtimeMs": 1793138958656.4807,
+      "updatedAt": "2026-10-27T22:09:19.050Z",
+      "source": "hook"
+    },
+    "app/components/dashboard/InboxReply.vue": {
+      "description": "Vue: setup",
+      "tokens": 559,
+      "hash": "aeb047d83a329689",
+      "size": 2094,
+      "mtimeMs": 1793138959848.3665,
+      "updatedAt": "2026-10-27T22:09:20.350Z",
+      "source": "hook"
+    },
+    "app/components/dashboard/InboxDetail.vue": {
+      "description": "Vue: setup",
+      "tokens": 1198,
+      "hash": "d97a71b5666f135e",
+      "size": 4495,
+      "mtimeMs": 1793138960912.4253,
+      "updatedAt": "2026-10-27T22:09:21.433Z",
+      "source": "hook"
+    },
+    "app/pages/dashboard/inbox.vue": {
+      "description": "Vue: setup",
+      "tokens": 783,
+      "hash": "270ec4905d4b54da",
+      "size": 2937,
+      "mtimeMs": 1793138961982.5762,
+      "updatedAt": "2026-10-27T22:09:22.331Z",
+      "source": "hook"
     }
   },
   "preamble": [

@@ -13,12 +13,12 @@ const rows = [
 </script>
 
 <template>
-  <AccountPanel title="Home profile" meta="Used for matching" see-all="/account/profile" see-all-label="Edit">
+  <SectionPanel title="Home profile" meta="Used for matching" see-all="/account/profile" see-all-label="Edit">
     <dl class="m-0 grid grid-cols-[auto_1fr] gap-x-6 gap-y-2.5 p-3">
       <template v-for="row in rows" :key="row.label">
         <dt class="font-mono text-[10.5px] leading-5 font-semibold tracking-[.12em] text-ink-muted uppercase">{{ row.label }}</dt>
         <dd class="m-0 text-sm leading-5 font-semibold">{{ row.value }}</dd>
       </template>
     </dl>
-  </AccountPanel>
+  </SectionPanel>
 </template>

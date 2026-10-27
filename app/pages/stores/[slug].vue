@@ -10,6 +10,9 @@ const store = findStore(String(route.params.slug))
 if (!store) throw createError({ statusCode: 404, statusMessage: 'No store with that name' })
 
 const summary = storeSummary(store)
+// People who work at this store see management actions instead of Contact and Book
+const { memberOf } = useSession()
+const isOwn = computed(() => !!memberOf(store.id))
 const care = store.care
   .map(link => ({ ...link, provider: findCareProvider(link.providerId)! }))
   .filter(c => c.provider)
@@ -86,6 +89,8 @@ const h2 = 'm-0 mega text-[clamp(26px,2.6vw,34px)] leading-none'
       <span class="mx-2" aria-hidden="true">/</span>
       <span class="text-ink">{{ store.name }}</span>
     </nav>
+
+    <OwnListingBanner :store="store" what="store" class="mb-4" />
 
     <!-- Banner: the store's own banner image will replace this once stores can upload one -->
     <StoreBanner :store="store" size="hero" class="h-[220px] animate-rise rounded-xl sm:h-[340px]">
@@ -308,8 +313,11 @@ const h2 = 'm-0 mega text-[clamp(26px,2.6vw,34px)] leading-none'
             </div>
           </div>
           <div class="flex flex-col gap-2.5">
-            <Button variant="marigold" class="w-full">Contact store</Button>
-            <Button variant="outline" class="w-full">Book a kennel visit</Button>
+            <OwnListingActions v-if="isOwn" :store="store" />
+            <template v-else>
+              <ContactStoreDialog :store="store" trigger-class="w-full" />
+              <KennelVisitDialog :store="store" trigger-class="h-10 w-full" />
+            </template>
           </div>
           <ul class="m-0 flex list-none flex-col gap-3 border-t border-line p-0 pt-5 text-sm">
             <li class="flex gap-2.5"><MapPin class="mt-0.5 size-4 shrink-0 text-ink-muted" aria-hidden="true" />{{ store.area }}, {{ store.city }}, {{ store.state }}</li>
@@ -330,7 +338,8 @@ const h2 = 'm-0 mega text-[clamp(26px,2.6vw,34px)] leading-none'
         <strong class="block truncate text-sm">{{ store.name }}</strong>
         <span class="text-xs text-ink-muted">Replies in {{ store.replies }}</span>
       </div>
-      <Button variant="marigold" size="sm">Contact store</Button>
+      <Button v-if="isOwn" as-child variant="marigold" size="sm"><NuxtLink to="/dashboard">Store dashboard</NuxtLink></Button>
+      <ContactStoreDialog v-else :store="store" size="sm" />
     </div>
   </div>
 </template>
