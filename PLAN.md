@@ -202,12 +202,12 @@ Vets, trainers, groomers and cleaners, kennel builders, equipment suppliers and 
 - [ ] Verification: vets checked against the veterinary council register; "Verified" badge only on providers Dogeash has checked
 - [x] Store page panel: "Vets and trainers" with a booking button per provider
 - [ ] K9 file shows the vet who signed the vaccinations and the trainer who trained the dog, where known
-- [ ] Public directory (`/care`): filter by service and city, each provider has its own page listing the kennels they work with
+- [x] Public directory (`/care`): search, filter by service, city, checked providers and home visits; each provider has its own page (`/care/[slug]`) listing the stores they work with
 - [ ] After purchase: suggest providers near the buyer's address ("Vets within 10 km of you")
 
 ### Bookings
 - [ ] Provider availability: working hours, appointment length per service, days off
-- [ ] Book from a provider's page in the directory
+- [~] Book from the directory and a provider's page (same preview dialog; requests are not sent yet)
 - [~] Book from a store page (preview dialog built: service, day, time, home or premises, dog name; requests are not sent yet)
 - [ ] Book from a K9 file (the store's own vet or trainer)
 - [ ] Booking types: vet check-up, vaccination, training session, grooming or cleaning, kennel build quote, equipment fitting, boarding stay
@@ -222,8 +222,10 @@ Vets, trainers, groomers and cleaners, kennel builders, equipment suppliers and 
 
 ### Gear cart
 A normal cart and checkout, but only for equipment, never for dogs.
-- [ ] Gear listings from equipment suppliers: harnesses, collars, kennel runs, bowls, starter food packs, tick treatment
-- [ ] Cart with quantities, delivery address and checkout
+- [~] Gear listings (`/gear`): category tabs, sizes, sample products in `app/utils/gear.ts`; suppliers can't list their own yet, and products need photos
+- [~] Cart (`/cart`) with sizes and quantities, kept per person and merged on sign-in; checkout (`/cart/checkout`) takes the delivery address but is a preview until payments are connected
+- [ ] Real delivery fees and prices (example figures for now)
+- [ ] Gear orders in the buyer account and for suppliers
 - [ ] Suggest the right gear when a dog is reserved ("Kaiser is 31 kg: this harness size fits")
 
 ## Phase 6 · Transactions

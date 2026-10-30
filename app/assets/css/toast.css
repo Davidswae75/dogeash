@@ -1,5 +1,5 @@
-/* vue-toastification in Dogeash style: a quiet surface card, the tone carried by the icon tile and
-   a timer ring around the close button. Built only from tokens, so Day watch and Night watch both work.
+/* vue-toastification in Dogeash style: a frosted glass card that flows in like liquid and wiggles once,
+   plus a timer ring around the close button. Built only from tokens, so Day watch and Night watch both work.
    Top right on larger screens, top centre on phones. */
 
 .Vue-Toastification__container {
@@ -26,10 +26,12 @@
   font-family: var(--font-sans);
   background: var(--surface);
   color: var(--ink);
+  -webkit-backdrop-filter: blur(18px) saturate(170%);
+  backdrop-filter: blur(18px) saturate(170%);
   box-shadow:
-    0 0 0 1px var(--line),
-    0 1px 2px rgb(0 0 0 / 0.06),
-    0 16px 36px -18px rgb(0 0 0 / 0.38);
+    inset 0 1px 0 color-mix(in srgb, var(--surface) 55%, white),
+    0 0 0 1px color-mix(in srgb, var(--ink) 12%, transparent),
+    0 18px 40px -18px rgb(0 0 0 / 0.45);
 }
 
 .Vue-Toastification__container .Vue-Toastification__toast--default,
@@ -37,7 +39,7 @@
 .Vue-Toastification__container .Vue-Toastification__toast--info,
 .Vue-Toastification__container .Vue-Toastification__toast--warning,
 .Vue-Toastification__container .Vue-Toastification__toast--error {
-  background: var(--surface);
+  background: color-mix(in srgb, var(--surface) 68%, transparent);
   color: var(--ink);
 }
 
@@ -119,21 +121,40 @@
   }
 }
 
-/* Enter: drop in from above. Leave: lift and fade. */
+/* Enter: a blurred droplet stretches into the card and settles like liquid, then wiggles once.
+   Leave: shrinks back into a droplet. */
 @keyframes dogeash-toast-in {
-  from { opacity: 0; transform: translateY(-10px) scale(0.98); }
-  to { opacity: 1; transform: none; }
+  0% { opacity: 0; filter: blur(12px); transform: translateY(-28px) scale(0.55, 0.3); }
+  45% { opacity: 1; filter: blur(0); transform: translateY(4px) scale(1.05, 0.93); }
+  65% { transform: translateY(-1px) scale(0.97, 1.04); }
+  82% { transform: scale(1.01, 0.99); }
+  100% { opacity: 1; filter: none; transform: none; }
+}
+@keyframes dogeash-toast-wiggle {
+  0%, 100% { transform: rotate(0); }
+  20% { transform: rotate(-2.2deg); }
+  40% { transform: rotate(1.8deg); }
+  60% { transform: rotate(-1.1deg); }
+  80% { transform: rotate(0.5deg); }
 }
 @keyframes dogeash-toast-out {
-  from { opacity: 1; transform: none; }
-  to { opacity: 0; transform: translateY(-6px) scale(0.98); }
+  from { opacity: 1; filter: none; transform: none; }
+  to { opacity: 0; filter: blur(8px); transform: translateY(-14px) scale(0.75, 0.5); }
 }
-.dogeash-toast-enter-active { animation: dogeash-toast-in 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
-.dogeash-toast-leave-active:not(.disable-transition) { animation: dogeash-toast-out 0.2s ease-in both; }
+.dogeash-toast-enter-active {
+  transform-origin: top center;
+  animation:
+    dogeash-toast-in 0.65s cubic-bezier(0.2, 0.8, 0.2, 1) both,
+    dogeash-toast-wiggle 0.55s ease-in-out 0.7s;
+}
+.dogeash-toast-leave-active:not(.disable-transition) {
+  transform-origin: top center;
+  animation: dogeash-toast-out 0.22s ease-in both;
+}
 .dogeash-toast-move { transition: transform 0.25s ease; }
 
 @media (prefers-reduced-motion: reduce) {
   .dogeash-toast-enter-active,
-  .dogeash-toast-leave-active { animation-duration: 0.01s !important; }
+  .dogeash-toast-leave-active:not(.disable-transition) { animation: none !important; }
   .dogeash-toast-move { transition: none; }
 }

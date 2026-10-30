@@ -216,3 +216,25 @@ description: chronological action log per session, consolidated weekly
 | 23:09 | Created app/pages/dashboard/inbox.vue | — | ~783 |
 <!-- session:MDQ2MmZjM2MtODMwNS00ZDMxLWE1Y2UtMDM4ZmQ5ODdjNmE0 -->
 | 2026-10-27T22:13:42.207Z | Dashboard: fixed phone sheet hiding nav links in short windows (whole column scrolls) and close button over Store label (SheetContent hideClose + own close in DashboardNav header). New store inbox /dashboard/inbox: utils/inbox.ts sample items, useStoreInbox (role-filtered, unread, reply, act), DashboardInboxList/Detail/Reply; bell + sidebar Inbox with live unread; /dashboard/enquiries 301 to inbox | app/components/ui/sheet/SheetContent.vue,app/components/DashboardNav.vue,app/layouts/dashboard.vue,app/utils/inbox.ts,app/composables/useStoreInbox.ts,app/components/dashboard/DashboardInboxList.vue,app/components/dashboard/DashboardInboxDetail.vue,app/components/dashboard/DashboardInboxReply.vue,app/pages/dashboard/inbox.vue,app/utils/dashboard.ts,app/composables/useNotify.ts,nuxt.config.ts,PLAN.md | verified in browser: sheet links visible, inbox reply + booking action + unread counts, phone list/detail |
+
+## Session: 2026-10-30 17:23
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-10-30 19:24
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-10-30 21:57
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+<!-- session:MTRmMzg5ZGQtMTUwNy00MDdiLWJhM2YtNjBhODQ4ZTkzNmRj -->
+| 2026-10-30T21:11:05.222Z | Built gear shop and cart: utils/gear.ts, useCart on useAccountList ('cart', entries productId~size:qty), /gear, /cart, /cart/checkout preview, components/gear, CartLink, cart toasts; theme label only at 2xl; bell hidden on phones | app/utils/gear.ts,app/composables/useCart.ts,app/composables/useAccountList.ts,app/composables/useNotify.ts,app/components/gear/,app/components/CartLink.vue,app/pages/gear/,app/pages/cart/,app/components/SiteHeader.vue,app/components/SiteFooterMinimal.vue,app/components/ThemeToggle.vue,PLAN.md | Add, quantity, totals, gate, merge on sign-in, checkout validation and preview checked in browser; typecheck clean outside components/ui |
+
+## Session: 2026-10-30 22:33
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|

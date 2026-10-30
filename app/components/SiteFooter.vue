@@ -4,6 +4,7 @@ const year = new Date().getFullYear()
 const links = [
   { label: 'Find a guard dog', to: '/dogs' },
   { label: 'Protection levels', to: '/protection-levels' },
+  { label: 'Vets and trainers', to: '/care' },
   { label: 'Open a store', to: '/open-a-store' },
   { label: "Buyer's guide", to: '/guide' },
 ]

@@ -1,3 +1,4 @@
+import { ShoppingCart } from '@lucide/vue'
 import { CalendarCheck, CircleX, Heart, HeartOff, Info, LogIn, LogOut, MessageSquare, Scale, Store, TriangleAlert, UserRoundCheck } from '@lucide/vue'
 import type { Component } from 'vue'
 import { TYPE, useToast } from 'vue-toastification'
@@ -44,6 +45,12 @@ export function useNotify() {
 
     compareFull: (max: number, dog: Dog) =>
       show('warning', Scale, { kicker: 'Compare', meta: `${max} of ${max}`, title: 'Compare is full', text: `Untick a dog to swap in ${dog.name}.`, action: { label: 'Compare now', onClick: () => navigateTo('/shortlist/compare') } }),
+
+    cartAdded: (name: string, size?: string) =>
+      show('success', ShoppingCart, { kicker: 'Cart', title: `${name} added`, text: size ? `Size ${size}` : undefined, action: { label: 'View cart', onClick: () => navigateTo('/cart') } }),
+
+    cartRemoved: (name: string, undo: () => void) =>
+      show('info', ShoppingCart, { kicker: 'Cart', title: `${name} removed`, action: { label: 'Undo', onClick: undo, kind: 'undo' } }),
 
     bookingRequested: (withWhom: string, when: string) =>
       show('success', CalendarCheck, { kicker: 'Booking', meta: 'Preview', title: 'Request ready', text: `${withWhom} · ${when}. Nothing is sent yet.` }),

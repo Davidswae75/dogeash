@@ -341,6 +341,14 @@ export function findStore(slugOrId: string) {
   return sampleStores.find(s => s.slug === key || s.id.toLowerCase() === key)
 }
 
+// The stores that work with a care provider, and what they call the relationship
+export function storesForProvider(providerId: string) {
+  return sampleStores.flatMap((store) => {
+    const link = store.care.find(c => c.providerId === providerId)
+    return link ? [{ store, relationship: link.relationship }] : []
+  })
+}
+
 // Dogs a buyer can see: listed and not sold or withdrawn
 export function storeDogs(storeId: string) {
   return sampleDogs.filter(d => d.storeId === storeId)

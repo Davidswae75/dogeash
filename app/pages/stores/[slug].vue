@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import { CalendarDays, Clock, Dumbbell, Hammer, House, MapPin, MessageSquare, Package, Quote, Scissors, Star, Stethoscope, Truck } from '@lucide/vue'
-import type { Component } from 'vue'
-import type { CareType } from '~/utils/care'
+import { CalendarDays, Clock, MapPin, MessageSquare, Quote, Star, Truck } from '@lucide/vue'
 import type { ProtectionLevel } from '~/utils/protection'
 
 // A store: its dogs for sale, who runs it, its history, inspection record, care team and reviews
@@ -40,10 +38,6 @@ const stats = [
   { value: String(years), label: years === 1 ? 'year running' : 'years running' },
   { value: store.reviews ? String(store.rating) : 'New', label: store.reviews ? `${store.reviews} reviews` : 'no reviews yet' },
 ]
-
-const careIcons: Record<CareType, Component> = {
-  vet: Stethoscope, trainer: Dumbbell, groomer: Scissors, builder: Hammer, equipment: Package, boarding: House,
-}
 
 // Section tabs with a sliding marigold indicator that follows the section in view
 const sections = [
@@ -236,13 +230,11 @@ const h2 = 'm-0 mega text-[clamp(26px,2.6vw,34px)] leading-none'
             </div>
             <ul v-if="care.length" class="m-0 flex list-none flex-col divide-y divide-line rounded-xl bg-surface p-0 ring-1 ring-line">
               <li v-for="c in care" :key="c.providerId" class="flex flex-col gap-4 p-5 sm:flex-row sm:items-center">
-                <span class="grid size-11 shrink-0 place-items-center rounded-full bg-ash-soft text-ink">
-                  <component :is="careIcons[c.provider.type]" class="size-5" aria-hidden="true" />
-                </span>
+                <CareProviderIcon :type="c.provider.type" />
                 <div class="flex min-w-0 flex-1 flex-col gap-0.5">
                   <span class="text-[11px] leading-4 font-bold tracking-[.08em] text-marigold-ink uppercase">{{ c.relationship }}</span>
                   <span class="flex flex-wrap items-center gap-2">
-                    <strong class="text-[16px] leading-6">{{ c.provider.name }}</strong>
+                    <NuxtLink :to="`/care/${careProviderSlug(c.provider)}`" class="text-[16px] leading-6 font-bold text-ink underline-offset-4 hover:underline">{{ c.provider.name }}</NuxtLink>
                     <AppIcon v-if="c.provider.verified" name="shield" :size="16" class="text-verified" aria-label="Verified" />
                   </span>
                   <span class="text-[13px] text-ink-muted">

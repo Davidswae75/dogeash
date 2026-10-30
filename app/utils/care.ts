@@ -43,3 +43,12 @@ export const sampleCareProviders: CareProvider[] = [
 export function findCareProvider(id: string) {
   return sampleCareProviders.find(p => p.id === id)
 }
+
+// Public address of a provider's page, made from its name
+export function careProviderSlug(provider: CareProvider) {
+  return provider.name.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+}
+
+export function findCareProviderBySlug(slug: string) {
+  return sampleCareProviders.find(p => careProviderSlug(p) === slug.toLowerCase())
+}

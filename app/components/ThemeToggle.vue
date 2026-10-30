@@ -32,7 +32,7 @@ function flip() {
       @click="flip"
     >
       <AppIcon :name="isNight ? 'sun' : 'moon'" :size="16" />
-      <span class="hidden sm:inline">{{ isNight ? 'Day watch' : 'Night watch' }}</span>
+      <span class="hidden 2xl:inline">{{ isNight ? 'Day watch' : 'Night watch' }}</span>
     </button>
 
     <ToggleGroup
@@ -50,7 +50,7 @@ function flip() {
     </ToggleGroup>
 
     <template #fallback>
-      <span class="inline-block h-[38px] w-[124px] rounded-full border-[1.5px] border-line" aria-hidden="true" />
+      <span class="inline-block h-[38px] w-[38px] rounded-full 2xl:w-[124px] border-[1.5px] border-line" aria-hidden="true" />
     </template>
   </ClientOnly>
 </template>

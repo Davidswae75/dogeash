@@ -1,20 +1,16 @@
 <script setup lang="ts">
 import { ArrowRight } from '@lucide/vue'
 import { useEventListener } from '@vueuse/core'
-const links = [
-  { label: 'Find a guard dog', to: '/dogs' },
-  { label: 'Protection levels', to: '/protection-levels' },
-  { label: 'Stores', to: '/stores' },
-  { label: "Buyer's guide", to: '/guide' },
-]
 
+// Main links stay exposed; the rest live in named dropdowns (groups in app/utils/siteNav.ts)
 const { user, initials, memberships, hasStore, signOut } = useSession()
+const groups = computed(() => siteNavGroups(hasStore.value))
 const menuOpen = ref(false)
 const route = useRoute()
 useEventListener('keydown', (e: KeyboardEvent) => { if (e.key === 'Escape') menuOpen.value = false })
-// Links slide in one after another; the account row comes last
+// Links and groups slide in one after another; the account row comes last
 const stagger = (i: number) => ({ animationDelay: `${80 + i * 45}ms` })
-const lastDelay = computed(() => stagger(links.length + 1))
+const lastDelay = computed(() => stagger(siteNavMain.length + groups.value.length + 1))
 // Signing in from the header brings you back to the page you were on
 const signInQuery = computed(() => (['/', '/sign-in', '/sign-up'].includes(route.path) ? {} : { redirect: route.fullPath }))
 watch(() => route.fullPath, () => { menuOpen.value = false })
@@ -25,23 +21,26 @@ watch(() => route.fullPath, () => { menuOpen.value = false })
     <div class="mx-auto flex h-header max-w-[calc(var(--container)+64px)] items-center gap-4 px-4 xl:gap-8 xl:px-8">
       <AppLogo />
 
-      <nav class="hidden gap-6 text-[15px] font-semibold xl:flex" aria-label="Main">
+      <nav class="hidden items-center gap-6 text-[15px] font-semibold xl:flex" aria-label="Main">
         <NuxtLink
-          v-for="link in links"
+          v-for="link in siteNavMain"
           :key="link.to"
           :to="link.to"
           class="py-1 whitespace-nowrap text-ink-muted no-underline hover:text-ink hover:shadow-[0_3px_0_var(--marigold)] [&.router-link-active]:text-ink [&.router-link-active]:shadow-[0_3px_0_var(--marigold)]"
         >
           {{ link.label }}
         </NuxtLink>
+        <SiteNavMenu v-for="group in groups" :key="group.label" :group="group" />
       </nav>
 
-      <div class="ml-auto flex items-center gap-2.5">
+      <div class="ml-auto flex items-center gap-1.5 sm:gap-2.5">
         <ShortlistLink />
+        <CartLink />
         <!-- Signed in: the marketplace header. Bell and avatar in place of Sign in and Open a store. -->
         <template v-if="user">
           <AccountStorePill />
-          <AccountNotifications />
+          <!-- Phones: no room beside shortlist, cart, avatar and menu -->
+          <span class="hidden sm:inline-flex"><AccountNotifications /></span>
           <span class="hidden sm:inline-flex"><ThemeToggle /></span>
           <AccountMenu />
         </template>
@@ -50,9 +49,6 @@ watch(() => route.fullPath, () => { menuOpen.value = false })
           <span class="hidden sm:inline-flex"><ThemeToggle /></span>
           <Button as-child variant="ghost" size="sm" class="px-2.5 sm:px-3">
             <NuxtLink :to="{ path: '/sign-in', query: signInQuery }">Sign in</NuxtLink>
-          </Button>
-          <Button as-child size="sm" class="hidden xl:inline-flex">
-            <NuxtLink to="/open-a-store">Open a store</NuxtLink>
           </Button>
         </template>
         <Button
@@ -84,7 +80,7 @@ watch(() => route.fullPath, () => { menuOpen.value = false })
         <span :class="['block h-1 origin-left hazard-thin transition-transform duration-500 ease-calm', menuOpen ? 'scale-x-100' : 'scale-x-0']" aria-hidden="true" />
         <nav class="flex flex-col gap-1 px-4 pt-2 pb-5" aria-label="Main">
           <NuxtLink
-            v-for="(link, i) in links"
+            v-for="(link, i) in siteNavMain"
             :key="link.to"
             :to="link.to"
             :class="['group flex items-center justify-between py-2.5 font-display text-[22px] leading-[1.2] font-extrabold text-ink no-underline [font-stretch:112%] [&.router-link-active]:text-marigold-ink', menuOpen && 'animate-menu-in']"
@@ -93,7 +89,23 @@ watch(() => route.fullPath, () => { menuOpen.value = false })
             {{ link.label }}
             <ArrowRight class="size-5 text-ink-muted transition-transform group-hover:translate-x-1" aria-hidden="true" />
           </NuxtLink>
-          <div :class="menuOpen && 'animate-menu-in'" :style="stagger(links.length)">
+          <div
+            v-for="(group, g) in groups"
+            :key="group.label"
+            :class="['flex flex-col border-t border-line pt-3 pb-1', g === 0 && 'mt-2', menuOpen && 'animate-menu-in']"
+            :style="stagger(siteNavMain.length + g)"
+          >
+            <span class="pb-1 font-mono text-[10.5px] font-semibold tracking-[.12em] text-ink-muted uppercase">{{ group.label }}</span>
+            <NuxtLink
+              v-for="link in group.links"
+              :key="link.to"
+              :to="link.to"
+              class="flex items-center gap-3 py-2 text-[15px] font-semibold text-ink no-underline"
+            >
+              <component :is="link.icon" class="size-[18px] text-ink-muted" aria-hidden="true" />{{ link.label }}
+            </NuxtLink>
+          </div>
+          <div :class="['mt-2', menuOpen && 'animate-menu-in']" :style="stagger(siteNavMain.length + groups.length)">
             <ThemeToggle variant="segmented" />
           </div>
           <div v-if="user" :class="['mt-3 flex items-center gap-3 rounded-lg bg-surface p-3 ring-1 ring-line', menuOpen && 'animate-menu-in']" :style="lastDelay">

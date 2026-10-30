@@ -2,7 +2,7 @@
 import type { CareProvider } from '~/utils/care'
 
 // Book a care provider: the shared booking dialog, filled in from the provider
-const props = withDefaults(defineProps<{ provider: CareProvider, label?: string }>(), { label: 'Book appointment' })
+const props = withDefaults(defineProps<{ provider: CareProvider, label?: string, variant?: 'outline' | 'default' | 'marigold' | 'night', triggerClass?: string }>(), { label: 'Book appointment', variant: 'outline' })
 
 const gate = computed<AccountGate>(() => ({
   key: `care:${props.provider.id}`,
@@ -19,6 +19,8 @@ const gate = computed<AccountGate>(() => ({
     :home-visits="props.provider.homeVisits"
     :price-note="`From ${formatNaira(props.provider.priceFrom)}. You pay the provider directly for now.`"
     :trigger-label="props.label"
+    :trigger-variant="props.variant"
+    :trigger-class="props.triggerClass"
     :gate="gate"
     ask-dog-name
   />
