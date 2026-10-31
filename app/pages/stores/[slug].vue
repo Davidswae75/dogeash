@@ -47,30 +47,26 @@ const sections = [
   { id: 'inspection', label: 'Inspection' },
   { id: 'reviews', label: 'Reviews' },
 ]
-const active = ref('dogs')
+const { active, goTo: goToSection } = useSectionSpy(sections.map(s => s.id))
+const tabRow = ref<HTMLElement>()
 const tabEls = ref<HTMLElement[]>([])
 const indicator = ref({ left: 0, width: 0 })
 
-function moveIndicator() {
+function moveIndicator(smooth = true) {
   const el = tabEls.value[sections.findIndex(s => s.id === active.value)]
-  if (el) indicator.value = { left: el.offsetLeft, width: el.offsetWidth }
+  if (!el) return
+  indicator.value = { left: el.offsetLeft, width: el.offsetWidth }
+  if (tabRow.value) centerInRow(tabRow.value, el, smooth)
 }
 
 watch(active, () => nextTick(moveIndicator))
 
+const onResize = () => moveIndicator(false)
 onMounted(() => {
-  moveIndicator()
-  const observer = new IntersectionObserver((entries) => {
-    const visible = entries.filter(e => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)
-    if (visible[0]) active.value = visible[0].target.id
-  }, { rootMargin: '-30% 0px -60% 0px' })
-  sections.forEach(s => document.getElementById(s.id) && observer.observe(document.getElementById(s.id)!))
-  window.addEventListener('resize', moveIndicator)
-  onBeforeUnmount(() => {
-    observer.disconnect()
-    window.removeEventListener('resize', moveIndicator)
-  })
+  nextTick(() => moveIndicator(false))
+  window.addEventListener('resize', onResize)
 })
+onBeforeUnmount(() => window.removeEventListener('resize', onResize))
 
 const eyebrow = 'text-xs leading-4 font-bold tracking-[.08em] uppercase'
 const h2 = 'm-0 mega text-[clamp(26px,2.6vw,34px)] leading-none'
@@ -121,11 +117,12 @@ const h2 = 'm-0 mega text-[clamp(26px,2.6vw,34px)] leading-none'
 
         <!-- Section tabs -->
         <nav aria-label="On this page" class="sticky top-[calc(var(--header-height)+env(safe-area-inset-top,0px))] z-10 -mx-4 mt-10 bg-canvas px-4 sm:mx-0 sm:px-0">
-          <ul v-center-tab class="relative m-0 flex list-none gap-1 overflow-x-auto border-b border-line p-0 [scrollbar-width:none]">
+          <ul ref="tabRow" class="relative m-0 flex list-none gap-1 overflow-x-auto border-b border-line p-0 [scrollbar-width:none]">
             <li v-for="s in sections" :key="s.id">
               <a
                 ref="tabEls"
                 :href="`#${s.id}`"
+                @click.exact.prevent="goToSection(s.id)"
                 :aria-current="active === s.id ? 'true' : undefined"
                 :class="['block px-3 py-3.5 text-sm font-semibold whitespace-nowrap no-underline transition-colors', active === s.id ? 'text-ink' : 'text-ink-muted hover:text-ink']"
               >{{ s.label }}</a>

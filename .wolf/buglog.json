@@ -72,13 +72,165 @@
       "last_seen": "2026-10-30T21:39:28.434Z",
       "occurrences": 1,
       "related_bugs": []
+    },
+    {
+      "error_message": "CSS fix: category",
+      "file": "app/components/gear/GearIcon.vue",
+      "root_cause": "category: GearCategory → GearCategory, image?: string",
+      "fix": "Changed category: GearCategory → GearCategory, image?: string",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "vue"
+      ],
+      "status": "candidate",
+      "observed_worktree": "/Users/dave/Documents/personalProjects/dogeash",
+      "id": "bug-005",
+      "timestamp": "2026-10-31T15:53:47.974Z",
+      "last_seen": "2026-10-31T15:53:47.974Z",
+      "occurrences": 1,
+      "related_bugs": []
+    },
+    {
+      "error_message": "Incorrect value in code",
+      "file": "app/components/gear/GearIcon.vue",
+      "root_cause": "Had 'grid place-items-center'",
+      "fix": "Changed to 'relative grid place-items-center overflow-hidden'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "vue"
+      ],
+      "status": "candidate",
+      "observed_worktree": "/Users/dave/Documents/personalProjects/dogeash",
+      "id": "bug-006",
+      "timestamp": "2026-10-31T15:53:49.374Z",
+      "last_seen": "2026-10-31T15:53:49.374Z",
+      "occurrences": 1,
+      "related_bugs": []
+    },
+    {
+      "error_message": "Incorrect value in code",
+      "file": "app/components/gear/GearCard.vue",
+      "root_cause": "Had \"aspect-[16/8]\"",
+      "fix": "Changed to \"props.product.image\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "vue"
+      ],
+      "status": "candidate",
+      "observed_worktree": "/Users/dave/Documents/personalProjects/dogeash",
+      "id": "bug-007",
+      "timestamp": "2026-10-31T15:53:50.779Z",
+      "last_seen": "2026-10-31T15:53:50.779Z",
+      "occurrences": 1,
+      "related_bugs": []
+    },
+    {
+      "error_message": "Incorrect value in code",
+      "file": "app/components/gear/GearCartLine.vue",
+      "root_cause": "Had \"size-16 shrink-0 rounded-md sm:size-20\"",
+      "fix": "Changed to \"props.line.product.image\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "vue"
+      ],
+      "status": "candidate",
+      "observed_worktree": "/Users/dave/Documents/personalProjects/dogeash",
+      "id": "bug-008",
+      "timestamp": "2026-10-31T15:53:52.033Z",
+      "last_seen": "2026-10-31T15:53:52.033Z",
+      "occurrences": 1,
+      "related_bugs": []
+    },
+    {
+      "error_message": "CSS fix: section",
+      "file": "app/components/home/HomeGuest.vue",
+      "root_cause": "section: class=\"[section, 'flex flex-col gap-8']\"> → class=\"[section, 'grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-12']\">",
+      "fix": "Changed section: class=\"[section, 'flex flex-col gap-8']\"> → class=\"[section, 'grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-12']\">",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "vue"
+      ],
+      "status": "candidate",
+      "observed_worktree": "/Users/dave/Documents/personalProjects/dogeash",
+      "id": "bug-009",
+      "timestamp": "2026-10-31T16:09:12.922Z",
+      "last_seen": "2026-10-31T16:09:12.922Z",
+      "occurrences": 1,
+      "related_bugs": []
+    },
+    {
+      "error_message": "CSS fix: in",
+      "file": "app/components/home/HomeGuest.vue",
+      "root_cause": "in: a compact intro with the patrol chase, then dogs straight away. → the hero, then dogs straight away. The patrol chase closes the page.",
+      "fix": "Changed in: a compact intro with the patrol chase, then dogs straight away. → the hero, then dogs straight away. The patrol chase closes the page.",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "vue"
+      ],
+      "status": "candidate",
+      "observed_worktree": "/Users/dave/Documents/personalProjects/dogeash",
+      "id": "bug-010",
+      "timestamp": "2026-10-31T16:09:14.277Z",
+      "last_seen": "2026-10-31T16:09:14.277Z",
+      "occurrences": 1,
+      "related_bugs": []
+    },
+    {
+      "error_message": "CSS fix: section",
+      "file": "app/components/home/HomeGuest.vue",
+      "root_cause": "section: class=\"[section, 'grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-12']\"> → class=\"[section, 'flex flex-col gap-8']\">",
+      "fix": "Changed section: class=\"[section, 'grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-12']\"> → class=\"[section, 'flex flex-col gap-8']\">",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "vue"
+      ],
+      "status": "candidate",
+      "observed_worktree": "/Users/dave/Documents/personalProjects/dogeash",
+      "id": "bug-011",
+      "timestamp": "2026-10-31T16:17:12.624Z",
+      "last_seen": "2026-10-31T16:17:12.624Z",
+      "occurrences": 1,
+      "related_bugs": []
+    },
+    {
+      "error_message": "CSS fix: in",
+      "file": "app/components/home/HomeGuest.vue",
+      "root_cause": "in: the hero, then dogs straight away. The patrol chase closes the page. → a compact intro with the patrol chase, then dogs straight away.",
+      "fix": "Changed in: the hero, then dogs straight away. The patrol chase closes the page. → a compact intro with the patrol chase, then dogs straight away.",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "vue"
+      ],
+      "status": "candidate",
+      "observed_worktree": "/Users/dave/Documents/personalProjects/dogeash",
+      "id": "bug-012",
+      "timestamp": "2026-10-31T16:17:13.807Z",
+      "last_seen": "2026-10-31T16:17:13.807Z",
+      "occurrences": 1,
+      "related_bugs": []
     }
   ],
   "applied_observations": {
     "002d7988-3ba3-4215-bdad-636d420696df": true,
     "1a9d344b-76f0-4dfb-b51c-f0063ef5f046": true,
     "f276c833-dee6-49e1-9d05-af242eff834f": true,
-    "a05f9295-a116-4492-a231-743f0e546524": true
+    "a05f9295-a116-4492-a231-743f0e546524": true,
+    "97f08d7f-5359-4f8f-8efd-baa7d20f7da8": true,
+    "f93e3d4b-2cbf-4c6f-80e9-0ec9c63d8633": true,
+    "199cc3e5-f44e-439a-9c72-fe6ea4f48892": true,
+    "1d9965f3-874a-4fcc-bebf-1e768adcf63c": true,
+    "999ded9d-bfe7-47ca-a310-38fbd72ad8e5": true,
+    "407a0c57-4b07-456e-b752-72fd8a11f0d0": true,
+    "e49a7259-0c22-4581-ad30-5b5868eebb12": true,
+    "35261b85-e481-4de8-beee-d4e55763072d": true
   },
-  "next_id": 5
+  "next_id": 13
 }

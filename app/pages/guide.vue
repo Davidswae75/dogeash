@@ -16,15 +16,7 @@ const ratingTone: Record<GuideRating, string> = {
 }
 
 // Highlight the section in view in the contents list
-const active = ref<string>(guideSections[0].id)
-onMounted(() => {
-  const observer = new IntersectionObserver((entries) => {
-    const visible = entries.filter(e => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)
-    if (visible[0]) active.value = visible[0].target.id
-  }, { rootMargin: '-20% 0px -70% 0px' })
-  guideSections.forEach(s => document.getElementById(s.id) && observer.observe(document.getElementById(s.id)!))
-  onBeforeUnmount(() => observer.disconnect())
-})
+const { active, goTo } = useSectionSpy(guideSections.map(s => s.id))
 
 const eyebrow = 'text-xs leading-4 font-bold tracking-[.08em] uppercase'
 const h2 = 'm-0 mega text-[clamp(28px,3vw,40px)] leading-none scroll-mt-28'
@@ -59,6 +51,7 @@ const lead = 'm-0 max-w-[40em] text-[17px] leading-[28px] text-ink-muted'
             <li v-for="s in guideSections" :key="s.id">
               <a
                 :href="`#${s.id}`"
+                @click.exact.prevent="goTo(s.id)"
                 :aria-current="active === s.id ? 'true' : undefined"
                 :class="[
                   '-ml-0.5 block border-l-2 py-1.5 pl-3.5 text-sm leading-5 no-underline',

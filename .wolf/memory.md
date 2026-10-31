@@ -245,3 +245,38 @@ description: chronological action log per session, consolidated weekly
 | 05:24 | Created app/plugins/centerTab.ts | — | ~477 |
 <!-- session:MjllYzU1N2MtYWJmNC00OWE0LWE3MjMtNjFhMjVlNTUxNjE4 -->
 | 2026-10-31T04:32:34.691Z | v-center-tab directive (plugins/centerTab.ts) centres clicked tab in sideways rows: inbox filters, account tabs, gear categories, care chips, store cities, store page tabs. Dogs page filters sticky with own scroll on wide screens | app/plugins/centerTab.ts,app/pages/dogs/index.vue,app/pages/gear/index.vue,app/pages/care/index.vue,app/pages/stores/index.vue,app/pages/stores/[slug].vue,app/components/account/AccountNav.vue,app/components/dashboard/DashboardInboxList.vue | typecheck clean; sticky and centring measured in browser; smooth animation not seen (pane hidden) |
+<!-- session:MjllYzU1N2MtYWJmNC00OWE0LWE3MjMtNjFhMjVlNTUxNjE4 -->
+| 2026-10-31T11:58:09.850Z | Store page section tabs glitch: IntersectionObserver band highlighted the wrong tab (Reviews->Inspection at 800-1080px tall) and hash links jumped instantly. Replaced with click-hold + smooth scrollIntoView + position-based tracking; tab row follows active; shared centerInRow/scrollBehavior in utils/scroll.ts | app/pages/stores/[slug].vue,app/utils/scroll.ts,app/plugins/centerTab.ts,.wolf/cerebrum.md | typecheck clean; logic tested with instant scroll at 800px; one unreproduced miss in first run; smooth animation not seen (pane hidden) |
+<!-- session:MjllYzU1N2MtYWJmNC00OWE0LWE3MjMtNjFhMjVlNTUxNjE4 -->
+| 2026-10-31T12:25:28.100Z | Smooth in-page scrolling everywhere: smoothAnchors.client plugin (plain # links, router hash scrolls), scrollToSection util, useSectionSpy shared by store page and guide (replaces guide's observer) | app/plugins/smoothAnchors.client.ts,app/composables/useSectionSpy.ts,app/utils/scroll.ts,app/pages/guide.vue,app/pages/stores/[slug].vue | typecheck clean; each link's smooth request and highlight checked by script; motion not seen (pane hidden) |
+<!-- session:MDQ2MmZjM2MtODMwNS00ZDMxLWE1Y2UtMDM4ZmQ5ODdjNmE0 -->
+| 2026-10-31T15:31:39.244Z | Fixed dashboard page crushing to a narrow column on phones when the menu opens: sr-only table label escaped overflow-x-auto, widening layout viewport to 584, and scroll lock added 209px body padding. Scrollers made relative in DashboardDogs and AccountDogHealth. Also narrowed sidebar (224 desktop, 264 sheet), ThemeToggle fit option | app/components/dashboard/DashboardDogs.vue,app/components/account/AccountDogHealth.vue,app/layouts/dashboard.vue,app/components/DashboardNav.vue,app/components/ThemeToggle.vue | measured at 375px: inner 375, no body padding with sheet open; /stores /care /guide /account dog record also 375 |
+
+## Session: 2026-10-31 16:52
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 16:53 | Edited app/utils/gear.ts | 2→4 lines | ~46 |
+| 16:53 | Edited app/components/gear/GearIcon.vue | CSS: way | ~58 |
+| 16:53 | Edited app/components/gear/GearIcon.vue | 2→3 lines | ~84 |
+| 16:53 | Edited app/components/gear/GearCard.vue | inline fix | ~28 |
+| 16:53 | Edited app/components/gear/GearCartLine.vue | inline fix | ~37 |
+<!-- session:NTRiNTc5ZGYtOGZhNy00N2EwLWFhNmQtMWYxNjBmYTU5YzY0 -->
+| 2026-10-31T16:02:53.008Z | Added optional image to GearProduct; GearIcon shows the photo or falls back to the category placeholder | app/utils/gear.ts,app/components/gear/GearIcon.vue,app/components/gear/GearCard.vue,app/components/gear/GearCartLine.vue | nuxi typecheck: no gear errors; 6 unrelated errors elsewhere; not checked in browser |
+| 17:03 | Edited app/utils/gear.ts | added 9 import(s) | ~178 |
+| 17:03 | Edited app/utils/gear.ts | 9→9 lines | ~569 |
+<!-- session:NTRiNTc5ZGYtOGZhNy00N2EwLWFhNmQtMWYxNjBmYTU5YzY0 -->
+| 2026-10-31T16:04:03.997Z | Imported the 9 images from assets/gears and set image on every sampleGear product | app/utils/gear.ts | nuxi typecheck: no gear errors; not checked in browser |
+| 17:09 | Created app/components/home/HomeHeroFrame.vue | — | ~299 |
+| 17:09 | Created app/components/home/HomeHero.vue | — | ~481 |
+| 17:09 | Created app/components/home/HomeWelcome.vue | — | ~440 |
+| 17:09 | Edited app/components/home/HomeGuest.vue | CSS: lg, lg | ~108 |
+| 17:09 | Edited app/components/home/HomeGuest.vue | inline fix | ~30 |
+| 17:09 | Edited app/utils/market.ts | 1→3 lines | ~110 |
+| 17:17 | Created app/components/home/HomeHero.vue | — | ~521 |
+| 17:17 | Created app/components/home/HomeWelcome.vue | — | ~610 |
+| 17:17 | Edited app/components/home/HomeGuest.vue | 7→4 lines | ~58 |
+| 17:17 | Edited app/components/home/HomeGuest.vue | inline fix | ~29 |
+<!-- session:NTRiNTc5ZGYtOGZhNy00N2EwLWFhNmQtMWYxNjBmYTU5YzY0 -->
+| 2026-10-31T16:18:50.713Z | New guest hero headline on dark card with patrol GIF; signed-in hero on dark card with night patrol photo and link chips; shared homeHeroChip | app/components/home/HomeHero.vue,app/components/home/HomeWelcome.vue,app/utils/market.ts | Screenshots checked in light/dark at 1280 and 390 |
+| 17:19 | Edited app/components/home/HomeHero.vue | inline fix | ~8 |

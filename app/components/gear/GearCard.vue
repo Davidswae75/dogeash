@@ -19,7 +19,7 @@ function addToCart() {
 
 <template>
   <article class="flex flex-col overflow-hidden rounded-xl bg-surface ring-1 ring-line">
-    <GearIcon :category="props.product.category" class="aspect-[16/8]" />
+    <GearIcon :category="props.product.category" :image="props.product.image" class="aspect-[16/8]" />
     <div class="flex flex-1 flex-col gap-3 p-5">
       <div class="flex flex-col gap-1">
         <span class="text-[11px] font-bold tracking-[.08em] text-ink-muted uppercase">{{ gearCategories[props.product.category] }}</span>

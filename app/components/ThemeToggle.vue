@@ -1,6 +1,7 @@
 <script setup lang="ts">
 // Day watch / Night watch. "quick" flips between the two; "segmented" offers Day, Night and Auto.
-const props = withDefaults(defineProps<{ variant?: 'quick' | 'segmented' }>(), { variant: 'quick' })
+// `fit` shares the available width equally, for narrow columns such as the dashboard sidebar.
+const props = withDefaults(defineProps<{ variant?: 'quick' | 'segmented', fit?: boolean }>(), { variant: 'quick' })
 
 const colorMode = useColorMode()
 const isNight = computed(() => colorMode.value === 'dark')
@@ -41,9 +42,9 @@ function flip() {
       type="single"
       variant="watch"
       aria-label="Appearance"
-      class="inline-flex w-fit gap-0.5 rounded-full bg-surface-sunk p-[3px]"
+      :class="['inline-flex gap-0.5 rounded-full bg-surface-sunk p-[3px]', props.fit ? 'w-full' : 'w-fit']"
     >
-      <ToggleGroupItem v-for="option in options" :key="option.value" :value="option.value" class="rounded-full! px-3">
+      <ToggleGroupItem v-for="option in options" :key="option.value" :value="option.value" :class="['rounded-full!', props.fit ? 'min-w-0 flex-1 gap-1 px-1 text-xs' : 'px-3']">
         <AppIcon :name="option.icon" :size="15" />
         {{ option.label }}
       </ToggleGroupItem>

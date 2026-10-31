@@ -8,7 +8,8 @@ const attention = computed(() => props.dog.vaccinations.filter(v => v.status !==
 
 <template>
   <SectionPanel title="Vaccinations and treatments" :meta="attention ? `${attention} need attention` : 'All up to date'">
-    <div class="overflow-x-auto">
+    <!-- relative: keeps the hidden column label inside this scroller, or it widens the whole page on phones -->
+    <div class="relative overflow-x-auto">
       <table class="w-full border-collapse text-sm">
         <thead>
           <tr class="text-left font-mono text-[10.5px] tracking-[.12em] text-ink-muted uppercase">

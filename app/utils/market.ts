@@ -4,6 +4,8 @@ import type { BuyerProfile, SavedSearch } from './account'
 
 // Width and gutters for every band on Home
 export const homeSection = 'mx-auto w-full max-w-[calc(var(--container)+64px)] px-4 sm:px-8'
+// Link chips on the dark Home heroes
+export const homeHeroChip = 'inline-flex items-center gap-1.5 rounded-full border-[1.5px] border-on-night/40 px-3.5 py-1.5 text-sm font-semibold text-on-night no-underline transition-colors hover:border-marigold hover:bg-marigold hover:text-on-marigold'
 
 const forSale = () => sampleDogs.filter(d => d.status === 'available')
 

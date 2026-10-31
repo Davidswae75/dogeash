@@ -1,6 +1,6 @@
 <script setup lang="ts">
-// Compact top of the marketplace: what Dogeash is in one line, search, quick property filters,
-// and the patrol chase. Dogs start right below it.
+// Top of the marketplace: the promise, search, quick property filters and the patrol chase.
+// Stays dark in both themes. Dogs start right below it.
 const query = ref('')
 
 function search(q: string) {
@@ -9,23 +9,27 @@ function search(q: string) {
 </script>
 
 <template>
-  <section class="grid items-center gap-8 rounded-xl bg-surface px-5 py-7 sm:px-9 sm:py-9 lg:grid-cols-[1.15fr_1fr] lg:gap-10">
+  <section class="grid items-center gap-8 rounded-xl bg-night px-5 py-7 text-on-night sm:px-9 sm:py-10 lg:grid-cols-[1.2fr_1fr] lg:gap-10 lg:py-12">
     <div class="flex min-w-0 animate-rise flex-col gap-5">
       <span class="text-xs leading-4 font-bold tracking-[.08em] uppercase">
         <span class="rounded-[4px] bg-marigold px-2.5 py-1.5 text-on-marigold">K9 · Verified kennels · Nigeria</span>
       </span>
-      <h1 class="m-0 mega text-[clamp(32px,3.6vw,52px)] leading-[.98]">
-        Trained guard dogs. <span class="rounded-lg bg-marigold px-[.1em] text-on-marigold box-decoration-clone">Checked</span>
-        <span class="text-outline whitespace-nowrap">by us.</span>
+      <h1 class="m-0 mega text-[clamp(26px,7.3vw,56px)] leading-[1.02] lg:text-[clamp(40px,3.9vw,48px)]">
+        Trained Guardians<br>
+        For The<br>
+        <span class="text-marigold">Nigerian Home</span>
       </h1>
-      <SearchBar v-model="query" class="max-w-[560px]" @search="search" />
+      <p class="m-0 max-w-[32em] text-base leading-[26px] text-on-night/80">
+        Every kennel inspected in person. Every dog with a K9 file and handover training.
+      </p>
+      <SearchBar v-model="query" class="max-w-[560px] text-ink focus-within:outline-marigold!" @search="search" />
       <nav aria-label="Shop by property" class="flex flex-wrap items-center gap-2">
-        <span class="mr-1 text-sm font-semibold text-ink-muted">Protecting a</span>
+        <span class="mr-1 text-sm font-semibold text-on-night/80">Protecting a</span>
         <NuxtLink
           v-for="p in propertyTypes"
           :key="p.value"
           :to="{ path: '/dogs', query: { property: p.value } }"
-          class="inline-flex items-center gap-1.5 rounded-full border-[1.5px] border-line-strong px-3.5 py-1.5 text-sm font-semibold text-ink no-underline transition-colors hover:border-ink hover:bg-ink hover:text-canvas"
+          :class="homeHeroChip"
         >
           <AppIcon :name="p.value" :size="16" />{{ p.label }}
         </NuxtLink>
@@ -33,7 +37,7 @@ function search(q: string) {
     </div>
     <div class="relative mx-auto w-full max-w-[480px] animate-rise [animation-delay:80ms]">
       <PatrolMap variant="night" />
-      <KennelSticker class="absolute -top-8 -right-3 hidden sm:inline-grid" />
+      <KennelSticker class="absolute -top-6 -left-6 hidden sm:inline-grid" />
     </div>
   </section>
 </template>

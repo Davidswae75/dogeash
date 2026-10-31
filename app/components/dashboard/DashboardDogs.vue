@@ -29,7 +29,8 @@ const statsOf = (fileNo: string) => dashboardDogStats[fileNo]
       </ToggleGroup>
     </template>
 
-    <div class="overflow-x-auto">
+    <!-- relative: keeps the hidden column label inside this scroller, or it widens the whole page on phones -->
+    <div class="relative overflow-x-auto">
       <table class="w-full min-w-[600px] border-collapse text-left text-sm">
         <thead>
           <tr class="font-mono text-[10.5px] tracking-[.12em] text-ink-muted uppercase">

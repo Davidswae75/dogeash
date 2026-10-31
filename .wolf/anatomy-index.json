@@ -1,13 +1,13 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-10-31T04:24:30.882Z",
-    "fileCount": 631,
+    "lastScanned": "2026-10-31T16:19:00.838Z",
+    "fileCount": 637,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "07e27aa5b63aab743d29450a2afba8879119af6b7f6e73b2edff0e8c21af18b8",
-    "storeUpdatedAt": "2026-10-31T04:24:30.939Z",
-    "rootHash": "d72a287a857747e1"
+    "renderedHash": "e010f0e678d02150f2349cc32f1c2e83f0bc7dd032ad3c26abb579e2fed608e2",
+    "storeUpdatedAt": "2026-10-31T16:19:00.861Z",
+    "rootHash": "d9eb1638002a7887"
   },
   "files": {
     ".gitignore": {
@@ -6673,12 +6673,21 @@
     },
     "app/utils/market.ts": {
       "description": "The marketplace rows on Home: which dogs and stores each one shows",
-      "tokens": 234,
-      "hash": "64d6187d0230906a",
-      "size": 818,
-      "mtimeMs": 1793026160622.4983,
-      "updatedAt": "2026-10-26T14:49:21.000Z",
-      "source": "hook"
+      "tokens": 545,
+      "hash": "73c55ce3928e0c29",
+      "size": 1906,
+      "mtimeMs": 1793462955244.8008,
+      "updatedAt": "2026-10-31T16:09:15.598Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "forSale",
+          "kind": "fn",
+          "startLine": 10,
+          "endLine": 33,
+          "tokens": 385
+        }
+      ]
     },
     "app/components/MarketRow.vue": {
       "description": "Vue: setup",
@@ -6701,10 +6710,10 @@
     "app/components/home/HomeHero.vue": {
       "description": "Vue: setup",
       "tokens": 521,
-      "hash": "a3c1031b7981c9c5",
-      "size": 1955,
-      "mtimeMs": 1793026163956.9377,
-      "updatedAt": "2026-10-26T14:49:24.470Z",
+      "hash": "dffdc438f3535f8a",
+      "size": 1953,
+      "mtimeMs": 1793463540648.5884,
+      "updatedAt": "2026-10-31T16:19:00.837Z",
       "source": "hook"
     },
     "app/pages/index.vue": {
@@ -6979,11 +6988,11 @@
     },
     "app/components/home/HomeWelcome.vue": {
       "description": "Vue: setup",
-      "tokens": 412,
-      "hash": "4a54b43a5329456f",
-      "size": 1546,
-      "mtimeMs": 1793063597492.6204,
-      "updatedAt": "2026-10-27T01:13:17.919Z",
+      "tokens": 610,
+      "hash": "b8bce1b9171438a9",
+      "size": 2288,
+      "mtimeMs": 1793463431102.303,
+      "updatedAt": "2026-10-31T16:17:11.272Z",
       "source": "hook"
     },
     "app/components/home/HomeGlance.vue": {
@@ -7623,6 +7632,76 @@
       "size": 1668,
       "mtimeMs": 1793420670409.712,
       "updatedAt": "2026-10-31T04:24:30.878Z",
+      "source": "hook"
+    },
+    "app/utils/gear.ts": {
+      "description": "Gear shop: normal products with sizes and quantities. Dogs never go in the cart.",
+      "tokens": 1305,
+      "hash": "8068a0f479e606b1",
+      "size": 4572,
+      "mtimeMs": 1793462595058.8284,
+      "updatedAt": "2026-10-31T16:03:15.247Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "GearProduct",
+          "kind": "section",
+          "startLine": 28,
+          "endLine": 59,
+          "tokens": 736
+        },
+        {
+          "name": "findGear",
+          "kind": "fn",
+          "startLine": 60,
+          "endLine": 85,
+          "tokens": 257
+        }
+      ]
+    },
+    "app/components/gear/GearIcon.vue": {
+      "description": "Vue: setup",
+      "tokens": 317,
+      "hash": "283557f35feafcb7",
+      "size": 1186,
+      "mtimeMs": 1793462029169.0994,
+      "updatedAt": "2026-10-31T15:53:49.329Z",
+      "source": "hook"
+    },
+    "app/components/gear/GearCard.vue": {
+      "description": "Vue: setup",
+      "tokens": 642,
+      "hash": "d2617a190cd72e20",
+      "size": 2406,
+      "mtimeMs": 1793462030455.9954,
+      "updatedAt": "2026-10-31T15:53:50.642Z",
+      "source": "hook"
+    },
+    "app/components/gear/GearCartLine.vue": {
+      "description": "Vue: setup",
+      "tokens": 686,
+      "hash": "5a577d52204224eb",
+      "size": 2573,
+      "mtimeMs": 1793462031740.2974,
+      "updatedAt": "2026-10-31T15:53:51.948Z",
+      "source": "hook"
+    },
+    "app/components/home/HomeHeroFrame.vue": {
+      "description": "Vue: setup",
+      "tokens": 299,
+      "hash": "5704dd162dc9689a",
+      "size": 1118,
+      "mtimeMs": 1793462948437.9011,
+      "updatedAt": "2026-10-31T16:09:08.644Z",
+      "source": "hook"
+    },
+    "app/components/home/HomeGuest.vue": {
+      "description": "Vue: setup",
+      "tokens": 893,
+      "hash": "471f5c3f52b82281",
+      "size": 3346,
+      "mtimeMs": 1793463433504.0747,
+      "updatedAt": "2026-10-31T16:17:13.712Z",
       "source": "hook"
     }
   },

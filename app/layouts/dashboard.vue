@@ -15,7 +15,7 @@ watch(() => route.fullPath, () => { navOpen.value = false })
 </script>
 
 <template>
-  <div class="min-h-screen bg-canvas lg:grid lg:grid-cols-[264px_1fr]">
+  <div class="min-h-screen bg-canvas lg:grid lg:grid-cols-[224px_minmax(0,1fr)]">
     <a href="#main" class="absolute -top-15 left-4 z-30 rounded-md bg-marigold px-3.5 py-2.5 font-bold text-on-marigold focus:top-3">Skip to content</a>
 
     <!-- Sidebar -->
@@ -33,7 +33,7 @@ watch(() => route.fullPath, () => { navOpen.value = false })
                 <Menu aria-hidden="true" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" hide-close class="w-[288px] border-line bg-surface p-0">
+            <SheetContent side="left" hide-close class="w-[264px] border-line bg-surface p-0">
               <SheetTitle class="sr-only">Dashboard menu</SheetTitle>
               <SheetDescription class="sr-only">Store dashboard sections</SheetDescription>
               <DashboardNav in-sheet />

@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-10-31T04:24:30.882Z
-> Files: 631 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-10-31T16:19:00.838Z
+> Files: 637 tracked | Anatomy hits: 0 | Misses: 0
 
 > Project structure index. Auto-maintained by OpenWolf hooks and daemon.
 > Run `openwolf scan` to generate, or wait for the first Claude Code session.
@@ -128,6 +128,12 @@
 - `InboxList.vue` — Vue: setup (~1022 tok)
 - `InboxReply.vue` — Vue: setup (~559 tok)
 
+## app/components/gear/
+
+- `GearCard.vue` — Vue: setup (~642 tok)
+- `GearCartLine.vue` — Vue: setup (~686 tok)
+- `GearIcon.vue` — Vue: setup (~317 tok)
+
 ## app/components/guide/
 
 - `CostBars.vue` — Vue: setup, TS (~586 tok)
@@ -139,12 +145,14 @@
 
 - `HomeComingUp.vue` — Vue: setup (~614 tok)
 - `HomeGlance.vue` — Vue: setup (~731 tok)
+- `HomeGuest.vue` — Vue: setup (~893 tok)
 - `HomeHero.vue` — Vue: setup (~521 tok)
+- `HomeHeroFrame.vue` — Vue: setup (~299 tok)
 - `HomeIntroCard.vue` — Vue: setup (~454 tok)
 - `HomePanel.vue` — Vue: setup (~283 tok)
 - `HomeShortlistChanges.vue` — Vue: setup (~698 tok)
 - `HomeSignedIn.vue` — Vue: setup (~750 tok)
-- `HomeWelcome.vue` — Vue: setup (~412 tok)
+- `HomeWelcome.vue` — Vue: setup (~610 tok)
 
 ## app/components/shortlist/
 
@@ -897,10 +905,11 @@
 - `care.ts` — Care network: vets, trainers, groomers, kennel builders, equipment suppliers and boarding. (~1087 tok)
 - `compare.ts` — Numeric key for picking the best dog on this row; lower wins unless `higherIsBetter` (~439 tok)
 - `dashboard.ts` — Store dashboard: navigation and example figures until accounts and the API exist. (~1396 tok)
+- `gear.ts` — Gear shop: normal products with sizes and quantities. Dogs never go in the cart. (~1305 tok)
 - `gen.ts` — Read and write values on nested objects by dotted path ("owner.name") (~181 tok)
 - `inbox.ts` — How the buyer hears about replies, besides Dogeash itself (~1864 tok)
 - `legal.ts` — Terms of use and privacy policy, in plain words. DRAFTS: both must be reviewed by a Nigerian lawyer (~1282 tok)
-- `market.ts` — The marketplace rows on Home: which dogs and stores each one shows (~234 tok)
+- `market.ts` — The marketplace rows on Home: which dogs and stores each one shows (~545 tok)
 - `myDogs.ts` — Dogs a buyer owns after handover: a living record of health, training and care. (~928 tok)
 - `sell.ts` — The Sell with us page: why kennels list on Dogeash, how verification works, what to have ready, and (~915 tok)
 - `signUpIntents.ts` — "What brings you here?" on sign-up. Each answer changes the heading, the fields, the side panel (~1043 tok)
