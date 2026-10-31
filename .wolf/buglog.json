@@ -216,6 +216,60 @@
       "last_seen": "2026-10-31T16:17:13.807Z",
       "occurrences": 1,
       "related_bugs": []
+    },
+    {
+      "error_message": "Incorrect value in code",
+      "file": "app/components/PatrolMap.vue",
+      "root_cause": "Had 'day'",
+      "fix": "Changed to `cover`",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "vue"
+      ],
+      "status": "candidate",
+      "observed_worktree": "/Users/dave/Documents/personalProjects/dogeash",
+      "id": "bug-013",
+      "timestamp": "2026-10-31T16:24:47.020Z",
+      "last_seen": "2026-10-31T16:24:47.020Z",
+      "occurrences": 1,
+      "related_bugs": []
+    },
+    {
+      "error_message": "Incorrect value in code",
+      "file": "app/components/PatrolMap.vue",
+      "root_cause": "Had \"block overflow-hidden rounded-[8%/10.667%]\"",
+      "fix": "Changed to 'block overflow-hidden'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "vue"
+      ],
+      "status": "candidate",
+      "observed_worktree": "/Users/dave/Documents/personalProjects/dogeash",
+      "id": "bug-014",
+      "timestamp": "2026-10-31T16:24:48.318Z",
+      "last_seen": "2026-10-31T16:24:48.318Z",
+      "occurrences": 1,
+      "related_bugs": []
+    },
+    {
+      "error_message": "Incorrect value in code",
+      "file": "app/components/PatrolMap.vue",
+      "root_cause": "Had \"block h-auto w-full max-w-full\"",
+      "fix": "Changed to 'block max-w-full'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "vue"
+      ],
+      "status": "candidate",
+      "observed_worktree": "/Users/dave/Documents/personalProjects/dogeash",
+      "id": "bug-015",
+      "timestamp": "2026-10-31T16:24:49.449Z",
+      "last_seen": "2026-10-31T16:24:49.449Z",
+      "occurrences": 1,
+      "related_bugs": []
     }
   ],
   "applied_observations": {
@@ -230,7 +284,10 @@
     "999ded9d-bfe7-47ca-a310-38fbd72ad8e5": true,
     "407a0c57-4b07-456e-b752-72fd8a11f0d0": true,
     "e49a7259-0c22-4581-ad30-5b5868eebb12": true,
-    "35261b85-e481-4de8-beee-d4e55763072d": true
+    "35261b85-e481-4de8-beee-d4e55763072d": true,
+    "981bf5e7-d797-435d-88fb-2f5f8f777f2b": true,
+    "b17e7302-bf16-43cc-9958-7153d87f07bd": true,
+    "2a9e4617-6420-40f2-b450-8d2349a037f4": true
   },
-  "next_id": 13
+  "next_id": 16
 }

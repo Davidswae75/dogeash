@@ -1,13 +1,13 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-10-31T16:19:00.838Z",
+    "lastScanned": "2026-10-31T16:24:49.383Z",
     "fileCount": 637,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "e010f0e678d02150f2349cc32f1c2e83f0bc7dd032ad3c26abb579e2fed608e2",
-    "storeUpdatedAt": "2026-10-31T16:19:00.861Z",
-    "rootHash": "d9eb1638002a7887"
+    "renderedHash": "b784c9062d89ce2d0ae6a44d91db40099a1a85629f2f0e94808d17d4289d70f4",
+    "storeUpdatedAt": "2026-10-31T16:24:49.424Z",
+    "rootHash": "b85b122470f87496"
   },
   "files": {
     ".gitignore": {
@@ -240,14 +240,13 @@
       "importance": 0.4429
     },
     "app/components/PatrolMap.vue": {
-      "description": "Vue: setup, TS, 1 props",
-      "tokens": 325,
-      "hash": "afc1893704198eb8",
-      "size": 1216,
-      "mtimeMs": 1792903496573.1636,
-      "updatedAt": "2026-10-26T02:55:55.566Z",
-      "source": "scan",
-      "importance": 0.4429
+      "description": "Vue: setup",
+      "tokens": 374,
+      "hash": "e2a57e55df3e899b",
+      "size": 1400,
+      "mtimeMs": 1793463889230.3489,
+      "updatedAt": "2026-10-31T16:24:49.382Z",
+      "source": "hook"
     },
     "app/components/PromiseStrip.vue": {
       "description": "Vue: setup, TS",
@@ -6709,11 +6708,11 @@
     },
     "app/components/home/HomeHero.vue": {
       "description": "Vue: setup",
-      "tokens": 521,
-      "hash": "dffdc438f3535f8a",
-      "size": 1953,
-      "mtimeMs": 1793463540648.5884,
-      "updatedAt": "2026-10-31T16:19:00.837Z",
+      "tokens": 444,
+      "hash": "6ad65e7c04cf37c4",
+      "size": 1667,
+      "mtimeMs": 1793463883774.958,
+      "updatedAt": "2026-10-31T16:24:43.969Z",
       "source": "hook"
     },
     "app/pages/index.vue": {
@@ -6988,11 +6987,11 @@
     },
     "app/components/home/HomeWelcome.vue": {
       "description": "Vue: setup",
-      "tokens": 610,
-      "hash": "b8bce1b9171438a9",
-      "size": 2288,
-      "mtimeMs": 1793463431102.303,
-      "updatedAt": "2026-10-31T16:17:11.272Z",
+      "tokens": 450,
+      "hash": "3ae3ce707f4a36be",
+      "size": 1689,
+      "mtimeMs": 1793463885274.7307,
+      "updatedAt": "2026-10-31T16:24:45.536Z",
       "source": "hook"
     },
     "app/components/home/HomeGlance.vue": {
@@ -7688,11 +7687,11 @@
     },
     "app/components/home/HomeHeroFrame.vue": {
       "description": "Vue: setup",
-      "tokens": 299,
-      "hash": "5704dd162dc9689a",
-      "size": 1118,
-      "mtimeMs": 1793462948437.9011,
-      "updatedAt": "2026-10-31T16:09:08.644Z",
+      "tokens": 215,
+      "hash": "01848286b002296b",
+      "size": 806,
+      "mtimeMs": 1793463882357.7878,
+      "updatedAt": "2026-10-31T16:24:42.563Z",
       "source": "hook"
     },
     "app/components/home/HomeGuest.vue": {

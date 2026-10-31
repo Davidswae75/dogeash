@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-10-31T16:19:00.838Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-10-31T16:24:49.383Z
 > Files: 637 tracked | Anatomy hits: 0 | Misses: 0
 
 > Project structure index. Auto-maintained by OpenWolf hooks and daemon.
@@ -64,7 +64,7 @@
 - `MarketRow.vue` — Vue: setup (~655 tok)
 - `OwnListingActions.vue` — Vue: setup (~521 tok)
 - `OwnListingBanner.vue` — Vue: setup (~276 tok)
-- `PatrolMap.vue` — Vue: setup, TS, 1 props (~325 tok)
+- `PatrolMap.vue` — Vue: setup (~374 tok)
 - `PromiseStrip.vue` — Vue: setup, TS (~145 tok)
 - `PropertyPicker.vue` — Vue: setup, TS, emits (~316 tok)
 - `ProtectionLevelDetail.vue` — Vue: setup (~1152 tok)
@@ -146,13 +146,13 @@
 - `HomeComingUp.vue` — Vue: setup (~614 tok)
 - `HomeGlance.vue` — Vue: setup (~731 tok)
 - `HomeGuest.vue` — Vue: setup (~893 tok)
-- `HomeHero.vue` — Vue: setup (~521 tok)
-- `HomeHeroFrame.vue` — Vue: setup (~299 tok)
+- `HomeHero.vue` — Vue: setup (~444 tok)
+- `HomeHeroFrame.vue` — Vue: setup (~215 tok)
 - `HomeIntroCard.vue` — Vue: setup (~454 tok)
 - `HomePanel.vue` — Vue: setup (~283 tok)
 - `HomeShortlistChanges.vue` — Vue: setup (~698 tok)
 - `HomeSignedIn.vue` — Vue: setup (~750 tok)
-- `HomeWelcome.vue` — Vue: setup (~610 tok)
+- `HomeWelcome.vue` — Vue: setup (~450 tok)
 
 ## app/components/shortlist/
 

@@ -280,3 +280,11 @@ description: chronological action log per session, consolidated weekly
 <!-- session:NTRiNTc5ZGYtOGZhNy00N2EwLWFhNmQtMWYxNjBmYTU5YzY0 -->
 | 2026-10-31T16:18:50.713Z | New guest hero headline on dark card with patrol GIF; signed-in hero on dark card with night patrol photo and link chips; shared homeHeroChip | app/components/home/HomeHero.vue,app/components/home/HomeWelcome.vue,app/utils/market.ts | Screenshots checked in light/dark at 1280 and 390 |
 | 17:19 | Edited app/components/home/HomeHero.vue | inline fix | ~8 |
+| 17:24 | Created app/components/home/HomeHeroFrame.vue | — | ~215 |
+| 17:24 | Created app/components/home/HomeHero.vue | — | ~444 |
+| 17:24 | Created app/components/home/HomeWelcome.vue | — | ~450 |
+| 17:24 | Edited app/components/PatrolMap.vue | 1→2 lines | ~47 |
+| 17:24 | Edited app/components/PatrolMap.vue | "block overflow-hidden rou" → "[" | ~27 |
+| 17:24 | Edited app/components/PatrolMap.vue | "block h-auto w-full max-w" → "[" | ~30 |
+<!-- session:NTRiNTc5ZGYtOGZhNy00N2EwLWFhNmQtMWYxNjBmYTU5YzY0 -->
+| 2026-10-31T16:26:56.045Z | Guest hero patrol GIF now fades into content like the signed-in photo via shared HomeHeroFrame; PatrolMap gained cover prop | app/components/home/HomeHeroFrame.vue,app/components/home/HomeHero.vue,app/components/home/HomeWelcome.vue,app/components/PatrolMap.vue | Screenshots at 1280, 768, 390 |
