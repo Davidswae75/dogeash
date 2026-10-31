@@ -13,7 +13,7 @@ const items = accountNav.flatMap(g => g.items)
 
 <template>
   <!-- Phones: one scrolling row of tabs -->
-  <nav aria-label="Account" class="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] lg:hidden">
+  <nav v-center-tab aria-label="Account" class="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] lg:hidden">
     <NuxtLink
       v-for="item in items"
       :key="item.to"

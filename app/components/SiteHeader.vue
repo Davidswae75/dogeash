@@ -78,7 +78,8 @@ watch(() => route.fullPath, () => { menuOpen.value = false })
     >
       <div class="overflow-hidden">
         <span :class="['block h-1 origin-left hazard-thin transition-transform duration-500 ease-calm', menuOpen ? 'scale-x-100' : 'scale-x-0']" aria-hidden="true" />
-        <nav class="flex flex-col gap-1 px-4 pt-2 pb-5" aria-label="Main">
+        <!-- Scrolls inside itself: the header is sticky, so short phones couldn't otherwise reach the bottom -->
+        <nav class="flex max-h-[calc(100dvh-var(--header-height)-4px)] flex-col gap-1 overflow-y-auto px-4 pt-2 pb-5" aria-label="Main">
           <NuxtLink
             v-for="(link, i) in siteNavMain"
             :key="link.to"

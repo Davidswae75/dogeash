@@ -238,3 +238,10 @@ description: chronological action log per session, consolidated weekly
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
+| 22:39 | Edited app/components/SiteHeader.vue | CSS: itself | ~67 |
+| 22:40 | Session end: 1 writes across 1 files (SiteHeader.vue) | 1 reads | ~615 tok |
+<!-- session:MjllYzU1N2MtYWJmNC00OWE0LWE3MjMtNjFhMjVlNTUxNjE4 -->
+| 2026-10-31T04:05:23.631Z | Header nav decluttered: main links exposed, Care and gear / Learn / For stores dropdowns (utils/siteNav.ts, SiteNavMenu.vue); guest Open a store moved to For stores; phone menu grouped and scrolls inside itself | app/utils/siteNav.ts,app/components/SiteNavMenu.vue,app/components/SiteHeader.vue | typecheck clean; desktop dropdown checked in browser; short-phone scroll checked by measurement |
+| 05:24 | Created app/plugins/centerTab.ts | — | ~477 |
+<!-- session:MjllYzU1N2MtYWJmNC00OWE0LWE3MjMtNjFhMjVlNTUxNjE4 -->
+| 2026-10-31T04:32:34.691Z | v-center-tab directive (plugins/centerTab.ts) centres clicked tab in sideways rows: inbox filters, account tabs, gear categories, care chips, store cities, store page tabs. Dogs page filters sticky with own scroll on wide screens | app/plugins/centerTab.ts,app/pages/dogs/index.vue,app/pages/gear/index.vue,app/pages/care/index.vue,app/pages/stores/index.vue,app/pages/stores/[slug].vue,app/components/account/AccountNav.vue,app/components/dashboard/DashboardInboxList.vue | typecheck clean; sticky and centring measured in browser; smooth animation not seen (pane hidden) |

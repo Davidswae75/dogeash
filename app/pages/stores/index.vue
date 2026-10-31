@@ -123,7 +123,7 @@ const eyebrow = 'text-xs leading-4 font-bold tracking-[.08em] uppercase'
     <!-- Toolbar: city tabs, filters, sort -->
     <div class="sticky top-[calc(var(--header-height)+env(safe-area-inset-top,0px))] z-10 -mx-4 bg-canvas px-4 sm:-mx-8 sm:px-8">
       <div class="flex items-center gap-3 border-b border-line">
-        <nav aria-label="City" class="-mb-px flex min-w-0 flex-1 gap-1 overflow-x-auto [scrollbar-width:none]">
+        <nav v-center-tab aria-label="City" class="-mb-px flex min-w-0 flex-1 gap-1 overflow-x-auto [scrollbar-width:none]">
           <button
             v-for="c in ['', ...cityTabs]"
             :key="c || 'all'"

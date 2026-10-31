@@ -29,7 +29,7 @@ const eyebrow = 'text-xs leading-4 font-bold tracking-[.08em] uppercase'
       <aside class="flex min-w-0 flex-col gap-6" aria-label="Filters">
         <div class="flex flex-col gap-2.5">
           <span :class="[eyebrow, 'text-ink-muted']">Service</span>
-          <div class="flex gap-2 overflow-x-auto [scrollbar-width:none] lg:flex-wrap lg:overflow-visible">
+          <div v-center-tab class="flex gap-2 overflow-x-auto [scrollbar-width:none] lg:flex-wrap lg:overflow-visible">
             <Button size="sm" :variant="type === '' ? 'default' : 'outline'" :aria-pressed="type === ''" class="shrink-0 rounded-full!" @click="type = ''">All</Button>
             <Button
               v-for="option in typeOptions"
@@ -44,11 +44,11 @@ const eyebrow = 'text-xs leading-4 font-bold tracking-[.08em] uppercase'
         </div>
         <div class="flex flex-col gap-2.5">
           <span :class="[eyebrow, 'text-ink-muted']">City</span>
-          <FilterChips v-model="cities" :options="cityOptions" label="City" class="flex-nowrap overflow-x-auto [scrollbar-width:none] lg:flex-wrap lg:overflow-visible" item-class="shrink-0" />
+          <FilterChips v-center-tab v-model="cities" :options="cityOptions" label="City" class="flex-nowrap overflow-x-auto [scrollbar-width:none] lg:flex-wrap lg:overflow-visible" item-class="shrink-0" />
         </div>
         <div class="flex flex-col gap-2.5">
           <span :class="[eyebrow, 'text-ink-muted']">Show only</span>
-          <FilterChips v-model="options" :options="trustOptions" label="Show only" class="flex-nowrap overflow-x-auto [scrollbar-width:none] lg:flex-wrap lg:overflow-visible" item-class="shrink-0" />
+          <FilterChips v-center-tab v-model="options" :options="trustOptions" label="Show only" class="flex-nowrap overflow-x-auto [scrollbar-width:none] lg:flex-wrap lg:overflow-visible" item-class="shrink-0" />
         </div>
       </aside>
 

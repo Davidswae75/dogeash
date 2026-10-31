@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-10-27T22:09:22.338Z
-> Files: 630 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-10-31T04:24:30.882Z
+> Files: 631 tracked | Anatomy hits: 0 | Misses: 0
 
 > Project structure index. Auto-maintained by OpenWolf hooks and daemon.
 > Run `openwolf scan` to generate, or wait for the first Claude Code session.
@@ -75,7 +75,7 @@
 - `ShortlistButton.vue` — Vue: setup (~518 tok)
 - `SiteFooter.vue` — Vue: setup, TS (~400 tok)
 - `SiteFooterMinimal.vue` — Vue: setup (~302 tok)
-- `SiteHeader.vue` — Vue: setup (~1557 tok)
+- `SiteHeader.vue` — Vue: setup (~1923 tok)
 - `StatusDot.vue` — Vue: setup, TS, 1 props (~98 tok)
 - `StoreAvatar.vue` — Vue: setup (~131 tok)
 - `StoreBanner.vue` — Vue: setup (~659 tok)
@@ -882,6 +882,7 @@
 
 ## app/plugins/
 
+- `centerTab.ts` — v-center-tab on a row of tabs that scrolls sideways: the clicked tab slides to the row's centre, (~477 tok)
 - `toast.client.ts` — Toasts confirm what a buyer just did. Use them through useNotify(), not useToast() directly, (~206 tok)
 
 ## app/types/

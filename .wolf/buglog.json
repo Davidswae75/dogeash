@@ -54,12 +54,31 @@
       "last_seen": "2026-10-27T01:46:52.595Z",
       "occurrences": 1,
       "related_bugs": []
+    },
+    {
+      "error_message": "Incorrect value in code",
+      "file": "app/components/SiteHeader.vue",
+      "root_cause": "Had \"flex flex-col gap-1 px-4 pt-2 pb-5\"",
+      "fix": "Changed to 't otherwise reach the bottom -->\n        <nav cla",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "vue"
+      ],
+      "status": "candidate",
+      "observed_worktree": "/Users/dave/Documents/personalProjects/dogeash",
+      "id": "bug-004",
+      "timestamp": "2026-10-30T21:39:28.434Z",
+      "last_seen": "2026-10-30T21:39:28.434Z",
+      "occurrences": 1,
+      "related_bugs": []
     }
   ],
   "applied_observations": {
     "002d7988-3ba3-4215-bdad-636d420696df": true,
     "1a9d344b-76f0-4dfb-b51c-f0063ef5f046": true,
-    "f276c833-dee6-49e1-9d05-af242eff834f": true
+    "f276c833-dee6-49e1-9d05-af242eff834f": true,
+    "a05f9295-a116-4492-a231-743f0e546524": true
   },
-  "next_id": 4
+  "next_id": 5
 }

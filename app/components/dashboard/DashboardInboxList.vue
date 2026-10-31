@@ -17,7 +17,7 @@ const unreadOf = (k: InboxKind | 'all') => props.items.filter(i => i.unread && (
 
 <template>
   <section class="flex min-w-0 flex-col overflow-hidden rounded-xl bg-surface ring-1 ring-line">
-    <nav aria-label="Filter inbox" class="flex gap-1.5 overflow-x-auto border-b border-line p-3 [scrollbar-width:none]">
+    <nav v-center-tab aria-label="Filter inbox" class="flex gap-1.5 overflow-x-auto border-b border-line p-3 [scrollbar-width:none]">
       <button
         v-for="k in (['all', ...kinds] as const)"
         :key="k"

@@ -121,7 +121,7 @@ const h2 = 'm-0 mega text-[clamp(26px,2.6vw,34px)] leading-none'
 
         <!-- Section tabs -->
         <nav aria-label="On this page" class="sticky top-[calc(var(--header-height)+env(safe-area-inset-top,0px))] z-10 -mx-4 mt-10 bg-canvas px-4 sm:mx-0 sm:px-0">
-          <ul class="relative m-0 flex list-none gap-1 overflow-x-auto border-b border-line p-0 [scrollbar-width:none]">
+          <ul v-center-tab class="relative m-0 flex list-none gap-1 overflow-x-auto border-b border-line p-0 [scrollbar-width:none]">
             <li v-for="s in sections" :key="s.id">
               <a
                 ref="tabEls"

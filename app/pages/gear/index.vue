@@ -19,7 +19,7 @@ const products = computed(() => sampleGear.filter(p => !category.value || p.cate
       <p class="m-0 max-w-[34em] text-[17px] leading-[27px] text-ink-muted">Everything your dog needs at home, from suppliers we have checked. Delivered to your gate.</p>
     </header>
 
-    <nav aria-label="Category" class="flex gap-1 overflow-x-auto border-b border-line [scrollbar-width:none]">
+    <nav v-center-tab aria-label="Category" class="flex gap-1 overflow-x-auto border-b border-line [scrollbar-width:none]">
       <button
         v-for="[value, label] in tabs"
         :key="value"

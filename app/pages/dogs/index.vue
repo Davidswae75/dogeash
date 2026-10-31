@@ -54,7 +54,8 @@ function clearFilters() {
     </div>
 
     <div class="grid gap-10 lg:grid-cols-[250px_1fr]">
-      <aside class="flex flex-col gap-6" aria-label="Filters">
+      <!-- Wide screens: stays in view while the dogs scroll, and scrolls itself if the window is too short for every filter -->
+      <aside class="flex flex-col gap-6 lg:sticky lg:top-[calc(var(--header-height)+16px)] lg:max-h-[calc(100dvh-var(--header-height)-32px)] lg:self-start lg:overflow-y-auto lg:pr-1 lg:pb-1 lg:[scrollbar-width:thin]" aria-label="Filters">
         <div class="flex flex-col gap-2.5">
           <span class="text-xs leading-4 font-bold tracking-[.08em] text-ink-muted uppercase">Property</span>
           <FilterChips v-model="properties" :options="propertyOptions" label="Property" />

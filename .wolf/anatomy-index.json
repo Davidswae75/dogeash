@@ -1,13 +1,13 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-10-27T22:09:22.338Z",
-    "fileCount": 630,
+    "lastScanned": "2026-10-31T04:24:30.882Z",
+    "fileCount": 631,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "b9f33215262d87a0d2be4f948a7ec7edd4755f7e28d4abaf321140e32c39de9b",
-    "storeUpdatedAt": "2026-10-27T22:09:22.436Z",
-    "rootHash": "674b41d6a0e30e93"
+    "renderedHash": "07e27aa5b63aab743d29450a2afba8879119af6b7f6e73b2edff0e8c21af18b8",
+    "storeUpdatedAt": "2026-10-31T04:24:30.939Z",
+    "rootHash": "d72a287a857747e1"
   },
   "files": {
     ".gitignore": {
@@ -321,13 +321,12 @@
     },
     "app/components/SiteHeader.vue": {
       "description": "Vue: setup",
-      "tokens": 1557,
-      "hash": "df405f7691d306e8",
-      "size": 2535,
-      "mtimeMs": 1792778732347.9111,
-      "updatedAt": "2026-10-27T21:45:42.665Z",
-      "source": "md-import",
-      "importance": 0.4429
+      "tokens": 1923,
+      "hash": "b3b0116581b0381a",
+      "size": 7209,
+      "mtimeMs": 1793396367550.5657,
+      "updatedAt": "2026-10-30T21:39:28.279Z",
+      "source": "hook"
     },
     "app/components/StatusDot.vue": {
       "description": "Vue: setup, TS, 1 props",
@@ -7615,6 +7614,15 @@
       "size": 2937,
       "mtimeMs": 1793138961982.5762,
       "updatedAt": "2026-10-27T22:09:22.331Z",
+      "source": "hook"
+    },
+    "app/plugins/centerTab.ts": {
+      "description": "v-center-tab on a row of tabs that scrolls sideways: the clicked tab slides to the row's centre,",
+      "tokens": 477,
+      "hash": "ab068fd32ecdb9cf",
+      "size": 1668,
+      "mtimeMs": 1793420670409.712,
+      "updatedAt": "2026-10-31T04:24:30.878Z",
       "source": "hook"
     }
   },
