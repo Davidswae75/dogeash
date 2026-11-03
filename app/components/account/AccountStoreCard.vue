@@ -2,6 +2,7 @@
 import { ArrowRight } from '@lucide/vue'
 import type { Store } from '~/utils/stores'
 import type { StoreRole } from '~/utils/storeRoles'
+import { storeActivityLine, storeRoles } from '~/utils/storeRoles'
 
 // "Your store" in the account menus: which store, your role, what's waiting, and the way into the dashboard
 const props = defineProps<{ store: Store, role: StoreRole }>()

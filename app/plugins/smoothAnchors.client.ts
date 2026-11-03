@@ -1,3 +1,6 @@
+import { defineNuxtPlugin, useRouter } from '#imports' // nuxt
+import { scrollBehavior, scrollToSection } from '~/utils/scroll'
+
 // Every jump within a page scrolls smoothly, except for people who've asked for reduced motion.
 // Page changes still start at the top instantly, and skip links stay instant so keyboard users aren't kept waiting.
 export default defineNuxtPlugin((nuxtApp) => {

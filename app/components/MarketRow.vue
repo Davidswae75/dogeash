@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ChevronLeft, ChevronRight } from '@lucide/vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 
 // A titled row that scrolls sideways, with arrows on wide screens and "See all".
 // Each slot child is one item; give items a fixed width (e.g. w-[300px]).

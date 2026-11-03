@@ -1,3 +1,6 @@
+import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { scrollToSection } from '~/utils/scroll'
+
 // Which section of a long page is in view, for tabs and contents lists, plus going to one smoothly.
 // In view means the last section whose top has passed `line` (just below the sticky header); at the
 // bottom of the page it's the last section, because short ones there can never scroll that far.

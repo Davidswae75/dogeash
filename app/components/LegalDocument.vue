@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { TriangleAlert } from '@lucide/vue'
 import type { LegalDoc } from '~/utils/legal'
+import { homeSection } from '~/utils/market'
 
 // A legal page: heading, draft notice, contents on the side (wide screens), numbered sections
 const props = defineProps<{ doc: LegalDoc }>()

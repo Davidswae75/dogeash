@@ -1,3 +1,6 @@
+import { defineNuxtRouteMiddleware, navigateTo } from '#imports' // nuxt
+import { useSession } from '~/composables/useSession'
+
 // Store dashboard pages: only people who work at a store. Visitors sign in first;
 // signed-in buyers without a store are shown how to open one.
 export default defineNuxtRouteMiddleware((to) => {

@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { ArrowRight } from '@lucide/vue'
 import { useEventListener } from '@vueuse/core'
+import { computed, ref, watch } from 'vue'
+import { useRoute } from '#imports' // nuxt
+import { useSession } from '~/composables/useSession'
+import { siteNavGroups, siteNavMain } from '~/utils/siteNav'
 
 // Main links stay exposed; the rest live in named dropdowns (groups in app/utils/siteNav.ts)
 const { user, initials, memberships, hasStore, signOut } = useSession()

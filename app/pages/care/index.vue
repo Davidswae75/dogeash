@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { Search } from '@lucide/vue'
+import { useSeoMeta } from '#imports' // nuxt
+import { useCareDirectory } from '~/composables/useCareDirectory'
+import { sampleCareProviders } from '~/utils/care'
 
 useSeoMeta({
   title: 'Vets, trainers and dog care · Dogeash',

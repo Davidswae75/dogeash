@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useId } from 'vue'
+
 const props = withDefaults(defineProps<{ variant?: 'marigold' | 'default' }>(), { variant: 'marigold' })
 const query = defineModel<string>({ default: '' })
 const emit = defineEmits<{ search: [query: string] }>()

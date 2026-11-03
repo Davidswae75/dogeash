@@ -1,13 +1,29 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useRecentlyViewed } from '~/composables/useRecentlyViewed'
+import { useShortlist } from '~/composables/useShortlist'
+import { useSession } from '~/composables/useSession'
+import { useSavedSearches } from '~/composables/useSavedSearches'
+import { filtersToQuery } from '~/utils/searchFilters'
+import { COMPARE_MAX } from '~/utils/compare'
+import { homeSection, marketRows } from '~/utils/market'
+import { propertyTypes } from '~/utils/protection'
+
 // Home for a signed-in buyer: no introductions, just their marketplace.
 // Welcome and search, activity tiles, what's coming up and what changed, then dogs picked for them.
 const { dogs: shortlist } = useShortlist()
 const { dogs: recentlyViewed } = useRecentlyViewed()
 
-const profile = sampleBuyerProfile
-const propertyLabel = propertyTypes.find(p => p.value === profile.property)?.label.toLowerCase()
-const matched = computed(() => marketRows.matchedTo(profile, shortlist.value.map(d => d.fileNo)))
-const savedSearchDogs = marketRows.savedSearch(sampleSavedSearch)
+// Matches come from the home profile; until it's filled in, a prompt takes its place
+const { user } = useSession()
+const profile = computed(() => user.value?.home ?? null)
+const propertyLabel = computed(() => propertyTypes.find(p => p.value === profile.value?.property)?.label.toLowerCase())
+const matched = computed(() => (profile.value ? marketRows.matchedTo(profile.value, shortlist.value.map(d => d.fileNo)) : []))
+// The first saved search with alerts on; the row is left out until there is one
+const { searches } = useSavedSearches()
+const search = computed(() => searches.value.find(s => s.alerts) ?? searches.value[0])
+const savedSearchDogs = computed(() => (search.value ? marketRows.savedSearch(search.value.filters) : []))
+const searchLink = computed(() => (search.value ? `/dogs?${new URLSearchParams(filtersToQuery(search.value.filters))}` : '/dogs'))
 const topStores = marketRows.topStores()
 
 const section = homeSection
@@ -28,12 +44,13 @@ const card = 'w-[280px] sm:w-[300px]'
 
     <div :class="[section, 'flex flex-col gap-14']">
       <ClientOnly>
-        <MarketRow v-if="shortlist.length" title="Your" outline="shortlist" :subtitle="`${shortlist.length} saved · compare up to ${COMPARE_MAX}, then book one visit per store`" see-all="/shortlist">
+        <MarketRow v-if="shortlist.length" title="Your" outline="shortlist" :subtitle="`${shortlist.length} saved · compare up to ${COMPARE_MAX}, then book one visit per store`" see-all="/account/shortlist">
           <K9Card v-for="dog in shortlist" :key="dog.fileNo" :dog="dog" :class="card" />
         </MarketRow>
       </ClientOnly>
 
       <MarketRow
+        v-if="profile"
         title="Matched to your"
         :outline="propertyLabel"
         :subtitle="`From your profile: ${propertyLabel} in ${profile.city}${profile.children ? ', children at home' : ''}. ${profile.city} dogs first.`"
@@ -43,8 +60,9 @@ const card = 'w-[280px] sm:w-[300px]'
           <K9Card v-for="dog in matched" :key="dog.fileNo" :dog="dog" :class="card" />
         </ClientOnly>
       </MarketRow>
+      <AccountProfilePrompt v-else />
 
-      <MarketRow title="Saved search" :outline="sampleSavedSearch.label" :subtitle="`${savedSearchDogs.length} available now. We'll tell you when a new one is listed.`" :see-all="sampleSavedSearch.to">
+      <MarketRow v-if="search" title="Saved search" :outline="search.label" :subtitle="`${savedSearchDogs.length} available now. We'll tell you when a new one is listed.`" :see-all="searchLink">
         <K9Card v-for="dog in savedSearchDogs" :key="dog.fileNo" :dog="dog" :class="card" />
       </MarketRow>
 

@@ -1,17 +1,31 @@
 <script setup lang="ts">
 import { ArrowUpRight } from '@lucide/vue'
 import { cn } from '~/lib/utils'
+import { computed } from 'vue'
+import { useShortlist } from '~/composables/useShortlist'
+import { useVisits } from '~/composables/useVisits'
+import { useSavedSearches } from '~/composables/useSavedSearches'
+import { filtersToQuery } from '~/utils/searchFilters'
+import { visitDay } from '~/utils/time'
+import { COMPARE_MAX } from '~/utils/compare'
+import { marketRows } from '~/utils/market'
 
 // Four tiles under the welcome: shortlist, compare, next visit, saved search. Each one opens its page.
 const { count, compareDogs } = useShortlist()
-const next = sampleBookings[0]
-const searchMatches = marketRows.savedSearch(sampleSavedSearch).length
+const { upcoming } = useVisits()
+const next = computed(() => upcoming.value[0])
+// The first saved search with alerts on (or the first at all)
+const { searches } = useSavedSearches()
+const search = computed(() => searches.value.find(s => s.alerts) ?? searches.value[0])
+const searchMatches = computed(() => (search.value ? marketRows.savedSearch(search.value.filters).length : 0))
 
 const tiles = computed(() => [
-  { label: 'Shortlist', value: String(count.value), text: count.value ? 'Dogs saved to compare and visit' : 'Tap the heart on any dog', to: '/shortlist', tone: 'surface' },
-  { label: 'Comparing', value: `${compareDogs.value.length}/${COMPARE_MAX}`, text: compareDogs.value.length > 1 ? 'Ready to compare side by side' : 'Tick 2 or 3 dogs on your shortlist', to: compareDogs.value.length > 1 ? '/shortlist/compare' : '/shortlist', tone: 'surface' },
-  ...(next ? [{ label: next.kind, value: next.day, text: `${next.time} · ${next.with}`, to: next.to, tone: 'marigold' }] : []),
-  { label: 'Saved search', value: String(searchMatches), text: `Dogs matching ${sampleSavedSearch.label}`, to: sampleSavedSearch.to, tone: 'night' },
+  { label: 'Shortlist', value: String(count.value), text: count.value ? 'Dogs saved to compare and visit' : 'Tap the heart on any dog', to: '/account/shortlist', tone: 'surface' },
+  { label: 'Comparing', value: `${compareDogs.value.length}/${COMPARE_MAX}`, text: compareDogs.value.length > 1 ? 'Ready to compare side by side' : 'Tick 2 or 3 dogs on your shortlist', to: compareDogs.value.length > 1 ? '/account/shortlist/compare' : '/account/shortlist', tone: 'surface' },
+  ...(next.value ? [{ label: 'Next visit', value: visitDay(next.value.day).label, text: `${next.value.slot} · ${next.value.storeName}`, to: '/account/bookings', tone: 'marigold' }] : []),
+  search.value
+    ? { label: 'Saved search', value: String(searchMatches.value), text: `Dogs matching ${search.value.label}`, to: `/dogs?${new URLSearchParams(filtersToQuery(search.value.filters))}`, tone: 'night' }
+    : { label: 'Saved searches', value: '0', text: 'Save a search on Find a guard dog', to: '/dogs', tone: 'night' },
 ])
 
 const tones: Record<string, string> = {

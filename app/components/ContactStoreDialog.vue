@@ -2,9 +2,13 @@
 import { MessageSquare } from '@lucide/vue'
 import type { Dog } from '~/utils/dogs'
 import type { Store } from '~/utils/stores'
+import { computed, ref, watch } from 'vue'
+import { useAccountGate } from '~/composables/useAccountGate'
+import { useConversations } from '~/composables/useConversations'
+import { useNotify } from '~/composables/useNotify'
 
 // Message a store, optionally about one dog. Needs an account (signed-out visitors get the sign-in dialog first).
-// Messaging isn't connected yet, so sending shows a preview and a toast.
+// Sends for real: the message lands in the store's inbox and in your Messages (useConversations).
 const props = withDefaults(defineProps<{
   store: Store
   dog?: Dog
@@ -29,10 +33,17 @@ const prompts = computed(() => props.dog
   ? [`Is ${props.dog.name} still available?`, `Can I visit to meet ${props.dog.name} this week?`, `How is ${props.dog.name} with children and visitors?`]
   : ['Which of your dogs would suit a family compound?', 'Can I visit the kennel this week?', 'Do you deliver and train at the buyer\'s home?'])
 
-function send() {
+const conversations = useConversations()
+const sending = ref(false)
+
+async function send() {
   if (message.value.trim().length < 10) return (error.value = 'Write a little more so the store knows what you need.')
-  notify.messageSent(props.store.name, props.store.replies)
+  sending.value = true
+  const result = await conversations.start(props.store.id, props.dog?.fileNo, message.value)
+  sending.value = false
+  if (result.error) return (error.value = result.error)
   open.value = false
+  notify.messageSent(props.store.name, props.store.replies, result.id!)
 }
 
 watch(open, (isOpen) => {
@@ -73,8 +84,8 @@ watch(message, () => { error.value = '' })
         <Textarea id="contact-message" v-model="message" rows="4" placeholder="Write your message" class="border-line-strong" />
         <p v-if="error" class="m-0 text-sm font-semibold text-danger" role="alert">{{ error }}</p>
         <DialogFooter class="flex-col gap-3 sm:flex-col">
-          <Button type="submit" variant="marigold" class="w-full">Send message</Button>
-          <p class="m-0 text-center text-xs text-ink-muted">Preview: messages aren't sent yet. Your phone number is never shown to the store.</p>
+          <Button type="submit" variant="marigold" class="w-full" :loading="sending">Send message</Button>
+          <p class="m-0 text-center text-xs text-ink-muted">The store sees your name, not your phone number or email. Replies show in Messages.</p>
         </DialogFooter>
       </form>
     </DialogContent>

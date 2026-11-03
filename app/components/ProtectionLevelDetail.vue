@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { Check, Minus } from '@lucide/vue'
 import type { ProtectionLevel } from '~/utils/protection'
+import { formatNaira, sampleDogs } from '~/utils/dogs'
+import { propertyTypes, protectionLevelDetails, protectionLevels } from '~/utils/protection'
 
 // One level on the Protection levels page: the number, what the dog does and won't do,
 // who it suits, the price range on Dogeash today, and dogs at that level

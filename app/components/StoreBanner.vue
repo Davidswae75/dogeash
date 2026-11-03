@@ -2,6 +2,7 @@
 import type { HTMLAttributes } from 'vue'
 import type { Store } from '~/utils/stores'
 import { cn } from '~/lib/utils'
+import { computed } from 'vue'
 
 // The store's banner until stores upload their own: initials set huge on one of the
 // brand blocks, a dashed patrol route, and the store's file line in mono.

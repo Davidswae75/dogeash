@@ -1,5 +1,8 @@
 import { useLocalStorage } from '@vueuse/core'
 import type { RemovableRef } from '@vueuse/core'
+import { computed } from 'vue'
+import { useSession } from './useSession'
+import { COMPARE_MAX } from '~/utils/compare'
 
 // Lists (dog file numbers, gear cart lines) kept in this browser per person: one for the guest, one per account.
 // Stored as { guest: [...], 'BYR-0417': [...] } under `dogeash-<name>`; older plain arrays count as the guest's.
@@ -38,17 +41,20 @@ export function useAccountList(name: AccountListName) {
 }
 
 // On sign-in: put the guest's items in front of the account's own, drop duplicates, clear the guest.
-// Returns how many shortlisted dogs were new to the account.
-export function mergeGuestLists(accountId: string) {
-  let movedToShortlist = 0
-  for (const name of ['shortlist', 'compare', 'recently-viewed', 'cart'] as const) {
+// For lists still kept in the browser; the shortlist and compare picks go to Supabase (useSavedDogs).
+export function mergeGuestLists(accountId: string, names: AccountListName[] = ['recently-viewed', 'cart']) {
+  for (const name of names) {
     const all = owners(name)
     const guest = all[GUEST] ?? []
     if (!guest.length) continue
-    const mine = all[accountId] ?? []
-    if (name === 'shortlist') movedToShortlist = guest.filter(f => !mine.includes(f)).length
-    write(name, accountId, [...new Set([...guest, ...mine])])
+    write(name, accountId, [...new Set([...guest, ...(all[accountId] ?? [])])])
     write(name, GUEST, [])
   }
-  return movedToShortlist
+}
+
+// Hand over the guest's list and clear it (when it moves somewhere else, such as Supabase)
+export function takeGuestList(name: AccountListName) {
+  const guest = owners(name)[GUEST] ?? []
+  if (guest.length) write(name, GUEST, [])
+  return guest
 }

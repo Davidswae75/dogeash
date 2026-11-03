@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import type { IconName } from '~/components/AppIcon.vue'
 import type { GuideRating } from '~/utils/guide'
+import { useSeoMeta } from '#imports' // nuxt
+import { useSectionSpy } from '~/composables/useSectionSpy'
+import { guideBenefits, guideComparison, guideComparisonOptions, guideDrawbacks, guideFaqs, guideImages, guideLevels, guidePoisoningSteps, guideSections, guideSuitsYouIf, guideThinkTwiceIf } from '~/utils/guide'
 
 useSeoMeta({
   title: "Should you get a guard dog? Buyer's guide · Dogeash",

@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { Star } from '@lucide/vue'
 import type { CareProvider } from '~/utils/care'
+import { computed } from 'vue'
+import { careProviderSlug, careTypes } from '~/utils/care'
+import { formatNaira } from '~/utils/dogs'
+import { storesForProvider } from '~/utils/stores'
 
 // A provider in the directory: who they are, whether Dogeash has checked them, and a way to book
 const props = defineProps<{ provider: CareProvider }>()

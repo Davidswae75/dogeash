@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { HTMLAttributes } from 'vue'
 import type { FieldInputProps } from './FieldInput.vue'
+import { getNestedValue, setNestedValue } from '~/utils/gen'
 
 // Build a form's fields from a list instead of writing each one out.
 // Each field validates through the surrounding vee-validate form (useForm) by its `name`.

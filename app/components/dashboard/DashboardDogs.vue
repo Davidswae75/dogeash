@@ -1,5 +1,10 @@
 <script setup lang="ts">
 import { ChevronRight } from '@lucide/vue'
+import { computed, ref } from 'vue'
+import { useStoreContext } from '~/composables/useStoreContext'
+import { dashboardDogStats } from '~/utils/dashboard'
+import { formatNaira } from '~/utils/dogs'
+import { storeSummary } from '~/utils/stores'
 
 // The store's dogs with how each is doing: level, status, enquiries and views, filtered by status
 const { store } = useStoreContext()

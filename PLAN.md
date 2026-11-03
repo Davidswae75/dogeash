@@ -89,20 +89,21 @@ The goal: someone can land, understand Dogeash, browse dogs and read a full K9 f
 
 ## Phase 2 · Backend and accounts
 
-- [ ] **Decide** the stack: Supabase, or Nuxt server routes + Postgres (see Open decisions)
-- [ ] Database schema for dogs, sellers, inspections, users, reservations
+- [x] Stack: Supabase
+- [~] Supabase foundation: `@nuxtjs/supabase` (loads only when `.env` has keys), first migration in `supabase/migrations/`, seed from the sample data (`npm run db:seed`), access-rule tests without Docker (`npm run db:test`). Still to do: create the project and apply them
+- [~] Database schema: profiles, stores, store members, dogs, shortlists, saved searches, conversations, messages and kennel visits done, with row level security (`npm run db:test`). Still to come: care bookings, inspections, reservations, photo storage
 - [ ] Separate database `id` (uuid) from the public `fileNo` (done in the model; carry into the schema)
 - [ ] Image and video storage for dog photos and training videos
-- [ ] Accounts and sign-in (email + phone OTP)
+- [~] Accounts with Supabase Auth: email and password, or a 6-digit code by email; sign-up confirms the email with a code; forgot password by code. Profile (name, phone, city) and store memberships load from the database (`useSession`, `plugins/account.ts`, `useAuth`). Email templates in `supabase/email-templates/`. Phone sign-in waits for an SMS provider
 - [~] One sign-in page (`/sign-in`) for everyone: buyers, store owners and staff, care providers, inspectors and admins
   - UI built (`app/layouts/auth.vue`): email + password, phone or email one-time code, validation, resend timer; ends on a preview of where buyers and stores land
-  - [ ] Connect to real accounts, then remove the preview step
+  - [x] Connect to real accounts, then remove the preview step
   - [x] Sign-in fields built with `<Fields>` + vee-validate + Zod schemas (`app/utils/auth.ts`)
   - [x] Sign-up page (`/sign-up`): what brings you here, name, email, phone, password with strength meter, terms; phone code step; welcome with next steps (preview, nothing saved)
-  - [~] Forgot-password page (`/forgot-password`): email, code, new password, done (preview: nothing sent)
+  - [x] Forgot-password page (`/forgot-password`): email, code, new password, signed in
   - [~] Terms of use and privacy policy pages (`/terms`, `/privacy`): plain-words drafts marked as drafts; need a lawyer's review (Phase 8)
   - [ ] Line under the form: "Selling on Dogeash? Sign in here with the account you used to apply."
-  - [ ] After sign-in, send each person where they belong: buyers back to where they were, stores to the dashboard, providers to their bookings, staff to admin
+  - [~] After sign-in, send each person where they belong: back to where they were, store members to the dashboard, everyone else Home (providers and staff later)
 - [ ] Roles: buyer, store member, care provider, inspector, admin (one account can hold several)
 - [ ] Account menu switch between "Buying" and "My store" for people who do both
 - [ ] Route guards: dashboard and admin pages need the right role; everyone else is sent to sign-in or their profile
@@ -129,7 +130,7 @@ Sellers are called **stores** everywhere buyers can see them. A store is a kenne
 - [ ] Listing statuses: draft → pending review → available → reserved → sold / withdrawn
 - [ ] Puppy and litter listings (separate shape, no training section)
 - [ ] Stud and breeding listings
-- [~] Store inbox (`/dashboard/inbox`, from the bell and the sidebar): messages, booking requests, payments, reviews and Dogeash updates in one list, filtered by kind and role; conversations with a reply box ("Sending as" the store), bookings and payments with actions. Messages will live in the database; email, SMS or WhatsApp tell the other person, with a link back (`?id=`). Reply-by-email later via inbound email
+- [~] Store inbox (`/dashboard/inbox`, from the bell and the sidebar): real buyer conversations (reply as the store, quick replies) and kennel visit requests (confirm, decline, mark done, with a note for the buyer), filtered by kind and role. Still to come: payments, reviews and Dogeash updates; email, SMS or WhatsApp telling the other person, with a link back (`?id=`); reply-by-email via inbound email
 
 ## Phase 4 · Inspections and trust
 
@@ -147,7 +148,7 @@ Sellers are called **stores** everywhere buyers can see them. A store is a kenne
 - [x] Shortlist instead of a cart for dogs (every dog is one of a kind, sold by different stores, and needs a visit before buying)
   - [x] Save button (heart) on every K9 card and dog page
   - [x] Shortlist page (`/shortlist`): saved dogs grouped by store, with live status (available, reserved)
-  - [~] Works before sign-in (saved in the browser); merged into the account on sign-in (see Phase 5a)
+  - [~] Works before sign-in (saved in the browser); signed in, kept in Supabase (`shortlist_items`, via `useSavedDogs`) so it follows you to any device. Guest saves move into the account on sign-in
   - [x] Header shows how many dogs are shortlisted
   - [x] Compare 2–3 shortlisted dogs side by side (`/shortlist/compare`): protection level, price, age, weight, hips, safe with children, suits, titles, store, city, status
   - [ ] Add distance from the buyer once we know their location
@@ -163,7 +164,7 @@ Once a buyer signs in, Dogeash stops introducing itself and becomes their market
 
 1. Signed-in header and guest data
    - [~] Header: account menu (avatar) in place of "Sign in", notifications bell, "Open a store" hidden for buyers; phone menu shows the account and Sign out (sample session until accounts are connected)
-   - [~] Shortlist, compare picks and recently viewed are kept per account; on sign-in the guest's are merged in and the buyer is told how many moved
+   - [~] Shortlist and compare picks are kept in Supabase for signed-in people, and the guest's move in on sign-in (the toast says how many). Recently viewed and the gear cart stay in the browser for now
    - [~] One person, two roles: the session carries store memberships and roles (`app/utils/storeRoles.ts`: owner, manager, handler). Store members see a store badge on their avatar, a "Your store" card in the avatar and phone menus, and a store pill with waiting enquiries in the header; the dashboard is guarded (`store-member` middleware) and shows only what the role allows
    - [~] Your own listings: on your store's own store and dog pages, a "This is your listing" strip and management actions replace Contact, Book and Save; your dogs' cards say "Your store" instead of the heart
    - [ ] Still to do for roles: matching avatar menu in the dashboard (Buying section), Buying / My store tabs in the bell, "Sending as" in messages, a store switcher for people in several stores, store sign-up creating a draft membership
@@ -172,19 +173,19 @@ Once a buyer signs in, Dogeash stops introducing itself and becomes their market
 2. Account area (`/account`): sidebar on desktop, tabs on phones
    - [~] Shell (`app/pages/account.vue`): sidebar with who's signed in, tabs on phones, `signed-in` middleware sends visitors to sign in and back; unbuilt sections show a Coming next page
    - [~] Overview: activity tiles, my dogs, coming up, shortlist changes, ready-to-reserve checklist, home profile
-   - [ ] Shortlist and compare (moves in from `/shortlist`)
-   - [ ] Visits and bookings, with status
+   - [x] Shortlist and compare inside the account (`/account/shortlist`); `/shortlist` sends signed-in people there
+   - [x] Visits and bookings (`/account/bookings`): coming up and earlier, with the store's decision and note; cancel. Booked from "Book a kennel visit" (saved to `visits`). Care bookings still a preview
    - [ ] Reservations: deposit, countdown, escrow status, handover checklist
    - [~] My dogs: a record per dog after handover (vaccinations, training, care bookings, reminders, health guarantee). Built with one sample dog in `app/utils/myDogs.ts`; photos and adding a dog you already own still to do
-   - [ ] Messages with stores and care providers
-   - [ ] Saved searches and alerts ("a Level 4 dog listed in Abuja")
+   - [x] Messages with stores (`/account/messages`): conversations from "Contact store", one per store and dog, unread dots and counts, replies checked every 20 s. Care providers later
+   - [~] Saved searches (`/account/alerts`): "Save this search" on Find a guard dog (filters now live in the page address), alerts on/off, remove with undo, up to 20, in Supabase. Still to do: actually sending alerts when a new dog matches
    - [ ] Reviews to write, gear orders
-   - [ ] Profile: property type, household, handler experience (used for matching)
-   - [ ] Settings: payments, security, notifications (email, SMS, WhatsApp)
-   - [ ] First visit: set up the property profile, then show matched dogs (no empty sections)
+   - [x] Home profile (`/account/profile`): property, city, children, other pets, experience; saved in Supabase and used for matching on Home, with "What suits you" beside the form
+   - [~] Settings (`/account/settings`): name, phone, city, password, how we reach you (email, SMS, WhatsApp), sign out. Still to come: change email, payment methods, delete account
+   - [~] First visit: Home and the account overview ask for the home profile until it's filled in (no sample profile)
 3. Signed-in Home
    - [x] Drop the intro card, trust explainers, protection levels, how it works, sign-up prompts and big hero (`HomeGuest` keeps them for visitors; `HomeSignedIn` for buyers)
-   - [~] Add: welcome with search, activity tiles (shortlist, compare, next visit, saved search), coming up, shortlist changes (reserved, price drops), your shortlist, matched to your property, saved search, recently viewed, top stores. Sample profile, bookings and price drops in `app/utils/account.ts` until accounts are connected
+   - [~] Add: welcome with search, activity tiles (shortlist, compare, next visit, saved search), coming up, shortlist changes (reserved, price drops), your shortlist, matched to your property, saved search, recently viewed, top stores. Next visit and Coming up use real visits; sample price drops in `app/utils/account.ts` remain
    - [x] A smaller patrol chase GIF in the welcome card on wide screens
 4. Trust and messaging (needs the backend)
    - [ ] In-app messaging; notifications by email, SMS and WhatsApp
@@ -278,7 +279,6 @@ A normal cart and checkout, but only for equipment, never for dogs.
 
 ## Open decisions
 
-- [ ] Backend: Supabase, or Nuxt server routes + Postgres?
 - [ ] Payments: Paystack or Flutterwave?
 - [ ] Hosting: Vercel, Netlify or a VPS?
 - [ ] Sign-in: email, phone OTP, or both?
@@ -303,6 +303,7 @@ A normal cart and checkout, but only for equipment, never for dogs.
 - 2026-10-26 · No shopping cart for dogs: buyers shortlist and compare, then reserve one dog at a time with a deposit. A normal cart is only for gear
 - 2026-10-26 · Home is a marketplace with a thin, trust-first intro rather than a landing page; the patrol chase GIF stays
 - 2026-10-27 · Toasts use vue-toastification, always through `useNotify()` (never `useToast()` directly). One helper per action, four types: success (marigold) for done, info (charcoal, with Undo) for removals, warning (marigold soft) for limits and reserved dogs, error (red) for failed forms. Time left shows as a ring around the close button that empties, then the toast closes. Styles in `app/assets/css/toast.css`, built on tokens so Day and Night watch both work.
+- 2026-11-01 · Backend is Supabase, starting on the free plan with a keep-awake job and moving to Pro at launch. Access rules live in the database (row level security); every new table gets rules and tests in `scripts/test-db.mjs`
 
 ## Inbox
 
@@ -347,7 +348,7 @@ New tasks that haven't been sorted into a phase yet.
 - [ ] Delivery and handover tracking, follow-up support log
 
 ## Community and trust
-- [ ] Buyer–seller messaging and viewing bookings
+- [x] Buyer–store messaging and kennel visit bookings
 - [ ] Seller reviews after handover
 - [ ] Disputes and how they're resolved
 - [ ] Saved dogs, alerts, search filters for the new fields

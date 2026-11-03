@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { definePageMeta, useSeoMeta } from '#imports' // nuxt
+
 // Store dashboard overview. Main column: what needs doing, then the dogs.
 // Side column: what's coming up, then how the store looks to buyers. Each section is its own component.
 definePageMeta({ layout: 'dashboard', title: 'Overview', middleware: 'store-member' })

@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import type { Store } from '~/utils/stores'
+import { computed } from 'vue'
+import { storeSummary } from '~/utils/stores'
 
 // Store summary: on a dog's K9 file (compact) or anywhere a store needs a short introduction
 const props = withDefaults(defineProps<{ store: Store, compact?: boolean }>(), { compact: false })

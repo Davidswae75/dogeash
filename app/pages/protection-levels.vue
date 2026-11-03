@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import type { ProtectionLevel } from '~/utils/protection'
+import { useSeoMeta } from '#imports' // nuxt
+import { homeSection } from '~/utils/market'
+import { protectionLevels } from '~/utils/protection'
 
 // The Dogeash protection scale in full: the five levels at a glance, then each one in detail with dogs
 useSeoMeta({

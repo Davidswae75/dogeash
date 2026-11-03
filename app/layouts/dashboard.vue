@@ -1,5 +1,10 @@
 <script setup lang="ts">
 import { Bell, Menu, Plus, Search } from '@lucide/vue'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute } from '#imports' // nuxt
+import { useStoreContext } from '~/composables/useStoreContext'
+import { useStoreInbox } from '~/composables/useStoreInbox'
+import { dashboardSections } from '~/utils/dashboard'
 
 // Store dashboard: fixed sidebar, slim top bar, no public header or footer.
 // Pages set their title with definePageMeta({ layout: 'dashboard', title: '…' }).
@@ -9,7 +14,10 @@ const title = computed(() => (route.meta.title as string | undefined)
   ?? 'Dashboard')
 const navOpen = ref(false)
 const { can, store } = useStoreContext()
-const { unread } = useStoreInbox()
+// The inbox loads here so the bell's count is right on every dashboard page
+const inbox = useStoreInbox()
+const { unread } = inbox
+onMounted(inbox.load)
 const canAddDogs = computed(() => can('dogs'))
 watch(() => route.fullPath, () => { navOpen.value = false })
 </script>

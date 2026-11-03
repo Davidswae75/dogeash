@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useColorMode } from '#imports' // @nuxtjs/color-mode
+
 // Day watch / Night watch. "quick" flips between the two; "segmented" offers Day, Night and Auto.
 // `fit` shares the available width equally, for narrow columns such as the dashboard sidebar.
 const props = withDefaults(defineProps<{ variant?: 'quick' | 'segmented', fit?: boolean }>(), { variant: 'quick' })

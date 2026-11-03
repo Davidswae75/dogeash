@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { Plus } from '@lucide/vue'
+import { useSeoMeta } from '#imports' // nuxt
+import { sampleOwnedDogs } from '~/utils/myDogs'
 
 // My dogs: every dog you own, each with a record of health, training and care
 useSeoMeta({ title: 'My dogs · Dogeash' })

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { PropertyType } from '~/utils/protection'
 import { cn } from '~/lib/utils'
+import { propertyTypes } from '~/utils/protection'
 
 // "What are you protecting?": the main way in, ahead of breed
 const emit = defineEmits<{ select: [value: PropertyType] }>()

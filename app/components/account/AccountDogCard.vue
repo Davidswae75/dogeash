@@ -2,6 +2,9 @@
 import { ArrowRight } from '@lucide/vue'
 import type { OwnedDog } from '~/utils/myDogs'
 import { cn } from '~/lib/utils'
+import { computed } from 'vue'
+import { getStore } from '~/utils/dogs'
+import { careStatus, nextReminder, ownedDogLink } from '~/utils/myDogs'
 
 // A dog you own, on the My dogs page: who it is, its guarantee, and what it needs next
 const props = defineProps<{ dog: OwnedDog }>()

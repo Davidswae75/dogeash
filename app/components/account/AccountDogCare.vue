@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ShieldCheck } from '@lucide/vue'
 import type { OwnedDog } from '~/utils/myDogs'
+import { computed } from 'vue'
+import { getStore } from '~/utils/dogs'
+import { sortedReminders } from '~/utils/myDogs'
 
 // Side column of a dog's record: reminders, most urgent first, and the health guarantee
 const props = defineProps<{ dog: OwnedDog }>()

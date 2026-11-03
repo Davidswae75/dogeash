@@ -2,6 +2,8 @@
 import { ChevronDown } from '@lucide/vue'
 import type { SiteNavGroup } from '~/utils/siteNav'
 import { cn } from '~/lib/utils'
+import { computed } from 'vue'
+import { useRoute } from '#imports' // nuxt
 
 // One dropdown in the header. Not modal, so the page keeps scrolling and doesn't shift while it's open.
 const props = defineProps<{ group: SiteNavGroup }>()

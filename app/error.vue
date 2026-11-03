@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import type { NuxtError } from '#app'
+import { computed } from 'vue'
+import { clearError, useRoute, useSeoMeta } from '#imports' // nuxt
+import { homeSection } from '~/utils/market'
 
 // Every error inside the site's frame: "not found" for missing pages, a plain apology for the rest.
 // The patrol chase keeps watch either way.

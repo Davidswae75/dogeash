@@ -1,4 +1,7 @@
 import type { AuthPanelMeta } from '~/types/page-meta'
+import { onBeforeUnmount, toValue, watchEffect } from 'vue'
+import type { MaybeRefOrGetter } from 'vue'
+import { useState } from '#imports' // nuxt
 
 // Lets an auth page swap its side panel while it's open (sign-up shows a store panel for "Open a store").
 // The auth layout uses this when set, otherwise the page's definePageMeta authPanel. Cleared when the page leaves.

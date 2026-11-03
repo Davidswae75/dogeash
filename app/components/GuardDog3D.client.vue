@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import * as THREE from 'three'
 import type { DogAppearance } from '~/utils/k9'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 
 // Procedural Malinois in a braced, snarling stance: no model file to load.
 // Drag to turn it; it growls (jaw tremor), bristles its hackles and snaps every few seconds.

@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { createError, useRoute, useSeoMeta } from '#imports' // nuxt
+import { accountSections } from '~/utils/account'
+
 // Account sections that aren't built yet: say what will live here
 const route = useRoute()
 const section = accountSections[String(route.params.section)]

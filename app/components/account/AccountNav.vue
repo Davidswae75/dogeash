@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { LogOut } from '@lucide/vue'
+import { computed } from 'vue'
 import { cn } from '~/lib/utils'
+import { useRoute } from '#imports' // nuxt
+import { useConversations } from '~/composables/useConversations'
+import { useSession } from '~/composables/useSession'
+import { useVisits } from '~/composables/useVisits'
+import { accountNav } from '~/utils/account'
 
 // The account area's navigation: a sidebar with who you are on wide screens, a row of tabs on phones
 const { user, initials, signOut } = useSession()
@@ -9,6 +15,11 @@ const route = useRoute()
 // Overview only matches itself; other sections also match their sub-pages (a dog's record under My dogs)
 const isActive = (to: string) => to === '/account' ? route.path === to : route.path.startsWith(to)
 const items = accountNav.flatMap(g => g.items)
+
+// Counts beside sections that need a look: unread replies, visits coming up
+const { unread } = useConversations()
+const { upcoming } = useVisits()
+const counts = computed<Record<string, number>>(() => ({ '/account/messages': unread.value, '/account/bookings': upcoming.value.length }))
 </script>
 
 <template>
@@ -25,6 +36,7 @@ const items = accountNav.flatMap(g => g.items)
       )"
     >
       <component :is="item.icon" class="size-4" aria-hidden="true" />{{ item.label }}
+      <span v-if="counts[item.to]" class="grid h-[18px] min-w-[18px] place-items-center rounded-full bg-marigold px-1 font-mono text-[10px] font-bold text-on-marigold tabular-nums">{{ counts[item.to] }}</span>
     </NuxtLink>
   </nav>
 
@@ -34,7 +46,7 @@ const items = accountNav.flatMap(g => g.items)
       <AccountAvatar :initials="initials" class="size-11 text-[15px]" />
       <div class="flex min-w-0 flex-col">
         <strong class="truncate text-sm leading-5">{{ user.name }}</strong>
-        <span class="truncate font-mono text-[10.5px] font-semibold tracking-[.12em] text-ink-muted uppercase">Buyer · {{ user.id }}</span>
+        <span class="truncate font-mono text-[10.5px] font-semibold tracking-[.12em] text-ink-muted uppercase">Buyer · {{ user.ref }}</span>
       </div>
     </div>
 
@@ -54,6 +66,7 @@ const items = accountNav.flatMap(g => g.items)
           <span v-if="isActive(item.to)" class="absolute top-2 bottom-2 left-0 w-1 rounded-r-full bg-marigold" aria-hidden="true" />
           <component :is="item.icon" class="size-[18px]" aria-hidden="true" />
           <span class="flex-1">{{ item.label }}</span>
+          <span v-if="counts[item.to]" class="grid h-5 min-w-5 place-items-center rounded-full bg-marigold px-1.5 font-mono text-[10.5px] font-bold text-on-marigold tabular-nums">{{ counts[item.to] }}</span>
           <span v-if="item.soon" class="font-mono text-[9.5px] font-semibold tracking-[.1em] uppercase opacity-70">Soon</span>
         </NuxtLink>
       </div>

@@ -1,5 +1,10 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import { existsSync } from 'node:fs'
 import tailwindcss from '@tailwindcss/vite'
+import { defineNuxtConfig } from 'nuxt/config'
+
+// Nuxt only reads .env by itself; local keys live in .env.local (see .env.example)
+if (existsSync('.env.local')) process.loadEnvFile('.env.local')
 
 export default defineNuxtConfig({
   // Renamed pages keep their old links working
@@ -11,7 +16,16 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
 
-  modules: ['@nuxtjs/color-mode', 'shadcn-nuxt'],
+  modules: ['@nuxtjs/color-mode', 'shadcn-nuxt', '@nuxtjs/supabase'],
+
+  // Every file imports what it uses, so you can see where each name comes from: 'vue', the file
+  // in ~/utils or ~/composables, or '#imports' (Nuxt and its modules, origin noted in a comment).
+  // A missing import is an error rather than a silent auto-import. Components still auto-import.
+  imports: { autoImport: false },
+
+  // Accounts and data. Needs the project URL and publishable key in .env.local (see .env.example).
+  // Browsing stays open to everyone; pages opt in to needing an account (useAccountGate, route middleware).
+  supabase: { redirect: false },
 
   // Listen on the LAN so `npm run dev` prints a Network URL for testing on a phone
   devServer: {

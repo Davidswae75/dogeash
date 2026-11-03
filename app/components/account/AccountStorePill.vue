@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useSession } from '~/composables/useSession'
+import { storeActivity } from '~/utils/storeRoles'
+
 // Header pill for people who work at a store: the store, and how many enquiries are waiting.
 // Wide screens only; on phones the store lives in the menu.
 const { memberships } = useSession()

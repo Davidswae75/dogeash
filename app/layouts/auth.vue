@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { ArrowLeft } from '@lucide/vue'
+import { computed } from 'vue'
+import { useRoute } from '#imports' // nuxt
+import { useAuthPanel } from '~/composables/useAuthPanel'
 
 // Sign-in and sign-up: logo, a way back and the page's form on the left; the brand panel on the right
 // stays put at full window height while the form scrolls.

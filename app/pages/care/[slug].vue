@@ -1,5 +1,9 @@
 <script setup lang="ts">
 import { Check, MapPin, Star } from '@lucide/vue'
+import { createError, useRoute, useSeoMeta } from '#imports' // nuxt
+import { careTypes, findCareProviderBySlug, sampleCareProviders } from '~/utils/care'
+import { formatNaira } from '~/utils/dogs'
+import { storesForProvider } from '~/utils/stores'
 
 // One provider: credentials, services, the stores they work with, and booking
 const route = useRoute()
@@ -36,8 +40,9 @@ const eyebrow = 'text-xs leading-4 font-bold tracking-[.08em] uppercase'
       <span class="text-ink">{{ provider.name }}</span>
     </nav>
 
+    <!-- Source order is details, booking, similar so booking comes before similar providers when stacked -->
     <div class="grid items-start gap-10 lg:grid-cols-[1fr_340px]">
-      <div class="flex min-w-0 flex-col gap-10">
+      <div class="flex min-w-0 flex-col gap-10 lg:col-start-1">
         <header class="flex animate-rise flex-col gap-4">
           <CareProviderIcon :type="provider.type" />
           <span :class="[eyebrow, 'text-marigold-ink']">{{ typeLabel }}</span>
@@ -75,16 +80,9 @@ const eyebrow = 'text-xs leading-4 font-bold tracking-[.08em] uppercase'
           </ul>
           <p v-else class="m-0 rounded-lg bg-surface p-5 text-[15px] text-ink-muted ring-1 ring-line">No stores have linked to this provider yet.</p>
         </section>
-
-        <section v-if="similar.length" class="flex flex-col gap-4" aria-labelledby="similar-title">
-          <h2 id="similar-title" class="m-0 mega text-[clamp(26px,3vw,36px)] leading-none">Also on Dogeash</h2>
-          <div class="grid gap-4 md:grid-cols-2">
-            <CareProviderCard v-for="p in similar" :key="p.id" :provider="p" />
-          </div>
-        </section>
       </div>
 
-      <aside class="flex flex-col gap-4 rounded-xl bg-night p-6 text-on-night lg:sticky lg:top-24" aria-label="Book">
+      <aside class="flex flex-col gap-4 rounded-xl bg-night p-6 text-on-night lg:sticky lg:top-24 lg:col-start-2 lg:row-span-2 lg:row-start-1" aria-label="Book">
         <span :class="[eyebrow, 'text-marigold']">Book an appointment</span>
         <dl class="m-0 flex flex-col gap-3">
           <div v-for="fact in facts" :key="fact.label">
@@ -95,6 +93,13 @@ const eyebrow = 'text-xs leading-4 font-bold tracking-[.08em] uppercase'
         <CareBookingDialog :provider="provider" variant="marigold" trigger-class="w-full" />
         <p class="m-0 text-[13px] leading-5">You pay the provider directly for now.</p>
       </aside>
+
+      <section v-if="similar.length" class="flex min-w-0 flex-col gap-4 lg:col-start-1" aria-labelledby="similar-title">
+        <h2 id="similar-title" class="m-0 mega text-[clamp(26px,3vw,36px)] leading-none">Also on Dogeash</h2>
+        <div class="grid gap-4 md:grid-cols-2">
+          <CareProviderCard v-for="p in similar" :key="p.id" :provider="p" />
+        </div>
+      </section>
     </div>
   </div>
 </template>

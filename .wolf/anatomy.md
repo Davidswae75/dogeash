@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-10-31T16:24:49.383Z
-> Files: 637 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-11-03T17:46:56.799Z
+> Files: 670 tracked | Anatomy hits: 0 | Misses: 0
 
 > Project structure index. Auto-maintained by OpenWolf hooks and daemon.
 > Run `openwolf scan` to generate, or wait for the first Claude Code session.
@@ -12,7 +12,7 @@
 - `.gitignore` — Git ignore rules (~52 tok)
 - `CLAUDE.md` — OpenWolf (~99 tok)
 - `components.json` (~126 tok)
-- `nuxt.config.ts` — https://nuxt.com/docs/api/configuration/nuxt-config (~505 tok)
+- `nuxt.config.ts` — https://nuxt.com/docs/api/configuration/nuxt-config (~809 tok)
 - `package.json` — Node.js package manifest (~356 tok)
 - `PLAN.md` — Dogeash project plan (~3364 tok)
 - `README.md` — Project documentation (~206 tok)
@@ -20,7 +20,7 @@
 
 ## app/
 
-- `app.vue` — Vue component (~26 tok)
+- `app.vue` — Vue component (~90 tok)
 - `error.vue` — Vue: setup (~806 tok)
 
 ## app/assets/css/
@@ -33,6 +33,7 @@
 
 - `AccountGateDialog.vue` — Vue: setup (~655 tok)
 - `AppIcon.vue` — Vue: setup, TS, 3 props (~2222 tok)
+- `AppLoader.vue` — Vue: setup (~541 tok)
 - `AppLogo.vue` — Vue: setup, TS, 1 props (~160 tok)
 - `AppToast.vue` — Vue component (~67 tok)
 - `AuthCodeStep.vue` — Vue: setup (~740 tok)
@@ -45,6 +46,8 @@
 - `CheckboxField.vue` — Vue: setup (~294 tok)
 - `ComingNext.vue` — Vue: setup (~330 tok)
 - `ContactStoreDialog.vue` — Vue: setup (~1039 tok)
+- `ConversationReply.vue` — Vue: setup (~574 tok)
+- `ConversationThread.vue` — Vue: setup (~393 tok)
 - `DashboardNav.vue` — Vue: setup (~1090 tok)
 - `EmptyState.vue` — Vue: setup, TS, 2 props, emits (~240 tok)
 - `FactRow.vue` — Vue: setup, TS (~184 tok)
@@ -87,6 +90,9 @@
 - `TourBeacon.vue` — Vue component (~33 tok)
 - `TourHint.vue` — Vue: setup, TS, 3 props, emits (~372 tok)
 - `VerifiedStamp.vue` — Vue: setup, TS, 1 props (~150 tok)
+- `VisitCard.vue` — Vue: setup (~723 tok)
+- `VisitDateBlock.vue` — Vue: setup (~218 tok)
+- `VisitStatusChip.vue` — Vue: setup (~151 tok)
 
 ## app/components/account/
 
@@ -99,12 +105,18 @@
 - `AccountDogPortrait.vue` — Vue: setup (~386 tok)
 - `AccountDogTraining.vue` — Vue: setup (~314 tok)
 - `AccountHeading.vue` — Vue: setup (~221 tok)
+- `AccountHomeMatch.vue` — Vue: setup (~872 tok)
 - `AccountHomeProfile.vue` — Vue: setup (~286 tok)
 - `AccountMenu.vue` — Vue: setup (~908 tok)
 - `AccountMyDogs.vue` — Vue: setup (~400 tok)
 - `AccountNav.vue` — Vue: setup (~886 tok)
 - `AccountNotifications.vue` — Vue: setup (~989 tok)
+- `AccountProfilePrompt.vue` — Vue: setup (~265 tok)
 - `AccountReadiness.vue` — Vue: setup (~387 tok)
+- `AccountSavedSearch.vue` — Vue: setup (~864 tok)
+- `AccountSettingsContact.vue` — Vue: setup (~630 tok)
+- `AccountSettingsDetails.vue` — Vue: setup (~590 tok)
+- `AccountSettingsPassword.vue` — Vue: setup (~467 tok)
 - `AccountStoreCard.vue` — Vue: setup (~392 tok)
 - `AccountStorePill.vue` — Vue: setup (~288 tok)
 
@@ -122,6 +134,8 @@
 - `DashboardAttention.vue` — Vue: setup (~571 tok)
 - `DashboardDogs.vue` — Vue: setup (~1172 tok)
 - `DashboardGreeting.vue` — Vue: setup (~448 tok)
+- `DashboardInboxDetail.vue` — Vue: setup (~1088 tok)
+- `DashboardInboxVisit.vue` — Vue: setup (~647 tok)
 - `DashboardStats.vue` — Vue: setup (~576 tok)
 - `DashboardStoreHealth.vue` — Vue: setup (~867 tok)
 - `InboxDetail.vue` — Vue: setup (~1198 tok)
@@ -130,7 +144,7 @@
 
 ## app/components/gear/
 
-- `GearCard.vue` — Vue: setup (~642 tok)
+- `GearCard.vue` — Vue: setup (~693 tok)
 - `GearCartLine.vue` — Vue: setup (~686 tok)
 - `GearIcon.vue` — Vue: setup (~317 tok)
 
@@ -246,7 +260,7 @@
 
 ## app/components/ui/button/
 
-- `Button.vue` — Vue: setup, TS (~195 tok)
+- `Button.vue` — Dogeash: show a spinner and block further clicks while something is working (~296 tok)
 - `index.ts` — Exports buttonVariants, ButtonVariants (~495 tok)
 
 ## app/components/ui/calendar/
@@ -832,14 +846,21 @@
 
 - `useAccountGate.ts` — Unique per action and target, e.g. `visit:STR-001` (~550 tok)
 - `useAccountList.ts` — Lists of dog file numbers kept in this browser per person: one for the guest, one per account. (~636 tok)
+- `useAuth.ts` — Every sign-up, sign-in and password call to Supabase, in one place. Each returns a plain (~1419 tok)
 - `useAuthPanel.ts` — Lets an auth page swap its side panel while it's open (sign-up shows a store panel for "Open a store (~180 tok)
+- `useConversations.ts` — Conversations between buyers and stores (Supabase: conversations, messages), for both sides. (~1450 tok)
 - `useFirstVisit.ts` — Whether this browser has dismissed a one-time message, e.g. the "New to guard dogs?" intro (~107 tok)
-- `useNotify.ts` — Every toast in the app goes through here, so the same action always looks and reads the same. (~1090 tok)
+- `useLoader.ts` — The full-screen loader (AppLoader in app.vue) for moments that change the whole page: (~282 tok)
+- `useNotify.ts` — Every toast in the app goes through here, so the same action always looks and reads the same. (~2217 tok)
 - `useRecentlyViewed.ts` — Dogs this browser has opened, newest first. Kept on the device until accounts exist. (~147 tok)
-- `useSession.ts` — Who is signed in. A sample session in a cookie (so the server renders the right header) (~335 tok)
+- `useSavedDogs.ts` — The shortlist and compare picks behind useShortlist(). Signed in: the shortlist_items table in (~1404 tok)
+- `useSession.ts` — Who is signed in: the Supabase user, their profile, and the stores they work at. (~910 tok)
 - `useShortlist.ts` — The buyer's shortlist: dogs they're considering, and up to three picked to compare. (~562 tok)
+- `useShortlistRoutes.ts` — Where the shortlist lives: inside the account area when signed in (so people stay in their (~157 tok)
+- `useStoreApi.ts` — Store data in Supabase. Creating a store makes the signed-in person its owner (a database (~318 tok)
 - `useStoreContext.ts` — The store the dashboard is showing, and what the signed-in person may do there. (~178 tok)
-- `useStoreInbox.ts` — The store inbox as one shared list: what this person's role may see, unread counts for the bell (~397 tok)
+- `useStoreInbox.ts` — The store inbox as one list: buyer conversations and visit requests for the store being run, (~1097 tok)
+- `useVisits.ts` — Kennel-visit requests (Supabase: visits). Buyers request and can cancel; a store's people confirm, (~1283 tok)
 
 ## app/layouts/
 
@@ -859,24 +880,37 @@
 - `index.vue` — Vue: setup (~979 tok)
 - `protection-levels.vue` — Vue: setup (~732 tok)
 - `sell.vue` — Vue: setup (~1528 tok)
-- `sign-in.vue` — Vue: setup (~1217 tok)
+- `sign-in.vue` — Vue: setup (~1242 tok)
 - `sign-up.vue` — Vue: setup (~1370 tok)
 
 ## app/pages/account/
 
 - `[section].vue` — Vue: setup (~140 tok)
+- `alerts.vue` — Vue: setup (~448 tok)
+- `bookings.vue` — Vue: setup (~1007 tok)
 - `index.vue` — Vue: setup (~194 tok)
+- `messages.vue` — Vue: setup (~1817 tok)
+- `profile.vue` — Vue: setup (~1759 tok)
+- `settings.vue` — Vue: setup (~351 tok)
 
 ## app/pages/account/dogs/
 
 - `[id].vue` — Vue: setup (~282 tok)
 - `index.vue` — Vue: setup (~396 tok)
 
+## app/pages/care/
+
+- `[slug].vue` — Vue: setup (~1616 tok)
+
 ## app/pages/dashboard/
 
 - `[section].vue` — Vue: setup (~394 tok)
 - `inbox.vue` — Vue: setup (~783 tok)
 - `index.vue` — Vue: setup (~228 tok)
+
+## app/pages/gear/
+
+- `index.vue` — Vue: setup (~504 tok)
 
 ## app/pages/shortlist/
 
@@ -890,11 +924,13 @@
 
 ## app/plugins/
 
+- `account.ts` — Loads the signed-in person's account before the first page renders, and again whenever (~117 tok)
 - `centerTab.ts` — v-center-tab on a row of tabs that scrolls sideways: the clicked tab slides to the row's centre, (~477 tok)
 - `toast.client.ts` — Toasts confirm what a buyer just did. Use them through useNotify(), not useToast() directly, (~206 tok)
 
 ## app/types/
 
+- `database.types.ts` — The database's shape, for type-checked Supabase queries. Written by hand to match (~1351 tok)
 - `page-meta.d.ts` — default layout: 'full' shows the full footer (Home); everything else gets quick links (~139 tok)
 
 ## app/utils/
@@ -911,11 +947,17 @@
 - `legal.ts` — Terms of use and privacy policy, in plain words. DRAFTS: both must be reviewed by a Nigerian lawyer (~1282 tok)
 - `market.ts` — The marketplace rows on Home: which dogs and stores each one shows (~545 tok)
 - `myDogs.ts` — Dogs a buyer owns after handover: a living record of health, training and care. (~928 tok)
+- `searchFilters.ts` — The filters on Find a guard dog, in one shape: read from and written to the page address (~791 tok)
 - `sell.ts` — The Sell with us page: why kennels list on Dogeash, how verification works, what to have ready, and (~915 tok)
 - `signUpIntents.ts` — "What brings you here?" on sign-up. Each answer changes the heading, the fields, the side panel (~1043 tok)
 - `storeRoles.ts` — People who work at a store, and what each role may do in the store dashboard. (~442 tok)
 - `stores.ts` — A store is a kennel that sells guard dogs on Dogeash. Dogs link to it by storeId; (~3985 tok)
+- `time.ts` — Times as people say them: "Just now", "5 min", "3 h", "Yesterday", "Mon 3 Nov" (~335 tok)
 
 ## scripts/
 
 - `render-kennel-watch.mjs` — Renders the kennel watch for the sign-in and sign-up pages: a K9 stands guard beside its kennel, (~4330 tok)
+
+## supabase/migrations/
+
+- `20261104000000_messages_and_visits.sql` — Messages between buyers and stores, and kennel-visit requests. (~2699 tok)

@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { Eye } from '@lucide/vue'
 import type { Store } from '~/utils/stores'
+import { computed } from 'vue'
+import { useSession } from '~/composables/useSession'
+import { storeRoles } from '~/utils/storeRoles'
 
 // Top of a store's own pages, for people who work there: this is what buyers see
 const props = defineProps<{ store: Store, what: 'store' | 'listing' }>()

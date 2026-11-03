@@ -31,7 +31,7 @@ export const signUpIntents: SignUpIntentCopy[] = [
     icon: Search,
     heading: { title: 'Create an', outline: 'account', text: 'Save dogs, message stores and book kennel visits. Free, and it takes a minute.' },
     submitLabel: 'Create account',
-    welcome: () => 'This is a preview: accounts aren\'t connected yet, so nothing was saved. Here\'s where you\'d go next.',
+    welcome: () => 'Your account is ready. Here\'s where to start.',
     nextSteps: buyerNextSteps,
   },
   {
@@ -40,7 +40,7 @@ export const signUpIntents: SignUpIntentCopy[] = [
     icon: CalendarCheck,
     heading: { title: 'Create an', outline: 'account', text: 'Book vets, trainers and groomers who work with Dogeash kennels, and keep your dog\'s record in one place.' },
     submitLabel: 'Create account',
-    welcome: () => 'This is a preview: accounts aren\'t connected yet, so nothing was saved. Here\'s where you\'d go next.',
+    welcome: () => 'Your account is ready. Here\'s where to start.',
     nextSteps: [
       { to: '/stores', title: 'Find a store\'s care team', text: 'Each store lists the vets and trainers it works with.', icon: Store },
       { to: '/account/dogs', title: 'Add your dog\'s record', text: 'Vaccinations, training and reminders in one place.', icon: ClipboardCheck },
@@ -59,7 +59,7 @@ export const signUpIntents: SignUpIntentCopy[] = [
       outline: 'inspected.',
       text: 'Stores on Dogeash are kennels we have visited in person. Buyers see your record before they ever call.',
     },
-    welcome: ({ storeName }) => `${storeName} is saved as a draft store. This is a preview, so nothing was sent. Next you'd add your documents and book the inspection.`,
+    welcome: ({ storeName }) => `${storeName} is saved as a draft store, hidden until it's verified. Next: add your documents and book the inspection.`,
     nextSteps: [
       { to: '/dashboard', title: 'Set up your store', text: 'Store profile, your dogs and your care team, in the store dashboard.', icon: LayoutDashboard },
       { to: '/open-a-store#verification', title: 'How verification works', text: 'Apply, inspection visit, go live, stay verified.', icon: ClipboardCheck },

@@ -1,4 +1,9 @@
-import type { BuyerProfile, SavedSearch } from './account'
+import type { BuyerProfile } from './account'
+import type { SearchFilters } from './searchFilters'
+import { matchesFilters } from './searchFilters'
+import { sampleDogs } from './dogs'
+import { propertyTypes } from './protection'
+import { sampleStores } from './stores'
 
 // The marketplace rows on Home: which dogs and stores each one shows
 
@@ -23,7 +28,7 @@ export const marketRows = {
       .filter(d => d.property.includes(profile.property) && levels.includes(d.level) && (!profile.children || d.safeWithChildren) && !exclude.includes(d.fileNo))
       .sort((a, b) => Number(b.city === profile.city) - Number(a.city === profile.city))
   },
-  savedSearch: (search: SavedSearch) => forSale().filter(search.matches),
+  savedSearch: (filters: SearchFilters) => forSale().filter(d => matchesFilters(filters, d)),
 }
 
 // Cities with the most dogs first, for the "Near you" row

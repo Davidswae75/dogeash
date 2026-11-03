@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { dashboardToday, dashboardUpcoming } from '~/utils/dashboard'
+
 // Coming up: visits, handovers and vet checks, grouped by day. The one dark card on the page.
 const days = computed(() => {
   const groups = new Map<string, typeof dashboardUpcoming[number][]>()

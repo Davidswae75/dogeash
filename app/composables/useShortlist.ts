@@ -1,11 +1,14 @@
 import { createGlobalState } from '@vueuse/core'
 import type { Dog } from '~/utils/dogs'
+import { computed } from 'vue'
+import { useSavedDogs } from './useSavedDogs'
+import { COMPARE_MAX } from '~/utils/compare'
+import { findDog, getStore } from '~/utils/dogs'
 
 // The buyer's shortlist: dogs they're considering, and up to three picked to compare.
-// One shared instance for the whole app, kept per person (guest or account) in this browser.
+// One shared instance for the whole app. Signed in: kept in Supabase; guests: this browser (useSavedDogs).
 export const useShortlist = createGlobalState(() => {
-  const fileNos = useAccountList('shortlist')
-  const compareNos = useAccountList('compare')
+  const { fileNos, compareNos } = useSavedDogs()
 
   const dogs = computed(() => fileNos.value.map(findDog).filter((d): d is Dog => !!d))
   const count = computed(() => dogs.value.length)

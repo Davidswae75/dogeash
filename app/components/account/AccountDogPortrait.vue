@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { HTMLAttributes } from 'vue'
 import { cn } from '~/lib/utils'
+import { computed } from 'vue'
 
 // An owned dog's picture. Until the owner adds a photo: the dog's initial, like the store banners,
 // solid bottom-left with an outlined echo off the right edge. `compact` drops the echo for thumbnails.

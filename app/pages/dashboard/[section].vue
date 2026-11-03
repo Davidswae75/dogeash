@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { Lock } from '@lucide/vue'
 import type { StorePermission } from '~/utils/storeRoles'
+import { computed } from 'vue'
+import { createError, definePageMeta, useRoute, useSeoMeta } from '#imports' // nuxt
+import { useStoreContext } from '~/composables/useStoreContext'
+import { dashboardSections } from '~/utils/dashboard'
 
 // Dashboard sections that aren't built yet: say what will live here.
 // Section names match permission names, so people outside a role see who to ask instead.

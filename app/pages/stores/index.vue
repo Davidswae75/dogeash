@@ -2,6 +2,10 @@
 import { ClipboardCheck, Cpu, FileHeart, Gauge, Search, SlidersHorizontal, X } from '@lucide/vue'
 import type { ProtectionLevel } from '~/utils/protection'
 import type { StoreService } from '~/utils/stores'
+import { computed, ref } from 'vue'
+import { useRoute, useSeoMeta } from '#imports' // nuxt
+import { sampleDogs } from '~/utils/dogs'
+import { sampleStores, storeServices, storeSummary } from '~/utils/stores'
 
 useSeoMeta({
   title: 'Guard dog stores · Dogeash',

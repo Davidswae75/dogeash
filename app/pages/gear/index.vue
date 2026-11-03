@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import type { GearCategory } from '~/utils/gear'
+import { computed, ref } from 'vue'
+import { useSeoMeta } from '#imports' // nuxt
+import { gearCategories, sampleGear } from '~/utils/gear'
 
 // The gear shop: equipment from checked suppliers. Dogs are never sold through the cart.
 useSeoMeta({
@@ -30,7 +33,7 @@ const products = computed(() => sampleGear.filter(p => !category.value || p.cate
       >{{ label }}</button>
     </nav>
 
-    <div class="grid grid-cols-1 gap-6 pb-8 sm:grid-cols-2 lg:grid-cols-3">
+    <div class="grid grid-cols-2 gap-3 pb-8 sm:gap-6 lg:grid-cols-3">
       <GearCard v-for="product in products" :key="product.id" :product="product" />
     </div>
   </div>

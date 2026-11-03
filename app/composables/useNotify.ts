@@ -1,10 +1,13 @@
-import { ShoppingCart } from '@lucide/vue'
+import { BellRing, ShoppingCart } from '@lucide/vue'
 import { CalendarCheck, CircleX, Heart, HeartOff, Info, LogIn, LogOut, MessageSquare, Scale, Store, TriangleAlert, UserRoundCheck } from '@lucide/vue'
 import type { Component } from 'vue'
 import { TYPE, useToast } from 'vue-toastification'
 import ToastContent, { type ToastAction, type ToastTone } from '~/components/ToastContent.vue'
 import type { Dog } from '~/utils/dogs'
-import type { InboxChannel } from '~/utils/inbox'
+import { markRaw } from 'vue'
+import { navigateTo } from '#imports' // nuxt
+import { useShortlist } from './useShortlist'
+import { formatNaira } from '~/utils/dogs'
 
 // Every toast in the app goes through here, so the same action always looks and reads the same.
 // Tones: success (marigold) for things done, info (ash) for neutral changes and undo,
@@ -52,8 +55,10 @@ export function useNotify() {
     cartRemoved: (name: string, undo: () => void) =>
       show('info', ShoppingCart, { kicker: 'Cart', title: `${name} removed`, action: { label: 'Undo', onClick: undo, kind: 'undo' } }),
 
-    bookingRequested: (withWhom: string, when: string) =>
-      show('success', CalendarCheck, { kicker: 'Booking', meta: 'Preview', title: 'Request ready', text: `${withWhom} · ${when}. Nothing is sent yet.` }),
+    bookingRequested: (withWhom: string, when: string, sent = false) =>
+      sent
+        ? show('success', CalendarCheck, { kicker: 'Visit', meta: 'Requested', title: 'Request sent', text: `${withWhom} · ${when}. The store will confirm the time.`, action: { label: 'My visits', onClick: () => navigateTo('/account/bookings') } })
+        : show('success', CalendarCheck, { kicker: 'Booking', meta: 'Preview', title: 'Request ready', text: `${withWhom} · ${when}. Nothing is sent yet.` }),
 
     // `moved`: shortlisted dogs carried over from this browser into the account
     signedIn: (firstName: string, moved: number) =>
@@ -65,19 +70,27 @@ export function useNotify() {
     storeStarted: (firstName: string, storeName: string) =>
       show('success', Store, { kicker: 'Store', meta: 'Draft', title: `Welcome, ${firstName}`, text: `${storeName} is saved as a draft. Next: your documents and the inspection.` }),
 
-    messageSent: (storeName: string, replies: string) =>
-      show('success', MessageSquare, { kicker: 'Message', meta: 'Preview', title: `Message to ${storeName} ready`, text: `They usually reply in ${replies}. Messages aren't sent until accounts are connected.` }),
+    messageSent: (storeName: string, replies: string, conversationId: string) =>
+      show('success', MessageSquare, { kicker: 'Message', meta: 'Sent', title: `Message sent to ${storeName}`, text: `They usually reply in ${replies}. You'll find the reply in Messages.`, action: { label: 'Open conversation', onClick: () => navigateTo({ path: '/account/messages', query: { id: conversationId } }) } }),
 
     // A guest who has saved a few dogs: offer an account once, never blocking anything
     keepShortlist: (count: number, path: string) =>
       show('info', Heart, { kicker: 'Shortlist', meta: `${count} saved`, title: 'Keep your shortlist on any device', text: 'Create a free account and your saved dogs come with you.', action: { label: 'Create account', onClick: () => navigateTo({ path: '/sign-up', query: { redirect: path } }) } }),
 
     // Store inbox: the reply is saved in Dogeash; the buyer also hears by their chosen channels
-    storeReplySent: (to: string, channels: InboxChannel[]) =>
-      show('success', MessageSquare, { kicker: 'Inbox', meta: 'Preview', title: `Reply to ${to} sent`, text: channels.length ? `Saved in Dogeash. ${to} also gets it by ${channels.map(c => channelLabels[c]).join(' and ')}.` : 'Saved in Dogeash.' }),
+    storeReplySent: (to: string) =>
+      show('success', MessageSquare, { kicker: 'Inbox', meta: 'Sent', title: `Reply to ${to} sent`, text: `${to} sees it in their Messages.` }),
 
-    storeActionDone: (text: string) =>
-      show('success', CalendarCheck, { kicker: 'Inbox', meta: 'Preview', title: 'Done', text }),
+    // A visit changed: cancelled by the buyer, or confirmed / declined / marked done by the store
+    visitUpdated: (title: string, text: string) =>
+      show('success', CalendarCheck, { kicker: 'Visit', meta: 'Updated', title, text }),
+
+    // Something the database refused; `text` is already a friendly message
+    failed: (text: string) =>
+      show('error', CircleX, { kicker: 'Not saved', title: 'That didn\'t work', text }),
+
+    searchSaved: () =>
+      show('success', BellRing, { kicker: 'Saved searches', meta: 'Alerts on', title: 'Search saved', text: 'We\'ll tell you when a new dog matches.', action: { label: 'Saved searches', onClick: () => navigateTo('/account/alerts') } }),
 
     signedOut: () =>
       show('info', LogOut, { kicker: 'Account', meta: 'Signed out', title: 'You\'re signed out', text: 'Your saved dogs stay in your account for next time.' }),

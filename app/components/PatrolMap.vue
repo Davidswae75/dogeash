@@ -5,6 +5,7 @@ import dayGif from '~/assets/patrol/patrol-chase-day.gif'
 import dayStill from '~/assets/patrol/patrol-chase-day.png'
 import nightGif from '~/assets/patrol/patrol-chase-night.gif'
 import nightStill from '~/assets/patrol/patrol-chase-night.png'
+import { computed } from 'vue'
 
 // `cover` fills its parent edge to edge, for use as a backdrop.
 const props = withDefaults(defineProps<{ variant?: 'day' | 'night', cover?: boolean }>(), { variant: 'day' })

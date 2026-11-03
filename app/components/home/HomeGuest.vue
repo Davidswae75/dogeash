@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import { computed, ref } from 'vue'
+import { useRecentlyViewed } from '~/composables/useRecentlyViewed'
+import { homeSection, marketCities, marketRows } from '~/utils/market'
+
 // Home for visitors who aren't signed in: a compact intro with the patrol chase, then dogs straight away.
 // First-time visitors also get a one-time "New to guard dogs?" card.
 const city = ref(marketCities[0]!)

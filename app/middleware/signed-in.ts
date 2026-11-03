@@ -1,3 +1,6 @@
+import { defineNuxtRouteMiddleware, navigateTo } from '#imports' // nuxt
+import { useSession } from '~/composables/useSession'
+
 // Pages that need an account: send visitors to sign in, then back to where they were going
 export default defineNuxtRouteMiddleware((to) => {
   const { signedIn } = useSession()

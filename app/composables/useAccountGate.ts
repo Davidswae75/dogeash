@@ -4,6 +4,11 @@
 //  - signed out: the sign-in dialog opens, saying what the action was and why it needs an account.
 // Signing in from the dialog returns to the same page with `?resume=<key>`, and the action reopens by itself.
 
+import { onMounted, toValue } from 'vue'
+import type { MaybeRefOrGetter } from 'vue'
+import { useRoute, useRouter, useState } from '#imports' // nuxt
+import { useSession } from './useSession'
+
 export interface AccountGate {
   /** Unique per action and target, e.g. `visit:STR-001` */
   key: string

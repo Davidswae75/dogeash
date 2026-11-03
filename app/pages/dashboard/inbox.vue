@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { Inbox } from '@lucide/vue'
 import type { InboxKind } from '~/utils/inbox'
+import { computed, onMounted } from 'vue'
+import { definePageMeta, useRoute, useRouter, useSeoMeta } from '#imports' // nuxt
+import { useStoreInbox } from '~/composables/useStoreInbox'
 
 // The store inbox: everything that needs a reply or a decision, in one place.
 // Wide screens: list beside the open item. Phones: the list, then the item full width with a way back.
@@ -10,7 +13,7 @@ useSeoMeta({ title: 'Inbox · Store dashboard · Dogeash', robots: 'noindex' })
 
 const route = useRoute()
 const router = useRouter()
-const { items, unread, find, markRead, reply, act } = useStoreInbox()
+const { items, unread, find, load, markRead, reply, decide } = useStoreInbox()
 
 const selectedId = computed(() => (route.query.id ? String(route.query.id) : undefined))
 const selected = computed(() => (selectedId.value ? find(selectedId.value) : undefined))
@@ -26,7 +29,8 @@ function open(id: string) {
 const back = () => router.replace({ query: { ...route.query, id: undefined } })
 
 // Opening the page on wide screens shows the first item rather than an empty pane
-onMounted(() => {
+onMounted(async () => {
+  await load()
   if (!selectedId.value && items.value[0] && window.matchMedia('(min-width: 1024px)').matches) open(items.value[0].id)
   else if (selectedId.value) markRead(selectedId.value)
 })
@@ -37,7 +41,7 @@ onMounted(() => {
     <header class="flex flex-wrap items-end justify-between gap-3">
       <div class="flex flex-col gap-1.5">
         <span class="font-mono text-[11px] font-semibold tracking-[.12em] text-ink-muted uppercase">{{ unread }} unread · {{ items.length }} in all</span>
-        <p class="m-0 max-w-[44em] text-[15px] leading-6 text-ink-muted">Messages from buyers, booking requests, payments and reviews. Reply here; buyers also get your reply by email, SMS or WhatsApp.</p>
+        <p class="m-0 max-w-[44em] text-[15px] leading-6 text-ink-muted">Messages from buyers and their kennel visit requests. Reply, confirm or decline here; buyers see it in their account.</p>
       </div>
     </header>
 
@@ -47,13 +51,13 @@ onMounted(() => {
         v-if="selected"
         :item="selected"
         class="lg:sticky lg:top-[88px] lg:max-h-[calc(100dvh-112px)]"
+        :reply="text => reply(selected!.id, text)"
+        :decide="(status, note) => decide(selected!.id, status, note)"
         @back="back"
-        @reply="reply(selected.id, $event)"
-        @act="act(selected.id, $event)"
       />
       <div v-else class="hidden min-h-[320px] flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-line-strong p-8 text-center text-ink-muted lg:flex">
         <Inbox class="size-8" aria-hidden="true" />
-        <p class="m-0 text-sm">Choose a message or update to see it here.</p>
+        <p class="m-0 text-sm">{{ items.length ? 'Choose a message or visit to see it here.' : 'Nothing yet. Buyers\' messages and visit requests land here.' }}</p>
       </div>
     </div>
   </div>

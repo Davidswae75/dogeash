@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { ProtectionLevel } from '~/utils/protection'
 import { cn } from '~/lib/utils'
+import { computed } from 'vue'
+import { protectionLevels } from '~/utils/protection'
 
 // Five bars; levels 4 and 5 light up marigold
 const props = withDefaults(defineProps<{ level: ProtectionLevel, showLabel?: boolean }>(), { showLabel: true })

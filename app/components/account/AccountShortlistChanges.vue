@@ -1,5 +1,9 @@
 <script setup lang="ts">
 import { Lock, TrendingDown } from '@lucide/vue'
+import { computed } from 'vue'
+import { useShortlist } from '~/composables/useShortlist'
+import { shortlistChanges } from '~/utils/account'
+import { formatNaira } from '~/utils/dogs'
 
 // Shortlisted dogs that changed since they were saved: reserved by another buyer, or cheaper
 const { dogs } = useShortlist()
@@ -8,7 +12,7 @@ const link = (fileNo: string) => `/dogs/${fileNo.toLowerCase()}`
 </script>
 
 <template>
-  <SectionPanel title="On your shortlist" :meta="changes.length ? `${changes.length} changed` : undefined" see-all="/shortlist" see-all-label="Open shortlist">
+  <SectionPanel title="On your shortlist" :meta="changes.length ? `${changes.length} changed` : undefined" see-all="/account/shortlist" see-all-label="Open shortlist">
     <ClientOnly>
       <ul v-if="changes.length" class="m-0 flex list-none flex-col p-0">
         <li v-for="c in changes" :key="c.dog.fileNo">

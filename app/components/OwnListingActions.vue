@@ -2,6 +2,10 @@
 import { CalendarDays, LayoutDashboard, MessageSquare, PencilLine, Store as StoreIcon } from '@lucide/vue'
 import type { Dog } from '~/utils/dogs'
 import type { Store } from '~/utils/stores'
+import { computed } from 'vue'
+import { useSession } from '~/composables/useSession'
+import { dashboardDogStats } from '~/utils/dashboard'
+import { storeActivity } from '~/utils/storeRoles'
 
 // In place of Contact and Book on a store's own pages: what its people can do here, by role.
 // Nobody can save, message, book or buy from their own store.

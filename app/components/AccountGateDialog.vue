@@ -1,5 +1,9 @@
 <script setup lang="ts">
 import { Heart, LogIn, UserPlus } from '@lucide/vue'
+import { computed } from 'vue'
+import { useRoute } from '#imports' // nuxt
+import { accountGateLinks, useAccountGateDialog } from '~/composables/useAccountGate'
+import { useShortlist } from '~/composables/useShortlist'
 
 // "Sign in to book a visit with …": shown when a signed-out visitor tries something that needs an account.
 // One instance lives in each layout; buttons open it through useAccountGate().

@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { ArrowRight, Check } from '@lucide/vue'
+import { useSeoMeta } from '#imports' // nuxt
+import { homeSection } from '~/utils/market'
+import { openStoreFacts, openStoreQuestions, openStoreReasons, openStoreRequirements, storeVerificationSteps } from '~/utils/openStore'
 
 // Open a store: the pitch to kennels, how store verification works, what to have ready, and common questions.
 // Applying starts at sign-up with the store intent until the full store application exists (PLAN.md Phase 3).

@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import { Heart } from '@lucide/vue'
+import { useShortlist } from '~/composables/useShortlist'
+import { useShortlistRoutes } from '~/composables/useShortlistRoutes'
 
-// Header link to the shortlist, with how many dogs are on it
+// Header link to the shortlist (inside the account when signed in), with how many dogs are on it
 const { count } = useShortlist()
+const { list } = useShortlistRoutes()
 </script>
 
 <template>
   <NuxtLink
-    to="/shortlist"
+    :to="list"
     class="relative grid size-[38px] place-items-center rounded-full border-[1.5px] border-line-strong text-ink no-underline hover:bg-surface-sunk [&.router-link-active]:border-ink"
     :aria-label="`Shortlist${count ? `, ${count} ${count === 1 ? 'dog' : 'dogs'}` : ''}`"
   >

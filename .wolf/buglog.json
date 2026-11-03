@@ -270,6 +270,96 @@
       "last_seen": "2026-10-31T16:24:49.449Z",
       "occurrences": 1,
       "related_bugs": []
+    },
+    {
+      "error_message": "CSS fix: sm",
+      "file": "app/pages/gear/index.vue",
+      "root_cause": "sm: grid-cols-2 lg:grid-cols-3 → gap-6 lg:grid-cols-3",
+      "fix": "Changed sm: grid-cols-2 lg:grid-cols-3 → gap-6 lg:grid-cols-3",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "vue"
+      ],
+      "status": "candidate",
+      "observed_worktree": "/Users/dave/Documents/personalProjects/dogeash",
+      "id": "bug-016",
+      "timestamp": "2026-11-01T11:22:15.396Z",
+      "last_seen": "2026-11-01T11:22:15.396Z",
+      "occurrences": 1,
+      "related_bugs": []
+    },
+    {
+      "error_message": "CSS fix: GearIcon",
+      "file": "app/components/gear/GearCard.vue",
+      "root_cause": "GearIcon: category=\"props.product.category\" :image=\"props.product.image\" class=\"aspect-[16/8]\" /> → category=\"props.product.category\" :image=\"props.product.image\" class=\"aspect-[4/3] sm:aspect-[16/8]\" />",
+      "fix": "Changed GearIcon: category=\"props.product.category\" :image=\"props.product.image\" class=\"aspect-[16/8]\" /> → category=\"props.product.category\" :image=\"props.product.image\" class=\"aspect-[4/3] sm:aspect-[16/8]\" />",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "vue"
+      ],
+      "status": "candidate",
+      "observed_worktree": "/Users/dave/Documents/personalProjects/dogeash",
+      "id": "bug-017",
+      "timestamp": "2026-11-01T11:22:15.897Z",
+      "last_seen": "2026-11-01T11:22:15.897Z",
+      "occurrences": 1,
+      "related_bugs": []
+    },
+    {
+      "error_message": "Incorrect value in code",
+      "file": "app/pages/care/[slug].vue",
+      "root_cause": "Had \"flex min-w-0 flex-col gap-10\"",
+      "fix": "Changed to \"flex min-w-0 flex-col gap-10 lg:col-start-1\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "vue"
+      ],
+      "status": "candidate",
+      "observed_worktree": "/Users/dave/Documents/personalProjects/dogeash",
+      "id": "bug-018",
+      "timestamp": "2026-11-01T11:22:16.729Z",
+      "last_seen": "2026-11-01T11:22:16.729Z",
+      "occurrences": 1,
+      "related_bugs": []
+    },
+    {
+      "error_message": "CSS fix: lg",
+      "file": "app/pages/care/[slug].vue",
+      "root_cause": "lg: sticky lg:top-24\" aria-label=\"Book\"> → sticky lg:top-24 lg:col-start-2 lg:row-span-2 lg:row-start-1\" aria-label=\"Book\">",
+      "fix": "Changed lg: sticky lg:top-24\" aria-label=\"Book\"> → sticky lg:top-24 lg:col-start-2 lg:row-span-2 lg:row-start-1\" aria-label=\"Book\">",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "vue"
+      ],
+      "status": "candidate",
+      "observed_worktree": "/Users/dave/Documents/personalProjects/dogeash",
+      "id": "bug-019",
+      "timestamp": "2026-11-01T11:22:17.273Z",
+      "last_seen": "2026-11-01T11:22:17.273Z",
+      "occurrences": 1,
+      "related_bugs": []
+    },
+    {
+      "error_message": "Incorrect value in code",
+      "file": "app/components/gear/GearCard.vue",
+      "root_cause": "Had \"w-11 justify-center rounded-full! px-0\"",
+      "fix": "Changed to \"w-10 justify-center rounded-full! px-0 sm:w-11\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "vue"
+      ],
+      "status": "candidate",
+      "observed_worktree": "/Users/dave/Documents/personalProjects/dogeash",
+      "id": "bug-020",
+      "timestamp": "2026-11-01T11:23:52.323Z",
+      "last_seen": "2026-11-01T11:23:52.323Z",
+      "occurrences": 1,
+      "related_bugs": []
     }
   ],
   "applied_observations": {
@@ -287,7 +377,12 @@
     "35261b85-e481-4de8-beee-d4e55763072d": true,
     "981bf5e7-d797-435d-88fb-2f5f8f777f2b": true,
     "b17e7302-bf16-43cc-9958-7153d87f07bd": true,
-    "2a9e4617-6420-40f2-b450-8d2349a037f4": true
+    "2a9e4617-6420-40f2-b450-8d2349a037f4": true,
+    "4556683a-6c21-48a9-b016-ab94d154cd2d": true,
+    "0226557e-ea1b-42cf-b821-f719751f71e1": true,
+    "9fcd8798-2e0a-4a4a-bdbe-c0aa7d0fcb0e": true,
+    "e70653e2-8691-40e3-9982-3f0bdcbf75c8": true,
+    "2d4f081c-5f7d-4654-b52a-5368236f27f4": true
   },
-  "next_id": 16
+  "next_id": 21
 }

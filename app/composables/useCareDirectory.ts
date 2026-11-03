@@ -1,4 +1,7 @@
 import type { CareType } from '~/utils/care'
+import { computed, ref } from 'vue'
+import { useRoute } from '#imports' // nuxt
+import { careTypes, sampleCareProviders } from '~/utils/care'
 
 // Search, filters and sort for the care directory. Reads ?type= and ?city= so links can land on a filtered view.
 export function useCareDirectory() {

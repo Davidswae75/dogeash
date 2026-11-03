@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { ProtectionLevel } from '~/utils/protection'
 import { cn } from '~/lib/utils'
+import { protectionLevels } from '~/utils/protection'
 
 // The five levels as colour cards: surface, ash-soft, ash, marigold, night
 const levels = Object.entries(protectionLevels).map(([n, level]) => ({ n: Number(n) as ProtectionLevel, ...level }))

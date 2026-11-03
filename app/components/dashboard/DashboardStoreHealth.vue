@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { Check, Eye } from '@lucide/vue'
+import { computed } from 'vue'
+import { useStoreContext } from '~/composables/useStoreContext'
+import { profileChecklist } from '~/utils/dashboard'
 
 // How the store looks to buyers: inspection, rating, reply time, and what's left on the profile
 const { store, can } = useStoreContext()

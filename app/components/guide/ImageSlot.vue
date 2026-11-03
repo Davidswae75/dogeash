@@ -3,6 +3,8 @@ import type { HTMLAttributes } from 'vue'
 import type { GuideImage } from '~/utils/guide'
 import { Check, Copy, ImagePlus } from '@lucide/vue'
 import { cn } from '~/lib/utils'
+import { computed, ref } from 'vue'
+import { guideImageStyle } from '~/utils/guide'
 
 // Shows the photo once it's in public/guide/, otherwise a brief describing what to generate
 const props = defineProps<{ image: GuideImage, class?: HTMLAttributes['class'] }>()

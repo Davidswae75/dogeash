@@ -1,10 +1,14 @@
 <script setup lang="ts">
 import { Clock, MapPin, Star, Truck, UserRound } from '@lucide/vue'
 import type { Store } from '~/utils/stores'
+import { computed } from 'vue'
+import { formatNaira } from '~/utils/dogs'
+import { storeServices, storeSummary } from '~/utils/stores'
 
 // A store in the directory: banner, who runs it, what it lists and why to trust it
 const props = defineProps<{ store: Store }>()
 const summary = computed(() => storeSummary(props.store))
+const serviceLabels = computed(() => props.store.services.map(s => storeServices[s].label).join(' · '))
 
 const levelRange = computed(() => {
   const l = summary.value.levels
@@ -88,7 +92,7 @@ const delivery = computed(() => props.store.services.includes('delivery')
           <span v-for="breed in summary.breeds" :key="breed" class="rounded-full bg-ash-soft px-2.5 py-1 text-xs font-semibold text-ink">{{ breed }}</span>
         </div>
         <p class="m-0 text-[13px] leading-5 text-ink-muted">
-          {{ props.store.services.map(s => storeServices[s].label).join(' · ') }}
+          {{ serviceLabels }}
         </p>
       </div>
 

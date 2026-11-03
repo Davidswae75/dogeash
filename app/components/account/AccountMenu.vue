@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { LogOut } from '@lucide/vue'
+import { useSession } from '~/composables/useSession'
+import { useShortlist } from '~/composables/useShortlist'
+import { accountNav } from '~/utils/account'
 
 // The avatar in the header: who is signed in, their account pages and Sign out
 const { user, initials, memberships, hasStore, signOut } = useSession()
@@ -26,7 +29,7 @@ const groups = accountNav.map(g => g.items.filter(i => i.inMenu)).filter(g => g.
         <div class="flex min-w-0 flex-col">
           <strong class="truncate font-display text-[15px] leading-5 font-extrabold font-stretch-expanded">{{ user.name }}</strong>
           <span class="truncate text-[13px] text-ink-muted">{{ user.email }}</span>
-          <span class="mt-1 font-mono text-[10.5px] font-semibold tracking-[.12em] text-ink-muted uppercase">Buyer · {{ user.city }} · {{ user.id }}</span>
+          <span class="mt-1 font-mono text-[10.5px] font-semibold tracking-[.12em] text-ink-muted uppercase">{{ ['Buyer', user.city, user.ref].filter(Boolean).join(' · ') }}</span>
         </div>
       </div>
 
@@ -44,7 +47,7 @@ const groups = accountNav.map(g => g.items.filter(i => i.inMenu)).filter(g => g.
               <span class="flex-1">{{ item.label }}</span>
               <span v-if="item.soon" class="rounded-full bg-surface-sunk px-2 py-0.5 font-mono text-[10px] font-semibold tracking-[.08em] uppercase">Soon</span>
               <ClientOnly>
-                <span v-if="item.to === '/shortlist' && count" class="grid h-5 min-w-5 place-items-center rounded-full bg-marigold px-1.5 text-[11px] font-bold text-on-marigold">{{ count }}</span>
+                <span v-if="item.to === '/account/shortlist' && count" class="grid h-5 min-w-5 place-items-center rounded-full bg-marigold px-1.5 text-[11px] font-bold text-on-marigold">{{ count }}</span>
               </ClientOnly>
             </NuxtLink>
           </DropdownMenuItem>

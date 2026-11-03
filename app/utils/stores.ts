@@ -1,3 +1,4 @@
+import { initialsOf } from './account'
 import type { ProtectionLevel } from './protection'
 import { sampleDogs } from './dogs'
 
@@ -369,3 +370,52 @@ export function storeSummary(store: Store) {
 
 // What a buyer can ask for when booking a kennel visit
 export const kennelVisitServices = ['Meet the dogs', 'Meet the dogs and see protection work']
+
+// A store as it comes from Supabase (public.stores); `details` holds everything without its own column
+export interface StoreRow {
+  public_id: string
+  slug: string
+  name: string
+  initials: string
+  tagline: string
+  city: string
+  area: string
+  state: string
+  founded: number | null
+  status: 'draft' | 'in_review' | 'verified' | 'suspended'
+  rating: number
+  reviews_count: number
+  details: Partial<Store>
+}
+
+export const storeColumns = 'public_id, slug, name, initials, tagline, city, area, state, founded, status, rating, reviews_count, details'
+
+// The app's Store from a database row. A new store has little in `details` yet, so everything has a default.
+export function toStore(row: StoreRow, ownerName = ''): Store {
+  return {
+    replies: '—',
+    dogsPlaced: 0,
+    hours: '',
+    deliveryAreas: '',
+    services: [],
+    owner: { name: ownerName, title: 'Owner', yearsWithDogs: 0, bio: '', credentials: [] },
+    about: '',
+    history: [],
+    inspection: { status: 'booked', date: '', by: '', checks: [] },
+    care: [],
+    reviewSamples: [],
+    ...row.details,
+    id: row.public_id,
+    slug: row.slug,
+    name: row.name,
+    initials: row.initials || initialsOf(row.name),
+    tagline: row.tagline,
+    city: row.city,
+    area: row.area,
+    state: row.state,
+    founded: row.founded ?? new Date().getFullYear(),
+    verified: row.status === 'verified',
+    rating: Number(row.rating),
+    reviews: row.reviews_count,
+  }
+}

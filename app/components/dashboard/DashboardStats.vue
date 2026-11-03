@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ArrowDownRight, ArrowUpRight } from '@lucide/vue'
+import { dashboardStats } from '~/utils/dashboard'
 
 // This week in four numbers: one connected strip, each with its change and a filled 7-day trend
 const stats = dashboardStats

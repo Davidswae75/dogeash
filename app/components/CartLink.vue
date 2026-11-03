@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ShoppingCart } from '@lucide/vue'
+import { useCart } from '~/composables/useCart'
 
 // Header link to the gear cart. Stays out of the way until there's something in it.
 const { count } = useCart()

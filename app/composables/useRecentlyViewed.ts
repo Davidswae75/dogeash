@@ -1,4 +1,7 @@
 import type { Dog } from '~/utils/dogs'
+import { computed } from 'vue'
+import { useAccountList } from './useAccountList'
+import { findDog } from '~/utils/dogs'
 
 // Dogs this person has opened, newest first (kept to 12 by useAccountList)
 

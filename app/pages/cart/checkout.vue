@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
+import { onMounted, ref } from 'vue'
+import { navigateTo, useSeoMeta } from '#imports' // nuxt
+import { useCart } from '~/composables/useCart'
+import { useSession } from '~/composables/useSession'
+import { gearCheckoutFields, gearCheckoutSchema } from '~/utils/gear'
 
 // Gear checkout: where to deliver, then a preview. Payments aren't connected, so no order is placed.
 useSeoMeta({ title: 'Checkout · Dogeash', robots: 'noindex' })

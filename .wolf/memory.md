@@ -288,3 +288,78 @@ description: chronological action log per session, consolidated weekly
 | 17:24 | Edited app/components/PatrolMap.vue | "block h-auto w-full max-w" → "[" | ~30 |
 <!-- session:NTRiNTc5ZGYtOGZhNy00N2EwLWFhNmQtMWYxNjBmYTU5YzY0 -->
 | 2026-10-31T16:26:56.045Z | Guest hero patrol GIF now fades into content like the signed-in photo via shared HomeHeroFrame; PatrolMap gained cover prop | app/components/home/HomeHeroFrame.vue,app/components/home/HomeHero.vue,app/components/home/HomeWelcome.vue,app/components/PatrolMap.vue | Screenshots at 1280, 768, 390 |
+| 19:13 | Session end: 24 writes across 10 files (gear.ts, GearIcon.vue, GearCard.vue, GearCartLine.vue, HomeHeroFrame.vue) | 8 reads | ~7023 tok |
+
+## Session: 2026-11-01 12:21
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 12:22 | Edited app/pages/gear/index.vue | inline fix | ~14 |
+| 12:22 | Edited app/components/gear/GearCard.vue | 22→22 lines | ~482 |
+| 12:22 | Edited app/pages/care/[slug].vue | 2→3 lines | ~64 |
+| 12:22 | Edited app/pages/care/[slug].vue | reduced (-7 lines) | ~52 |
+| 12:22 | Edited app/pages/care/[slug].vue | CSS: lg, md | ~135 |
+| 12:23 | Edited app/components/gear/GearCard.vue | "w-11 justify-center round" → "w-10 justify-center round" | ~15 |
+<!-- session:MDQ2MmZjM2MtODMwNS00ZDMxLWE1Y2UtMDM4ZmQ5ODdjNmE0 -->
+| 2026-11-01T11:24:01.381Z | Supabase foundation: @nuxtjs/supabase loaded only with keys, .env.example, migration (profiles, stores, store_members, dogs, shortlist_items with RLS and column grants), seed generator from sample data, PGlite access-rule tests | nuxt.config.ts,package.json,.env.example,supabase/migrations/20261101000000_core_marketplace.sql,supabase/seed.sql,scripts/generate-seed.mjs,scripts/test-db.mjs,PLAN.md | 30 access rules pass; site still 200 without keys; module types load with placeholder keys; not yet run on a real Supabase project |
+<!-- session:MTNmZDNjZGEtZjZjOS00Njg4LWIwYjUtYWZlYTQ1Yzg2NWVk -->
+| 2026-11-01T11:24:57.340Z | Gear page shows two columns on phones with a compact GearCard; care provider page reordered so booking comes before similar providers when stacked | app/pages/gear/index.vue,app/components/gear/GearCard.vue,app/pages/care/[slug].vue | Checked in browser at 375px and 1280px: no horizontal overflow at 375px, order correct, desktop layout and sticky booking card unchanged |
+| 12:36 | Session end: 6 writes across 3 files (index.vue, GearCard.vue, [slug].vue) | 1 reads | ~876 tok |
+
+## Session: 2026-11-03 03:43
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 15:22 | Created app/composables/useSession.ts | — | ~910 |
+| 15:22 | Created app/plugins/account.ts | — | ~117 |
+| 15:22 | Created app/composables/useAuth.ts | — | ~1419 |
+| 15:23 | Created app/pages/sign-in.vue | — | ~1242 |
+| 15:23 | Created app/composables/useStoreApi.ts | — | ~318 |
+| 15:25 | Created app/types/database.types.ts | — | ~1351 |
+<!-- session:MDQ2MmZjM2MtODMwNS00ZDMxLWE1Y2UtMDM4ZmQ5ODdjNmE0 -->
+| 2026-11-03T14:29:25.405Z | Real accounts on Supabase Auth: useAuth (sign-up with email code, sign-in password or code, reset by code, friendly errors), useSession loads profile + store memberships from DB (plugins/account.ts), toStore adapter, useStoreApi.createDraftStore, AuthCodeStep real verify/resend, sign-in/sign-up/forgot-password connected, database.types.ts, email templates, module always on | app/composables/useAuth.ts,app/composables/useSession.ts,app/plugins/account.ts,app/composables/useStoreApi.ts,app/utils/account.ts,app/utils/stores.ts,app/types/database.types.ts,app/components/auth/AuthCodeStep.vue,app/pages/sign-in.vue,app/pages/sign-up.vue,app/pages/forgot-password.vue,nuxt.config.ts,supabase/email-templates/,PLAN.md | typecheck clean (except pre-existing smoothAnchors); pages 200 signed out, guards redirect; not yet tested with a real sign-up (needs user's email + templates) |
+
+## Session: 2026-11-03 15:30
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 15:52 | Edited nuxt.config.ts | 2→7 lines | ~114 |
+| 17:24 | Created app/composables/useSavedDogs.ts | — | ~1404 |
+<!-- session:MDQ2MmZjM2MtODMwNS00ZDMxLWE1Y2UtMDM4ZmQ5ODdjNmE0 -->
+| 2026-11-03T16:29:19.837Z | Shortlist in Supabase: useSavedDogs (signed in: shortlist_items with optimistic writes, file_no↔id map, reload on error; guests: browser), adoptGuest on sign-in, takeGuestList, loaded in plugins/account.ts; fixed useNotify↔useShortlist startup loop; db:test shortlist cases | app/composables/useSavedDogs.ts,app/composables/useShortlist.ts,app/composables/useAccountList.ts,app/composables/useSession.ts,app/composables/useAuth.ts,app/plugins/account.ts,scripts/test-db.mjs,PLAN.md | pages 200, guest flow verified in browser, 34 access rules pass; signed-in sync not yet tested with a real account |
+| 17:37 | Created app/composables/useLoader.ts | — | ~282 |
+| 17:37 | Created app/components/AppLoader.vue | — | ~541 |
+| 17:37 | Created app/app.vue | — | ~90 |
+| 17:38 | Created app/components/ui/button/Button.vue | — | ~296 |
+<!-- session:MDQ2MmZjM2MtODMwNS00ZDMxLWE1Y2UtMDM4ZmQ5ODdjNmE0 -->
+| 2026-11-03T16:42:12.106Z | Loading states: useLoader + AppLoader (blurred backdrop, kennel-watch GIF day/night, message, paw dots, min 600ms) used for sign-out, sign-in finish and account/store setup; NuxtLoadingIndicator marigold bar for page changes; Button loading prop (spinner, disabled, aria-busy) on auth buttons | app/composables/useLoader.ts,app/components/AppLoader.vue,app/app.vue,app/components/ui/button/Button.vue,app/composables/useSession.ts,app/pages/sign-in.vue,app/pages/sign-up.vue,app/pages/forgot-password.vue,app/components/auth/AuthCodeStep.vue | overlay checked in browser in both themes; pages 200; typecheck clean |
+| 18:06 | Created app/components/account/AccountHomeMatch.vue | — | ~872 |
+| 18:06 | Created app/pages/account/profile.vue | — | ~1759 |
+| 18:07 | Created app/components/account/AccountSettingsDetails.vue | — | ~590 |
+| 18:07 | Created app/components/account/AccountSettingsPassword.vue | — | ~467 |
+| 18:07 | Created app/components/account/AccountSettingsContact.vue | — | ~630 |
+| 18:07 | Created app/pages/account/settings.vue | — | ~351 |
+| 18:08 | Created app/components/account/AccountProfilePrompt.vue | — | ~265 |
+<!-- session:MDQ2MmZjM2MtODMwNS00ZDMxLWE1Y2UtMDM4ZmQ5ODdjNmE0 -->
+| 2026-11-03T17:10:16.071Z | Account Home profile + Settings with Supabase: migration 20261103 (profile home fields, notify prefs, checks), useProfile, AccountHomeMatch, Settings split into Details/Password/Contact components, matching on Home from real profile with AccountProfilePrompt fallback; db:test 37 rules | supabase/migrations/20261103000000_profile_preferences.sql,app/pages/account/profile.vue,app/pages/account/settings.vue,app/components/account/AccountHomeMatch.vue,app/components/account/AccountSettingsDetails.vue,app/components/account/AccountSettingsPassword.vue,app/components/account/AccountSettingsContact.vue,app/components/account/AccountProfilePrompt.vue,app/components/account/AccountHomeProfile.vue,app/components/home/HomeSignedIn.vue,app/composables/useProfile.ts,app/composables/useSession.ts,app/utils/account.ts,app/utils/auth.ts,app/types/database.types.ts,scripts/test-db.mjs,PLAN.md | typecheck clean, 37 access rules pass, pages load; needs the migration run in Supabase, then a signed-in check |
+| 18:21 | Created app/composables/useShortlistRoutes.ts | — | ~157 |
+| 18:25 | Created app/utils/searchFilters.ts | — | ~791 |
+| 18:27 | Created app/components/account/AccountSavedSearch.vue | — | ~864 |
+| 18:27 | Created app/pages/account/alerts.vue | — | ~448 |
+<!-- session:MDQ2MmZjM2MtODMwNS00ZDMxLWE1Y2UtMDM4ZmQ5ODdjNmE0 -->
+| 2026-11-03T17:30:29.894Z | Shortlist + compare inside account (/account/shortlist, shortlist-home redirect, ShortlistView/ShortlistCompare components, useShortlistRoutes); compare bar redesigned for phones; Saved searches: migration 20261103000100, searchFilters util (filters in /dogs URL), useSavedSearches, Save this search (gated), /account/alerts page, Home + tiles use real searches, sample removed | app/pages/account/shortlist/,app/components/shortlist/ShortlistView.vue,app/components/shortlist/ShortlistCompare.vue,app/components/shortlist/ShortlistCompareBar.vue,app/middleware/shortlist-home.ts,app/composables/useShortlistRoutes.ts,supabase/migrations/20261103000100_saved_searches.sql,app/utils/searchFilters.ts,app/composables/useSavedSearches.ts,app/pages/dogs/index.vue,app/pages/account/alerts.vue,app/components/account/AccountSavedSearch.vue,PLAN.md | typecheck clean, db:test passes, pages load, compare bar + URL filters checked in browser; migration needs running; signed-in flows not yet tried |
+| 18:34 | Created supabase/migrations/20261104000000_messages_and_visits.sql | — | ~2699 |
+| 18:36 | Created app/utils/time.ts | — | ~335 |
+| 18:36 | Created app/composables/useConversations.ts | — | ~1450 |
+| 18:36 | Created app/composables/useVisits.ts | — | ~1283 |
+| 18:39 | Created app/components/ConversationThread.vue | — | ~393 |
+| 18:39 | Created app/components/ConversationReply.vue | — | ~574 |
+| 18:39 | Created app/pages/account/messages.vue | — | ~1817 |
+| 18:42 | Created app/components/VisitDateBlock.vue | — | ~218 |
+| 18:42 | Created app/components/VisitStatusChip.vue | — | ~151 |
+| 18:42 | Created app/components/VisitCard.vue | — | ~723 |
+| 18:43 | Edited app/composables/useNotify.ts | expanded (+8 lines) | ~164 |
+| 18:43 | Created app/pages/account/bookings.vue | — | ~1007 |
+| 18:46 | Created app/composables/useStoreInbox.ts | — | ~1097 |
+| 18:46 | Created app/components/dashboard/DashboardInboxVisit.vue | — | ~647 |
+| 18:46 | Created app/components/dashboard/DashboardInboxDetail.vue | — | ~1088 |

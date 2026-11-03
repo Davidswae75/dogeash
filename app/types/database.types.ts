@@ -1,0 +1,209 @@
+// The database's shape, for type-checked Supabase queries. Written by hand to match
+// the files in supabase/migrations/, in the format `supabase gen types` produces;
+// once the Supabase CLI is linked, `npm run db:types` regenerates it. Keep it in step with every migration.
+
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
+
+type Timestamps = { created_at: string, updated_at: string }
+
+export interface Database {
+  public: {
+    Tables: {
+      profiles: {
+        Row: {
+          id: string
+          full_name: string
+          phone: string | null
+          city: string | null
+          property: Database['public']['Enums']['property_type'] | null
+          has_children: boolean | null
+          has_other_pets: boolean | null
+          experience: Database['public']['Enums']['handler_experience'] | null
+          notify_email: boolean
+          notify_sms: boolean
+          notify_whatsapp: boolean
+        } & Timestamps
+        Insert: never
+        Update: {
+          full_name?: string
+          phone?: string | null
+          city?: string | null
+          property?: Database['public']['Enums']['property_type'] | null
+          has_children?: boolean | null
+          has_other_pets?: boolean | null
+          experience?: Database['public']['Enums']['handler_experience'] | null
+          notify_email?: boolean
+          notify_sms?: boolean
+          notify_whatsapp?: boolean
+        }
+        Relationships: []
+      }
+      stores: {
+        Row: {
+          id: string
+          public_id: string
+          slug: string
+          name: string
+          initials: string
+          tagline: string
+          city: string
+          area: string
+          state: string
+          founded: number | null
+          status: Database['public']['Enums']['store_status']
+          rating: number
+          reviews_count: number
+          details: Json
+          created_by: string | null
+        } & Timestamps
+        Insert: {
+          public_id: string
+          slug: string
+          name: string
+          city: string
+          initials?: string
+          tagline?: string
+          area?: string
+          state?: string
+          founded?: number | null
+          details?: Json
+        }
+        Update: { name?: string, initials?: string, tagline?: string, city?: string, area?: string, state?: string, founded?: number | null, details?: Json }
+        Relationships: []
+      }
+      store_members: {
+        Row: { store_id: string, user_id: string, role: Database['public']['Enums']['store_role'], created_at: string }
+        Insert: { store_id: string, user_id: string, role: Database['public']['Enums']['store_role'] }
+        Update: { role?: Database['public']['Enums']['store_role'] }
+        Relationships: [
+          { foreignKeyName: 'store_members_store_id_fkey', columns: ['store_id'], isOneToOne: false, referencedRelation: 'stores', referencedColumns: ['id'] },
+        ]
+      }
+      dogs: {
+        Row: {
+          id: string
+          file_no: string
+          store_id: string
+          name: string
+          breed: string
+          sex: Database['public']['Enums']['dog_sex']
+          city: string
+          age: string
+          weight_kg: number
+          hips: string
+          level: number
+          price_naira: number
+          status: Database['public']['Enums']['dog_status']
+          photo_path: string | null
+          property: Database['public']['Enums']['property_type'][]
+          safe_with_children: boolean
+          file: Json | null
+        } & Timestamps
+        Insert: {
+          file_no: string
+          store_id: string
+          name: string
+          breed: string
+          sex: Database['public']['Enums']['dog_sex']
+          city: string
+          age: string
+          weight_kg: number
+          level: number
+          price_naira: number
+          hips?: string
+          status?: Database['public']['Enums']['dog_status']
+          photo_path?: string | null
+          property?: Database['public']['Enums']['property_type'][]
+          safe_with_children?: boolean
+          file?: Json | null
+        }
+        Update: Partial<Omit<Database['public']['Tables']['dogs']['Insert'], 'file_no' | 'store_id'>>
+        Relationships: [
+          { foreignKeyName: 'dogs_store_id_fkey', columns: ['store_id'], isOneToOne: false, referencedRelation: 'stores', referencedColumns: ['id'] },
+        ]
+      }
+      conversations: {
+        Row: {
+          id: string
+          store_id: string
+          buyer_id: string
+          dog_id: string | null
+          buyer_name: string
+          last_message_at: string
+          last_message_preview: string
+          last_sender: Database['public']['Enums']['message_role'] | null
+          buyer_read_at: string
+          store_read_at: string | null
+          created_at: string
+        }
+        Insert: { store_id: string, dog_id?: string | null }
+        Update: never
+        Relationships: [
+          { foreignKeyName: 'conversations_store_id_fkey', columns: ['store_id'], isOneToOne: false, referencedRelation: 'stores', referencedColumns: ['id'] },
+          { foreignKeyName: 'conversations_dog_id_fkey', columns: ['dog_id'], isOneToOne: false, referencedRelation: 'dogs', referencedColumns: ['id'] },
+        ]
+      }
+      messages: {
+        Row: { id: string, conversation_id: string, sender_id: string | null, sender_role: Database['public']['Enums']['message_role'], body: string, created_at: string }
+        Insert: { conversation_id: string, sender_role: Database['public']['Enums']['message_role'], body: string }
+        Update: never
+        Relationships: [
+          { foreignKeyName: 'messages_conversation_id_fkey', columns: ['conversation_id'], isOneToOne: false, referencedRelation: 'conversations', referencedColumns: ['id'] },
+        ]
+      }
+      visits: {
+        Row: {
+          id: string
+          store_id: string
+          buyer_id: string
+          buyer_name: string
+          buyer_phone: string | null
+          dog_ids: string[]
+          service: string
+          day: string
+          slot: string
+          place: Database['public']['Enums']['visit_place']
+          note: string | null
+          status: Database['public']['Enums']['visit_status']
+          store_note: string | null
+        } & Timestamps
+        Insert: { store_id: string, dog_ids?: string[], service: string, day: string, slot: string, place?: Database['public']['Enums']['visit_place'], note?: string | null }
+        Update: { status?: Database['public']['Enums']['visit_status'], store_note?: string | null }
+        Relationships: [
+          { foreignKeyName: 'visits_store_id_fkey', columns: ['store_id'], isOneToOne: false, referencedRelation: 'stores', referencedColumns: ['id'] },
+        ]
+      }
+      saved_searches: {
+        Row: { id: string, user_id: string, label: string, filters: Json, alerts: boolean, created_at: string }
+        Insert: { label: string, filters?: Json, alerts?: boolean }
+        Update: { label?: string, alerts?: boolean }
+        Relationships: []
+      }
+      shortlist_items: {
+        Row: { user_id: string, dog_id: string, comparing: boolean, created_at: string }
+        Insert: { user_id: string, dog_id: string, comparing?: boolean }
+        Update: { comparing?: boolean }
+        Relationships: [
+          { foreignKeyName: 'shortlist_items_dog_id_fkey', columns: ['dog_id'], isOneToOne: false, referencedRelation: 'dogs', referencedColumns: ['id'] },
+        ]
+      }
+    }
+    Views: { [_ in never]: never }
+    Functions: {
+      has_store_role: { Args: { target_store: string, roles: Database['public']['Enums']['store_role'][] }, Returns: boolean }
+      mark_conversation_read: { Args: { target: string }, Returns: undefined }
+    }
+    Enums: {
+      store_status: 'draft' | 'in_review' | 'verified' | 'suspended'
+      store_role: 'owner' | 'manager' | 'handler'
+      dog_status: 'draft' | 'pending_review' | 'available' | 'reserved' | 'sold' | 'withdrawn'
+      dog_sex: 'Male' | 'Female'
+      property_type: 'home' | 'compound' | 'estate' | 'business'
+      handler_experience: 'first-time' | 'some' | 'experienced' | 'professional'
+      message_role: 'buyer' | 'store'
+      visit_status: 'requested' | 'confirmed' | 'declined' | 'cancelled' | 'done'
+      visit_place: 'kennel' | 'home'
+    }
+    CompositeTypes: { [_ in never]: never }
+  }
+}

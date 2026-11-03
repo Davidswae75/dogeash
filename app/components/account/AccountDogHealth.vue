@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { OwnedDog } from '~/utils/myDogs'
+import { computed } from 'vue'
 
 // Vaccinations and treatments: when given, when due, and whether it's on time
 const props = defineProps<{ dog: OwnedDog }>()

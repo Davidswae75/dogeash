@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { definePageMeta, useSeoMeta } from '#imports' // nuxt
+import { useSession } from '~/composables/useSession'
+
 // Home is the marketplace. Visitors get a compact intro first; signed-in buyers get their own
 // marketplace (activity, bookings, matched dogs) with the introductions left out.
 definePageMeta({ footer: 'full' })

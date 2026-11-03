@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { ShoppingCart } from '@lucide/vue'
+import { navigateTo, useSeoMeta } from '#imports' // nuxt
+import { useAccountGate } from '~/composables/useAccountGate'
+import { useCart } from '~/composables/useCart'
 
 // The gear cart. Checkout needs an account, so delivery updates have somewhere to go.
 useSeoMeta({ title: 'Your cart · Dogeash', robots: 'noindex' })

@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import type { AuthPanelMeta } from '~/types/page-meta'
+import { sampleDogs } from '~/utils/dogs'
+import { sampleStores } from '~/utils/stores'
 
 // The dark panel beside sign-in and sign-up: a headline, the kennel watch and three numbers.
 // Fixed to the window's height and sticky; the kennel watch shrinks to fit short windows.

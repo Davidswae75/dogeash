@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { BookOpen, Compass, X } from '@lucide/vue'
+import { useFirstVisit } from '~/composables/useFirstVisit'
 
 // Shown once to first-time visitors; returning visitors get the plain marketplace
 const { isFirstVisit, dismiss } = useFirstVisit('home-intro')

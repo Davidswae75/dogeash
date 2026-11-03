@@ -1,5 +1,12 @@
 <script setup lang="ts">
 import { Heart } from '@lucide/vue'
+import { computed } from 'vue'
+import { useRoute } from '#imports' // nuxt
+import { useFirstVisit } from '~/composables/useFirstVisit'
+import { useNotify } from '~/composables/useNotify'
+import { useSession } from '~/composables/useSession'
+import { useShortlist } from '~/composables/useShortlist'
+import { findDog } from '~/utils/dogs'
 
 // Save a dog to the shortlist. "icon" sits on a card's photo; "button" is a full button on the dog page.
 const props = withDefaults(defineProps<{ fileNo: string, name: string, variant?: 'icon' | 'button' }>(), { variant: 'icon' })

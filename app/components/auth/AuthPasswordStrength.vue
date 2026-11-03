@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { passwordStrength } from '~/utils/auth'
+
 // Four bars that fill as a new password gets stronger
 const props = defineProps<{ password?: string }>()
 

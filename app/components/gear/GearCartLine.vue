@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { Minus, Plus, Trash2 } from '@lucide/vue'
 import type { GearProduct } from '~/utils/gear'
+import { useCart } from '~/composables/useCart'
+import { useNotify } from '~/composables/useNotify'
+import { formatNaira } from '~/utils/dogs'
+import { GEAR_MAX_QUANTITY } from '~/utils/gear'
 
 // One line in the cart: what it is, how many, and the line total
 const props = defineProps<{ line: { key: string, product: GearProduct, size?: string, quantity: number, total: number } }>()

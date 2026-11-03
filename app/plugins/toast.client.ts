@@ -1,6 +1,7 @@
 import Toast, { POSITION, type PluginOptions } from 'vue-toastification'
 import 'vue-toastification/dist/index.css'
 import '~/assets/css/toast.css'
+import { defineNuxtPlugin } from '#imports' // nuxt
 
 // Toasts confirm what a buyer just did. Use them through useNotify(), not useToast() directly,
 // so every action gets the right type, icon and wording.

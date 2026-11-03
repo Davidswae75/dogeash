@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ImagePlus } from '@lucide/vue'
 import type { OwnedDog } from '~/utils/myDogs'
+import { computed } from 'vue'
+import { getStore } from '~/utils/dogs'
 
 // Top of a dog's record: portrait, the facts you'd need at the vet, and booking care
 const props = defineProps<{ dog: OwnedDog }>()

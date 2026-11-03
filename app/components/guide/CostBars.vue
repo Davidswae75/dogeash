@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { formatNairaRange, guideFirstYearCosts } from '~/utils/guide'
+
 // First-year costs as low–high ranges on one shared scale
 const max = Math.max(...guideFirstYearCosts.map(c => c.high))
 const pct = (v: number) => `${(v / max) * 100}%`

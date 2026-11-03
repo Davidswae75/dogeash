@@ -1,13 +1,13 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-10-31T16:24:49.383Z",
-    "fileCount": 637,
+    "lastScanned": "2026-11-03T17:46:56.799Z",
+    "fileCount": 670,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "b784c9062d89ce2d0ae6a44d91db40099a1a85629f2f0e94808d17d4289d70f4",
-    "storeUpdatedAt": "2026-10-31T16:24:49.424Z",
-    "rootHash": "b85b122470f87496"
+    "renderedHash": "bca7ad9030660c4665af20ced2763def9a3e67ae9f471737adb8e8d51d6f8099",
+    "storeUpdatedAt": "2026-11-03T17:46:56.862Z",
+    "rootHash": "0b2c82d4377bf47f"
   },
   "files": {
     ".gitignore": {
@@ -22,13 +22,12 @@
     },
     "app/app.vue": {
       "description": "Vue component",
-      "tokens": 26,
-      "hash": "2f509d92af23a0b8",
-      "size": 96,
-      "mtimeMs": 1792777437406.9585,
-      "updatedAt": "2026-10-26T02:55:55.557Z",
-      "source": "scan",
-      "importance": 0.4429
+      "tokens": 90,
+      "hash": "ff38991bfcf68720",
+      "size": 335,
+      "mtimeMs": 1793723878051.3408,
+      "updatedAt": "2026-11-03T16:37:58.392Z",
+      "source": "hook"
     },
     "app/assets/css/main.css": {
       "description": "Styles: 13 rules, 56 vars, 1 media queries, 5 animations, 1 layers",
@@ -961,14 +960,13 @@
       "importance": 0.4429
     },
     "app/components/ui/button/Button.vue": {
-      "description": "Vue: setup, TS",
-      "tokens": 195,
-      "hash": "47b4a8d7c7c42c70",
-      "size": 729,
-      "mtimeMs": 1792779533779.2036,
-      "updatedAt": "2026-10-26T02:55:55.585Z",
-      "source": "scan",
-      "importance": 0.8194
+      "description": "Dogeash: show a spinner and block further clicks while something is working",
+      "tokens": 296,
+      "hash": "2e32422d89dc7497",
+      "size": 1108,
+      "mtimeMs": 1793723889471.3945,
+      "updatedAt": "2026-11-03T16:38:09.849Z",
+      "source": "hook"
     },
     "app/components/ui/button/index.ts": {
       "description": "Exports buttonVariants, ButtonVariants",
@@ -6128,11 +6126,11 @@
     },
     "nuxt.config.ts": {
       "description": "https://nuxt.com/docs/api/configuration/nuxt-config",
-      "tokens": 505,
-      "hash": "ab87ac66ecffb861",
-      "size": 1767,
-      "mtimeMs": 1793022608047.2134,
-      "updatedAt": "2026-10-26T13:50:08.241Z",
+      "tokens": 809,
+      "hash": "19ebccfbaf8002fd",
+      "size": 2831,
+      "mtimeMs": 1793717562911.06,
+      "updatedAt": "2026-11-03T14:52:43.411Z",
       "source": "hook"
     },
     "package.json": {
@@ -6354,11 +6352,11 @@
     },
     "app/pages/sign-in.vue": {
       "description": "Vue: setup",
-      "tokens": 1217,
-      "hash": "d329ed936fb96b86",
-      "size": 4564,
-      "mtimeMs": 1792990598499.0063,
-      "updatedAt": "2026-10-26T04:56:38.695Z",
+      "tokens": 1242,
+      "hash": "22610f0676db170b",
+      "size": 4660,
+      "mtimeMs": 1793715784599.2231,
+      "updatedAt": "2026-11-03T14:23:04.806Z",
       "source": "hook"
     },
     "app/utils/dashboard.ts": {
@@ -6834,26 +6832,26 @@
     },
     "app/composables/useNotify.ts": {
       "description": "Every toast in the app goes through here, so the same action always looks and reads the same.",
-      "tokens": 1090,
-      "hash": "9771ad6fef83cdf1",
-      "size": 3819,
-      "mtimeMs": 1793061139005.6392,
-      "updatedAt": "2026-10-27T00:32:19.275Z",
+      "tokens": 2217,
+      "hash": "d1a0b2763a07bdd3",
+      "size": 7763,
+      "mtimeMs": 1793727806821.7246,
+      "updatedAt": "2026-11-03T17:43:27.077Z",
       "source": "hook",
       "symbols": [
         {
           "name": "Message",
           "kind": "section",
-          "startLine": 10,
-          "endLine": 13,
+          "startLine": 17,
+          "endLine": 20,
           "tokens": 64
         },
         {
           "name": "useNotify",
           "kind": "fn",
-          "startLine": 14,
-          "endLine": 61,
-          "tokens": 851
+          "startLine": 21,
+          "endLine": 110,
+          "tokens": 1882
         }
       ]
     },
@@ -6950,13 +6948,22 @@
       ]
     },
     "app/composables/useSession.ts": {
-      "description": "Who is signed in. A sample session in a cookie (so the server renders the right header)",
-      "tokens": 335,
-      "hash": "6d84b2df2fa2511d",
-      "size": 1171,
-      "mtimeMs": 1793062709802.086,
-      "updatedAt": "2026-10-27T00:58:30.302Z",
-      "source": "hook"
+      "description": "Who is signed in: the Supabase user, their profile, and the stores they work at.",
+      "tokens": 910,
+      "hash": "25db4cc449cbb047",
+      "size": 3185,
+      "mtimeMs": 1793715735381.9893,
+      "updatedAt": "2026-11-03T14:22:15.667Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "useSession",
+          "kind": "fn",
+          "startLine": 8,
+          "endLine": 68,
+          "tokens": 788
+        }
+      ]
     },
     "app/components/account/AccountAvatar.vue": {
       "description": "Vue: setup",
@@ -7580,13 +7587,22 @@
       ]
     },
     "app/composables/useStoreInbox.ts": {
-      "description": "The store inbox as one shared list: what this person's role may see, unread counts for the bell",
-      "tokens": 397,
-      "hash": "56425778384d6f89",
-      "size": 1387,
-      "mtimeMs": 1793138909845.8765,
-      "updatedAt": "2026-10-27T22:08:30.268Z",
-      "source": "hook"
+      "description": "The store inbox as one list: buyer conversations and visit requests for the store being run,",
+      "tokens": 1097,
+      "hash": "e63326cc87ff5f2b",
+      "size": 3839,
+      "mtimeMs": 1793727977026.7644,
+      "updatedAt": "2026-11-03T17:46:17.519Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "useStoreInbox",
+          "kind": "fn",
+          "startLine": 44,
+          "endLine": 99,
+          "tokens": 601
+        }
+      ]
     },
     "app/components/dashboard/InboxList.vue": {
       "description": "Vue: setup",
@@ -7669,11 +7685,11 @@
     },
     "app/components/gear/GearCard.vue": {
       "description": "Vue: setup",
-      "tokens": 642,
-      "hash": "d2617a190cd72e20",
-      "size": 2406,
-      "mtimeMs": 1793462030455.9954,
-      "updatedAt": "2026-10-31T15:53:50.642Z",
+      "tokens": 693,
+      "hash": "522a533b3ed9428d",
+      "size": 2597,
+      "mtimeMs": 1793532231560.6938,
+      "updatedAt": "2026-11-01T11:23:52.047Z",
       "source": "hook"
     },
     "app/components/gear/GearCartLine.vue": {
@@ -7701,6 +7717,448 @@
       "size": 3346,
       "mtimeMs": 1793463433504.0747,
       "updatedAt": "2026-10-31T16:17:13.712Z",
+      "source": "hook"
+    },
+    "app/pages/gear/index.vue": {
+      "description": "Vue: setup",
+      "tokens": 504,
+      "hash": "c0cdec336f493650",
+      "size": 1888,
+      "mtimeMs": 1793532135136.2993,
+      "updatedAt": "2026-11-01T11:22:15.328Z",
+      "source": "hook"
+    },
+    "app/pages/care/[slug].vue": {
+      "description": "Vue: setup",
+      "tokens": 1616,
+      "hash": "c7111e4ee0589479",
+      "size": 6059,
+      "mtimeMs": 1793532137559.0217,
+      "updatedAt": "2026-11-01T11:22:17.756Z",
+      "source": "hook"
+    },
+    "app/plugins/account.ts": {
+      "description": "Loads the signed-in person's account before the first page renders, and again whenever",
+      "tokens": 117,
+      "hash": "4010c30d6ba2b253",
+      "size": 408,
+      "mtimeMs": 1793715736192.2488,
+      "updatedAt": "2026-11-03T14:22:16.449Z",
+      "source": "hook"
+    },
+    "app/composables/useAuth.ts": {
+      "description": "Every sign-up, sign-in and password call to Supabase, in one place. Each returns a plain",
+      "tokens": 1419,
+      "hash": "0b7bdca7d019e171",
+      "size": 4964,
+      "mtimeMs": 1793715754482.014,
+      "updatedAt": "2026-11-03T14:22:34.739Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "explainAuthError",
+          "kind": "fn",
+          "startLine": 24,
+          "endLine": 29,
+          "tokens": 84
+        },
+        {
+          "name": "useAuth",
+          "kind": "fn",
+          "startLine": 30,
+          "endLine": 96,
+          "tokens": 941
+        }
+      ]
+    },
+    "app/composables/useStoreApi.ts": {
+      "description": "Store data in Supabase. Creating a store makes the signed-in person its owner (a database",
+      "tokens": 318,
+      "hash": "7032caefbdf5806f",
+      "size": 1111,
+      "mtimeMs": 1793715811846.4792,
+      "updatedAt": "2026-11-03T14:23:31.996Z",
+      "source": "hook"
+    },
+    "app/types/database.types.ts": {
+      "description": "The database's shape, for type-checked Supabase queries. Written by hand to match",
+      "tokens": 1351,
+      "hash": "a0c6e23a11f384e8",
+      "size": 4726,
+      "mtimeMs": 1793715918287.3655,
+      "updatedAt": "2026-11-03T14:25:18.636Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "Database",
+          "kind": "section",
+          "startLine": 9,
+          "endLine": 125,
+          "tokens": 1219
+        }
+      ]
+    },
+    "app/composables/useSavedDogs.ts": {
+      "description": "The shortlist and compare picks behind useShortlist(). Signed in: the shortlist_items table in",
+      "tokens": 1404,
+      "hash": "6f21ec115d3c2df5",
+      "size": 4916,
+      "mtimeMs": 1793723082190.8948,
+      "updatedAt": "2026-11-03T16:24:42.464Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "Saved",
+          "kind": "section",
+          "startLine": 11,
+          "endLine": 12,
+          "tokens": 16
+        },
+        {
+          "name": "useSavedDogs",
+          "kind": "fn",
+          "startLine": 13,
+          "endLine": 108,
+          "tokens": 1226
+        }
+      ]
+    },
+    "app/composables/useLoader.ts": {
+      "description": "The full-screen loader (AppLoader in app.vue) for moments that change the whole page:",
+      "tokens": 282,
+      "hash": "c69c6c004bcd4dc8",
+      "size": 990,
+      "mtimeMs": 1793723875576.0593,
+      "updatedAt": "2026-11-03T16:37:56.062Z",
+      "source": "hook"
+    },
+    "app/components/AppLoader.vue": {
+      "description": "Vue: setup",
+      "tokens": 541,
+      "hash": "98fb9d89530786d1",
+      "size": 2026,
+      "mtimeMs": 1793723876755.8445,
+      "updatedAt": "2026-11-03T16:37:57.288Z",
+      "source": "hook"
+    },
+    "app/components/account/AccountHomeMatch.vue": {
+      "description": "Vue: setup",
+      "tokens": 872,
+      "hash": "b18efe7dd8b6a516",
+      "size": 3269,
+      "mtimeMs": 1793725610607.4429,
+      "updatedAt": "2026-11-03T17:06:51.582Z",
+      "source": "hook"
+    },
+    "app/pages/account/profile.vue": {
+      "description": "Vue: setup",
+      "tokens": 1759,
+      "hash": "5b8d553475af1576",
+      "size": 6596,
+      "mtimeMs": 1793725612481.0842,
+      "updatedAt": "2026-11-03T17:06:53.234Z",
+      "source": "hook"
+    },
+    "app/components/account/AccountSettingsDetails.vue": {
+      "description": "Vue: setup",
+      "tokens": 590,
+      "hash": "aa5a7a3df39b39f5",
+      "size": 2212,
+      "mtimeMs": 1793725653108.5813,
+      "updatedAt": "2026-11-03T17:07:33.713Z",
+      "source": "hook"
+    },
+    "app/components/account/AccountSettingsPassword.vue": {
+      "description": "Vue: setup",
+      "tokens": 467,
+      "hash": "57a1a0eb4f14a7d0",
+      "size": 1749,
+      "mtimeMs": 1793725654492.179,
+      "updatedAt": "2026-11-03T17:07:35.184Z",
+      "source": "hook"
+    },
+    "app/components/account/AccountSettingsContact.vue": {
+      "description": "Vue: setup",
+      "tokens": 630,
+      "hash": "540f9ed426ab81db",
+      "size": 2362,
+      "mtimeMs": 1793725656173.609,
+      "updatedAt": "2026-11-03T17:07:36.721Z",
+      "source": "hook"
+    },
+    "app/pages/account/settings.vue": {
+      "description": "Vue: setup",
+      "tokens": 351,
+      "hash": "f3ba9013617f26d1",
+      "size": 1317,
+      "mtimeMs": 1793725657809.557,
+      "updatedAt": "2026-11-03T17:07:38.498Z",
+      "source": "hook"
+    },
+    "app/components/account/AccountProfilePrompt.vue": {
+      "description": "Vue: setup",
+      "tokens": 265,
+      "hash": "fb664f3942a3b0e7",
+      "size": 992,
+      "mtimeMs": 1793725689271.9663,
+      "updatedAt": "2026-11-03T17:08:09.908Z",
+      "source": "hook"
+    },
+    "app/composables/useShortlistRoutes.ts": {
+      "description": "Where the shortlist lives: inside the account area when signed in (so people stay in their",
+      "tokens": 157,
+      "hash": "0a18823147110b30",
+      "size": 549,
+      "mtimeMs": 1793726513385.7048,
+      "updatedAt": "2026-11-03T17:21:53.947Z",
+      "source": "hook"
+    },
+    "app/utils/searchFilters.ts": {
+      "description": "The filters on Find a guard dog, in one shape: read from and written to the page address",
+      "tokens": 791,
+      "hash": "9234743429352c20",
+      "size": 2775,
+      "mtimeMs": 1793726721814.5647,
+      "updatedAt": "2026-11-03T17:25:22.213Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "SearchFilters",
+          "kind": "section",
+          "startLine": 7,
+          "endLine": 16,
+          "tokens": 75
+        },
+        {
+          "name": "list",
+          "kind": "fn",
+          "startLine": 17,
+          "endLine": 18,
+          "tokens": 41
+        },
+        {
+          "name": "filtersFromQuery",
+          "kind": "fn",
+          "startLine": 19,
+          "endLine": 29,
+          "tokens": 127
+        },
+        {
+          "name": "filtersToQuery",
+          "kind": "fn",
+          "startLine": 30,
+          "endLine": 39,
+          "tokens": 109
+        },
+        {
+          "name": "hasFilters",
+          "kind": "fn",
+          "startLine": 40,
+          "endLine": 41,
+          "tokens": 26
+        },
+        {
+          "name": "matchesFilters",
+          "kind": "fn",
+          "startLine": 42,
+          "endLine": 49,
+          "tokens": 112
+        },
+        {
+          "name": "describeFilters",
+          "kind": "fn",
+          "startLine": 50,
+          "endLine": 61,
+          "tokens": 164
+        },
+        {
+          "name": "sameFilters",
+          "kind": "fn",
+          "startLine": 62,
+          "endLine": 63,
+          "tokens": 40
+        }
+      ]
+    },
+    "app/components/account/AccountSavedSearch.vue": {
+      "description": "Vue: setup",
+      "tokens": 864,
+      "hash": "c91dc64ccc583308",
+      "size": 3241,
+      "mtimeMs": 1793726855605.9753,
+      "updatedAt": "2026-11-03T17:27:35.905Z",
+      "source": "hook"
+    },
+    "app/pages/account/alerts.vue": {
+      "description": "Vue: setup",
+      "tokens": 448,
+      "hash": "4eb989b169c67ff0",
+      "size": 1679,
+      "mtimeMs": 1793726856223.907,
+      "updatedAt": "2026-11-03T17:27:36.519Z",
+      "source": "hook"
+    },
+    "supabase/migrations/20261104000000_messages_and_visits.sql": {
+      "description": "Messages between buyers and stores, and kennel-visit requests.",
+      "tokens": 2699,
+      "hash": "74142439c4a43ff4",
+      "size": 10474,
+      "mtimeMs": 1793727267211.796,
+      "updatedAt": "2026-11-03T17:34:27.457Z",
+      "source": "hook"
+    },
+    "app/utils/time.ts": {
+      "description": "Times as people say them: \"Just now\", \"5 min\", \"3 h\", \"Yesterday\", \"Mon 3 Nov\"",
+      "tokens": 335,
+      "hash": "6c5eccca4e02c2e2",
+      "size": 1171,
+      "mtimeMs": 1793727364254.195,
+      "updatedAt": "2026-11-03T17:36:04.534Z",
+      "source": "hook"
+    },
+    "app/composables/useConversations.ts": {
+      "description": "Conversations between buyers and stores (Supabase: conversations, messages), for both sides.",
+      "tokens": 1450,
+      "hash": "d5ee98e4f3a9550a",
+      "size": 5072,
+      "mtimeMs": 1793727364979.2483,
+      "updatedAt": "2026-11-03T17:36:05.408Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "ConversationSummary",
+          "kind": "section",
+          "startLine": 10,
+          "endLine": 24,
+          "tokens": 87
+        },
+        {
+          "name": "ThreadMessage",
+          "kind": "section",
+          "startLine": 25,
+          "endLine": 55,
+          "tokens": 321
+        },
+        {
+          "name": "useConversations",
+          "kind": "fn",
+          "startLine": 56,
+          "endLine": 114,
+          "tokens": 910
+        }
+      ]
+    },
+    "app/composables/useVisits.ts": {
+      "description": "Kennel-visit requests (Supabase: visits). Buyers request and can cancel; a store's people confirm,",
+      "tokens": 1283,
+      "hash": "c51a6c3306c5f999",
+      "size": 4492,
+      "mtimeMs": 1793727366078.1875,
+      "updatedAt": "2026-11-03T17:36:06.328Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "Visit",
+          "kind": "section",
+          "startLine": 9,
+          "endLine": 26,
+          "tokens": 96
+        },
+        {
+          "name": "VisitRequest",
+          "kind": "section",
+          "startLine": 27,
+          "endLine": 38,
+          "tokens": 244
+        },
+        {
+          "name": "useVisits",
+          "kind": "fn",
+          "startLine": 39,
+          "endLine": 107,
+          "tokens": 820
+        }
+      ]
+    },
+    "app/components/ConversationThread.vue": {
+      "description": "Vue: setup",
+      "tokens": 393,
+      "hash": "066b0a05666c68da",
+      "size": 1474,
+      "mtimeMs": 1793727584732.2075,
+      "updatedAt": "2026-11-03T17:39:45.005Z",
+      "source": "hook"
+    },
+    "app/components/ConversationReply.vue": {
+      "description": "Vue: setup",
+      "tokens": 574,
+      "hash": "d2ad600b7e8debb5",
+      "size": 2150,
+      "mtimeMs": 1793727585578.3374,
+      "updatedAt": "2026-11-03T17:39:45.955Z",
+      "source": "hook"
+    },
+    "app/pages/account/messages.vue": {
+      "description": "Vue: setup",
+      "tokens": 1817,
+      "hash": "44ceb83d9cabdd53",
+      "size": 6814,
+      "mtimeMs": 1793727586367.659,
+      "updatedAt": "2026-11-03T17:39:46.642Z",
+      "source": "hook"
+    },
+    "app/components/VisitDateBlock.vue": {
+      "description": "Vue: setup",
+      "tokens": 218,
+      "hash": "76079044ff669643",
+      "size": 817,
+      "mtimeMs": 1793727757250.0012,
+      "updatedAt": "2026-11-03T17:42:37.621Z",
+      "source": "hook"
+    },
+    "app/components/VisitStatusChip.vue": {
+      "description": "Vue: setup",
+      "tokens": 151,
+      "hash": "8669fb11da081727",
+      "size": 566,
+      "mtimeMs": 1793727758381.007,
+      "updatedAt": "2026-11-03T17:42:38.766Z",
+      "source": "hook"
+    },
+    "app/components/VisitCard.vue": {
+      "description": "Vue: setup",
+      "tokens": 723,
+      "hash": "bb5f785f244f9c76",
+      "size": 2712,
+      "mtimeMs": 1793727776020.739,
+      "updatedAt": "2026-11-03T17:42:56.364Z",
+      "source": "hook"
+    },
+    "app/pages/account/bookings.vue": {
+      "description": "Vue: setup",
+      "tokens": 1007,
+      "hash": "e9438ae604450be6",
+      "size": 3778,
+      "mtimeMs": 1793727807717.7012,
+      "updatedAt": "2026-11-03T17:43:28.016Z",
+      "source": "hook"
+    },
+    "app/components/dashboard/DashboardInboxVisit.vue": {
+      "description": "Vue: setup",
+      "tokens": 647,
+      "hash": "f0c2b88b25059bee",
+      "size": 2430,
+      "mtimeMs": 1793727977936.5757,
+      "updatedAt": "2026-11-03T17:46:18.335Z",
+      "source": "hook"
+    },
+    "app/components/dashboard/DashboardInboxDetail.vue": {
+      "description": "Vue: setup",
+      "tokens": 1088,
+      "hash": "cebbbb28dbc60a38",
+      "size": 4079,
+      "mtimeMs": 1793728016450.8228,
+      "updatedAt": "2026-11-03T17:46:56.780Z",
       "source": "hook"
     }
   },

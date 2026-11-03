@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+
 // Steps joined by the dashed marigold patrol line. Defaults to the buyer's journey; pass `steps` for others.
 export interface HowItWorksStep { title: string, text: string }
 

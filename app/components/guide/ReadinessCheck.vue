@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { computed, ref } from 'vue'
+import { guideReadiness } from '~/utils/guide'
+
 // Ten honest statements; the score says whether to start looking or wait
 const answers = ref<boolean[]>(guideReadiness.map(() => false))
 const score = computed(() => answers.value.filter(Boolean).length)

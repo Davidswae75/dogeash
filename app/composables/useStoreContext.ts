@@ -1,3 +1,9 @@
+import { computed } from 'vue'
+import { useSession } from './useSession'
+import { roleCan, storeRoles } from '~/utils/storeRoles'
+import type { StorePermission } from '~/utils/storeRoles'
+import { sampleStores } from '~/utils/stores'
+
 // The store the dashboard is showing, and what the signed-in person may do there.
 // For now that's their first store; a switcher for people with several comes later.
 export function useStoreContext() {

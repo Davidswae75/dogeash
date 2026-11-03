@@ -1,6 +1,14 @@
 <script setup lang="ts">
 import { CalendarDays, Clock, MapPin, MessageSquare, Quote, Star, Truck } from '@lucide/vue'
 import type { ProtectionLevel } from '~/utils/protection'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { createError, useRoute, useSeoMeta } from '#imports' // nuxt
+import { useSectionSpy } from '~/composables/useSectionSpy'
+import { useSession } from '~/composables/useSession'
+import { careProviderSlug, findCareProvider } from '~/utils/care'
+import { formatNaira } from '~/utils/dogs'
+import { centerInRow } from '~/utils/scroll'
+import { findStore, storeServices, storeSummary } from '~/utils/stores'
 
 // A store: its dogs for sale, who runs it, its history, inspection record, care team and reviews
 const route = useRoute()

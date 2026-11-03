@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useField } from 'vee-validate'
+import { computed } from 'vue'
 
 // A validated checkbox bound to the surrounding vee-validate form by `name`. The label goes in the slot.
 const props = defineProps<{ name: string }>()

@@ -1,8 +1,17 @@
 <script setup lang="ts">
 import { ArrowLeft } from '@lucide/vue'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { setInterval } from '#imports' // nuxt
 
 // The 6-digit code step for sign-in and sign-up. Verifies on the sixth digit; resend unlocks after 30 seconds.
-const props = withDefaults(defineProps<{ destination: string, submitLabel?: string, title?: string }>(), {
+// `verify` and `resend` do the real work and return an error message to show, or null when it worked.
+const props = withDefaults(defineProps<{
+  destination: string
+  submitLabel?: string
+  title?: string
+  verify: (code: string) => Promise<string | null>
+  resend: () => Promise<string | null>
+}>(), {
   submitLabel: 'Verify',
   title: 'Enter your',
 })
@@ -10,6 +19,7 @@ const emit = defineEmits<{ verified: [], back: [] }>()
 
 const code = ref('')
 const error = ref('')
+const busy = ref(false)
 const resendIn = ref(30)
 let timer: ReturnType<typeof setInterval> | undefined
 
@@ -24,10 +34,21 @@ function startTimer() {
 onMounted(startTimer)
 onBeforeUnmount(() => clearInterval(timer))
 
-function verify() {
+async function verify() {
+  if (busy.value) return
   if (code.value.length !== 6) return (error.value = 'Enter all 6 digits from the code we sent.')
-  error.value = ''
-  emit('verified')
+  busy.value = true
+  error.value = (await props.verify(code.value)) ?? ''
+  busy.value = false
+  if (!error.value) emit('verified')
+}
+
+async function resend() {
+  busy.value = true
+  error.value = (await props.resend()) ?? ''
+  busy.value = false
+  code.value = ''
+  startTimer()
 }
 
 watch(code, () => { error.value = '' })
@@ -48,10 +69,10 @@ watch(code, () => { error.value = '' })
         </InputOTPGroup>
       </InputOTP>
       <p v-if="error" class="m-0 text-sm font-semibold text-danger" role="alert">{{ error }}</p>
-      <Button type="submit" class="h-12 w-full">{{ props.submitLabel }}</Button>
+      <Button type="submit" class="h-12 w-full" :loading="busy">{{ busy ? 'Checking…' : props.submitLabel }}</Button>
       <p class="m-0 text-sm text-ink-muted">
         Didn't get it?
-        <button v-if="resendIn <= 0" type="button" class="cursor-pointer border-0 bg-transparent p-0 font-bold text-ink underline underline-offset-4" @click="startTimer">Send a new code</button>
+        <button v-if="resendIn <= 0" type="button" class="cursor-pointer border-0 bg-transparent p-0 font-bold text-ink underline underline-offset-4" @click="resend">Send a new code</button>
         <span v-else class="font-mono">Send again in {{ resendIn }}s</span>
       </p>
     </form>

@@ -3,10 +3,23 @@ import { Undo2 } from '@lucide/vue'
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
 import type { AuthLinkCard } from '~/components/auth/AuthLinkCards.vue'
+import { computed, ref, watch } from 'vue'
+import { definePageMeta, useRoute, useSeoMeta } from '#imports' // nuxt
+import { useSupabaseClient } from '#imports' // @nuxtjs/supabase
+import { useAuth } from '~/composables/useAuth'
+import { useAuthPanel } from '~/composables/useAuthPanel'
+import { useNotify } from '~/composables/useNotify'
+import { useSession } from '~/composables/useSession'
+import { useStoreApi } from '~/composables/useStoreApi'
+import { firstNameOf } from '~/utils/account'
+import { formatNigerianPhone, safeRedirect, signUpSchema, storeSignUpSchema } from '~/utils/auth'
+import { authFields } from '~/utils/authFields'
+import { findSignUpIntent, signUpIntents } from '~/utils/signUpIntents'
+import type { SignUpIntent } from '~/utils/signUpIntents'
 
-// Create an account: what brings you here, details, confirm the phone with a code, then a welcome with next steps.
-// "Open a store" (/sign-up?as=store) asks for the kennel's name and city too and changes the copy and panel.
-// Accounts aren't connected yet, so nothing is saved and the welcome is a preview.
+// Create an account: what brings you here, details, confirm the email with a 6-digit code, then a welcome.
+// "Open a store" (/sign-up?as=store) asks for the kennel's name and city too, creates the store as a draft
+// once the email is confirmed, and changes the copy and panel.
 definePageMeta({
   layout: 'auth',
   authPanel: {
@@ -37,9 +50,11 @@ const nextSteps = computed<AuthLinkCard[]>(() => redirect && !isStore.value
 const isStore = computed(() => intent.value.value === 'store')
 useAuthPanel(() => intent.value.panel)
 
-const account = ref({ name: '', email: '', storeName: '' })
+const account = ref({ name: '', email: '', phone: '', storeName: '', city: '' })
 const firstName = computed(() => firstNameOf(account.value.name))
-const phoneShown = ref('')
+const auth = useAuth()
+const busy = ref(false)
+const error = ref('')
 
 const { handleSubmit, values } = useForm({
   validationSchema: computed(() => toTypedSchema(isStore.value ? storeSignUpSchema : signUpSchema)),
@@ -50,27 +65,49 @@ const fields = computed(() => [
   ...(isStore.value ? [authFields.storeName(), authFields.city()] : []),
   authFields.email(),
   authFields.phone(isStore.value
-    ? 'We\'ll text you a code to confirm it. Buyers reach your store through Dogeash, not this number.'
-    : 'We\'ll text you a code to confirm it. Stores use it to reach you about a dog.'),
+    ? 'Dogeash uses it to reach you about your store. Buyers contact you through Dogeash, not this number.'
+    : 'Stores you book with use it to confirm visits. It\'s never shown publicly.'),
   authFields.password({ visible: showPassword.value, isNew: true }),
 ])
 
 // Saved before the step changes: the form forgets values once their fields leave the screen
 const notify = useNotify()
-const submit = handleSubmit((v) => {
-  account.value = { name: v.fullName, email: v.email, storeName: 'storeName' in v ? String(v.storeName) : '' }
-  phoneShown.value = formatNigerianPhone(v.phone)
-  step.value = 'code'
+const submit = handleSubmit(async (v) => {
+  account.value = {
+    name: v.fullName,
+    email: v.email,
+    phone: formatNigerianPhone(v.phone),
+    storeName: 'storeName' in v ? String(v.storeName) : '',
+    city: 'city' in v ? String(v.city) : '',
+  }
+  busy.value = true
+  error.value = (await auth.signUp(v.email, v.password, v.fullName)) ?? ''
+  busy.value = false
+  if (!error.value) step.value = 'code'
 }, ({ errors }) => notify.formErrors(errors))
+watch(values, () => { error.value = '' })
 
-// Confirming the code creates (a preview of) the account, signs in and carries over this browser's saved dogs
+// The code confirms the email and signs you in. Then: phone (and city) on the profile, the draft store
+// for "Open a store", and this browser's saved dogs carried into the account.
 const session = useSession()
-watch(step, (s) => {
-  if (s !== 'welcome') return
-  const moved = session.signIn({ name: account.value.name, email: account.value.email, id: `BYR-${String(Math.floor(1000 + Math.random() * 9000))}` })
-  if (isStore.value) notify.storeStarted(firstName.value, account.value.storeName)
-  else notify.accountCreated(firstName.value, moved)
-})
+const supabase = useSupabaseClient()
+const stores = useStoreApi()
+
+// The code step's button keeps spinning until all of this is done, so no full-screen loader here
+async function confirm(code: string) {
+  const result = await auth.confirmSignUp(account.value.email, code)
+  if (result.error) return result.error
+  let storeError: string | null = null
+  const id = session.user.value?.id
+  if (id) await supabase.from('profiles').update({ phone: account.value.phone, ...(account.value.city ? { city: account.value.city } : {}) }).eq('id', id)
+  if (isStore.value) storeError = await stores.createDraftStore(account.value.storeName, account.value.city)
+  await session.load()
+  if (!isStore.value) notify.accountCreated(firstName.value, result.moved)
+  else if (storeError) notify.error({ kicker: 'Store', title: 'Store not saved', text: storeError })
+  else notify.storeStarted(firstName.value, account.value.storeName)
+  step.value = 'welcome'
+  return null
+}
 </script>
 
 <template>
@@ -100,7 +137,8 @@ watch(step, (s) => {
       <CheckboxField name="terms">
         I agree to the <NuxtLink to="/terms" class="font-bold text-ink">terms of use</NuxtLink> and the <NuxtLink to="/privacy" class="font-bold text-ink">privacy policy</NuxtLink>.
       </CheckboxField>
-      <Button type="submit" class="h-12 w-full">{{ intent.submitLabel }}</Button>
+      <p v-if="error" class="m-0 text-sm font-semibold text-danger" role="alert">{{ error }}</p>
+      <Button type="submit" class="h-12 w-full" :loading="busy">{{ busy ? 'Creating your account…' : intent.submitLabel }}</Button>
     </form>
 
     <p class="m-0 border-t border-line pt-6 text-sm text-ink-muted">
@@ -108,7 +146,15 @@ watch(step, (s) => {
     </p>
   </template>
 
-  <AuthCodeStep v-else-if="step === 'code'" title="Confirm with your" :destination="phoneShown" :submit-label="isStore ? 'Confirm and start my store' : 'Confirm and create account'" @verified="step = 'welcome'" @back="step = 'details'" />
+  <AuthCodeStep
+    v-else-if="step === 'code'"
+    title="Confirm with your"
+    :destination="account.email"
+    :submit-label="isStore ? 'Confirm and start my store' : 'Confirm and create account'"
+    :verify="confirm"
+    :resend="() => auth.resendSignUpCode(account.email)"
+    @back="step = 'details'"
+  />
 
   <template v-else>
     <AuthHeading title="Welcome," :outline="firstName" done :text="intent.welcome({ storeName: account.storeName })" />

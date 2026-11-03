@@ -3,6 +3,9 @@ import { Bell, CalendarCheck, Lock, PawPrint, TrendingDown } from '@lucide/vue'
 import type { Component } from 'vue'
 import type { NotificationKind } from '~/utils/account'
 import { cn } from '~/lib/utils'
+import { computed } from 'vue'
+import { useState } from '#imports' // nuxt
+import { sampleNotifications } from '~/utils/account'
 
 // The bell in the header: what changed for this buyer (sample notifications until accounts are connected)
 const items = useState('account-notifications', () => sampleNotifications.map(n => ({ ...n })))

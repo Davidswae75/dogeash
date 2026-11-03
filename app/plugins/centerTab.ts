@@ -1,4 +1,6 @@
 import type { Directive } from 'vue'
+import { defineNuxtPlugin } from '#imports' // nuxt
+import { centerInRow } from '~/utils/scroll'
 
 // v-center-tab on a row of tabs that scrolls sideways: the clicked tab slides to the row's centre,
 // and a tab already selected on load starts in view. Only the row moves, never the page.

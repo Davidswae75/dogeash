@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import type { Dog } from '~/utils/dogs'
+import { computed } from 'vue'
+import { useSession } from '~/composables/useSession'
+import { formatNaira } from '~/utils/dogs'
 
 // A listing presented as a K9 file: file tab, photo with stamp, protection scale, facts, price.
 // The save button sits beside the link, not inside it: a button can't live inside a link.

@@ -1,4 +1,10 @@
 <script setup lang="ts">
+import { computed, onMounted } from 'vue'
+import { createError, useRoute, useSeoMeta } from '#imports' // nuxt
+import { useRecentlyViewed } from '~/composables/useRecentlyViewed'
+import { useSession } from '~/composables/useSession'
+import { findDog, getStore } from '~/utils/dogs'
+
 // The full K9 file
 const route = useRoute()
 const dog = findDog(String(route.params.id))

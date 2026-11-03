@@ -72,3 +72,14 @@ export function safeRedirect(value: unknown, fallback = '/') {
   const path = String(value ?? '')
   return path.startsWith('/') && !path.startsWith('//') ? path : fallback
 }
+
+// Settings: your details. The phone is typed without +234, like on sign-up.
+export const accountDetailsSchema = z.object({
+  fullName: signUpSchema.shape.fullName,
+  phone: phoneSignInSchema.shape.phone,
+  city: z.string().trim().max(80, 'Keep the city under 80 characters.').optional(),
+})
+
+// The local digits of a saved number ("+234 803 123 4567" → "8031234567"), for the phone field
+export const localPhoneDigits = (phone: string) => phone.replace(/^\+?234/, '').replace(/\D/g, '')
+

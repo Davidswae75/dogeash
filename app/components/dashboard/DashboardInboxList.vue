@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import type { InboxItem, InboxKind } from '~/utils/inbox'
 import { cn } from '~/lib/utils'
+import { computed } from 'vue'
+import { inboxKinds } from '~/utils/inbox'
+import { shortTime } from '~/utils/time'
 
 // The inbox list: filter by kind, unread first in bold, the open item highlighted
 const props = defineProps<{ items: InboxItem[], selected?: string }>()
@@ -45,7 +48,7 @@ const unreadOf = (k: InboxKind | 'all') => props.items.filter(i => i.unread && (
           <span class="flex min-w-0 flex-1 flex-col gap-0.5">
             <span class="flex items-baseline gap-2">
               <span :class="cn('flex-1 truncate text-sm leading-5', item.unread ? 'font-bold' : 'font-semibold text-ink-muted')">{{ item.from }} · {{ item.subject }}</span>
-              <span class="shrink-0 font-mono text-[10.5px] text-ink-muted">{{ item.at }}</span>
+              <span class="shrink-0 font-mono text-[10.5px] text-ink-muted">{{ shortTime(item.at) }}</span>
             </span>
             <span :class="cn('truncate text-[13px] leading-[18px]', item.unread ? 'text-ink' : 'text-ink-muted')">{{ item.preview }}</span>
             <span class="flex items-center gap-2 pt-0.5">
@@ -57,7 +60,7 @@ const unreadOf = (k: InboxKind | 'all') => props.items.filter(i => i.unread && (
           <span v-if="item.unread" class="mt-1.5 size-2 shrink-0 rounded-full bg-marigold" aria-label="Unread" />
         </button>
       </li>
-      <li v-if="!shown.length" class="p-6 text-center text-sm text-ink-muted">Nothing here.</li>
+      <li v-if="!shown.length" class="p-6 text-center text-sm text-ink-muted">Nothing here yet. Messages and visit requests from buyers land here.</li>
     </ul>
   </section>
 </template>

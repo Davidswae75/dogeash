@@ -1,4 +1,6 @@
 import type { Dog } from './dogs'
+import { formatNaira, getStore } from './dogs'
+import { propertyTypes } from './protection'
 
 // How many shortlisted dogs can be compared side by side
 export const COMPARE_MAX = 3

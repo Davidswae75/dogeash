@@ -1,22 +1,28 @@
 import type { Account } from '~/utils/account'
+import type { StoreRow } from '~/utils/stores'
 import type { StorePermission } from '~/utils/storeRoles'
+import { computed } from 'vue'
+import { navigateTo, useState } from '#imports' // nuxt
+import { useSupabaseClient, useSupabaseUser } from '#imports' // @nuxtjs/supabase
+import { mergeGuestLists } from './useAccountList'
+import { useLoader } from './useLoader'
+import { useNotify } from './useNotify'
+import { accountRef, firstNameOf, initialsOf } from '~/utils/account'
+import { roleCan } from '~/utils/storeRoles'
+import { storeColumns, toStore } from '~/utils/stores'
 
-// Who is signed in. A sample session in a cookie (so the server renders the right header)
-// until accounts are connected; signing in merges the guest's saved dogs into the account.
-const THIRTY_DAYS = 60 * 60 * 24 * 30
-
+// Who is signed in: the Supabase user, their profile, and the stores they work at.
+// plugins/account.ts loads it (on the server too, so the header is right on first paint);
+// sign-in, sign-up and sign-out call load() and signOut() here. Pages read the result.
 export function useSession() {
-  const cookie = useCookie<Account | null>('dogeash-session', { default: () => null, maxAge: THIRTY_DAYS, sameSite: 'lax' })
-  const user = useState<Account | null>('session-user', () => cookie.value)
+  const user = useState<Account | null>('session-account', () => null)
 
   const signedIn = computed(() => !!user.value)
   const firstName = computed(() => (user.value ? firstNameOf(user.value.name) : ''))
-  const initials = computed(() => (user.value ? initialsOf(user.value.name) : ''))
+  const initials = computed(() => (user.value ? initialsOf(user.value.name || user.value.email) : ''))
 
   // Stores this person works at, with the store itself; empty for buyers only
-  const memberships = computed(() => (user.value?.stores ?? [])
-    .map(m => ({ ...m, store: getStore(m.storeId)! }))
-    .filter(m => m.store))
+  const memberships = computed(() => user.value?.stores ?? [])
   const hasStore = computed(() => memberships.value.length > 0)
   const memberOf = (storeId: string) => memberships.value.find(m => m.storeId === storeId)
   const can = (storeId: string, permission: StorePermission) => {
@@ -24,20 +30,56 @@ export function useSession() {
     return !!m && roleCan(m.role, permission)
   }
 
-  // Returns how many shortlisted dogs moved from this browser into the account
-  function signIn(details: Partial<Account> = {}) {
-    const account = { ...sampleAccount, ...details }
-    const moved = import.meta.client ? mergeGuestLists(account.id) : 0
-    user.value = cookie.value = account
-    return moved
+  // Read the signed-in person's profile and store memberships. Pass the user straight after
+  // signing in, before the auth state has caught up. Returns the account, or null if signed out.
+  async function load(authUser?: { id: string, email?: string } | null) {
+    const claims = useSupabaseUser().value
+    const id = authUser?.id ?? claims?.sub
+    if (!id) return (user.value = null)
+    const supabase = useSupabaseClient()
+
+    const [{ data: profile }, { data: members }] = await Promise.all([
+      supabase.from('profiles').select('full_name, phone, city, created_at, property, has_children, has_other_pets, experience, notify_email, notify_sms, notify_whatsapp').eq('id', id).maybeSingle(),
+      supabase.from('store_members').select(`role, stores (${storeColumns})`).eq('user_id', id),
+    ])
+    const name = profile?.full_name ?? ''
+    user.value = {
+      id,
+      ref: accountRef(id),
+      name,
+      email: authUser?.email ?? (claims?.email as string | undefined) ?? '',
+      phone: profile?.phone ?? '',
+      city: profile?.city ?? '',
+      memberSince: profile?.created_at ? String(new Date(profile.created_at).getFullYear()) : '',
+      home: profile?.property && profile.experience
+        ? { property: profile.property, city: profile.city ?? '', children: !!profile.has_children, otherPets: !!profile.has_other_pets, experience: profile.experience }
+        : null,
+      notify: { email: profile?.notify_email ?? true, sms: profile?.notify_sms ?? false, whatsapp: profile?.notify_whatsapp ?? false },
+      stores: (members ?? [])
+        .filter(m => m.stores)
+        .map((m) => {
+          const store = toStore(m.stores as unknown as StoreRow, name)
+          return { storeId: store.id, role: m.role, store }
+        }),
+    }
+    return user.value
   }
+
+  // Lists still kept in this browser (recently viewed, gear cart) join the account.
+  // The shortlist moves to Supabase separately (useSavedDogs().adoptGuest()).
+  const mergeGuest = () => { if (user.value && import.meta.client) mergeGuestLists(user.value.id) }
 
   // Saved dogs stay with the account; this browser goes back to the guest's (empty) lists
-  function signOut() {
-    user.value = cookie.value = null
-    useNotify().signedOut()
-    return navigateTo('/')
+  async function signOut() {
+    const notify = useNotify()
+    await useLoader().run('Signing you out…', async () => {
+      await useSupabaseClient().auth.signOut()
+      user.value = null
+      useState('saved-dogs').value = null
+      await navigateTo('/')
+    }, 'Your saved dogs stay safe in your account.')
+    notify.signedOut()
   }
 
-  return { user, signedIn, firstName, initials, memberships, hasStore, memberOf, can, signIn, signOut }
+  return { user, signedIn, firstName, initials, memberships, hasStore, memberOf, can, load, mergeGuest, signOut }
 }

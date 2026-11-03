@@ -1,5 +1,10 @@
 <script setup lang="ts">
 import { CalendarDays, MessageSquare, Wallet } from '@lucide/vue'
+import { computed } from 'vue'
+import { useSession } from '~/composables/useSession'
+import { useStoreContext } from '~/composables/useStoreContext'
+import { dashboardToday } from '~/utils/dashboard'
+import { storeActivity } from '~/utils/storeRoles'
 
 // Top of the overview: the day, who's here, and the three things worth knowing at a glance
 const { store, roleLabel } = useStoreContext()

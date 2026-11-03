@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { useSeoMeta } from '#imports' // nuxt
+import { useSession } from '~/composables/useSession'
+
 // Account overview: activity tiles, then your dogs, what's coming up, shortlist changes, readiness and home profile
 const { user } = useSession()
 useSeoMeta({ title: 'My Dogeash · Dogeash' })

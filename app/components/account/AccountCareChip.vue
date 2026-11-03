@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { CareStatus } from '~/utils/myDogs'
 import { cn } from '~/lib/utils'
+import { careStatus } from '~/utils/myDogs'
 
 // Up to date / Due soon / Overdue, for vaccinations and reminders
 const props = defineProps<{ status: CareStatus }>()

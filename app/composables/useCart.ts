@@ -1,4 +1,7 @@
 import { createGlobalState } from '@vueuse/core'
+import { computed } from 'vue'
+import { useAccountList } from './useAccountList'
+import { findGear, GEAR_DELIVERY_FEE, GEAR_FREE_DELIVERY_FROM, GEAR_MAX_QUANTITY } from '~/utils/gear'
 
 // The gear cart, kept per person like the shortlist. Entries are stored as `productId~size:quantity`,
 // so a guest's cart merges into their account on sign-in and matching lines add up.

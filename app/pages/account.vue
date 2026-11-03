@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { definePageMeta, useSeoMeta } from '#imports' // nuxt
+import { homeSection } from '~/utils/market'
+
 // The buyer's account area: sidebar (tabs on phones) around each section's page. Needs an account.
 definePageMeta({ middleware: 'signed-in' })
 useSeoMeta({ robots: 'noindex' })

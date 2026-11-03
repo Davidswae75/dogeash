@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { X } from '@lucide/vue'
 import type { Dog } from '~/utils/dogs'
+import { computed } from 'vue'
+import { useNotify } from '~/composables/useNotify'
+import { useShortlist } from '~/composables/useShortlist'
+import { COMPARE_MAX } from '~/utils/compare'
+import { formatNaira } from '~/utils/dogs'
 
 // One shortlisted dog: who it is, its level and price, whether it's still available, and compare/remove
 const props = defineProps<{ dog: Dog }>()

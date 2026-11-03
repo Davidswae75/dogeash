@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { nextReminder, ownedDogLink, sampleOwnedDogs } from '~/utils/myDogs'
+
 // Overview panel: each dog you own and the most urgent thing it needs
 const dogs = sampleOwnedDogs
 </script>

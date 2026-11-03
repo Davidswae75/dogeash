@@ -5,6 +5,12 @@ import {
   Settings, ShoppingBag, Stethoscope, Store, Users, Wallet,
 } from '@lucide/vue'
 import type { Component } from 'vue'
+import { computed } from 'vue'
+import { useRoute } from '#imports' // nuxt
+import { useSession } from '~/composables/useSession'
+import { useStoreContext } from '~/composables/useStoreContext'
+import { useStoreInbox } from '~/composables/useStoreInbox'
+import { dashboardNav } from '~/utils/dashboard'
 
 // Sidebar contents for the store dashboard; used in the desktop sidebar and the phone sheet.
 // The whole column scrolls on short screens, so the sections are never squeezed out.

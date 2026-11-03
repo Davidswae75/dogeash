@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ArrowRight, ImagePlus, MessageSquare, Syringe, Wallet } from '@lucide/vue'
 import type { Component } from 'vue'
+import { computed } from 'vue'
+import { useStoreContext } from '~/composables/useStoreContext'
+import { dashboardAttention } from '~/utils/dashboard'
 
 // What needs doing, most urgent first. Only items this person's role can act on.
 const { can } = useStoreContext()

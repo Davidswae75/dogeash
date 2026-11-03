@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useRoute } from '#imports' // nuxt
+
 // Pages opt into the full footer with definePageMeta({ footer: 'full' }); the rest get quick links only
 const route = useRoute()
 const fullFooter = computed(() => route.meta.footer === 'full')

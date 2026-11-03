@@ -5,6 +5,7 @@ import dayGif from '~/assets/patrol/kennel-watch-day.gif'
 import dayStill from '~/assets/patrol/kennel-watch-day.png'
 import nightGif from '~/assets/patrol/kennel-watch-night.gif'
 import nightStill from '~/assets/patrol/kennel-watch-night.png'
+import { computed } from 'vue'
 
 const props = withDefaults(defineProps<{ variant?: 'day' | 'night' }>(), { variant: 'night' })
 

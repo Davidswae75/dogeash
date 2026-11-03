@@ -1,15 +1,32 @@
 <script setup lang="ts">
 import type { PropertyType, ProtectionLevel } from '~/utils/protection'
+import { Bell, BellRing } from '@lucide/vue'
+import { computed, ref, watch } from 'vue'
+import { useRoute, useRouter, useSeoMeta } from '#imports' // nuxt
+import { useAccountGate } from '~/composables/useAccountGate'
+import { useNotify } from '~/composables/useNotify'
+import { useSavedSearches } from '~/composables/useSavedSearches'
+import { sampleDogs } from '~/utils/dogs'
+import type { SearchFilters } from '~/utils/searchFilters'
+import { filtersFromQuery, filtersToQuery, matchesFilters } from '~/utils/searchFilters'
+import { marketCities } from '~/utils/market'
+import { propertyTypes, protectionLevels } from '~/utils/protection'
 
 useSeoMeta({ title: 'Find a guard dog · Dogeash' })
 
 const route = useRoute()
+const router = useRouter()
 
-const properties = ref<PropertyType[]>(route.query.property ? [route.query.property as PropertyType] : [])
-const levels = ref<ProtectionLevel[]>(route.query.level ? [Number(route.query.level) as ProtectionLevel] : [])
-const cities = ref<string[]>(route.query.city ? [String(route.query.city)] : [])
-const household = ref<string[]>([])
-const breeds = ref<string[]>([])
+// Filters start from the address (?level=3,4&city=Abuja) and keep it up to date, so a search can be shared or saved
+const initial = filtersFromQuery(route.query)
+const properties = ref<PropertyType[]>(initial.property)
+const levels = ref<ProtectionLevel[]>(initial.level)
+const cities = ref<string[]>(initial.city)
+const household = ref<string[]>(initial.children ? ['children'] : [])
+const breeds = ref<string[]>(initial.breed)
+
+const filters = computed<SearchFilters>(() => ({ property: properties.value, level: levels.value, city: cities.value, breed: breeds.value, children: household.value.includes('children') }))
+watch(filters, f => router.replace({ query: filtersToQuery(f) }), { deep: true })
 
 const propertyOptions = propertyTypes.map(p => ({ value: p.value, label: p.label }))
 const levelOptions = ([1, 2, 3, 4, 5] as const).map(n => ({ value: n, label: String(n) }))
@@ -17,13 +34,25 @@ const cityOptions = marketCities.map(c => ({ value: c, label: c }))
 const householdOptions = [{ value: 'children', label: 'Safe with children' }]
 const breedOptions = [...new Set(sampleDogs.map(d => d.breed))].map(b => ({ value: b, label: b }))
 
-const dogs = computed(() => sampleDogs.filter(dog =>
-  (!properties.value.length || properties.value.some(p => dog.property.includes(p)))
-  && (!levels.value.length || levels.value.includes(dog.level))
-  && (!cities.value.length || cities.value.includes(dog.city))
-  && (!household.value.includes('children') || dog.safeWithChildren)
-  && (!breeds.value.length || breeds.value.includes(dog.breed)),
-))
+const dogs = computed(() => sampleDogs.filter(dog => matchesFilters(filters.value, dog)))
+
+// Save this search (needs an account; guests sign in and come back to it)
+const savedSearches = useSavedSearches()
+const notify = useNotify()
+const alreadySaved = computed(() => !!savedSearches.find(filters.value))
+const saving = ref(false)
+const { guard: saveSearch } = useAccountGate({
+  key: 'save-search',
+  action: 'save this search',
+  reason: 'We keep your searches in your account and tell you when a new dog matches.',
+}, async () => {
+  if (alreadySaved.value) return
+  saving.value = true
+  const error = await savedSearches.add(filters.value)
+  saving.value = false
+  if (error) notify.error({ kicker: 'Saved searches', title: 'Not saved', text: error })
+  else notify.searchSaved()
+})
 
 // Every listing page states the search in words
 const heading = computed(() => {
@@ -50,7 +79,14 @@ function clearFilters() {
         <span class="text-xs leading-4 font-bold tracking-[.08em] text-ink-muted uppercase">{{ dogs.length }} {{ dogs.length === 1 ? 'dog' : 'dogs' }}</span>
         <h1 class="mt-1 mb-0 font-display text-[clamp(32px,4vw,44px)] leading-[1.05] font-extrabold font-stretch-expanded">{{ heading }}</h1>
       </div>
-      <Button variant="outline" size="sm">Sort: Newest</Button>
+      <div class="flex flex-wrap gap-2">
+        <ClientOnly>
+          <Button :variant="alreadySaved ? 'outline' : 'marigold'" size="sm" :loading="saving" :disabled="alreadySaved" @click="saveSearch">
+            <component :is="alreadySaved ? BellRing : Bell" aria-hidden="true" />{{ alreadySaved ? 'Search saved' : 'Save this search' }}
+          </Button>
+        </ClientOnly>
+        <Button variant="outline" size="sm">Sort: Newest</Button>
+      </div>
     </div>
 
     <div class="grid gap-10 lg:grid-cols-[250px_1fr]">

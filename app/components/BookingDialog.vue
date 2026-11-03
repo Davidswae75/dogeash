@@ -1,8 +1,13 @@
 <script setup lang="ts">
 import { CalendarCheck } from '@lucide/vue'
+import { computed, ref, watch } from 'vue'
+import { useAccountGate } from '~/composables/useAccountGate'
+import type { AccountGate } from '~/composables/useAccountGate'
+import { useNotify } from '~/composables/useNotify'
 
 // Book a time with someone: a care provider, or a kennel visit to see shortlisted dogs.
-// Choose a service, one of the next six working days, a time, and where. UI preview: nothing is sent yet.
+// Choose a service, one of the next six working days, a time, and where. With `send` the request is saved
+// (kennel visits); without it the dialog is a preview (care bookings, until providers are in the database).
 export interface BookingSummaryRow { label: string, value: string }
 
 const props = withDefaults(defineProps<{
@@ -21,6 +26,8 @@ const props = withDefaults(defineProps<{
   triggerClass?: string
   /** Ask signed-out visitors to sign in first (see useAccountGate) */
   gate?: AccountGate
+  /** Save the request; returns an error message, or null when it was sent */
+  send?: (booking: { service: string, day: string, slot: string, place: 'home' | 'premises' }) => Promise<string | null>
 }>(), {
   homeVisits: false,
   premisesLabel: 'At their premises',
@@ -67,11 +74,19 @@ const confirmation = computed<BookingSummaryRow[]>(() => [
 
 const notify = useNotify()
 
-function submit() {
+const sending = ref(false)
+
+async function submit() {
   if (!service.value || !day.value || !time.value) return (error.value = 'Choose a service, a day and a time.')
   error.value = ''
+  if (props.send) {
+    sending.value = true
+    error.value = (await props.send({ service: service.value, day: day.value, slot: time.value, place: place.value as 'home' | 'premises' })) ?? ''
+    sending.value = false
+    if (error.value) return
+  }
   step.value = 'done'
-  notify.bookingRequested(props.title, confirmation.value.find(r => r.label === 'When')!.value)
+  notify.bookingRequested(props.title, confirmation.value.find(r => r.label === 'When')!.value, !!props.send)
 }
 
 function reset() {
@@ -138,7 +153,7 @@ const chips = 'flex w-auto flex-wrap justify-start gap-2'
           <p v-if="error" class="m-0 text-sm font-semibold text-danger" role="alert">{{ error }}</p>
 
           <DialogFooter class="flex-col gap-3 sm:flex-col">
-            <Button type="submit" variant="marigold" class="w-full">Request booking</Button>
+            <Button type="submit" variant="marigold" class="w-full" :loading="sending">Request booking</Button>
             <p v-if="props.priceNote" class="m-0 text-center text-xs text-ink-muted">{{ props.priceNote }}</p>
           </DialogFooter>
         </form>
@@ -146,18 +161,21 @@ const chips = 'flex w-auto flex-wrap justify-start gap-2'
 
       <div v-else class="flex flex-col items-start gap-4">
         <span class="grid size-12 place-items-center rounded-full bg-marigold text-on-marigold"><AppIcon name="check" :size="24" /></span>
-        <DialogTitle class="font-display text-[22px] leading-7 font-extrabold font-stretch-expanded">Request ready</DialogTitle>
+        <DialogTitle class="font-display text-[22px] leading-7 font-extrabold font-stretch-expanded">{{ props.send ? 'Request sent' : 'Request ready' }}</DialogTitle>
         <dl class="m-0 grid w-full grid-cols-[auto_1fr] gap-x-6 gap-y-2 rounded-md bg-surface-sunk p-4 text-sm">
           <template v-for="row in confirmation" :key="row.label">
             <dt class="font-semibold">{{ row.label }}</dt><dd class="m-0">{{ row.value }}</dd>
           </template>
         </dl>
         <DialogDescription class="m-0 text-sm leading-[22px] text-ink-muted">
-          This is a preview. Requests are not sent yet: online booking opens with Dogeash accounts.
+          {{ props.send ? 'The store confirms the time with you. You\'ll find it in Visits and bookings in your account.' : 'This is a preview. Requests are not sent yet: online booking for care opens soon.' }}
         </DialogDescription>
-        <DialogClose as-child>
-          <Button variant="outline" class="w-full">Done</Button>
-        </DialogClose>
+        <div class="flex w-full flex-col gap-2">
+          <Button v-if="props.send" as-child variant="marigold" class="w-full"><NuxtLink to="/account/bookings">See my visits</NuxtLink></Button>
+          <DialogClose as-child>
+            <Button variant="outline" class="w-full">Done</Button>
+          </DialogClose>
+        </div>
       </div>
     </DialogContent>
   </Dialog>

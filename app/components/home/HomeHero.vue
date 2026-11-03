@@ -1,4 +1,9 @@
 <script setup lang="ts">
+import { ref } from 'vue'
+import { navigateTo } from '#imports' // nuxt
+import { homeHeroChip } from '~/utils/market'
+import { propertyTypes } from '~/utils/protection'
+
 // Top of the marketplace: the patrol chase, the promise, search and quick property filters.
 // Dogs start right below it.
 const query = ref('')

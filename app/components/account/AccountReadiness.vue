@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Check } from '@lucide/vue'
 import { cn } from '~/lib/utils'
+import { reserveChecklist } from '~/utils/account'
 
 // Overview panel: what a store needs from you before it takes a deposit on a dog
 const items = reserveChecklist

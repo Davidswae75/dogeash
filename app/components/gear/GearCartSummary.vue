@@ -1,4 +1,9 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useCart } from '~/composables/useCart'
+import { formatNaira } from '~/utils/dogs'
+import { GEAR_FREE_DELIVERY_FROM } from '~/utils/gear'
+
 // Subtotal, delivery and total, on the cart and at checkout. The action goes in the slot.
 const { subtotal, delivery, total } = useCart()
 const toFree = computed(() => GEAR_FREE_DELIVERY_FROM - subtotal.value)

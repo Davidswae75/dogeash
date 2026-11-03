@@ -1,5 +1,9 @@
 <script setup lang="ts">
 import type { CareProvider } from '~/utils/care'
+import { computed } from 'vue'
+import type { AccountGate } from '~/composables/useAccountGate'
+import { careTypes } from '~/utils/care'
+import { formatNaira } from '~/utils/dogs'
 
 // Book a care provider: the shared booking dialog, filled in from the provider
 const props = withDefaults(defineProps<{ provider: CareProvider, label?: string, variant?: 'outline' | 'default' | 'marigold' | 'night', triggerClass?: string }>(), { label: 'Book appointment', variant: 'outline' })

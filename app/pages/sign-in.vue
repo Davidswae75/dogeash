@@ -1,11 +1,17 @@
 <script setup lang="ts">
-import { LayoutDashboard, Mail, ShoppingBag, Smartphone } from '@lucide/vue'
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
-import type { AuthLinkCard } from '~/components/auth/AuthLinkCards.vue'
+import { computed, ref, watch } from 'vue'
+import { definePageMeta, navigateTo, useRoute, useSeoMeta } from '#imports' // nuxt
+import { useAuth } from '~/composables/useAuth'
+import { useNotify } from '~/composables/useNotify'
+import { useSession } from '~/composables/useSession'
+import { emailSignInSchema, safeRedirect } from '~/utils/auth'
+import { authFields } from '~/utils/authFields'
 
 // One sign-in for everyone: buyers, stores, care providers and Dogeash staff.
-// Accounts aren't connected yet, so signing in ends on a preview of where each person lands.
+// Email and password, or a 6-digit code by email. Afterwards: back to where you were heading,
+// to your store dashboard if you work at a store, otherwise Home.
 definePageMeta({
   layout: 'auth',
   authPanel: {
@@ -17,66 +23,70 @@ definePageMeta({
 })
 useSeoMeta({ title: 'Sign in · Dogeash', robots: 'noindex' })
 
-const method = ref<'email' | 'phone'>('email')
-const step = ref<'credentials' | 'code' | 'landing'>('credentials')
+const route = useRoute()
+const auth = useAuth()
+const session = useSession()
+const notify = useNotify()
+
+const step = ref<'credentials' | 'code'>('credentials')
+// Which code we're waiting for: a sign-in code, or the confirmation for an account not yet confirmed
+const codeFor = ref<'sign-in' | 'confirm'>('sign-in')
+const email = ref('')
 const showPassword = ref(false)
-const destination = ref('')
+const busy = ref(false)
+const error = ref('')
 
-const { handleSubmit, values, resetForm, validateField } = useForm<{ email?: string, password?: string, phone?: string }>({
-  validationSchema: computed(() => toTypedSchema(method.value === 'phone' ? phoneSignInSchema : emailSignInSchema)),
+const { handleSubmit, values, validateField } = useForm<{ email?: string, password?: string }>({
+  validationSchema: toTypedSchema(emailSignInSchema),
 })
-watch(method, () => resetForm())
+const fields = computed(() => [authFields.email(), authFields.password({ visible: showPassword.value })])
+watch(values, () => { error.value = '' })
 
-const fields = computed(() => method.value === 'email'
-  ? [authFields.email(), authFields.password({ visible: showPassword.value })]
-  : [authFields.phone()])
-
-// Saved before the step changes: the form forgets values once their fields leave the screen
-function sendCode() {
-  destination.value = method.value === 'email' ? values.email ?? '' : formatNigerianPhone(values.phone ?? '')
-  step.value = 'code'
+// The button's spinner covers the wait, so no full-screen loader here
+async function finish(moved: number) {
+  const to = route.query.redirect ? safeRedirect(route.query.redirect) : session.hasStore.value ? '/dashboard' : '/'
+  await navigateTo(to)
+  notify.signedIn(session.firstName.value, moved)
 }
 
-const notify = useNotify()
-const submit = handleSubmit(
-  () => {
-    if (method.value === 'phone') return sendCode()
-    destination.value = values.email ?? ''
-    step.value = 'landing'
-  },
-  ({ errors }) => notify.formErrors(errors),
-)
-
-// Reaching the landing signs in the sample buyer and carries this browser's saved dogs into the account
-const session = useSession()
-watch(step, (s) => {
-  if (s !== 'landing') return
-  const moved = session.signIn(method.value === 'email' && destination.value ? { email: destination.value } : {})
-  notify.signedIn(session.firstName.value, moved)
-})
+// Saved before the step changes: the form forgets values once their fields leave the screen
+const submit = handleSubmit(async (v) => {
+  busy.value = true
+  email.value = v.email ?? ''
+  const result = await auth.signIn(email.value, v.password ?? '')
+  busy.value = false
+  if (result.error) return (error.value = result.error)
+  if (result.needsCode) {
+    codeFor.value = 'confirm'
+    step.value = 'code'
+    return
+  }
+  await finish(result.moved)
+}, ({ errors }) => notify.formErrors(errors))
 
 // "Email me a code" only needs a valid email, not the password
 async function emailCode() {
-  if ((await validateField('email')).valid) sendCode()
+  if (!(await validateField('email')).valid) return
+  busy.value = true
+  email.value = values.email ?? ''
+  error.value = (await auth.sendSignInCode(email.value)) ?? ''
+  busy.value = false
+  if (error.value) return
+  codeFor.value = 'sign-in'
+  step.value = 'code'
 }
 
-// Where a buyer was heading before being asked to sign in (only paths on this site)
-const redirect = safeRedirect(useRoute().query.redirect)
-
-const landing: AuthLinkCard[] = [
-  { to: '/dashboard', title: 'Continue as a store', text: 'Straight to the K9 Guardian Kennels dashboard', icon: LayoutDashboard },
-  { to: redirect, title: 'Continue as a buyer', text: 'Back to where you were, with your shortlist and bookings', icon: ShoppingBag },
-]
+async function verifyCode(code: string) {
+  const result = codeFor.value === 'confirm' ? await auth.confirmSignUp(email.value, code) : await auth.confirmSignInCode(email.value, code)
+  if (!result.error) await finish(result.moved)
+  return result.error
+}
+const resendCode = () => (codeFor.value === 'confirm' ? auth.resendSignUpCode(email.value) : auth.sendSignInCode(email.value))
 </script>
 
 <template>
   <template v-if="step === 'credentials'">
     <AuthHeading title="Sign" outline="in" text="One account for buying, running a store and booking on Dogeash." />
-
-    <ToggleGroup v-model="method" type="single" variant="watch" aria-label="Sign in with" class="inline-flex w-full gap-0.5 rounded-full bg-surface-sunk p-[3px]">
-      <ToggleGroupItem value="email" class="flex-1 rounded-full!"><Mail aria-hidden="true" />Email</ToggleGroupItem>
-      <ToggleGroupItem value="phone" class="flex-1 rounded-full!"><Smartphone aria-hidden="true" />Phone number</ToggleGroupItem>
-    </ToggleGroup>
 
     <!-- method="post" keeps typed values out of the URL if someone submits before the page loads -->
     <form class="flex flex-col gap-5" method="post" novalidate @submit.prevent="submit">
@@ -85,8 +95,9 @@ const landing: AuthLinkCard[] = [
           <AuthPasswordToggle v-model="showPassword" />
         </template>
       </Fields>
-      <Button type="submit" class="h-12 w-full">{{ method === 'email' ? 'Sign in' : 'Send code' }}</Button>
-      <button v-if="method === 'email'" type="button" class="cursor-pointer border-0 bg-transparent p-0 text-sm font-bold text-ink underline underline-offset-4" @click="emailCode">
+      <p v-if="error" class="m-0 text-sm font-semibold text-danger" role="alert">{{ error }}</p>
+      <Button type="submit" class="h-12 w-full" :loading="busy">{{ busy ? 'Signing in…' : 'Sign in' }}</Button>
+      <button type="button" class="cursor-pointer border-0 bg-transparent p-0 text-sm font-bold text-ink underline underline-offset-4" :disabled="busy" @click="emailCode">
         Email me a sign-in code instead
       </button>
     </form>
@@ -97,15 +108,18 @@ const landing: AuthLinkCard[] = [
       </HelpPanel>
       <p class="m-0 text-sm text-ink-muted">
         New here? <NuxtLink to="/sign-up" class="font-bold text-ink">Create an account</NuxtLink> or <NuxtLink to="/open-a-store" class="font-bold text-ink">open a store</NuxtLink>.
+        Sign-in by text message is coming soon.
       </p>
     </div>
   </template>
 
-  <AuthCodeStep v-else-if="step === 'code'" :destination="destination" submit-label="Verify and sign in" @verified="step = 'landing'" @back="step = 'credentials'" />
-
-  <template v-else>
-    <AuthHeading title="Signed" outline="in" done text="This is a preview: accounts aren't connected yet. On the live site you'd go straight to the right place. Choose one to see it." />
-    <AuthLinkCards :items="landing" />
-    <button type="button" class="w-fit cursor-pointer border-0 bg-transparent p-0 text-sm font-bold text-ink underline underline-offset-4" @click="step = 'credentials'">Start again</button>
-  </template>
+  <AuthCodeStep
+    v-else
+    :title="codeFor === 'confirm' ? 'Confirm with your' : 'Enter your'"
+    :destination="email"
+    :submit-label="codeFor === 'confirm' ? 'Confirm and sign in' : 'Verify and sign in'"
+    :verify="verifyCode"
+    :resend="resendCode"
+    @back="step = 'credentials'"
+  />
 </template>

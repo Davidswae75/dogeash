@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { ArrowLeft } from '@lucide/vue'
+import { createError, useRoute, useSeoMeta } from '#imports' // nuxt
+import { findOwnedDog } from '~/utils/myDogs'
 
 // One dog's record: who it is, health and treatments, reminders, guarantee and training
 const route = useRoute()
