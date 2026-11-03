@@ -12,7 +12,7 @@
     "render:kennel": "node scripts/render-kennel-watch.mjs",
     "db:seed": "node scripts/generate-seed.mjs",
     "db:test": "node scripts/test-db.mjs",
-    "db:types": "npx supabase gen types typescript --project-id \"$SUPABASE_PROJECT_REF\" > app/types/database.types.ts",
+    "db:types": "sh -c 'set -a; [ -f .env.local ] && . ./.env.local; : \"${SUPABASE_PROJECT_REF:?Set SUPABASE_PROJECT_REF in .env.local}\"; npx supabase gen types typescript --project-id \"$SUPABASE_PROJECT_REF\" > app/types/database.types.ts'",
     "db:check": "node scripts/check-db.mjs"
   },
   "dependencies": {

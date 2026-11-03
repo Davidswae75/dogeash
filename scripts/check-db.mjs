@@ -3,8 +3,8 @@
 import { existsSync } from 'node:fs'
 
 if (existsSync('.env.local')) process.loadEnvFile('.env.local')
-const url = process.env.NUXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
-const key = process.env.NUXT_PUBLIC_SUPABASE_KEY || process.env.SUPABASE_KEY
+const url = process.env.SUPABASE_URL
+const key = process.env.SUPABASE_KEY
 if (!url || !key) {
   console.log('No Supabase keys found in .env.local')
   process.exit(1)

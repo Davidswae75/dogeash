@@ -3,7 +3,7 @@ import { existsSync } from 'node:fs'
 import tailwindcss from '@tailwindcss/vite'
 import { defineNuxtConfig } from 'nuxt/config'
 
-// Nuxt only reads .env by itself; local keys live in .env.local (see .env.example)
+// Nuxt only reads .env by itself; local keys live in .env.local, the one env file (template: .env.example)
 if (existsSync('.env.local')) process.loadEnvFile('.env.local')
 
 export default defineNuxtConfig({
@@ -23,7 +23,7 @@ export default defineNuxtConfig({
   // A missing import is an error rather than a silent auto-import. Components still auto-import.
   imports: { autoImport: false },
 
-  // Accounts and data. Needs the project URL and publishable key in .env.local (see .env.example).
+  // Accounts and data. Needs SUPABASE_URL and SUPABASE_KEY from .env.local, or set on the host before the build.
   // Browsing stays open to everyone; pages opt in to needing an account (useAccountGate, route middleware).
   supabase: { redirect: false },
 
