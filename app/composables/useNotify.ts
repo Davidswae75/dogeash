@@ -1,5 +1,5 @@
 import { BellRing, ShoppingCart } from '@lucide/vue'
-import { CalendarCheck, CircleX, Heart, HeartOff, Info, LogIn, LogOut, MessageSquare, Scale, Store, TriangleAlert, UserRoundCheck, Users } from '@lucide/vue'
+import { CalendarCheck, CircleX, Heart, HeartOff, Info, LogIn, LogOut, MessageSquare, Scale, Star, Stethoscope, Store, TriangleAlert, UserRoundCheck, Users } from '@lucide/vue'
 import type { Component } from 'vue'
 import { TYPE, useToast } from 'vue-toastification'
 import ToastContent, { type ToastAction, type ToastTone } from '~/components/ToastContent.vue'
@@ -88,6 +88,14 @@ export function useNotify() {
     // The store team changed: an invitation sent or withdrawn, a role changed, someone removed or joined
     teamUpdated: (title: string, text: string) =>
       show('success', Users, { kicker: 'Team', meta: 'Updated', title, text }),
+
+    // The store's care team changed: a provider linked, renamed or removed
+    careUpdated: (title: string, text: string) =>
+      show('success', Stethoscope, { kicker: 'Care team', meta: 'Saved', title, text }),
+
+    // A review written, edited or deleted, or a store's reply to one
+    reviewSaved: (title: string, text: string) =>
+      show('success', Star, { kicker: 'Reviews', meta: 'Saved', title, text }),
 
     // The store profile saved; buyers see it on the store page
     storeUpdated: (name: string) =>

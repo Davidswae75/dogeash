@@ -175,6 +175,29 @@ export interface Database {
           { foreignKeyName: 'visits_store_id_fkey', columns: ['store_id'], isOneToOne: false, referencedRelation: 'stores', referencedColumns: ['id'] },
         ]
       }
+      care_providers: {
+        Row: { id: string, public_id: string, slug: string, name: string, person: string | null, type: Database['public']['Enums']['care_type'], city: string, areas: string, home_visits: boolean, verified: boolean, credential: string, rating: number, reviews_count: number, price_from: number } & Timestamps
+        Insert: never
+        Update: never
+        Relationships: []
+      }
+      store_care_links: {
+        Row: { store_id: string, provider_id: string, relationship: string, created_at: string }
+        Insert: { store_id: string, provider_id: string, relationship: string }
+        Update: { relationship?: string }
+        Relationships: [
+          { foreignKeyName: 'store_care_links_store_id_fkey', columns: ['store_id'], isOneToOne: false, referencedRelation: 'stores', referencedColumns: ['id'] },
+          { foreignKeyName: 'store_care_links_provider_id_fkey', columns: ['provider_id'], isOneToOne: false, referencedRelation: 'care_providers', referencedColumns: ['id'] },
+        ]
+      }
+      store_reviews: {
+        Row: { id: string, store_id: string, author_id: string, author_name: string, author_city: string, visit_id: string | null, rating: number, body: string, store_reply: string | null, replied_at: string | null } & Timestamps
+        Insert: { store_id: string, rating: number, body: string }
+        Update: { rating?: number, body?: string, store_reply?: string | null }
+        Relationships: [
+          { foreignKeyName: 'store_reviews_store_id_fkey', columns: ['store_id'], isOneToOne: false, referencedRelation: 'stores', referencedColumns: ['id'] },
+        ]
+      }
       store_invites: {
         Row: { id: string, store_id: string, email: string, role: Database['public']['Enums']['store_role'], invited_by: string | null, created_at: string }
         Insert: { store_id: string, email: string, role: Database['public']['Enums']['store_role'] }
@@ -223,7 +246,8 @@ export interface Database {
       message_role: 'buyer' | 'store'
       visit_status: 'requested' | 'confirmed' | 'declined' | 'cancelled' | 'done'
       visit_place: 'kennel' | 'home'
-      notification_kind: 'message' | 'visit' | 'reserved' | 'sold' | 'available' | 'price' | 'team'
+      care_type: 'vet' | 'trainer' | 'groomer' | 'builder' | 'equipment' | 'boarding'
+      notification_kind: 'message' | 'visit' | 'reserved' | 'sold' | 'available' | 'price' | 'team' | 'review'
     }
     CompositeTypes: { [_ in never]: never }
   }

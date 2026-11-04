@@ -360,6 +360,24 @@
       "last_seen": "2026-11-01T11:23:52.323Z",
       "occurrences": 1,
       "related_bugs": []
+    },
+    {
+      "error_message": "Incorrect value in code",
+      "file": "app/utils/reviews.ts",
+      "root_cause": "Had 'id, author_id, author_name, author_city, rating, ",
+      "fix": "Changed to 's account id; signed-in people need it to spot th",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "ts"
+      ],
+      "status": "candidate",
+      "observed_worktree": "/Users/dave/Documents/personalProjects/dogeash",
+      "id": "bug-021",
+      "timestamp": "2026-11-04T07:38:25.163Z",
+      "last_seen": "2026-11-04T07:38:25.163Z",
+      "occurrences": 1,
+      "related_bugs": []
     }
   ],
   "applied_observations": {
@@ -382,7 +400,8 @@
     "0226557e-ea1b-42cf-b821-f719751f71e1": true,
     "9fcd8798-2e0a-4a4a-bdbe-c0aa7d0fcb0e": true,
     "e70653e2-8691-40e3-9982-3f0bdcbf75c8": true,
-    "2d4f081c-5f7d-4654-b52a-5368236f27f4": true
+    "2d4f081c-5f7d-4654-b52a-5368236f27f4": true,
+    "8b5b9a6b-e1e1-4d5c-a44e-d616ae499abf": true
   },
-  "next_id": 21
+  "next_id": 22
 }

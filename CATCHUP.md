@@ -256,3 +256,93 @@ The owner should tell the person to sign in or sign up with that email; Dogeash 
 - `StoreBanner.vue` and `StoreAvatar.vue`: show the uploaded images.
 - `app/utils/stores.ts`: `Store` gained `banner`, `logo` (URLs) and their paths, and `storeMediaUrl()`. `toStore()` takes the Supabase URL to build them.
 - `npm run db:test`: 7 new checks. All pass.
+
+## 8. Reviews
+
+**What it does:** buyers review a store after a kennel visit there, store owners and managers reply, and the store's rating comes from real reviews.
+
+**Status:** migration run on 4 Nov and checked live: visitors can read reviews but not who wrote them (account ids are hidden), and sample stores keep their figures.
+
+**Who can review:** a buyer whose kennel visit at that store was marked **done** by the store. Purchases and handovers don't exist yet, so this is the rule for now. Store pages used to say "after a completed handover"; that now says "buyers who have visited the kennel".
+- One review per buyer per store.
+- The buyer can edit or delete it any time.
+- A review needs 1–5 stars and 20–1,000 characters.
+- The buyer's name and city are copied in when they write it; stores never see buyer profiles.
+
+**Where buyers write it:**
+- **My visits (`/account/bookings`):** visits marked done get a "Review <store>" button.
+- **The store page:** a "You visited this kennel. How did it go?" strip with "Write a review" (or "Edit your review"). It isn't shown on your own store.
+- **The dialog:** stars with a word ("Excellent"), the review text, and "Delete review" (it asks first) when editing.
+
+**On the store page:** real reviews, newest first, with the store's reply under each. A store with no real reviews keeps showing its sample reviews.
+
+**Store dashboard: new "Reviews" page (`/dashboard/reviews`)**, in the sidebar for owners and managers:
+- The average, the number of reviews, and how many have no reply.
+- Each review has Reply (or Edit reply / Remove reply). Replies are public.
+- A store can't change or remove a buyer's review, or its stars.
+
+**Rating:** the store's rating and review count are recalculated from real reviews whenever one is added, edited or deleted. Sample stores keep their sample figures (like 4.9 from 84) until their first real review; then the figures switch to real ones. Stores can't set their rating themselves.
+
+**Notifications (bell):**
+- A new review → the store's owners and managers.
+- A reply → the buyer who wrote the review. It opens the store page's reviews.
+
+**Not done yet:**
+- Reporting an unfair review to Dogeash. For now, delete it in the SQL Editor if needed.
+- Reviews after a purchase or handover, once those exist.
+- Reviews of care providers.
+
+**Code:**
+- `supabase/migrations/20261110000000_store_reviews.sql`: the `store_reviews` table, the rules, the rating update, notifications, a new "review" notification kind.
+- `npm run db:test`: 18 new checks. All pass.
+- `app/utils/reviews.ts`: the `Review` shape, the form rules, sample reviews in the same shape.
+- `app/composables/useStoreReviews.ts`: load, write or edit, delete, reply, and who can review.
+- New components:
+  - `review/ReviewStars.vue`, `review/ReviewCard.vue`, `review/ReviewDialog.vue`
+  - `dashboard/DashboardReviewReply.vue`
+- `app/pages/dashboard/reviews.vue`: new. Edited: the store page, `account/bookings.vue`, the dashboard sidebar, the bell's icons, `useNotify` (`reviewSaved`).
+
+## 9. Care team, and the care directory in the database
+
+**What it does:** the care directory (vets, trainers, groomers, kennel builders, equipment, boarding) now comes from Supabase. Stores manage their own care team at `/dashboard/care` (was a "Coming next" page).
+
+**You need to do (soon):** run `supabase/migrations/20261111000000_care_providers.sql` in the Supabase SQL Editor (it's on your clipboard). Until you do:
+- the public site shows sample data
+- store members' dashboards won't load their store
+The site now asks for each store's care links, which only exist after the migration.
+
+**The migration:**
+- Creates the `care_providers` table and adds the 9 sample providers to it.
+- Creates `store_care_links` (which store works with which provider, and "what they do for us").
+- Moves each store's existing care team out of `details` into links, then removes the old `care` list from `details`. Links that point at an unknown provider are skipped.
+
+**Rules:**
+- Anyone can read the directory. Only Dogeash (the SQL Editor) adds or edits providers; there are no provider accounts yet.
+- Anyone can see a verified store's care team.
+- Only that store's owners and managers can add, rename or remove providers on it. Handlers and outsiders can't.
+- Up to 12 providers per store. "What they do" must be 1–60 characters.
+
+**The Care team page:**
+- **Your care team:** each provider with type, person, city and a "Checked by Dogeash" mark. Their "what they do for you" line can be edited. Remove asks first; the provider stays in the directory.
+- **Add from the directory:**
+  - search by name, filter by type, and "Only in <your city>" (on by default)
+  - checked providers come first
+  - "Add" suggests a line by type ("Our vet", "Our handover trainer") that you can change before adding
+- Handlers see "Care team isn't part of your role".
+- The store page, the provider pages ("Stores that work with them") and the overview's Store health checklist all use the real links.
+
+**Also fixed:** `npm run db:seed` (the seed generator) had been broken since the dog photo change earlier this week. It now works again, and also writes the care providers and links. `supabase/seed.sql` is regenerated; the dog rows are unchanged.
+
+**Not done yet:**
+- Provider accounts, so providers can join and edit their own listing.
+- "Invite a provider to join Dogeash".
+- Booking a provider from a store's page through to an appointment.
+
+**Code:**
+- `supabase/migrations/20261111000000_care_providers.sql`, and `npm run db:test` with 12 new checks. One of them reruns the migration's move on a store that still has the old list. All pass.
+- `app/utils/care.ts`: `listedProviders` (loaded per page), `toCareProvider`, and a suggested line per type.
+- `app/plugins/00.catalog.ts`: also loads the directory. `app/utils/stores.ts`: a store's care team now comes from its links.
+- `app/composables/useStoreCare.ts`: add, rename, remove. `useStoreProfile` gained `reload()`.
+- New components: `dashboard/DashboardCareMember.vue`, `dashboard/DashboardCareFinder.vue`. New page: `app/pages/dashboard/care.vue`.
+- The profile form no longer writes the care team into `details`.
+- `scripts/generate-seed.mjs`: fixed, and now includes providers and links.

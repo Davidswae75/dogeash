@@ -402,3 +402,9 @@ description: chronological action log per session, consolidated weekly
 | 06:37 | Created supabase/migrations/20261109000000_store_media.sql | — | ~603 |
 | 06:39 | Created app/composables/useStoreProfile.ts | — | ~1030 |
 | 06:39 | Created app/components/dashboard/DashboardStoreImages.vue | — | ~931 |
+| 08:36 | Created supabase/migrations/20261110000000_store_reviews.sql | — | ~2015 |
+| 08:38 | Created app/utils/reviews.ts | — | ~636 |
+| 08:38 | Edited app/utils/reviews.ts | 1→3 lines | ~84 |
+| 08:38 | Created app/composables/useStoreReviews.ts | — | ~1096 |
+| 08:39 | Created app/components/review/ReviewDialog.vue | — | ~1054 |
+| 09:14 | Created app/pages/dashboard/care.vue | — | ~862 |

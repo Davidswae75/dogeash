@@ -1,14 +1,17 @@
 <script setup lang="ts">
-import { CalendarCheck } from '@lucide/vue'
+import { CalendarCheck, PenLine } from '@lucide/vue'
 import { onMounted, ref } from 'vue'
 import { useSeoMeta } from '#imports' // nuxt
 import type { Visit } from '~/composables/useVisits'
+import type { Review } from '~/utils/reviews'
 import { useNotify } from '~/composables/useNotify'
+import { useStoreReviews } from '~/composables/useStoreReviews'
 import { useVisits } from '~/composables/useVisits'
 import { visitDay } from '~/utils/time'
 
 // Kennel visits the buyer has asked for: what's coming up (awaiting the store, or confirmed) and
 // everything before. Upcoming visits can be cancelled; a store's confirm or decline shows here.
+// A visit the store marked done can be followed by a review of the store.
 useSeoMeta({ title: 'Visits and bookings · My Dogeash' })
 
 const visits = useVisits()
@@ -18,6 +21,17 @@ const cancelling = ref<Visit>()
 const busy = ref(false)
 
 onMounted(visits.loadMine)
+
+// Reviewing: load the store's reviews first, so an existing review of yours opens for editing
+const reviews = useStoreReviews()
+const reviewing = ref<Visit>()
+const reviewOpen = ref(false)
+const myReview = ref<Review>()
+async function openReview(v: Visit) {
+  myReview.value = (await reviews.load(v.storeId)).find(r => r.mine)
+  reviewing.value = v
+  reviewOpen.value = true
+}
 
 async function cancel() {
   const v = cancelling.value
@@ -51,8 +65,19 @@ async function cancel() {
 
     <section v-if="past.length" class="flex flex-col gap-3" aria-labelledby="past-visits">
       <h2 id="past-visits" class="m-0 font-mono text-[11px] leading-4 font-semibold tracking-[.12em] text-ink-muted uppercase">Earlier · {{ past.length }}</h2>
-      <VisitCard v-for="v in past" :key="v.id" :visit="v" side="buyer" muted />
+      <VisitCard v-for="v in past" :key="v.id" :visit="v" side="buyer" muted>
+        <Button v-if="v.status === 'done'" variant="outline" size="sm" @click="openReview(v)"><PenLine aria-hidden="true" />Review {{ v.storeName }}</Button>
+      </VisitCard>
     </section>
+
+    <ReviewDialog
+      v-if="reviewing"
+      v-model:open="reviewOpen"
+      :store-name="reviewing.storeName"
+      :existing="myReview"
+      :save="values => reviews.write(reviewing!.storeId, reviewing!.storeName, values)"
+      :remove="myReview ? () => reviews.remove(myReview!) : undefined"
+    />
 
     <AlertDialog :open="!!cancelling" @update:open="o => !o && (cancelling = undefined)">
       <AlertDialogContent>

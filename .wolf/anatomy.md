@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-11-04T05:39:52.006Z
-> Files: 699 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-11-04T08:14:02.514Z
+> Files: 704 tracked | Anatomy hits: 0 | Misses: 0
 
 > Project structure index. Auto-maintained by OpenWolf hooks and daemon.
 > Run `openwolf scan` to generate, or wait for the first Claude Code session.
@@ -177,6 +177,10 @@
 - `HomeShortlistChanges.vue` — Vue: setup (~698 tok)
 - `HomeSignedIn.vue` — Vue: setup (~750 tok)
 - `HomeWelcome.vue` — Vue: setup (~450 tok)
+
+## app/components/review/
+
+- `ReviewDialog.vue` — Vue: setup (~1054 tok)
 
 ## app/components/shortlist/
 
@@ -874,6 +878,7 @@
 - `useStoreInbox.ts` — The store inbox as one list: buyer conversations and visit requests for the store being run, (~1097 tok)
 - `useStoreInvites.ts` — Invitations to join a store's team that are waiting for the signed-in person, matched by their email (~522 tok)
 - `useStoreProfile.ts` — Saving the store profile of the store the dashboard is showing (Supabase: stores, and the store-medi (~1030 tok)
+- `useStoreReviews.ts` — Store reviews (Supabase: store_reviews). Anyone reads a store's reviews; a buyer writes one per stor (~1096 tok)
 - `useStoreTeam.ts` — The team of the store the dashboard is showing (Supabase: store_members, store_invites, store_team() (~1325 tok)
 - `useVisits.ts` — Kennel-visit requests (Supabase: visits). Buyers request and can cancel; a store's people confirm, (~1283 tok)
 
@@ -921,6 +926,7 @@
 
 - `[section].vue` — Vue: setup (~394 tok)
 - `bookings.vue` — Vue: setup (~714 tok)
+- `care.vue` — Vue: setup (~862 tok)
 - `inbox.vue` — Vue: setup (~783 tok)
 - `index.vue` — Vue: setup (~228 tok)
 - `profile.vue` — Vue: setup (~481 tok)
@@ -973,6 +979,7 @@
 - `legal.ts` — Terms of use and privacy policy, in plain words. DRAFTS: both must be reviewed by a Nigerian lawyer (~1282 tok)
 - `market.ts` — The marketplace rows on Home: which dogs and stores each one shows (~545 tok)
 - `myDogs.ts` — Dogs a buyer owns after handover: a living record of health, training and care. (~928 tok)
+- `reviews.ts` — Store reviews (Supabase: store_reviews). Buyers review a store after a done kennel visit; the store  (~678 tok)
 - `searchFilters.ts` — The filters on Find a guard dog, in one shape: read from and written to the page address (~791 tok)
 - `sell.ts` — The Sell with us page: why kennels list on Dogeash, how verification works, what to have ready, and (~915 tok)
 - `signUpIntents.ts` — "What brings you here?" on sign-up. Each answer changes the heading, the fields, the side panel (~1043 tok)
@@ -993,3 +1000,4 @@
 - `20261107000000_store_profile.sql` — Store profile editing. A store's owners and managers write the about text, owner profile, history, (~437 tok)
 - `20261108000000_store_team.sql` — Store teams. Owners invite people by email with a role; the invitation waits in that person's accoun (~1890 tok)
 - `20261109000000_store_media.sql` — Store banner and logo. Images live in the public `store-media` bucket, one folder per store (its dat (~603 tok)
+- `20261110000000_store_reviews.sql` — Store reviews. A buyer can review a store once one of their kennel visits there is marked done (~2015 tok)

@@ -1,7 +1,7 @@
 import type { CareType } from '~/utils/care'
 import { computed, ref } from 'vue'
 import { useRoute } from '#imports' // nuxt
-import { careTypes, sampleCareProviders } from '~/utils/care'
+import { careTypes, listedProviders } from '~/utils/care'
 
 // Search, filters and sort for the care directory. Reads ?type= and ?city= so links can land on a filtered view.
 export function useCareDirectory() {
@@ -12,9 +12,9 @@ export function useCareDirectory() {
   const options = ref<string[]>([])
   const sort = ref<'rating' | 'reviews' | 'price' | 'name'>('rating')
 
-  const cityOptions = [...new Set(sampleCareProviders.map(p => p.city))].sort().map(c => ({ value: c, label: c }))
+  const cityOptions = [...new Set(listedProviders.value.map(p => p.city))].sort().map(c => ({ value: c, label: c }))
   const typeOptions = (Object.keys(careTypes) as CareType[])
-    .filter(t => sampleCareProviders.some(p => p.type === t))
+    .filter(t => listedProviders.value.some(p => p.type === t))
     .map(t => ({ value: t, label: careTypes[t].label }))
   const trustOptions = [
     { value: 'verified', label: 'Checked by Dogeash' },
@@ -23,7 +23,7 @@ export function useCareDirectory() {
 
   const providers = computed(() => {
     const q = query.value.trim().toLowerCase()
-    const list = sampleCareProviders.filter(p =>
+    const list = listedProviders.value.filter(p =>
       (!type.value || p.type === type.value)
       && (!cities.value.length || cities.value.includes(p.city))
       && (!options.value.includes('verified') || p.verified)

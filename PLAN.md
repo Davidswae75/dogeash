@@ -122,10 +122,10 @@ Sellers are called **stores** everywhere buyers can see them. A store is a kenne
 - [x] Store dashboard layout (`app/layouts/dashboard.vue`): sidebar with Overview, Dogs, Enquiries, Bookings, Care team, Store profile, Payouts, Team, Settings; store switcher menu; top bar with search, notifications, theme and "Add a dog"; phone menu sheet
 - [~] Dashboard overview (`/dashboard`): greeting with today's status, a connected numbers strip with trends, needs your attention (by urgency and role), your dogs with status filters, coming up grouped by day, store health (inspection, rating, replies, profile). One component per section in `app/components/dashboard/` (example figures)
 - [x] Dogs (`/dashboard/dogs`): list with Live / Drafts / Sold and withdrawn filters; add and edit the K9 file with a photo (`/dashboard/dogs/new`, `/dashboard/dogs/[fileNo]`); go live, mark reserved or sold, withdraw, delete drafts. Dogeash assigns file numbers and owns the "inspected" line. Still to come: several photos and videos per dog
-- [~] Dashboard sections: Dogs, Inbox (enquiries), Bookings (kennel visits: answer, mark done), Store profile and Team are built; the overview's greeting, attention list and Coming up use real data (stat tiles still examples). Still "Coming next": Care team, Payouts, Settings
+- [~] Dashboard sections: Dogs, Inbox (enquiries), Bookings (kennel visits: answer, mark done), Store profile, Team, Reviews and Care team are built; the overview's greeting, attention list and Coming up use real data (stat tiles still examples). Still "Coming next": Payouts, Settings
 - [~] Store staff: invite members with roles (Owner: everything incl. payouts · Manager: dogs, enquiries, bookings · Handler: their own dogs). Built at `/dashboard/team`: invitations by email wait in the person's account (no email sent yet); change roles, remove, leave
 - [~] Store dashboard: edit store profile (about, history, owner, services, hours, delivery areas) at `/dashboard/profile`; the database keeps Dogeash's inspection and reviews. Banner and logo upload (`store-media` bucket) done
-- [ ] Store dashboard: manage the care team (add or remove linked vets and trainers)
+- [~] Store dashboard: manage the care team (add or remove linked vets and trainers) at `/dashboard/care`; the care directory is in Supabase (`care_providers`, `store_care_links`). Still to do: provider accounts, inviting providers
 - [ ] Add a dog: multi-step form using `dogSubmissionSchema` + vee-validate
 - [ ] Edit, withdraw and mark sold
 - [ ] Listing statuses: draft → pending review → available → reserved → sold / withdrawn
@@ -180,7 +180,7 @@ Once a buyer signs in, Dogeash stops introducing itself and becomes their market
    - [~] My dogs: a record per dog after handover (vaccinations, training, care bookings, reminders, health guarantee). Built with one sample dog in `app/utils/myDogs.ts`; photos and adding a dog you already own still to do
    - [x] Messages with stores (`/account/messages`): conversations from "Contact store", one per store and dog, unread dots and counts, replies checked every 20 s. Care providers later
    - [~] Saved searches (`/account/alerts`): "Save this search" on Find a guard dog (filters now live in the page address), alerts on/off, remove with undo, up to 20, in Supabase. Still to do: actually sending alerts when a new dog matches
-   - [ ] Reviews to write, gear orders
+   - [~] Reviews to write: done for stores (after a kennel visit marked done; edit, delete; stores reply on `/dashboard/reviews`; rating from real reviews). Still to do: reporting a review, reviews after purchase, care provider reviews, gear orders
    - [x] Home profile (`/account/profile`): property, city, children, other pets, experience; saved in Supabase and used for matching on Home, with "What suits you" beside the form
    - [~] Settings (`/account/settings`): name, phone, city, password, how we reach you (email, SMS, WhatsApp), sign out. Still to come: change email, payment methods, delete account
    - [~] First visit: Home and the account overview ask for the home profile until it's filled in (no sample profile)

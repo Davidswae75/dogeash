@@ -54,8 +54,8 @@ export const storeFormFromStore = (s: Store): StoreFormValues => ({
 
 type StoreWrite = Database['public']['Tables']['stores']['Update']
 
-// Form values → the stores table's columns. `care` is carried over until the Care team section edits it.
-export const storeFormToRow = (v: StoreFormValues, store: Store): StoreWrite => ({
+// Form values → the stores table's columns (the care team has its own table, store_care_links)
+export const storeFormToRow = (v: StoreFormValues): StoreWrite => ({
   name: v.name,
   initials: initialsOf(v.name),
   tagline: v.tagline,
@@ -70,7 +70,6 @@ export const storeFormToRow = (v: StoreFormValues, store: Store): StoreWrite => 
     services: v.services,
     owner: { name: v.ownerName, title: v.ownerTitle, yearsWithDogs: v.ownerYears, bio: v.ownerBio, credentials: v.credentials },
     history: [...v.history].sort((a, b) => a.year - b.year),
-    care: store.care,
   },
 })
 

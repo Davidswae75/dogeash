@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Check, MapPin, Star } from '@lucide/vue'
 import { createError, useRoute, useSeoMeta } from '#imports' // nuxt
-import { careTypes, findCareProviderBySlug, sampleCareProviders } from '~/utils/care'
+import { careTypes, findCareProviderBySlug, listedProviders } from '~/utils/care'
 import { formatNaira } from '~/utils/dogs'
 import { storesForProvider } from '~/utils/stores'
 
@@ -17,7 +17,7 @@ useSeoMeta({
 })
 
 const stores = storesForProvider(provider.id)
-const similar = sampleCareProviders
+const similar = listedProviders.value
   .filter(p => p.id !== provider.id && (p.type === provider.type || p.city === provider.city))
   .sort((a, b) => Number(b.type === provider.type) - Number(a.type === provider.type) || b.rating - a.rating)
   .slice(0, 2)

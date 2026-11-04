@@ -2,7 +2,7 @@
 import { Search } from '@lucide/vue'
 import { useSeoMeta } from '#imports' // nuxt
 import { useCareDirectory } from '~/composables/useCareDirectory'
-import { sampleCareProviders } from '~/utils/care'
+import { listedProviders } from '~/utils/care'
 
 useSeoMeta({
   title: 'Vets, trainers and dog care · Dogeash',
@@ -10,6 +10,7 @@ useSeoMeta({
 })
 
 const { query, type, cities, options, sort, cityOptions, typeOptions, trustOptions, providers, clear } = useCareDirectory()
+const providerCount = listedProviders.value.length
 const eyebrow = 'text-xs leading-4 font-bold tracking-[.08em] uppercase'
 </script>
 
@@ -17,7 +18,7 @@ const eyebrow = 'text-xs leading-4 font-bold tracking-[.08em] uppercase'
   <div class="mx-auto flex w-full max-w-[calc(var(--container)+64px)] flex-col gap-8 px-4 pt-8 sm:px-8 sm:pt-12">
     <header class="grid items-end gap-8 lg:grid-cols-[1.1fr_1fr]">
       <div class="flex animate-rise flex-col gap-4">
-        <span :class="[eyebrow, 'text-ink-muted']">{{ sampleCareProviders.length }} providers</span>
+        <span :class="[eyebrow, 'text-ink-muted']">{{ providerCount }} providers</span>
         <h1 class="m-0 mega text-[clamp(38px,4.6vw,64px)] leading-[.95]">Care for your <span class="text-outline">guard dog</span></h1>
         <p class="m-0 max-w-[30em] text-[17px] leading-[27px] text-ink-muted">Find a vet, trainer, groomer or kennel builder near you and book an appointment, whether or not you bought your dog here.</p>
       </div>

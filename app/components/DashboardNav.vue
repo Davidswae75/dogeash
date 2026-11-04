@@ -2,7 +2,7 @@
 import { X } from '@lucide/vue'
 import {
   CalendarDays, ChevronsUpDown, Dog, ExternalLink, LayoutDashboard, LogOut, MessageSquare,
-  Settings, ShoppingBag, Stethoscope, Store, Users, Wallet,
+  Settings, ShoppingBag, Star, Stethoscope, Store, Users, Wallet,
 } from '@lucide/vue'
 import type { Component } from 'vue'
 import { computed } from 'vue'
@@ -23,7 +23,7 @@ const badgeOf = (to: string) => (to === '/dashboard/inbox' ? unread.value : 0)
 const nav = computed(() => dashboardNav
   .map(g => ({ ...g, items: g.items.filter(i => !i.permission || can(i.permission)) }))
   .filter(g => g.items.length))
-const icons: Record<string, Component> = { LayoutDashboard, Dog, MessageSquare, CalendarDays, Stethoscope, Store, Wallet, Users, Settings }
+const icons: Record<string, Component> = { LayoutDashboard, Dog, MessageSquare, CalendarDays, Star, Stethoscope, Store, Wallet, Users, Settings }
 const route = useRoute()
 
 function isActive(to: string) {

@@ -1,13 +1,15 @@
 <script setup lang="ts">
-import { CalendarDays, Clock, MapPin, MessageSquare, Quote, Star, Truck } from '@lucide/vue'
+import { CalendarDays, Clock, MapPin, MessageSquare, PenLine, Star, Truck } from '@lucide/vue'
 import type { ProtectionLevel } from '~/utils/protection'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { createError, useRoute, useSeoMeta } from '#imports' // nuxt
 import { useSectionSpy } from '~/composables/useSectionSpy'
 import { useSession } from '~/composables/useSession'
+import { useStoreReviews } from '~/composables/useStoreReviews'
 import { careProviderSlug, findCareProvider } from '~/utils/care'
 import { formatNaira } from '~/utils/dogs'
 import { centerInRow } from '~/utils/scroll'
+import { sampleReview } from '~/utils/reviews'
 import { findStore, storeServices, storeSummary } from '~/utils/stores'
 
 // A store: its dogs for sale, who runs it, its history, inspection record, care team and reviews
@@ -19,6 +21,16 @@ const summary = storeSummary(store)
 // People who work at this store see management actions instead of Contact and Book
 const { memberOf } = useSession()
 const isOwn = computed(() => !!memberOf(store.id))
+// Reviews: real ones once the store has any, otherwise its example reviews. Buyers with a done visit
+// here can write one (or edit theirs); the store's own people can't review it.
+const reviews = useStoreReviews()
+const realReviews = reviews.reviewsOf(store.id)
+const shownReviews = computed(() => realReviews.value.length ? realReviews.value : store.reviewSamples.map(r => sampleReview(r, store.id)))
+const myReview = reviews.mineFor(store.id)
+const canReview = reviews.canReview(store.id)
+const reviewing = ref(false)
+onMounted(() => reviews.load(store.id))
+
 const care = store.care
   .map(link => ({ ...link, provider: findCareProvider(link.providerId)! }))
   .filter(c => c.provider)
@@ -279,23 +291,23 @@ const h2 = 'm-0 mega text-[clamp(26px,2.6vw,34px)] leading-none'
         <section id="reviews" class="flex scroll-mt-32 flex-col gap-5 pt-16">
           <div class="flex flex-wrap items-end justify-between gap-4">
             <h2 :class="h2">What buyers <span class="text-outline">say</span></h2>
-            <span v-if="store.reviews" class="text-sm text-ink-muted"><strong class="text-ink">{{ store.rating }}</strong> from {{ store.reviews }} reviews after handover</span>
+            <span v-if="store.reviews" class="text-sm text-ink-muted"><strong class="text-ink">{{ store.rating }}</strong> from {{ store.reviews }} reviews from buyers</span>
           </div>
-          <div v-if="store.reviewSamples.length" class="flex flex-col gap-4">
-            <figure v-for="review in store.reviewSamples" :key="review.name + review.date" class="m-0 grid gap-4 rounded-xl bg-surface p-6 ring-1 ring-line sm:grid-cols-[auto_1fr]">
-              <Quote class="size-8 text-marigold" aria-hidden="true" />
-              <div class="flex flex-col gap-3">
-                <blockquote class="m-0 text-[17px] leading-[27px]">{{ review.text }}</blockquote>
-                <figcaption class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink-muted">
-                  <span class="flex gap-0.5" :aria-label="`${review.rating} out of 5`">
-                    <Star v-for="n in 5" :key="n" :class="['size-3.5', n <= review.rating ? 'fill-marigold text-marigold' : 'text-line-strong']" aria-hidden="true" />
-                  </span>
-                  <span><strong class="text-ink">{{ review.name }}</strong>, {{ review.city }} · {{ review.date }}<template v-if="review.dog"> · bought {{ review.dog }}</template></span>
-                </figcaption>
-              </div>
-            </figure>
+          <div v-if="canReview && !isOwn" class="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-marigold-soft px-5 py-4">
+            <span class="text-[15px] leading-6">{{ myReview ? 'Thanks for reviewing this kennel. You can change your review any time.' : 'You visited this kennel. How did it go?' }}</span>
+            <Button variant="marigold" size="sm" @click="reviewing = true"><PenLine aria-hidden="true" />{{ myReview ? 'Edit your review' : 'Write a review' }}</Button>
           </div>
-          <p v-else class="m-0 text-[15px] text-ink-muted">No reviews yet. Reviews come only from buyers after a completed handover.</p>
+          <div v-if="shownReviews.length" class="flex flex-col gap-4">
+            <ReviewCard v-for="review in shownReviews" :key="review.id" :review="review" :store-name="store.name" />
+          </div>
+          <p v-else class="m-0 text-[15px] text-ink-muted">No reviews yet. Reviews come only from buyers who have visited the kennel.</p>
+          <ReviewDialog
+            v-model:open="reviewing"
+            :store-name="store.name"
+            :existing="myReview"
+            :save="values => reviews.write(store.id, store.name, values)"
+            :remove="myReview ? () => reviews.remove(myReview!) : undefined"
+          />
         </section>
       </div>
 

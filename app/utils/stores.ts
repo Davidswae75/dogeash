@@ -397,9 +397,10 @@ export interface StoreRow {
   details: Partial<Store>
   banner_path: string | null
   logo_path: string | null
+  store_care_links?: { relationship: string, care_providers: { public_id: string } | null }[]
 }
 
-export const storeColumns = 'public_id, slug, name, initials, tagline, city, area, state, founded, status, rating, reviews_count, details, banner_path, logo_path'
+export const storeColumns = 'public_id, slug, name, initials, tagline, city, area, state, founded, status, rating, reviews_count, details, banner_path, logo_path, store_care_links (relationship, care_providers (public_id))'
 
 // A store image's public URL (the store-media bucket)
 export const storeMediaUrl = (path: string | null, storageUrl: string) =>
@@ -418,7 +419,6 @@ export function toStore(row: StoreRow, ownerName = '', storageUrl = ''): Store {
     about: '',
     history: [],
     inspection: { status: 'booked', date: '', by: '', checks: [] },
-    care: [],
     reviewSamples: [],
     ...row.details,
     id: row.public_id,
@@ -437,5 +437,6 @@ export function toStore(row: StoreRow, ownerName = '', storageUrl = ''): Store {
     logo: storeMediaUrl(row.logo_path, storageUrl),
     bannerPath: row.banner_path,
     logoPath: row.logo_path,
+    care: (row.store_care_links ?? []).flatMap(l => (l.care_providers ? [{ providerId: l.care_providers.public_id, relationship: l.relationship }] : [])),
   }
 }

@@ -1,13 +1,13 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-11-04T05:39:52.006Z",
-    "fileCount": 699,
+    "lastScanned": "2026-11-04T08:14:02.514Z",
+    "fileCount": 704,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "c83f8ea8a083089cf97bf4e2d84fa153ecc8ef80acf611f6c97add84b36285f3",
-    "storeUpdatedAt": "2026-11-04T05:39:52.033Z",
-    "rootHash": "92ef5c64dbcafc2b"
+    "renderedHash": "b8b900b6a35491ac2487886dd0bfa9d258acfd4fc359b9b590d7aa212a609326",
+    "storeUpdatedAt": "2026-11-04T08:14:02.547Z",
+    "rootHash": "e79b22414e30cf73"
   },
   "files": {
     ".gitignore": {
@@ -8511,6 +8511,90 @@
       "size": 3490,
       "mtimeMs": 1793770791758.6436,
       "updatedAt": "2026-11-04T05:39:52.004Z",
+      "source": "hook"
+    },
+    "supabase/migrations/20261110000000_store_reviews.sql": {
+      "description": "Store reviews. A buyer can review a store once one of their kennel visits there is marked done",
+      "tokens": 2015,
+      "hash": "24830bf649dc2153",
+      "size": 7789,
+      "mtimeMs": 1793777772793.9565,
+      "updatedAt": "2026-11-04T07:36:13.061Z",
+      "source": "hook"
+    },
+    "app/utils/reviews.ts": {
+      "description": "Store reviews (Supabase: store_reviews). Buyers review a store after a done kennel visit; the store ",
+      "tokens": 678,
+      "hash": "79969aa2927d3cac",
+      "size": 2371,
+      "mtimeMs": 1793777904083.1572,
+      "updatedAt": "2026-11-04T07:38:25.059Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "Review",
+          "kind": "section",
+          "startLine": 6,
+          "endLine": 19,
+          "tokens": 97
+        },
+        {
+          "name": "reviewColumns",
+          "kind": "fn",
+          "startLine": 20,
+          "endLine": 22,
+          "tokens": 56
+        },
+        {
+          "name": "ReviewRow",
+          "kind": "section",
+          "startLine": 23,
+          "endLine": 63,
+          "tokens": 281
+        },
+        {
+          "name": "reviewDate",
+          "kind": "fn",
+          "startLine": 64,
+          "endLine": 73,
+          "tokens": 164
+        }
+      ]
+    },
+    "app/composables/useStoreReviews.ts": {
+      "description": "Store reviews (Supabase: store_reviews). Anyone reads a store's reviews; a buyer writes one per stor",
+      "tokens": 1096,
+      "hash": "ded83f4c2444ea9e",
+      "size": 3834,
+      "mtimeMs": 1793777905920.2156,
+      "updatedAt": "2026-11-04T07:38:26.305Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "useStoreReviews",
+          "kind": "fn",
+          "startLine": 12,
+          "endLine": 64,
+          "tokens": 910
+        }
+      ]
+    },
+    "app/components/review/ReviewDialog.vue": {
+      "description": "Vue: setup",
+      "tokens": 1054,
+      "hash": "25a2f4a19eb8c92d",
+      "size": 3950,
+      "mtimeMs": 1793777940901.3174,
+      "updatedAt": "2026-11-04T07:39:01.135Z",
+      "source": "hook"
+    },
+    "app/pages/dashboard/care.vue": {
+      "description": "Vue: setup",
+      "tokens": 862,
+      "hash": "be5b6b1485886eba",
+      "size": 3231,
+      "mtimeMs": 1793780042073.0151,
+      "updatedAt": "2026-11-04T08:14:02.512Z",
       "source": "hook"
     }
   },
