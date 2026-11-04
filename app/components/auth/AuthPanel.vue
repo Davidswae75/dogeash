@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import type { AuthPanelMeta } from '~/types/page-meta'
-import { sampleDogs } from '~/utils/dogs'
-import { sampleStores } from '~/utils/stores'
+import { listedDogs } from '~/utils/dogs'
+import { listedStores } from '~/utils/stores'
 
 // The dark panel beside sign-in and sign-up: a headline, the kennel watch and three numbers.
 // Fixed to the window's height and sticky; the kennel watch shrinks to fit short windows.
 const props = defineProps<{ panel: AuthPanelMeta }>()
 
 const stats = [
-  { value: sampleStores.filter(s => s.verified).length, label: 'inspected stores' },
-  { value: sampleDogs.filter(d => d.status === 'available').length, label: 'dogs for sale' },
+  { value: listedStores.value.filter(s => s.verified).length, label: 'inspected stores' },
+  { value: listedDogs.value.filter(d => d.status === 'available').length, label: 'dogs for sale' },
   { value: 5, label: 'protection levels' },
 ]
 </script>

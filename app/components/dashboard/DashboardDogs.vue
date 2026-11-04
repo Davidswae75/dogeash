@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { ChevronRight } from '@lucide/vue'
-import { computed, ref } from 'vue'
-import { useStoreContext } from '~/composables/useStoreContext'
+import { computed, onMounted, ref } from 'vue'
+import { useStoreDogs } from '~/composables/useStoreDogs'
 import { dashboardDogStats } from '~/utils/dashboard'
 import { formatNaira } from '~/utils/dogs'
-import { storeSummary } from '~/utils/stores'
 
 // The store's dogs with how each is doing: level, status, enquiries and views, filtered by status
-const { store } = useStoreContext()
-const dogs = computed(() => storeSummary(store.value).dogs)
+const storeDogs = useStoreDogs()
+const dogs = storeDogs.dogs
+onMounted(() => { if (!storeDogs.loaded.value) storeDogs.load() })
 
 const filter = ref<'all' | 'available' | 'reserved'>('all')
 const filterModel = computed({
@@ -51,7 +51,7 @@ const statsOf = (fileNo: string) => dashboardDogStats[fileNo]
         <tbody>
           <tr v-for="dog in shown" :key="dog.fileNo" class="group border-t border-line hover:bg-surface-sunk">
             <td class="px-3 py-2.5">
-              <NuxtLink :to="`/dogs/${dog.fileNo.toLowerCase()}`" class="flex items-center gap-3 text-ink no-underline">
+              <NuxtLink :to="`/dashboard/dogs/${dog.fileNo.toLowerCase()}`" class="flex items-center gap-3 text-ink no-underline">
                 <img v-if="dog.photo" :src="dog.photo" alt="" class="size-10 rounded-md object-cover">
                 <span>
                   <strong class="block leading-5">{{ dog.name }}</strong>
@@ -67,7 +67,7 @@ const statsOf = (fileNo: string) => dashboardDogStats[fileNo]
                 <span class="font-semibold">{{ dog.level }}</span>
               </span>
             </td>
-            <td class="px-3 py-2.5"><StatusDot :reserved="dog.status === 'reserved'" class="text-[11px] font-semibold" /></td>
+            <td class="px-3 py-2.5"><ListingStatusChip :status="dog.status" /></td>
             <td class="px-3 py-2.5 text-right font-mono tabular-nums">
               <span v-if="statsOf(dog.fileNo)?.enquiries" class="font-semibold">{{ statsOf(dog.fileNo)!.enquiries }}</span>
               <span v-else class="text-ink-muted">—</span>
@@ -75,7 +75,7 @@ const statsOf = (fileNo: string) => dashboardDogStats[fileNo]
             <td class="px-3 py-2.5 text-right font-mono text-ink-muted tabular-nums">{{ statsOf(dog.fileNo)?.views ?? '—' }}</td>
             <td class="px-3 py-2.5 text-right font-mono font-semibold tabular-nums">{{ formatNaira(dog.priceNaira) }}</td>
             <td class="pr-3">
-              <NuxtLink :to="`/dogs/${dog.fileNo.toLowerCase()}`" class="grid size-7 place-items-center rounded-full text-ink-muted group-hover:text-ink" :aria-label="`Open ${dog.name}`">
+              <NuxtLink :to="`/dashboard/dogs/${dog.fileNo.toLowerCase()}`" class="grid size-7 place-items-center rounded-full text-ink-muted group-hover:text-ink" :aria-label="`Open ${dog.name}`">
                 <ChevronRight class="size-4" aria-hidden="true" />
               </NuxtLink>
             </td>

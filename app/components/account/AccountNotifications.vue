@@ -1,30 +1,33 @@
 <script setup lang="ts">
-import { Bell, CalendarCheck, Lock, PawPrint, TrendingDown } from '@lucide/vue'
+import { Bell, CalendarCheck, Lock, MessageSquare, PawPrint, Tag, TrendingDown, Users } from '@lucide/vue'
 import type { Component } from 'vue'
-import type { NotificationKind } from '~/utils/account'
+import type { NotificationKind } from '~/composables/useNotifications'
 import { cn } from '~/lib/utils'
-import { computed } from 'vue'
-import { useState } from '#imports' // nuxt
-import { sampleNotifications } from '~/utils/account'
+import { onBeforeUnmount, onMounted } from 'vue'
+import { useNotifications } from '~/composables/useNotifications'
+import { shortTime } from '~/utils/time'
 
-// The bell in the header: what changed for this buyer (sample notifications until accounts are connected)
-const items = useState('account-notifications', () => sampleNotifications.map(n => ({ ...n })))
-const unread = computed(() => items.value.filter(n => n.unread).length)
+// The bell in the header: what changed for this buyer, written by the database (see useNotifications).
+// Checks for new ones when it opens and every minute while the page is open.
+const { items, unread, load, markRead, markAllRead } = useNotifications()
 
 const kinds: Record<NotificationKind, { icon: Component, tile: string }> = {
+  message: { icon: MessageSquare, tile: 'bg-marigold text-on-marigold' },
   visit: { icon: CalendarCheck, tile: 'bg-marigold text-on-marigold' },
   reserved: { icon: Lock, tile: 'bg-night text-marigold' },
+  sold: { icon: Tag, tile: 'bg-night text-on-night' },
+  available: { icon: PawPrint, tile: 'bg-surface-sunk text-ink ring-1 ring-line' },
   price: { icon: TrendingDown, tile: 'bg-marigold-soft text-marigold-ink' },
-  listing: { icon: PawPrint, tile: 'bg-surface-sunk text-ink ring-1 ring-line' },
+  team: { icon: Users, tile: 'bg-night text-marigold' },
 }
 
-function markAllRead() {
-  items.value.forEach((n) => { n.unread = false })
-}
+let timer: ReturnType<typeof setInterval> | undefined
+onMounted(() => { timer = setInterval(() => { if (document.visibilityState === 'visible') load() }, 60_000) })
+onBeforeUnmount(() => clearInterval(timer))
 </script>
 
 <template>
-  <Popover>
+  <Popover @update:open="o => o && load()">
     <PopoverTrigger as-child>
       <button
         type="button"
@@ -50,12 +53,15 @@ function markAllRead() {
         >Mark all read</button>
       </div>
 
-      <ul class="m-0 flex max-h-[min(420px,60vh)] list-none flex-col overflow-y-auto p-1.5">
+      <p v-if="!items.length" class="m-0 px-5 py-8 text-center text-[13px] leading-5 text-ink-muted">
+        Nothing yet. Store replies, visit answers and changes to dogs on your shortlist show up here.
+      </p>
+      <ul v-else class="m-0 flex max-h-[min(420px,60vh)] list-none flex-col overflow-y-auto p-1.5">
         <li v-for="n in items" :key="n.id">
           <NuxtLink
             :to="n.to"
             class="flex gap-3 rounded-md p-2.5 text-ink no-underline hover:bg-surface-sunk"
-            @click="n.unread = false"
+            @click="n.unread && markRead([n.id])"
           >
             <span :class="cn('grid size-9 shrink-0 place-items-center rounded-md', kinds[n.kind].tile)">
               <component :is="kinds[n.kind].icon" class="size-4" aria-hidden="true" />
@@ -63,7 +69,7 @@ function markAllRead() {
             <span class="flex min-w-0 flex-1 flex-col gap-0.5">
               <span class="flex items-center gap-2">
                 <strong :class="cn('flex-1 truncate text-sm leading-5', n.unread ? 'font-bold' : 'font-semibold text-ink-muted')">{{ n.title }}</strong>
-                <span class="shrink-0 font-mono text-[10.5px] text-ink-muted">{{ n.at }}</span>
+                <span class="shrink-0 font-mono text-[10.5px] text-ink-muted">{{ shortTime(n.at) }}</span>
               </span>
               <span class="text-[13px] leading-[18px] text-ink-muted">{{ n.text }}</span>
             </span>

@@ -369,3 +369,36 @@ description: chronological action log per session, consolidated weekly
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
+| 23:20 | Created supabase/migrations/20261105000000_store_dogs.sql | — | ~1002 |
+| 23:20 | Edited supabase/migrations/20261105000000_store_dogs.sql | modified lpad() | ~134 |
+| 23:22 | Created app/utils/dogForm.ts | — | ~1465 |
+| 23:22 | Created app/composables/useStoreDogs.ts | — | ~1489 |
+| 23:23 | Created app/components/FieldShell.vue | — | ~219 |
+| 23:23 | Created app/components/dashboard/DashboardDogPhoto.vue | — | ~599 |
+| 23:24 | Created CATCHUP.md | — | ~497 |
+| 23:24 | Created app/components/dashboard/DashboardDogForm.vue | — | ~2131 |
+| 23:24 | Created app/components/dashboard/DashboardDogActions.vue | — | ~528 |
+| 23:24 | Created app/components/ListingStatusChip.vue | — | ~154 |
+| 23:24 | Created app/components/dashboard/DashboardDogTable.vue | — | ~774 |
+| 23:26 | Created app/pages/dashboard/dogs/index.vue | — | ~1113 |
+| 23:26 | Created app/pages/dashboard/dogs/new.vue | — | ~379 |
+| 23:26 | Created app/pages/dashboard/dogs/[fileNo].vue | — | ~702 |
+| 23:34 | Created app/plugins/00.catalog.ts | — | ~484 |
+| 23:38 | Created CATCHUP.md | — | ~1255 |
+| 06:09 | Created app/pages/dashboard/bookings.vue | — | ~714 |
+| 06:09 | Created app/components/dashboard/DashboardAgenda.vue | — | ~842 |
+| 06:17 | Created supabase/migrations/20261106000000_notifications.sql | — | ~1846 |
+| 06:19 | Created app/composables/useNotifications.ts | — | ~539 |
+| 06:22 | Created supabase/migrations/20261107000000_store_profile.sql | — | ~437 |
+| 06:23 | Created app/utils/storeForm.ts | — | ~1349 |
+| 06:23 | Created app/composables/useStoreProfile.ts | — | ~500 |
+| 06:24 | Created app/components/dashboard/DashboardStoreForm.vue | — | ~1755 |
+| 06:24 | Created app/pages/dashboard/profile.vue | — | ~481 |
+| 06:28 | Created supabase/migrations/20261108000000_store_team.sql | — | ~1890 |
+| 06:30 | Created app/composables/useStoreTeam.ts | — | ~1325 |
+| 06:30 | Created app/composables/useStoreInvites.ts | — | ~522 |
+| 06:31 | Created app/pages/dashboard/team.vue | — | ~769 |
+| 06:33 | Edited app/components/dashboard/DashboardTeamList.vue | modified pickRole() | ~84 |
+| 06:37 | Created supabase/migrations/20261109000000_store_media.sql | — | ~603 |
+| 06:39 | Created app/composables/useStoreProfile.ts | — | ~1030 |
+| 06:39 | Created app/components/dashboard/DashboardStoreImages.vue | — | ~931 |

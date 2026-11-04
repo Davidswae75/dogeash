@@ -54,6 +54,8 @@ export interface Database {
           rating: number
           reviews_count: number
           details: Json
+          banner_path: string | null
+          logo_path: string | null
           created_by: string | null
         } & Timestamps
         Insert: {
@@ -68,7 +70,7 @@ export interface Database {
           founded?: number | null
           details?: Json
         }
-        Update: { name?: string, initials?: string, tagline?: string, city?: string, area?: string, state?: string, founded?: number | null, details?: Json }
+        Update: { name?: string, initials?: string, tagline?: string, city?: string, area?: string, state?: string, founded?: number | null, details?: Json, banner_path?: string | null, logo_path?: string | null }
         Relationships: []
       }
       store_members: {
@@ -100,7 +102,7 @@ export interface Database {
           file: Json | null
         } & Timestamps
         Insert: {
-          file_no: string
+          file_no?: string // assigned by the database
           store_id: string
           name: string
           breed: string
@@ -173,6 +175,20 @@ export interface Database {
           { foreignKeyName: 'visits_store_id_fkey', columns: ['store_id'], isOneToOne: false, referencedRelation: 'stores', referencedColumns: ['id'] },
         ]
       }
+      store_invites: {
+        Row: { id: string, store_id: string, email: string, role: Database['public']['Enums']['store_role'], invited_by: string | null, created_at: string }
+        Insert: { store_id: string, email: string, role: Database['public']['Enums']['store_role'] }
+        Update: never
+        Relationships: [
+          { foreignKeyName: 'store_invites_store_id_fkey', columns: ['store_id'], isOneToOne: false, referencedRelation: 'stores', referencedColumns: ['id'] },
+        ]
+      }
+      notifications: {
+        Row: { id: string, user_id: string, kind: Database['public']['Enums']['notification_kind'], title: string, body: string, link: string, topic: string | null, read_at: string | null, created_at: string }
+        Insert: never
+        Update: { read_at?: string | null }
+        Relationships: []
+      }
       saved_searches: {
         Row: { id: string, user_id: string, label: string, filters: Json, alerts: boolean, created_at: string }
         Insert: { label: string, filters?: Json, alerts?: boolean }
@@ -192,6 +208,10 @@ export interface Database {
     Functions: {
       has_store_role: { Args: { target_store: string, roles: Database['public']['Enums']['store_role'][] }, Returns: boolean }
       mark_conversation_read: { Args: { target: string }, Returns: undefined }
+      my_email: { Args: Record<string, never>, Returns: string }
+      my_store_invites: { Args: Record<string, never>, Returns: { id: string, store_name: string, store_city: string, role: Database['public']['Enums']['store_role'], invited_by_name: string, created_at: string }[] }
+      accept_store_invite: { Args: { target: string }, Returns: string }
+      store_team: { Args: { target: string }, Returns: { user_id: string, name: string, email: string | null, role: Database['public']['Enums']['store_role'], joined_at: string }[] }
     }
     Enums: {
       store_status: 'draft' | 'in_review' | 'verified' | 'suspended'
@@ -203,6 +223,7 @@ export interface Database {
       message_role: 'buyer' | 'store'
       visit_status: 'requested' | 'confirmed' | 'declined' | 'cancelled' | 'done'
       visit_place: 'kennel' | 'home'
+      notification_kind: 'message' | 'visit' | 'reserved' | 'sold' | 'available' | 'price' | 'team'
     }
     CompositeTypes: { [_ in never]: never }
   }

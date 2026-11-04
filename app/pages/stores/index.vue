@@ -4,8 +4,8 @@ import type { ProtectionLevel } from '~/utils/protection'
 import type { StoreService } from '~/utils/stores'
 import { computed, ref } from 'vue'
 import { useRoute, useSeoMeta } from '#imports' // nuxt
-import { sampleDogs } from '~/utils/dogs'
-import { sampleStores, storeServices, storeSummary } from '~/utils/stores'
+import { listedDogs } from '~/utils/dogs'
+import { listedStores, storeServices, storeSummary } from '~/utils/stores'
 
 useSeoMeta({
   title: 'Guard dog stores · Dogeash',
@@ -23,11 +23,11 @@ const trust = ref<string[]>([])
 const sort = ref<'rating' | 'available' | 'established' | 'name'>('rating')
 const sheetOpen = ref(false)
 
-const summaries = new Map(sampleStores.map(s => [s.id, storeSummary(s)]))
+const summaries = new Map(listedStores.value.map(s => [s.id, storeSummary(s)]))
 
 // A store shows up for every city it has dogs in, not only its home city
 const cityTabs = [...new Set([...summaries.values()].flatMap(s => s.cities))].sort()
-const breedOptions = [...new Set(sampleDogs.map(d => d.breed))].sort().map(b => ({ value: b, label: b }))
+const breedOptions = [...new Set(listedDogs.value.map(d => d.breed))].sort().map(b => ({ value: b, label: b }))
 const levelOptions = ([1, 2, 3, 4, 5] as const).map(n => ({ value: n, label: String(n) }))
 const serviceOptions = (Object.keys(storeServices) as StoreService[]).map(s => ({ value: s, label: storeServices[s].label }))
 const trustOptions = [
@@ -36,7 +36,7 @@ const trustOptions = [
 ]
 
 function matches(storeId: string, skipCity = false) {
-  const store = sampleStores.find(s => s.id === storeId)!
+  const store = listedStores.value.find(s => s.id === storeId)!
   const s = summaries.get(storeId)!
   const q = query.value.trim().toLowerCase()
   const haystack = [store.name, store.owner.name, store.city, store.area, store.tagline, ...s.breeds].join(' ').toLowerCase()
@@ -50,7 +50,7 @@ function matches(storeId: string, skipCity = false) {
 }
 
 const stores = computed(() => {
-  const list = sampleStores.filter(s => matches(s.id))
+  const list = listedStores.value.filter(s => matches(s.id))
   const by: Record<typeof sort.value, (a: typeof list[number], b: typeof list[number]) => number> = {
     rating: (a, b) => b.rating - a.rating,
     available: (a, b) => summaries.get(b.id)!.available - summaries.get(a.id)!.available,
@@ -62,7 +62,7 @@ const stores = computed(() => {
 
 // How many stores each city tab would show with the other filters applied
 const cityCounts = computed(() => Object.fromEntries(
-  ['', ...cityTabs].map(c => [c, sampleStores.filter(s => matches(s.id, true) && (!c || summaries.get(s.id)!.cities.includes(c))).length]),
+  ['', ...cityTabs].map(c => [c, listedStores.value.filter(s => matches(s.id, true) && (!c || summaries.get(s.id)!.cities.includes(c))).length]),
 ))
 
 const sheetCount = computed(() => breeds.value.length + levels.value.length + services.value.length + trust.value.length)
@@ -88,8 +88,8 @@ function clearFilters() {
   resetSheet()
 }
 
-const inspectedCount = sampleStores.filter(s => s.verified).length
-const dogCount = sampleDogs.filter(d => d.status === 'available').length
+const inspectedCount = listedStores.value.filter(s => s.verified).length
+const dogCount = listedDogs.value.filter(d => d.status === 'available').length
 
 const checks = [
   { icon: ClipboardCheck, label: 'Visited in person' },

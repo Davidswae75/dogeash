@@ -103,7 +103,7 @@ const h2 = 'm-0 mega text-[clamp(26px,2.6vw,34px)] leading-none'
         <!-- Title -->
         <header class="flex animate-rise flex-col gap-4 [animation-delay:80ms]">
           <div class="flex items-center gap-3">
-            <StoreAvatar :initials="store.initials" class="size-12 rounded-[14px]" />
+            <StoreAvatar :initials="store.initials" :src="store.logo" class="size-12 rounded-[14px]" />
             <Badge v-if="store.verified" variant="verified"><AppIcon name="shield" :size="14" />Verified store</Badge>
             <Badge v-else>Inspection booked</Badge>
           </div>
@@ -303,7 +303,7 @@ const h2 = 'm-0 mega text-[clamp(26px,2.6vw,34px)] leading-none'
       <aside class="hidden lg:block">
         <div class="sticky top-[calc(var(--header-height)+24px)] flex animate-rise flex-col gap-5 rounded-xl bg-surface p-6 ring-1 ring-line [animation-delay:160ms]">
           <div class="flex items-center gap-3">
-            <StoreAvatar :initials="store.initials" class="size-11 rounded-xl" />
+            <StoreAvatar :initials="store.initials" :src="store.logo" class="size-11 rounded-xl" />
             <div class="min-w-0">
               <strong class="block truncate text-[15px] leading-5">{{ store.name }}</strong>
               <span class="text-[13px] text-ink-muted">Replies in {{ store.replies }}</span>

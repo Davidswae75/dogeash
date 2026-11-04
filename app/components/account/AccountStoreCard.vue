@@ -11,7 +11,7 @@ const props = defineProps<{ store: Store, role: StoreRole }>()
 <template>
   <div class="flex flex-col gap-3 rounded-lg bg-night p-3.5 text-on-night">
     <div class="flex items-center gap-3">
-      <StoreAvatar :initials="props.store.initials" class="size-10 rounded-lg ring-1 ring-on-night/25" />
+      <StoreAvatar :initials="props.store.initials" :src="props.store.logo" class="size-10 rounded-lg ring-1 ring-on-night/25" />
       <div class="flex min-w-0 flex-1 flex-col">
         <span class="font-mono text-[10px] font-semibold tracking-[.12em] text-marigold uppercase">Your store · {{ storeRoles[props.role].label }}</span>
         <strong class="truncate text-sm leading-5">{{ props.store.name }}</strong>

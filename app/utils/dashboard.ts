@@ -1,7 +1,12 @@
 // Store dashboard: navigation and example figures until accounts and the API exist.
 // The signed-in store is K9 Guardian Kennels for now. Each item names the permission it needs
 // (see storeRoles.ts); people only see what their role allows.
+import type { Visit } from '~/composables/useVisits'
+import type { StoreDog } from './dogs'
+import type { InboxItem } from './inbox'
 import type { StorePermission } from './storeRoles'
+import type { Store } from './stores'
+import { shortTime, visitDay } from './time'
 
 export const dashboardNav: { group: string, items: { to: string, label: string, icon: string, badge?: number, permission?: StorePermission }[] }[] = [
   {
@@ -27,13 +32,8 @@ export const dashboardNav: { group: string, items: { to: string, label: string, 
 
 // What each section will hold, shown until it is built
 export const dashboardSections: Record<string, { title: string, text: string, plan: string[] }> = {
-  dogs: { title: 'Dogs', text: 'Every dog you list, from draft to sold.', plan: ['Add a dog with the full K9 file', 'Edit price, photos and videos', 'Mark reserved, sold or withdrawn'] },
-  enquiries: { title: 'Enquiries', text: 'Messages from buyers about your dogs.', plan: ['Reply from one inbox', 'See which dog each enquiry is about', 'Turn an enquiry into a kennel visit'] },
-  bookings: { title: 'Bookings', text: 'Kennel visits and handovers on your calendar.', plan: ['Set the days and times you take visits', 'Confirm, move or cancel visits', 'Schedule handover at the buyer\'s gate'] },
   care: { title: 'Care team', text: 'The vets, trainers and suppliers shown on your store page.', plan: ['Link providers you work with', 'Say what each one does for you', 'Invite a provider to join Dogeash'] },
-  profile: { title: 'Store profile', text: 'Everything buyers see on your public store page.', plan: ['Upload your banner and logo', 'Edit about, history, services and hours', 'Owner profile and credentials'] },
   payouts: { title: 'Payouts', text: 'Deposits, sales and money paid to your bank.', plan: ['Bank account for payouts', 'Escrow deposits and releases', 'Statements and platform fees'] },
-  team: { title: 'Team', text: 'People who help run your store.', plan: ['Invite staff by email or phone', 'Roles: owner, manager, handler', 'Remove access when someone leaves'] },
   settings: { title: 'Settings', text: 'Your account and store preferences.', plan: ['Sign-in and one-time code security', 'Notifications by SMS and email', 'Close or pause your store'] },
 }
 
@@ -45,22 +45,27 @@ export const dashboardStats = [
   { label: 'Dogs for sale', value: '4', change: '1 reserved', up: false, trend: [5, 5, 5, 4, 4, 4, 4] },
 ]
 
-// What needs doing, most urgent first; each item names the permission needed to act on it
-export const dashboardAttention = [
-  { icon: 'MessageSquare', title: '3 enquiries waiting for a reply', text: 'Oldest from Aisha B. about Sarge, 5 hours ago', action: 'Reply', to: '/dashboard/inbox?type=message', tone: 'marigold', when: 'Today', permission: 'enquiries' },
-  { icon: 'Wallet', title: 'Deposit received for Kaia', text: '₦250,000 held in escrow until handover', action: 'Plan handover', to: '/dashboard/bookings', tone: 'night', when: 'This week', permission: 'bookings' },
-  { icon: 'Syringe', title: 'Booster due for Onyx', text: 'Rabies booster due 14 November. Update the K9 file after.', action: 'Update file', to: '/dashboard/dogs', tone: 'ash', when: 'By 14 Nov', permission: 'dogs' },
-  { icon: 'ImagePlus', title: 'Add your store banner', text: 'Stores with a banner get more visits. Yours shows your initials for now.', action: 'Upload', to: '/dashboard/profile', tone: 'ash', when: 'When you can', permission: 'profile' },
-] as const
+// What needs doing, most urgent first, from the store's inbox, visits and dogs.
+// Each item names the permission needed to act on it; the panel shows only what this person's role allows.
+export interface AttentionItem { icon: 'MessageSquare' | 'CalendarDays' | 'FilePen', title: string, text: string, action: string, to: string, tone: 'marigold' | 'night' | 'ash', when: string, permission: StorePermission }
 
-// The day the example figures describe
-export const dashboardToday = { weekday: 'Tue', label: 'Tuesday 27 October' }
+const count = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`
 
-export const dashboardUpcoming = [
-  { day: 'Tue', date: '27', time: '10:30', title: 'Kennel visit', who: 'Tunde O. · interested in Mamba', where: 'At the kennel, Kuje' },
-  { day: 'Thu', date: '29', time: '14:00', title: 'Handover: Kaia', who: 'Folake A. · Maitama', where: 'At the buyer\'s gate' },
-  { day: 'Sat', date: '31', time: '09:00', title: 'Vet check-up', who: 'Dr. Halima Sani · 3 dogs', where: 'At the kennel, Kuje' },
-]
+export function attentionItems(unread: InboxItem[], waiting: Visit[], drafts: StoreDog[]): AttentionItem[] {
+  const items: AttentionItem[] = []
+  const oldest = unread.at(-1)
+  if (oldest) {
+    items.push({ icon: 'MessageSquare', title: `${count(unread.length, 'message', 'messages')} waiting for a reply`, text: `Oldest from ${oldest.from} about ${oldest.subject}`, action: 'Reply', to: `/dashboard/inbox?id=${oldest.id}`, tone: 'marigold', when: shortTime(oldest.at), permission: 'enquiries' })
+  }
+  const soonest = waiting[0]
+  if (soonest) {
+    items.push({ icon: 'CalendarDays', title: `${count(waiting.length, 'visit request', 'visit requests')} to answer`, text: `Soonest: ${soonest.buyerName}, ${visitDay(soonest.day).label} at ${soonest.slot}`, action: 'Answer', to: '/dashboard/bookings', tone: 'night', when: visitDay(soonest.day).label, permission: 'bookings' })
+  }
+  if (drafts.length) {
+    items.push({ icon: 'FilePen', title: `${count(drafts.length, 'draft', 'drafts')} not live yet`, text: `${drafts.slice(0, 3).map(d => d.name).join(', ')}${drafts.length > 3 ? ' and more' : ''}. Buyers can't see drafts.`, action: 'Finish', to: '/dashboard/dogs', tone: 'ash', when: 'When ready', permission: 'dogs' })
+  }
+  return items
+}
 
 // Views and enquiries per dog, last 30 days
 export const dashboardDogStats: Record<string, { views: number, enquiries: number }> = {
@@ -69,10 +74,12 @@ export const dashboardDogStats: Record<string, { views: number, enquiries: numbe
   'KD-2026-036': { views: 201, enquiries: 3 },
 }
 
-export const profileChecklist = [
-  { label: 'About and history', done: true },
-  { label: 'Owner profile', done: true },
-  { label: 'Care team', done: true },
-  { label: 'Opening hours and delivery', done: true },
-  { label: 'Store banner and logo', done: false },
+// What's filled in on the store profile, for the overview's Store health card
+export const profileChecklist = (s: Store) => [
+  { label: 'About and history', to: '/dashboard/profile', permission: 'profile' as const, done: s.about.length >= 40 && s.history.length > 0 },
+  { label: 'Owner profile', to: '/dashboard/profile', permission: 'profile' as const, done: !!s.owner.name && !!s.owner.bio },
+  { label: 'What you offer', to: '/dashboard/profile', permission: 'profile' as const, done: s.services.length > 0 },
+  { label: 'Opening hours and delivery', to: '/dashboard/profile', permission: 'profile' as const, done: !!s.hours && !!s.deliveryAreas },
+  { label: 'Banner and logo', to: '/dashboard/profile', permission: 'profile' as const, done: !!s.banner && !!s.logo },
+  { label: 'Care team', to: '/dashboard/care', permission: 'care' as const, done: s.care.length > 0 },
 ]

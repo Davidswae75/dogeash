@@ -11,7 +11,7 @@ const props = defineProps<{ store: Store, dogs: Dog[] }>()
 <template>
   <section class="overflow-hidden rounded-xl bg-surface ring-1 ring-line">
     <header class="flex flex-wrap items-center gap-4 border-b border-line bg-canvas/60 p-4 sm:p-5">
-      <StoreAvatar :initials="props.store.initials" class="size-11 rounded-xl" />
+      <StoreAvatar :initials="props.store.initials" :src="props.store.logo" class="size-11 rounded-xl" />
       <div class="min-w-0 flex-1">
         <div class="flex flex-wrap items-center gap-2">
           <NuxtLink :to="`/stores/${props.store.slug}`" class="font-display text-lg leading-6 font-extrabold text-ink no-underline font-stretch-expanded hover:underline">{{ props.store.name }}</NuxtLink>

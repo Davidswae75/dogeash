@@ -5,7 +5,7 @@ import { homeSection, marketCities, marketRows } from '~/utils/market'
 
 // Home for visitors who aren't signed in: a compact intro with the patrol chase, then dogs straight away.
 // First-time visitors also get a one-time "New to guard dogs?" card.
-const city = ref(marketCities[0]!)
+const city = ref(marketCities()[0] ?? '')
 const { dogs: recentlyViewed } = useRecentlyViewed()
 
 const rows = [
@@ -36,7 +36,7 @@ const section = homeSection
       <MarketRow title="Near" outline="you" subtitle="Dogs you can visit without a long drive" :see-all="`/dogs?city=${city}`">
         <template #actions>
           <ToggleGroup v-model="city" type="single" variant="chip" aria-label="City" class="hidden gap-1.5 lg:flex">
-            <ToggleGroupItem v-for="c in marketCities.slice(0, 4)" :key="c" :value="c" class="rounded-full!">{{ c }}</ToggleGroupItem>
+            <ToggleGroupItem v-for="c in marketCities().slice(0, 4)" :key="c" :value="c" class="rounded-full!">{{ c }}</ToggleGroupItem>
           </ToggleGroup>
         </template>
         <K9Card v-for="dog in cityDogs" :key="dog.fileNo" :dog="dog" class="w-[280px] sm:w-[300px]" />

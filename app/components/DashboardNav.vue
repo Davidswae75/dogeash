@@ -47,7 +47,7 @@ function isActive(to: string) {
     <DropdownMenu>
       <DropdownMenuTrigger as-child>
         <button type="button" class="flex w-full cursor-pointer items-center gap-2.5 rounded-lg border-0 bg-canvas p-2 text-left ring-1 ring-line hover:ring-ink">
-          <StoreAvatar :initials="store.initials" class="size-9 shrink-0 rounded-lg" />
+          <StoreAvatar :initials="store.initials" :src="store.logo" class="size-9 shrink-0 rounded-lg" />
           <span class="min-w-0 flex-1">
             <strong class="block text-[13px] leading-4">{{ store.name }}</strong>
             <span class="flex items-center gap-1.5 text-xs text-ink-muted"><span class="size-1.5 rounded-full bg-marigold" aria-hidden="true" />{{ store.verified ? 'Inspected' : 'In review' }} · {{ roleLabel }}</span>

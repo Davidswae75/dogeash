@@ -1,5 +1,5 @@
 import { BellRing, ShoppingCart } from '@lucide/vue'
-import { CalendarCheck, CircleX, Heart, HeartOff, Info, LogIn, LogOut, MessageSquare, Scale, Store, TriangleAlert, UserRoundCheck } from '@lucide/vue'
+import { CalendarCheck, CircleX, Heart, HeartOff, Info, LogIn, LogOut, MessageSquare, Scale, Store, TriangleAlert, UserRoundCheck, Users } from '@lucide/vue'
 import type { Component } from 'vue'
 import { TYPE, useToast } from 'vue-toastification'
 import ToastContent, { type ToastAction, type ToastTone } from '~/components/ToastContent.vue'
@@ -80,6 +80,18 @@ export function useNotify() {
     // Store inbox: the reply is saved in Dogeash; the buyer also hears by their chosen channels
     storeReplySent: (to: string) =>
       show('success', MessageSquare, { kicker: 'Inbox', meta: 'Sent', title: `Reply to ${to} sent`, text: `${to} sees it in their Messages.` }),
+
+    // A store's dog saved, published or moved on (reserved, sold, withdrawn, deleted)
+    dogUpdated: (title: string, text: string, image?: string) =>
+      show('success', Store, { kicker: 'Your dogs', meta: 'Saved', title, text, image }),
+
+    // The store team changed: an invitation sent or withdrawn, a role changed, someone removed or joined
+    teamUpdated: (title: string, text: string) =>
+      show('success', Users, { kicker: 'Team', meta: 'Updated', title, text }),
+
+    // The store profile saved; buyers see it on the store page
+    storeUpdated: (name: string) =>
+      show('success', Store, { kicker: 'Your store', meta: 'Saved', title: 'Store profile saved', text: `Buyers see the changes on ${name}'s page.` }),
 
     // A visit changed: cancelled by the buyer, or confirmed / declined / marked done by the store
     visitUpdated: (title: string, text: string) =>

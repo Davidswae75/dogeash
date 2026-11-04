@@ -1,6 +1,7 @@
 import type { PropertyType, ProtectionLevel } from './protection'
-import type { hipGrades } from './k9'
-import { sampleStores } from './stores'
+import type { hipGrades, ListingStatus } from './k9'
+import { shallowRef } from 'vue'
+import { listedStores } from './stores'
 import sargePhoto from "@/assets/dogs/sarge-gsd.jpg";
 import novaPhoto from "@/assets/dogs/nova-gsd.jpg";
 import ramboPhoto from "@/assets/dogs/rambo-malinois.jpg";
@@ -619,8 +620,12 @@ export const sampleDogs: Dog[] = [
   },
 ];
 
+// What buyers can browse: listed dogs of verified stores, loaded from Supabase by plugins/catalog.ts.
+// Starts as the sample dogs, which stay if the database can't be reached.
+export const listedDogs = shallowRef<Dog[]>(sampleDogs)
+
 export function getStore(storeId: string) {
-  return sampleStores.find(s => s.id === storeId)
+  return listedStores.value.find(s => s.id === storeId)
 }
 
 export function formatNaira(value: number) {
@@ -629,5 +634,107 @@ export function formatNaira(value: number) {
 }
 
 export function findDog(fileNo: string) {
-  return sampleDogs.find(dog => dog.fileNo.toLowerCase() === fileNo.toLowerCase())
+  return listedDogs.value.find(dog => dog.fileNo.toLowerCase() === fileNo.toLowerCase())
+}
+
+// ── From the database ───────────────────────────────────────────────────────
+
+
+// A dog as its store manages it: any status, with its database id and photo path
+export type StoreDog = Omit<Dog, 'status'> & { id: string, status: ListingStatus, photoPath: string | null, updatedAt: string }
+
+export const dogColumns = 'id, file_no, name, breed, sex, city, age, weight_kg, hips, level, price_naira, status, photo_path, property, safe_with_children, file, updated_at, stores!inner (public_id, status)'
+
+export interface DogRow {
+  id: string
+  file_no: string
+  name: string
+  breed: string
+  sex: Dog['sex']
+  city: string
+  age: string
+  weight_kg: number
+  hips: string
+  level: number
+  price_naira: number
+  status: ListingStatus
+  photo_path: string | null
+  property: PropertyType[]
+  safe_with_children: boolean
+  file: Partial<NonNullable<Dog['file']>> | null
+  updated_at: string
+  stores: { public_id: string }
+}
+
+// The sample dogs' photos ship with the site ("dogs/rambo-malinois.jpg"); stores' uploads live in
+// the dog-photos bucket ("<store id>/<name>.jpg"), served from `storageUrl`
+const bundledPhotos = import.meta.glob<string>('~/assets/dogs/*.{jpg,jpeg,png,webp}', { eager: true, import: 'default' })
+export function dogPhotoUrl(path: string | null, storageUrl: string) {
+  if (!path) return undefined
+  if (path.startsWith('dogs/')) return Object.entries(bundledPhotos).find(([file]) => file.endsWith(`/${path.slice(5)}`))?.[1]
+  return `${storageUrl}/storage/v1/object/public/dog-photos/${path}`
+}
+
+export function toStoreDog(r: DogRow, storageUrl: string): StoreDog {
+  const f = r.file ?? {}
+  return {
+    id: r.id,
+    fileNo: r.file_no,
+    name: r.name,
+    breed: r.breed,
+    sex: r.sex,
+    city: r.city,
+    age: r.age,
+    weightKg: Number(r.weight_kg),
+    hips: r.hips as Dog['hips'],
+    level: r.level as ProtectionLevel,
+    priceNaira: Number(r.price_naira),
+    status: r.status,
+    photo: dogPhotoUrl(r.photo_path, storageUrl),
+    photoPath: r.photo_path,
+    property: r.property,
+    safeWithChildren: r.safe_with_children,
+    storeId: r.stores.public_id,
+    updatedAt: r.updated_at,
+    file: {
+      summary: f.summary ?? '',
+      born: f.born ?? '',
+      hipsElbows: f.hipsElbows ?? '',
+      microchip: f.microchip ?? '',
+      vaccinations: f.vaccinations ?? '',
+      titles: f.titles ?? '',
+      sire: f.sire ?? '',
+      dam: f.dam ?? '',
+      inspected: f.inspected ?? '',
+      bestSuited: f.bestSuited ?? '',
+      traits: f.traits ?? [],
+    },
+  }
+}
+
+// How each listing status reads in the dashboard, and what the store can do next
+export const listingStatusLabels: Record<ListingStatus, { label: string, tone: string, dot: string }> = {
+  draft: { label: 'Draft', tone: 'bg-ash-soft text-ink-muted', dot: 'bg-ash' },
+  pending_review: { label: 'Waiting for inspection', tone: 'bg-ash-soft text-ink', dot: 'bg-ash' },
+  available: { label: 'Live', tone: 'bg-marigold-soft text-ink', dot: 'bg-marigold' },
+  reserved: { label: 'Reserved', tone: 'bg-night text-on-night', dot: 'bg-marigold' },
+  sold: { label: 'Sold', tone: 'bg-ash-soft text-ink', dot: 'bg-ink' },
+  withdrawn: { label: 'Withdrawn', tone: 'bg-ash-soft text-ink-muted', dot: 'bg-ash' },
+}
+
+// What a store can do with a dog in each status (deleting is for drafts only)
+export function listingActions(status: ListingStatus, verified: boolean): { to: ListingStatus, label: string }[] {
+  const live = verified ? [{ to: 'available' as const, label: 'Go live' }] : []
+  switch (status) {
+    case 'draft': case 'pending_review': case 'withdrawn': return live
+    case 'available': return [{ to: 'reserved', label: 'Mark reserved' }, { to: 'sold', label: 'Mark sold' }, { to: 'withdrawn', label: 'Withdraw' }]
+    case 'reserved': return [{ to: 'available', label: 'Back to available' }, { to: 'sold', label: 'Mark sold' }, { to: 'withdrawn', label: 'Withdraw' }]
+    case 'sold': return []
+  }
+}
+
+// A listed dog as buyers see it (the catalogue only loads available and reserved dogs)
+export function toDog(r: DogRow, storageUrl: string): Dog {
+  const { id: _id, photoPath: _path, updatedAt: _at, status, ...dog } = toStoreDog(r, storageUrl)
+  return { ...dog, status: status === 'reserved' ? 'reserved' : 'available' }
 }

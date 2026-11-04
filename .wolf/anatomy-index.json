@@ -1,13 +1,13 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-11-03T17:46:56.799Z",
-    "fileCount": 670,
+    "lastScanned": "2026-11-04T05:39:52.006Z",
+    "fileCount": 699,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "bca7ad9030660c4665af20ced2763def9a3e67ae9f471737adb8e8d51d6f8099",
-    "storeUpdatedAt": "2026-11-03T17:46:56.862Z",
-    "rootHash": "0b2c82d4377bf47f"
+    "renderedHash": "c83f8ea8a083089cf97bf4e2d84fa153ecc8ef80acf611f6c97add84b36285f3",
+    "storeUpdatedAt": "2026-11-04T05:39:52.033Z",
+    "rootHash": "92ef5c64dbcafc2b"
   },
   "files": {
     ".gitignore": {
@@ -7529,11 +7529,11 @@
     },
     "app/components/dashboard/DashboardAgenda.vue": {
       "description": "Vue: setup",
-      "tokens": 678,
-      "hash": "92257c3226fa6a5d",
-      "size": 2542,
-      "mtimeMs": 1793138203000.8462,
-      "updatedAt": "2026-10-27T21:56:43.175Z",
+      "tokens": 842,
+      "hash": "1cf6c907c47d2cd1",
+      "size": 3157,
+      "mtimeMs": 1793768980882.328,
+      "updatedAt": "2026-11-04T05:09:41.081Z",
       "source": "hook"
     },
     "app/components/dashboard/DashboardDogs.vue": {
@@ -8159,6 +8159,358 @@
       "size": 4079,
       "mtimeMs": 1793728016450.8228,
       "updatedAt": "2026-11-03T17:46:56.780Z",
+      "source": "hook"
+    },
+    "supabase/migrations/20261105000000_store_dogs.sql": {
+      "description": "Stores manage their own dogs from the dashboard.",
+      "tokens": 1076,
+      "hash": "8b6db4c774b00001",
+      "size": 4297,
+      "mtimeMs": 1793744449124.6655,
+      "updatedAt": "2026-11-03T22:20:49.322Z",
+      "source": "hook"
+    },
+    "app/utils/dogForm.ts": {
+      "description": "The dashboard's add / edit dog form: what a store fills in, checked the same way the database",
+      "tokens": 1465,
+      "hash": "7aabc83b6a973dc0",
+      "size": 5130,
+      "mtimeMs": 1793744526208.9612,
+      "updatedAt": "2026-11-03T22:22:06.395Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "optional",
+          "kind": "fn",
+          "startLine": 11,
+          "endLine": 128,
+          "tokens": 1325
+        }
+      ]
+    },
+    "app/composables/useStoreDogs.ts": {
+      "description": "The dogs of the store the dashboard is showing (Supabase: dogs, and the dog-photos bucket).",
+      "tokens": 1489,
+      "hash": "53282272a4b8f60b",
+      "size": 5209,
+      "mtimeMs": 1793744569870.4526,
+      "updatedAt": "2026-11-03T22:22:50.035Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "useStoreDogs",
+          "kind": "fn",
+          "startLine": 15,
+          "endLine": 99,
+          "tokens": 1283
+        }
+      ]
+    },
+    "app/components/FieldShell.vue": {
+      "description": "Vue: setup",
+      "tokens": 219,
+      "hash": "537d12bf680560e4",
+      "size": 821,
+      "mtimeMs": 1793744605614.007,
+      "updatedAt": "2026-11-03T22:23:25.992Z",
+      "source": "hook"
+    },
+    "app/components/dashboard/DashboardDogPhoto.vue": {
+      "description": "Vue: setup",
+      "tokens": 599,
+      "hash": "206aa643b6f00854",
+      "size": 2243,
+      "mtimeMs": 1793744606295.4744,
+      "updatedAt": "2026-11-03T22:23:26.464Z",
+      "source": "hook"
+    },
+    "CATCHUP.md": {
+      "description": "Catch-up log",
+      "tokens": 1176,
+      "hash": "9b16c415b7ad7f99",
+      "size": 4718,
+      "mtimeMs": 1793745500661.9656,
+      "updatedAt": "2026-11-03T22:38:21.263Z",
+      "source": "hook"
+    },
+    "app/components/dashboard/DashboardDogForm.vue": {
+      "description": "Vue: setup",
+      "tokens": 2131,
+      "hash": "9cadcf91bda70299",
+      "size": 7991,
+      "mtimeMs": 1793744641956.0347,
+      "updatedAt": "2026-11-03T22:24:02.268Z",
+      "source": "hook"
+    },
+    "app/components/dashboard/DashboardDogActions.vue": {
+      "description": "Vue: setup",
+      "tokens": 528,
+      "hash": "31eca1b4b5054e51",
+      "size": 1980,
+      "mtimeMs": 1793744676853.8618,
+      "updatedAt": "2026-11-03T22:24:38.357Z",
+      "source": "hook"
+    },
+    "app/components/ListingStatusChip.vue": {
+      "description": "Vue: setup",
+      "tokens": 154,
+      "hash": "083bb6f5176adc4e",
+      "size": 574,
+      "mtimeMs": 1793744680509.2488,
+      "updatedAt": "2026-11-03T22:24:41.763Z",
+      "source": "hook"
+    },
+    "app/components/dashboard/DashboardDogTable.vue": {
+      "description": "Vue: setup",
+      "tokens": 774,
+      "hash": "b75b9075ab98771d",
+      "size": 2901,
+      "mtimeMs": 1793744684018.425,
+      "updatedAt": "2026-11-03T22:24:45.453Z",
+      "source": "hook"
+    },
+    "app/pages/dashboard/dogs/index.vue": {
+      "description": "Vue: setup",
+      "tokens": 1113,
+      "hash": "1465ec2ca4e2d0af",
+      "size": 4177,
+      "mtimeMs": 1793744768219.4163,
+      "updatedAt": "2026-11-03T22:26:09.459Z",
+      "source": "hook"
+    },
+    "app/pages/dashboard/dogs/new.vue": {
+      "description": "Vue: setup",
+      "tokens": 379,
+      "hash": "7f4c85ddeb98d4c9",
+      "size": 1423,
+      "mtimeMs": 1793744771546.9172,
+      "updatedAt": "2026-11-03T22:26:12.729Z",
+      "source": "hook"
+    },
+    "app/pages/dashboard/dogs/[fileNo].vue": {
+      "description": "Vue: setup",
+      "tokens": 702,
+      "hash": "8f94d59d18227a4a",
+      "size": 2634,
+      "mtimeMs": 1793744774683.943,
+      "updatedAt": "2026-11-03T22:26:15.854Z",
+      "source": "hook"
+    },
+    "app/plugins/00.catalog.ts": {
+      "description": "The marketplace catalogue: verified stores and their listed dogs, read from Supabase once per page",
+      "tokens": 484,
+      "hash": "9c1546c91ed29e3c",
+      "size": 1692,
+      "mtimeMs": 1793745263618.0132,
+      "updatedAt": "2026-11-03T22:34:24.919Z",
+      "source": "hook"
+    },
+    "app/pages/dashboard/bookings.vue": {
+      "description": "Vue: setup",
+      "tokens": 714,
+      "hash": "7bc5aba5abaaf761",
+      "size": 2679,
+      "mtimeMs": 1793768949797.9424,
+      "updatedAt": "2026-11-04T05:09:10.088Z",
+      "source": "hook"
+    },
+    "supabase/migrations/20261106000000_notifications.sql": {
+      "description": "Notifications for the header bell. The database writes them when something happens, so they're right",
+      "tokens": 1846,
+      "hash": "9a0deeddc6705999",
+      "size": 7192,
+      "mtimeMs": 1793769466484.0007,
+      "updatedAt": "2026-11-04T05:17:46.637Z",
+      "source": "hook"
+    },
+    "app/composables/useNotifications.ts": {
+      "description": "The header bell's notifications (Supabase: notifications). The database writes them when a store rep",
+      "tokens": 539,
+      "hash": "4fda2ae1d450513f",
+      "size": 1886,
+      "mtimeMs": 1793769545142.8838,
+      "updatedAt": "2026-11-04T05:19:05.435Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "AccountNotification",
+          "kind": "section",
+          "startLine": 11,
+          "endLine": 12,
+          "tokens": 42
+        },
+        {
+          "name": "useNotifications",
+          "kind": "fn",
+          "startLine": 13,
+          "endLine": 35,
+          "tokens": 326
+        }
+      ]
+    },
+    "supabase/migrations/20261107000000_store_profile.sql": {
+      "description": "Store profile editing. A store's owners and managers write the about text, owner profile, history,",
+      "tokens": 437,
+      "hash": "103ab62cb922e5bb",
+      "size": 1637,
+      "mtimeMs": 1793769734177.715,
+      "updatedAt": "2026-11-04T05:22:14.605Z",
+      "source": "hook"
+    },
+    "app/utils/storeForm.ts": {
+      "description": "The dashboard's store profile form: everything buyers read on the public store page that the store",
+      "tokens": 1349,
+      "hash": "693c8888a661a96e",
+      "size": 4726,
+      "mtimeMs": 1793769789634.698,
+      "updatedAt": "2026-11-04T05:23:09.939Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "optional",
+          "kind": "fn",
+          "startLine": 12,
+          "endLine": 102,
+          "tokens": 1188
+        }
+      ]
+    },
+    "app/composables/useStoreProfile.ts": {
+      "description": "Saving the store profile of the store the dashboard is showing (Supabase: stores, and the store-medi",
+      "tokens": 1030,
+      "hash": "9afb1625778cd23d",
+      "size": 3604,
+      "mtimeMs": 1793770745531.2107,
+      "updatedAt": "2026-11-04T05:39:05.902Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "useStoreProfile",
+          "kind": "fn",
+          "startLine": 16,
+          "endLine": 71,
+          "tokens": 785
+        }
+      ]
+    },
+    "app/components/dashboard/DashboardStoreForm.vue": {
+      "description": "Vue: setup",
+      "tokens": 1755,
+      "hash": "63323eee243b4384",
+      "size": 6578,
+      "mtimeMs": 1793769867027.0051,
+      "updatedAt": "2026-11-04T05:24:27.392Z",
+      "source": "hook"
+    },
+    "app/pages/dashboard/profile.vue": {
+      "description": "Vue: setup",
+      "tokens": 481,
+      "hash": "8f724897a039df0d",
+      "size": 1805,
+      "mtimeMs": 1793769867781.6956,
+      "updatedAt": "2026-11-04T05:24:28.278Z",
+      "source": "hook"
+    },
+    "supabase/migrations/20261108000000_store_team.sql": {
+      "description": "Store teams. Owners invite people by email with a role; the invitation waits in that person's accoun",
+      "tokens": 1890,
+      "hash": "cef5ee180e23b41f",
+      "size": 7450,
+      "mtimeMs": 1793770115168.8035,
+      "updatedAt": "2026-11-04T05:28:35.355Z",
+      "source": "hook"
+    },
+    "app/composables/useStoreTeam.ts": {
+      "description": "The team of the store the dashboard is showing (Supabase: store_members, store_invites, store_team()",
+      "tokens": 1325,
+      "hash": "c30f718982d665c3",
+      "size": 4637,
+      "mtimeMs": 1793770208677.5076,
+      "updatedAt": "2026-11-04T05:30:08.932Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "TeamMember",
+          "kind": "section",
+          "startLine": 11,
+          "endLine": 11,
+          "tokens": 34
+        },
+        {
+          "name": "TeamInvite",
+          "kind": "section",
+          "startLine": 12,
+          "endLine": 13,
+          "tokens": 27
+        },
+        {
+          "name": "useStoreTeam",
+          "kind": "fn",
+          "startLine": 14,
+          "endLine": 77,
+          "tokens": 1090
+        }
+      ]
+    },
+    "app/composables/useStoreInvites.ts": {
+      "description": "Invitations to join a store's team that are waiting for the signed-in person, matched by their email",
+      "tokens": 522,
+      "hash": "65fcf838c3d195b5",
+      "size": 1825,
+      "mtimeMs": 1793770225977.238,
+      "updatedAt": "2026-11-04T05:30:26.516Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "StoreInvite",
+          "kind": "section",
+          "startLine": 8,
+          "endLine": 9,
+          "tokens": 40
+        },
+        {
+          "name": "useStoreInvites",
+          "kind": "fn",
+          "startLine": 10,
+          "endLine": 38,
+          "tokens": 370
+        }
+      ]
+    },
+    "app/pages/dashboard/team.vue": {
+      "description": "Vue: setup",
+      "tokens": 769,
+      "hash": "759d5c013f644c80",
+      "size": 2884,
+      "mtimeMs": 1793770292943.0051,
+      "updatedAt": "2026-11-04T05:31:33.389Z",
+      "source": "hook"
+    },
+    "app/components/dashboard/DashboardTeamList.vue": {
+      "description": "Vue: setup",
+      "tokens": 1044,
+      "hash": "5b413a2fb5337ce3",
+      "size": 3918,
+      "mtimeMs": 1793770421077.5266,
+      "updatedAt": "2026-11-04T05:33:41.367Z",
+      "source": "hook"
+    },
+    "supabase/migrations/20261109000000_store_media.sql": {
+      "description": "Store banner and logo. Images live in the public `store-media` bucket, one folder per store (its dat",
+      "tokens": 603,
+      "hash": "f32416354e93001f",
+      "size": 2259,
+      "mtimeMs": 1793770672098.2134,
+      "updatedAt": "2026-11-04T05:37:52.396Z",
+      "source": "hook"
+    },
+    "app/components/dashboard/DashboardStoreImages.vue": {
+      "description": "Vue: setup",
+      "tokens": 931,
+      "hash": "82a08b17d6d7444f",
+      "size": 3490,
+      "mtimeMs": 1793770791758.6436,
+      "updatedAt": "2026-11-04T05:39:52.004Z",
       "source": "hook"
     }
   },

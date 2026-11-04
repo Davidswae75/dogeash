@@ -67,7 +67,7 @@ watch(() => route.fullPath, () => { navOpen.value = false })
               </NuxtLink>
             </Button>
             <Button v-if="canAddDogs" as-child variant="marigold" size="sm" class="hidden sm:inline-flex">
-              <NuxtLink to="/dashboard/dogs"><Plus aria-hidden="true" />Add a dog</NuxtLink>
+              <NuxtLink to="/dashboard/dogs/new"><Plus aria-hidden="true" />Add a dog</NuxtLink>
             </Button>
           </div>
         </div>

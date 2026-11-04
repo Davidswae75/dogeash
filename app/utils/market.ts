@@ -1,9 +1,9 @@
 import type { BuyerProfile } from './account'
 import type { SearchFilters } from './searchFilters'
 import { matchesFilters } from './searchFilters'
-import { sampleDogs } from './dogs'
+import { listedDogs } from './dogs'
 import { propertyTypes } from './protection'
-import { sampleStores } from './stores'
+import { listedStores } from './stores'
 
 // The marketplace rows on Home: which dogs and stores each one shows
 
@@ -12,14 +12,14 @@ export const homeSection = 'mx-auto w-full max-w-[calc(var(--container)+64px)] p
 // Link chips on the dark Home heroes
 export const homeHeroChip = 'inline-flex items-center gap-1.5 rounded-full border-[1.5px] border-on-night/40 px-3.5 py-1.5 text-sm font-semibold text-on-night no-underline transition-colors hover:border-marigold hover:bg-marigold hover:text-on-marigold'
 
-const forSale = () => sampleDogs.filter(d => d.status === 'available')
+const forSale = () => listedDogs.value.filter(d => d.status === 'available')
 
 export const marketRows = {
   availableNow: () => forSale(),
   familyProtection: () => forSale().filter(d => d.level === 4 && d.safeWithChildren),
   forCompounds: () => forSale().filter(d => d.property.includes('compound') && d.level >= 3),
-  inCity: (city: string) => sampleDogs.filter(d => d.city === city),
-  topStores: () => [...sampleStores].filter(s => s.verified).sort((a, b) => b.rating - a.rating),
+  inCity: (city: string) => listedDogs.value.filter(d => d.city === city),
+  topStores: () => [...listedStores.value].filter(s => s.verified).sort((a, b) => b.rating - a.rating),
 
   // Signed-in Home: dogs suited to the buyer's property and household, their own city first
   matchedTo: (profile: BuyerProfile, exclude: string[] = []) => {
@@ -32,6 +32,6 @@ export const marketRows = {
 }
 
 // Cities with the most dogs first, for the "Near you" row
-export const marketCities = Object.entries(
-  sampleDogs.reduce<Record<string, number>>((acc, d) => ({ ...acc, [d.city]: (acc[d.city] ?? 0) + 1 }), {}),
+export const marketCities = () => Object.entries(
+  listedDogs.value.reduce<Record<string, number>>((acc, d) => ({ ...acc, [d.city]: (acc[d.city] ?? 0) + 1 }), {}),
 ).sort((a, b) => b[1] - a[1]).map(([city]) => city)

@@ -9,7 +9,7 @@ import { useStoreContext } from './useStoreContext'
 import { useVisits, visitDogNames } from './useVisits'
 import { findDog } from '~/utils/dogs'
 import { inboxKinds } from '~/utils/inbox'
-import { visitDay } from '~/utils/time'
+import { todayIso, visitDay } from '~/utils/time'
 
 // The store inbox as one list: buyer conversations and visit requests for the store being run,
 // filtered to what this person's role may see. Unread counts feed the bell and the sidebar.
@@ -55,6 +55,18 @@ export function useStoreInbox() {
       .sort((a, b) => b.at.localeCompare(a.at)),
   )
   const unread = computed(() => items.value.filter(i => i.unread).length)
+  const unreadMessages = computed(() => items.value.filter(i => i.kind === 'message' && i.unread).length)
+
+  // The store's visits for Bookings and the overview: requests still to answer, confirmed visits (kept until
+  // marked done, even once the day has passed), and everything else, newest first. Empty without the bookings permission.
+  const storeVisits = computed(() => (can('bookings') ? visits.value : []))
+  const ahead = (v: Visit) => v.day >= todayIso()
+  const waiting = computed(() => storeVisits.value.filter(v => v.status === 'requested' && ahead(v)))
+  const confirmed = computed(() => storeVisits.value.filter(v => v.status === 'confirmed'))
+  const earlier = computed(() => storeVisits.value.filter(v => !waiting.value.includes(v) && !confirmed.value.includes(v)).reverse())
+  // Requests and confirmed visits from today on, soonest first: the overview's Coming up
+  const upcoming = computed(() => [...waiting.value, ...confirmed.value.filter(ahead)].sort((a, b) => `${a.day}${a.slot}`.localeCompare(`${b.day}${b.slot}`)))
+  const today = computed(() => confirmed.value.filter(v => v.day === todayIso()))
   const find = (id: string) => items.value.find(i => i.id === id)
 
   async function load() {
@@ -94,5 +106,7 @@ export function useStoreInbox() {
     notify.visitUpdated(decided[status] ?? 'Visit updated', `${item.from} · ${item.preview}. They see it in their visits.`)
   }
 
-  return { items, unread, find, load, markRead, reply, decide }
+  const decideVisit = (v: Visit, status: VisitStatus, note?: string) => decide(`v-${v.id}`, status, note)
+
+  return { items, unread, unreadMessages, find, load, markRead, reply, decide, waiting, confirmed, earlier, today, upcoming, decideVisit }
 }

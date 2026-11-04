@@ -2,14 +2,16 @@ import { watch } from 'vue'
 import { defineNuxtPlugin } from '#imports' // nuxt
 import { useSupabaseUser } from '#imports' // @nuxtjs/supabase
 import { useConversations } from '~/composables/useConversations'
+import { useNotifications } from '~/composables/useNotifications'
 import { useSavedDogs } from '~/composables/useSavedDogs'
 import { useSavedSearches } from '~/composables/useSavedSearches'
 import { useSession } from '~/composables/useSession'
+import { useStoreInvites } from '~/composables/useStoreInvites'
 import { useVisits } from '~/composables/useVisits'
 
 // Loads the signed-in person's account before the first page renders, and again whenever
-// someone signs in or out (in this tab or another one). Messages and visits load here for the unread
-// and next-visit counts around the site.
+// someone signs in or out (in this tab or another one). Messages, visits and notifications load here for the unread
+// and next-visit counts around the site and the bell.
 export default defineNuxtPlugin(async () => {
   const authUser = useSupabaseUser()
   const { load } = useSession()
@@ -17,7 +19,9 @@ export default defineNuxtPlugin(async () => {
   const savedSearches = useSavedSearches()
   const conversations = useConversations()
   const visits = useVisits()
-  const loadLists = () => Promise.all([savedDogs.load(), savedSearches.load(), conversations.loadMine(), visits.loadMine()])
+  const notifications = useNotifications()
+  const storeInvites = useStoreInvites()
+  const loadLists = () => Promise.all([savedDogs.load(), savedSearches.load(), conversations.loadMine(), visits.loadMine(), notifications.load(), storeInvites.load()])
 
   await load()
   await loadLists()

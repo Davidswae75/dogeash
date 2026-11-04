@@ -6,10 +6,10 @@ export type StorePermission = 'dogs' | 'enquiries' | 'bookings' | 'care' | 'prof
 
 export interface StoreMembership { storeId: string, role: StoreRole }
 
-export const storeRoles: Record<StoreRole, { label: string, can: StorePermission[] }> = {
-  owner: { label: 'Owner', can: ['dogs', 'enquiries', 'bookings', 'care', 'profile', 'payouts', 'team', 'settings'] },
-  manager: { label: 'Manager', can: ['dogs', 'enquiries', 'bookings', 'care', 'profile'] },
-  handler: { label: 'Handler', can: ['dogs', 'bookings'] },
+export const storeRoles: Record<StoreRole, { label: string, hint: string, can: StorePermission[] }> = {
+  owner: { label: 'Owner', hint: 'Everything, including payouts, the team and settings', can: ['dogs', 'enquiries', 'bookings', 'care', 'profile', 'payouts', 'team', 'settings'] },
+  manager: { label: 'Manager', hint: 'Dogs, messages, bookings, the care team and the store profile', can: ['dogs', 'enquiries', 'bookings', 'care', 'profile'] },
+  handler: { label: 'Handler', hint: 'Dogs and kennel visits', can: ['dogs', 'bookings'] },
 }
 
 export const roleCan = (role: StoreRole, permission: StorePermission) => storeRoles[role].can.includes(permission)

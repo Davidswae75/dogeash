@@ -6,9 +6,10 @@ import { profileChecklist } from '~/utils/dashboard'
 
 // How the store looks to buyers: inspection, rating, reply time, and what's left on the profile
 const { store, can } = useStoreContext()
-const done = profileChecklist.filter(i => i.done).length
-const pct = Math.round((done / profileChecklist.length) * 100)
-const todo = profileChecklist.filter(i => !i.done)
+const checklist = computed(() => profileChecklist(store.value))
+const done = computed(() => checklist.value.filter(i => i.done).length)
+const pct = computed(() => Math.round((done.value / checklist.value.length) * 100))
+const todo = computed(() => checklist.value.filter(i => !i.done))
 
 const facts = computed(() => [
   { label: 'Inspection', value: store.value.inspection.status === 'passed' ? 'Passed' : 'Booked', sub: store.value.inspection.date },
@@ -32,7 +33,7 @@ const facts = computed(() => [
       <div class="flex flex-col gap-2">
         <div class="flex items-baseline justify-between">
           <span class="text-sm font-semibold">Store profile</span>
-          <span class="font-mono text-xs text-ink-muted">{{ done }} of {{ profileChecklist.length }} · {{ pct }}%</span>
+          <span class="font-mono text-xs text-ink-muted">{{ done }} of {{ checklist.length }} · {{ pct }}%</span>
         </div>
         <div class="h-1.5 overflow-hidden rounded-full bg-line" role="progressbar" :aria-valuenow="pct" aria-valuemin="0" aria-valuemax="100" aria-label="Store profile complete">
           <div class="h-full rounded-full bg-marigold" :style="{ width: `${pct}%` }" />
@@ -40,7 +41,7 @@ const facts = computed(() => [
         <ul class="m-0 flex list-none flex-col gap-1.5 p-0">
           <li v-for="item in todo" :key="item.label" class="flex items-center justify-between gap-3 rounded-md bg-marigold-soft px-3 py-2 text-[13px]">
             <span class="font-semibold">{{ item.label }}</span>
-            <NuxtLink v-if="can('profile')" to="/dashboard/profile" class="font-bold text-ink underline underline-offset-4">Add</NuxtLink>
+            <NuxtLink v-if="can(item.permission)" :to="item.to" class="font-bold text-ink underline underline-offset-4">Add</NuxtLink>
           </li>
           <li v-if="!todo.length" class="flex items-center gap-2 text-[13px] text-ink-muted"><Check class="size-4" aria-hidden="true" />Everything's filled in</li>
         </ul>

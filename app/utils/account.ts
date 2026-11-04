@@ -73,26 +73,6 @@ export const reserveChecklist = [
   { label: 'ID check', done: false, text: 'Stores ask for this before taking a deposit. Coming soon.' },
 ]
 
-// Sample notifications for the header bell
-export type NotificationKind = 'reserved' | 'price' | 'visit' | 'listing'
-
-export interface AccountNotification {
-  id: string
-  kind: NotificationKind
-  title: string
-  text: string
-  at: string
-  to: string
-  unread: boolean
-}
-
-export const sampleNotifications: AccountNotification[] = [
-  { id: 'n1', kind: 'visit', title: 'Kennel visit confirmed', text: 'K9 Guardian Kennels, Sat 10:30. Bring ID for the gate.', at: '12 min', to: '/account/shortlist', unread: true },
-  { id: 'n2', kind: 'reserved', title: 'Flash was reserved', text: 'Another buyer put down a deposit. Flash stays on your shortlist.', at: '2 h', to: '/account/shortlist', unread: true },
-  { id: 'n3', kind: 'price', title: 'Price drop on Sarge', text: 'Now ₦2.4m, down from ₦2.6m.', at: 'Yesterday', to: '/dogs/kd-2026-014', unread: false },
-  { id: 'n4', kind: 'listing', title: 'New Level 4 dog in Abuja', text: 'Onyx, a Giant Schnauzer, matches your saved search.', at: '2 days', to: '/dogs?level=4&city=Abuja', unread: false },
-]
-
 // What the buyer told us about their home; dogs are matched against it (Home profile page)
 export type HandlerExperience = 'first-time' | 'some' | 'experienced' | 'professional'
 export interface BuyerProfile { property: PropertyType, city: string, children: boolean, otherPets: boolean, experience: HandlerExperience }

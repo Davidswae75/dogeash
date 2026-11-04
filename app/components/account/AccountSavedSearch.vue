@@ -4,7 +4,7 @@ import { computed, ref } from 'vue'
 import type { SavedSearch } from '~/composables/useSavedSearches'
 import { useNotify } from '~/composables/useNotify'
 import { useSavedSearches } from '~/composables/useSavedSearches'
-import { sampleDogs } from '~/utils/dogs'
+import { listedDogs } from '~/utils/dogs'
 import { filtersToQuery, matchesFilters } from '~/utils/searchFilters'
 
 // One saved search: what it looks for, the dogs that match now, alerts on or off, and remove (with undo)
@@ -12,7 +12,7 @@ const props = defineProps<{ search: SavedSearch }>()
 const { setAlerts, remove, add } = useSavedSearches()
 const notify = useNotify()
 
-const matches = computed(() => sampleDogs.filter(d => d.status === 'available' && matchesFilters(props.search.filters, d)))
+const matches = computed(() => listedDogs.value.filter(d => d.status === 'available' && matchesFilters(props.search.filters, d)))
 const busy = ref(false)
 
 async function toggleAlerts(on: boolean) {

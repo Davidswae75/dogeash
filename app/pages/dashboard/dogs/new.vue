@@ -1,0 +1,30 @@
+<script setup lang="ts">
+import { definePageMeta, navigateTo, useSeoMeta } from '#imports' // nuxt
+import type { DogFormValues } from '~/utils/dogForm'
+import { useNotify } from '~/composables/useNotify'
+import { useStoreContext } from '~/composables/useStoreContext'
+import { useStoreDogs } from '~/composables/useStoreDogs'
+
+// Add a dog: the form, then back to the list with the new file number
+definePageMeta({ layout: 'dashboard', title: 'Add a dog', middleware: 'store-member' })
+useSeoMeta({ title: 'Add a dog · Store dashboard · Dogeash', robots: 'noindex' })
+
+const { store } = useStoreContext()
+const storeDogs = useStoreDogs()
+const notify = useNotify()
+
+async function save(values: DogFormValues, photoPath: string | null, publish: boolean) {
+  const { fileNo, error } = await storeDogs.create(values, photoPath, publish)
+  if (!fileNo) return error ?? null
+  notify.dogUpdated(`${values.name} ${publish && !error ? 'is live' : 'saved as a draft'}`, `File number ${fileNo}.${error ? ` ${error}` : ''}`)
+  await navigateTo('/dashboard/dogs')
+  return null
+}
+</script>
+
+<template>
+  <div class="mx-auto flex w-full max-w-[760px] flex-col gap-5">
+    <p class="m-0 text-[15px] leading-6 text-ink-muted">Fill in what buyers read on the dog's page. Dogeash gives it a file number when you save.</p>
+    <DashboardDogForm :verified="storeDogs.verified.value" :city="store.city" :save="save" />
+  </div>
+</template>

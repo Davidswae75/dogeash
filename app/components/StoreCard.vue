@@ -11,7 +11,7 @@ const summary = computed(() => storeSummary(props.store))
 <template>
   <div class="flex flex-col gap-4 rounded-lg border border-line bg-surface p-6">
     <div class="flex items-center gap-3.5">
-      <StoreAvatar :initials="props.store.initials" />
+      <StoreAvatar :initials="props.store.initials" :src="props.store.logo" />
       <div class="min-w-0">
         <NuxtLink :to="`/stores/${props.store.slug}`" class="font-display text-[19px] leading-6 font-bold text-ink no-underline [font-stretch:110%] hover:underline">{{ props.store.name }}</NuxtLink>
         <div class="text-sm leading-[22px] text-ink-muted">

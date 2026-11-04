@@ -6,7 +6,7 @@ import { useRoute, useRouter, useSeoMeta } from '#imports' // nuxt
 import { useAccountGate } from '~/composables/useAccountGate'
 import { useNotify } from '~/composables/useNotify'
 import { useSavedSearches } from '~/composables/useSavedSearches'
-import { sampleDogs } from '~/utils/dogs'
+import { listedDogs } from '~/utils/dogs'
 import type { SearchFilters } from '~/utils/searchFilters'
 import { filtersFromQuery, filtersToQuery, matchesFilters } from '~/utils/searchFilters'
 import { marketCities } from '~/utils/market'
@@ -30,11 +30,11 @@ watch(filters, f => router.replace({ query: filtersToQuery(f) }), { deep: true }
 
 const propertyOptions = propertyTypes.map(p => ({ value: p.value, label: p.label }))
 const levelOptions = ([1, 2, 3, 4, 5] as const).map(n => ({ value: n, label: String(n) }))
-const cityOptions = marketCities.map(c => ({ value: c, label: c }))
+const cityOptions = marketCities().map(c => ({ value: c, label: c }))
 const householdOptions = [{ value: 'children', label: 'Safe with children' }]
-const breedOptions = [...new Set(sampleDogs.map(d => d.breed))].map(b => ({ value: b, label: b }))
+const breedOptions = [...new Set(listedDogs.value.map(d => d.breed))].map(b => ({ value: b, label: b }))
 
-const dogs = computed(() => sampleDogs.filter(dog => matchesFilters(filters.value, dog)))
+const dogs = computed(() => listedDogs.value.filter(dog => matchesFilters(filters.value, dog)))
 
 // Save this search (needs an account; guests sign in and come back to it)
 const savedSearches = useSavedSearches()

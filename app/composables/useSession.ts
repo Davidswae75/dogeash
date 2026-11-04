@@ -2,7 +2,7 @@ import type { Account } from '~/utils/account'
 import type { StoreRow } from '~/utils/stores'
 import type { StorePermission } from '~/utils/storeRoles'
 import { computed } from 'vue'
-import { navigateTo, useState } from '#imports' // nuxt
+import { navigateTo, useRuntimeConfig, useState } from '#imports' // nuxt
 import { useSupabaseClient, useSupabaseUser } from '#imports' // @nuxtjs/supabase
 import { mergeGuestLists } from './useAccountList'
 import { useLoader } from './useLoader'
@@ -37,6 +37,7 @@ export function useSession() {
     const id = authUser?.id ?? claims?.sub
     if (!id) return (user.value = null)
     const supabase = useSupabaseClient()
+    const storageUrl = useRuntimeConfig().public.supabase.url as string
 
     const [{ data: profile }, { data: members }] = await Promise.all([
       supabase.from('profiles').select('full_name, phone, city, created_at, property, has_children, has_other_pets, experience, notify_email, notify_sms, notify_whatsapp').eq('id', id).maybeSingle(),
@@ -58,7 +59,7 @@ export function useSession() {
       stores: (members ?? [])
         .filter(m => m.stores)
         .map((m) => {
-          const store = toStore(m.stores as unknown as StoreRow, name)
+          const store = toStore(m.stores as unknown as StoreRow, name, storageUrl)
           return { storeId: store.id, role: m.role, store }
         }),
     }

@@ -1,6 +1,7 @@
 import { initialsOf } from './account'
 import type { ProtectionLevel } from './protection'
-import { sampleDogs } from './dogs'
+import { shallowRef } from 'vue'
+import { listedDogs } from './dogs'
 
 // A store is an inspected kennel listing guard dogs on Dogeash. Dogs link to it by storeId;
 // care providers link to it through `care`.
@@ -60,6 +61,11 @@ export interface Store {
   }
   care: { providerId: string, relationship: string }[]
   reviewSamples: StoreReview[]
+  // Uploaded images (URLs), and their storage paths for the profile editor; none for sample stores
+  banner?: string
+  logo?: string
+  bannerPath?: string | null
+  logoPath?: string | null
 }
 
 // Example stores until the store dashboard and API exist
@@ -337,14 +343,17 @@ export const sampleStores: Store[] = [
   },
 ]
 
+// Stores buyers can browse (verified), loaded with the dogs by plugins/catalog.ts; samples until then
+export const listedStores = shallowRef<Store[]>(sampleStores)
+
 export function findStore(slugOrId: string) {
   const key = slugOrId.toLowerCase()
-  return sampleStores.find(s => s.slug === key || s.id.toLowerCase() === key)
+  return listedStores.value.find(s => s.slug === key || s.id.toLowerCase() === key)
 }
 
 // The stores that work with a care provider, and what they call the relationship
 export function storesForProvider(providerId: string) {
-  return sampleStores.flatMap((store) => {
+  return listedStores.value.flatMap((store) => {
     const link = store.care.find(c => c.providerId === providerId)
     return link ? [{ store, relationship: link.relationship }] : []
   })
@@ -352,7 +361,7 @@ export function storesForProvider(providerId: string) {
 
 // Dogs a buyer can see: listed and not sold or withdrawn
 export function storeDogs(storeId: string) {
-  return sampleDogs.filter(d => d.storeId === storeId)
+  return listedDogs.value.filter(d => d.storeId === storeId)
 }
 
 export function storeSummary(store: Store) {
@@ -386,12 +395,19 @@ export interface StoreRow {
   rating: number
   reviews_count: number
   details: Partial<Store>
+  banner_path: string | null
+  logo_path: string | null
 }
 
-export const storeColumns = 'public_id, slug, name, initials, tagline, city, area, state, founded, status, rating, reviews_count, details'
+export const storeColumns = 'public_id, slug, name, initials, tagline, city, area, state, founded, status, rating, reviews_count, details, banner_path, logo_path'
+
+// A store image's public URL (the store-media bucket)
+export const storeMediaUrl = (path: string | null, storageUrl: string) =>
+  (path && storageUrl ? `${storageUrl}/storage/v1/object/public/store-media/${path}` : undefined)
 
 // The app's Store from a database row. A new store has little in `details` yet, so everything has a default.
-export function toStore(row: StoreRow, ownerName = ''): Store {
+// `storageUrl` (the Supabase URL) turns uploaded banner and logo paths into links.
+export function toStore(row: StoreRow, ownerName = '', storageUrl = ''): Store {
   return {
     replies: '—',
     dogsPlaced: 0,
@@ -417,5 +433,9 @@ export function toStore(row: StoreRow, ownerName = ''): Store {
     verified: row.status === 'verified',
     rating: Number(row.rating),
     reviews: row.reviews_count,
+    banner: storeMediaUrl(row.banner_path, storageUrl),
+    logo: storeMediaUrl(row.logo_path, storageUrl),
+    bannerPath: row.banner_path,
+    logoPath: row.logo_path,
   }
 }

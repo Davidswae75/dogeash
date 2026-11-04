@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Check, Minus } from '@lucide/vue'
 import type { ProtectionLevel } from '~/utils/protection'
-import { formatNaira, sampleDogs } from '~/utils/dogs'
+import { formatNaira, listedDogs } from '~/utils/dogs'
 import { propertyTypes, protectionLevelDetails, protectionLevels } from '~/utils/protection'
 
 // One level on the Protection levels page: the number, what the dog does and won't do,
@@ -11,7 +11,7 @@ const props = defineProps<{ level: ProtectionLevel }>()
 const info = protectionLevels[props.level]
 const detail = protectionLevelDetails[props.level]
 const suits = propertyTypes.filter(p => p.levels.includes(props.level))
-const dogs = sampleDogs.filter(d => d.level === props.level)
+const dogs = listedDogs.value.filter(d => d.level === props.level)
 const prices = dogs.map(d => d.priceNaira)
 const priceRange = prices.length
   ? (Math.min(...prices) === Math.max(...prices) ? formatNaira(prices[0]!) : `${formatNaira(Math.min(...prices))} – ${formatNaira(Math.max(...prices))}`)

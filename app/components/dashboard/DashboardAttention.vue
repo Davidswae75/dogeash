@@ -1,15 +1,23 @@
 <script setup lang="ts">
-import { ArrowRight, ImagePlus, MessageSquare, Syringe, Wallet } from '@lucide/vue'
+import { ArrowRight, CalendarDays, CheckCheck, FilePen, MessageSquare } from '@lucide/vue'
 import type { Component } from 'vue'
 import { computed } from 'vue'
 import { useStoreContext } from '~/composables/useStoreContext'
-import { dashboardAttention } from '~/utils/dashboard'
+import { useStoreDogs } from '~/composables/useStoreDogs'
+import { useStoreInbox } from '~/composables/useStoreInbox'
+import { attentionItems } from '~/utils/dashboard'
 
 // What needs doing, most urgent first. Only items this person's role can act on.
 const { can } = useStoreContext()
-const items = computed(() => dashboardAttention.filter(i => can(i.permission)))
+const inbox = useStoreInbox()
+const { dogs } = useStoreDogs()
+const items = computed(() => attentionItems(
+  inbox.items.value.filter(i => i.kind === 'message' && i.unread),
+  inbox.waiting.value,
+  dogs.value.filter(d => d.status === 'draft' || d.status === 'pending_review'),
+).filter(i => can(i.permission)))
 
-const icons: Record<string, Component> = { MessageSquare, Wallet, Syringe, ImagePlus }
+const icons: Record<string, Component> = { MessageSquare, CalendarDays, FilePen }
 const tone: Record<string, { tile: string, rail: string }> = {
   marigold: { tile: 'bg-marigold text-on-marigold', rail: 'bg-marigold' },
   night: { tile: 'bg-night text-marigold', rail: 'bg-ink' },
@@ -18,8 +26,11 @@ const tone: Record<string, { tile: string, rail: string }> = {
 </script>
 
 <template>
-  <SectionPanel title="Needs your attention" :meta="`${items.length} to do`">
-    <ul class="m-0 flex list-none flex-col p-0">
+  <SectionPanel title="Needs your attention" :meta="items.length ? `${items.length} to do` : undefined">
+    <p v-if="!items.length" class="m-0 flex items-center gap-2.5 p-3 text-sm text-ink-muted">
+      <CheckCheck class="size-5 text-marigold" aria-hidden="true" />All caught up. New messages, visit requests and drafts show up here.
+    </p>
+    <ul v-else class="m-0 flex list-none flex-col p-0">
       <li v-for="item in items" :key="item.title">
         <NuxtLink :to="item.to" class="group relative flex items-center gap-4 rounded-lg p-3 pl-4 text-ink no-underline hover:bg-surface-sunk">
           <span :class="['absolute top-3 bottom-3 left-0 w-1 rounded-r-full', tone[item.tone]!.rail]" aria-hidden="true" />
