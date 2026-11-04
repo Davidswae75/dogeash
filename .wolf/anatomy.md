@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-11-04T08:14:02.514Z
-> Files: 704 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-11-04T08:19:29.136Z
+> Files: 705 tracked | Anatomy hits: 0 | Misses: 0
 
 > Project structure index. Auto-maintained by OpenWolf hooks and daemon.
 > Run `openwolf scan` to generate, or wait for the first Claude Code session.
@@ -1001,3 +1001,4 @@
 - `20261108000000_store_team.sql` — Store teams. Owners invite people by email with a role; the invitation waits in that person's accoun (~1890 tok)
 - `20261109000000_store_media.sql` — Store banner and logo. Images live in the public `store-media` bucket, one folder per store (its dat (~603 tok)
 - `20261110000000_store_reviews.sql` — Store reviews. A buyer can review a store once one of their kennel visits there is marked done (~2015 tok)
+- `20261112000000_store_visit_settings.sql` — Store settings for kennel visits: the days and times a store takes visits, whether it also visits bu (~679 tok)

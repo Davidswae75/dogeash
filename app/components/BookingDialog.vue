@@ -6,7 +6,8 @@ import type { AccountGate } from '~/composables/useAccountGate'
 import { useNotify } from '~/composables/useNotify'
 
 // Book a time with someone: a care provider, or a kennel visit to see shortlisted dogs.
-// Choose a service, one of the next six working days, a time, and where. With `send` the request is saved
+// Choose a service, one of the next six days the other party works (Monday to Saturday unless `weekdays`
+// says otherwise), one of their times, and where. With `send` the request is saved
 // (kennel visits); without it the dialog is a preview (care bookings, until providers are in the database).
 export interface BookingSummaryRow { label: string, value: string }
 
@@ -16,6 +17,10 @@ const props = withDefaults(defineProps<{
   services: string[]
   /** Offer "At my home" as well as the other party's premises */
   homeVisits?: boolean
+  /** Days they take bookings, 0 = Sunday (default Monday to Saturday) */
+  weekdays?: number[]
+  /** Times they take bookings, like "9:00" (default five through the day) */
+  slots?: string[]
   premisesLabel?: string
   priceNote?: string
   /** Extra lines for the confirmation, e.g. which dogs */
@@ -49,16 +54,19 @@ const place = ref('premises')
 const dogName = ref('')
 const error = ref('')
 
-const times = ['9:00', '10:30', '12:00', '14:00', '15:30']
+const times = computed(() => props.slots ?? ['9:00', '10:30', '12:00', '14:00', '15:30'])
 
-// The next six working days (Sundays off)
+// The next six days they work, looking up to four weeks ahead
 const days = computed(() => {
+  const open = props.weekdays ?? [1, 2, 3, 4, 5, 6]
   const out: { value: string, label: string }[] = []
   const d = new Date()
-  while (out.length < 6) {
+  for (let i = 0; i < 28 && out.length < 6; i++) {
     d.setDate(d.getDate() + 1)
-    if (d.getDay() === 0) continue
-    out.push({ value: d.toISOString().slice(0, 10), label: d.toLocaleDateString('en-NG', { weekday: 'short', day: 'numeric', month: 'short' }) })
+    if (!open.includes(d.getDay())) continue
+    // The local date, not UTC: just after midnight in Lagos, UTC is still on yesterday
+    const value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    out.push({ value, label: d.toLocaleDateString('en-NG', { weekday: 'short', day: 'numeric', month: 'short' }) })
   }
   return out
 })

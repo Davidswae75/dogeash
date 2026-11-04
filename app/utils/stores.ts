@@ -66,7 +66,17 @@ export interface Store {
   logo?: string
   bannerPath?: string | null
   logoPath?: string | null
+  // When it takes kennel visits; sample stores use the defaults (see visitSettings)
+  visits?: VisitSettings
+  // Where it is with Dogeash; sample stores are all verified
+  status?: 'draft' | 'in_review' | 'verified' | 'suspended'
 }
+
+// The days (0 = Sunday) and times a store takes kennel visits, whether it also visits buyers at home,
+// and whether visit requests are paused (with a note buyers see)
+export interface VisitSettings { days: number[], slots: string[], home: boolean, paused: boolean, note: string }
+export const defaultVisitSettings: VisitSettings = { days: [1, 2, 3, 4, 5, 6], slots: ['9:00', '10:30', '12:00', '14:00', '15:30'], home: false, paused: false, note: '' }
+export const visitSettings = (s: Store): VisitSettings => s.visits ?? defaultVisitSettings
 
 // Example stores until the store dashboard and API exist
 export const sampleStores: Store[] = [
@@ -398,9 +408,14 @@ export interface StoreRow {
   banner_path: string | null
   logo_path: string | null
   store_care_links?: { relationship: string, care_providers: { public_id: string } | null }[]
+  visit_days: number[]
+  visit_slots: string[]
+  home_visits: boolean
+  visits_paused: boolean
+  pause_note: string
 }
 
-export const storeColumns = 'public_id, slug, name, initials, tagline, city, area, state, founded, status, rating, reviews_count, details, banner_path, logo_path, store_care_links (relationship, care_providers (public_id))'
+export const storeColumns = 'public_id, slug, name, initials, tagline, city, area, state, founded, status, rating, reviews_count, details, banner_path, logo_path, visit_days, visit_slots, home_visits, visits_paused, pause_note, store_care_links (relationship, care_providers (public_id))'
 
 // A store image's public URL (the store-media bucket)
 export const storeMediaUrl = (path: string | null, storageUrl: string) =>
@@ -431,12 +446,14 @@ export function toStore(row: StoreRow, ownerName = '', storageUrl = ''): Store {
     state: row.state,
     founded: row.founded ?? new Date().getFullYear(),
     verified: row.status === 'verified',
+    status: row.status,
     rating: Number(row.rating),
     reviews: row.reviews_count,
     banner: storeMediaUrl(row.banner_path, storageUrl),
     logo: storeMediaUrl(row.logo_path, storageUrl),
     bannerPath: row.banner_path,
     logoPath: row.logo_path,
+    visits: { days: row.visit_days, slots: row.visit_slots, home: row.home_visits, paused: row.visits_paused, note: row.pause_note },
     care: (row.store_care_links ?? []).flatMap(l => (l.care_providers ? [{ providerId: l.care_providers.public_id, relationship: l.relationship }] : [])),
   }
 }

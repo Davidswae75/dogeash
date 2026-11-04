@@ -408,3 +408,4 @@ description: chronological action log per session, consolidated weekly
 | 08:38 | Created app/composables/useStoreReviews.ts | — | ~1096 |
 | 08:39 | Created app/components/review/ReviewDialog.vue | — | ~1054 |
 | 09:14 | Created app/pages/dashboard/care.vue | — | ~862 |
+| 09:19 | Created supabase/migrations/20261112000000_store_visit_settings.sql | — | ~679 |

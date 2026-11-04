@@ -1,9 +1,10 @@
-import { useRuntimeConfig, useSupabaseClient } from '#imports'
-import type { StoreRow } from '~/utils/stores'
+import { navigateTo, useRuntimeConfig, useSupabaseClient } from '#imports'
+import type { StoreRow, VisitSettings } from '~/utils/stores'
 import type { StoreFormValues } from '~/utils/storeForm'
 import { listedStores, storeColumns, toStore } from '~/utils/stores'
 import { storeFormToRow } from '~/utils/storeForm'
 import { checkImage, imagePath } from '~/utils/imageUpload'
+import { visitSettingsToRow } from '~/utils/storeSettings'
 import { useNotify } from './useNotify'
 import { useSession } from './useSession'
 import { useStoreContext } from './useStoreContext'
@@ -74,5 +75,28 @@ export function useStoreProfile() {
     return null
   }
 
-  return { save, setImage, reload }
+  // When the store takes kennel visits, or pausing them
+  async function saveVisits(settings: VisitSettings): Promise<string | null> {
+    const store = membership.value?.store
+    if (!store) return 'Your store isn\'t loaded. Refresh the page and try again.'
+    const { data, error } = await supabase.from('stores').update(visitSettingsToRow(settings)).eq('public_id', store.id).select(storeColumns).maybeSingle()
+    if (error || !data) return 'That didn\'t save. Try again.'
+    await refresh(data as unknown as StoreRow)
+    useNotify().storeUpdated(store.name, settings.paused ? 'Visits paused' : 'Visit times saved')
+    return null
+  }
+
+  // Only a store still in draft can be deleted (by its owner); anything further along goes through Dogeash
+  async function deleteDraft(): Promise<string | null> {
+    const store = membership.value?.store
+    if (!store) return 'Your store isn\'t loaded. Refresh the page and try again.'
+    const { data, error } = await supabase.from('stores').delete().eq('public_id', store.id).select('public_id')
+    if (error) return error.message.includes('foreign key') ? 'Delete the store\'s dogs first.' : 'That didn\'t work. Try again.'
+    if (!data?.length) return 'Only a store still in draft can be deleted here. Contact Dogeash to close it.'
+    await session.load()
+    await navigateTo('/account')
+    return null
+  }
+
+  return { save, setImage, reload, saveVisits, deleteDraft }
 }

@@ -34,7 +34,6 @@ export const dashboardNav: { group: string, items: { to: string, label: string, 
 // What each section will hold, shown until it is built
 export const dashboardSections: Record<string, { title: string, text: string, plan: string[] }> = {
   payouts: { title: 'Payouts', text: 'Deposits, sales and money paid to your bank.', plan: ['Bank account for payouts', 'Escrow deposits and releases', 'Statements and platform fees'] },
-  settings: { title: 'Settings', text: 'Your account and store preferences.', plan: ['Sign-in and one-time code security', 'Notifications by SMS and email', 'Close or pause your store'] },
 }
 
 // Example figures for the design

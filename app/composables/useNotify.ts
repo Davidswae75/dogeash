@@ -98,8 +98,8 @@ export function useNotify() {
       show('success', Star, { kicker: 'Reviews', meta: 'Saved', title, text }),
 
     // The store profile saved; buyers see it on the store page
-    storeUpdated: (name: string) =>
-      show('success', Store, { kicker: 'Your store', meta: 'Saved', title: 'Store profile saved', text: `Buyers see the changes on ${name}'s page.` }),
+    storeUpdated: (name: string, title = 'Store profile saved') =>
+      show('success', Store, { kicker: 'Your store', meta: 'Saved', title, text: `Buyers see the changes on ${name}'s page.` }),
 
     // A visit changed: cancelled by the buyer, or confirmed / declined / marked done by the store
     visitUpdated: (title: string, text: string) =>

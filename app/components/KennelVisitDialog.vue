@@ -3,11 +3,12 @@ import type { Dog } from '~/utils/dogs'
 import type { Store } from '~/utils/stores'
 import { computed } from 'vue'
 import type { AccountGate } from '~/composables/useAccountGate'
-import { kennelVisitServices } from '~/utils/stores'
+import { kennelVisitServices, visitSettings } from '~/utils/stores'
 import { useVisits } from '~/composables/useVisits'
 
 // Book a kennel visit with a store, for one dog, several shortlisted dogs, or just to see the kennel.
-// The shared booking dialog, filled in from the store; needs an account.
+// The shared booking dialog, filled in from the store and its visit settings (days, times, home visits);
+// needs an account. While the store has paused visits, a disabled button says so instead.
 const props = withDefaults(defineProps<{
   store: Store
   dogs?: Dog[]
@@ -16,6 +17,7 @@ const props = withDefaults(defineProps<{
   triggerClass?: string
 }>(), { dogs: () => [], label: 'Book a kennel visit', variant: 'outline' })
 
+const settings = computed(() => visitSettings(props.store))
 const names = computed(() => props.dogs.map(d => d.name).join(', '))
 const summary = computed(() => props.dogs.length ? [{ label: props.dogs.length === 1 ? 'Dog' : 'Dogs', value: names.value }] : [])
 
@@ -33,10 +35,14 @@ const send = (b: { service: string, day: string, slot: string, place: 'home' | '
 
 <template>
   <BookingDialog
+    v-if="!settings.paused"
     :title="props.store.name"
     :description="`Kennel visit in ${props.store.area}, ${props.store.city} · ${props.store.hours}`"
     :services="kennelVisitServices"
     premises-label="At the kennel"
+    :weekdays="settings.days"
+    :slots="settings.slots"
+    :home-visits="settings.home"
     :summary="summary"
     :trigger-label="props.label"
     :trigger-variant="props.variant"
@@ -45,4 +51,7 @@ const send = (b: { service: string, day: string, slot: string, place: 'home' | '
     :send="send"
     price-note="Kennel visits are free. The store confirms the time with you."
   />
+  <Button v-else :variant="props.variant" :class="props.triggerClass" disabled :title="settings.note || 'This store isn\'t taking visit requests right now.'">
+    Visits paused{{ settings.note ? ` · ${settings.note}` : '' }}
+  </Button>
 </template>

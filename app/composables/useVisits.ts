@@ -97,7 +97,7 @@ export function useVisits() {
       place: r.place,
       note: r.note?.trim() || null,
     })
-    if (error) return error.message.includes('from today') ? 'Choose a day from today on.' : 'The request didn\'t send. Try again.'
+    if (error) return visitRefusal(error.message)
     await loadMine()
     return null
   }
@@ -110,6 +110,16 @@ export function useVisits() {
   }
 
   return { mine, upcoming, past, loadMine, loadForStore, request, setStatus }
+}
+
+// What the database's refusal of a visit request means, in words for the buyer
+function visitRefusal(message: string) {
+  if (message.includes('from today')) return 'Choose a day from today on.'
+  if (message.includes('isn\'t taking visits')) return 'This store has paused visit requests. Message them instead.'
+  if (message.includes('on that day')) return 'The store doesn\'t take visits that day. Choose another.'
+  if (message.includes('visit times')) return 'Choose one of the store\'s visit times.'
+  if (message.includes('only takes visits at the kennel')) return 'This store only takes visits at the kennel.'
+  return 'The request didn\'t send. Try again.'
 }
 
 // "Rambo and Sarge" / "Rambo, Sarge and Zara" for the dogs on a visit

@@ -132,7 +132,8 @@ check('outsiders can\'t change a store\'s dogs', await scalar(`select price_nair
 check('a member can change their store\'s dogs', (await as('authenticated', handler, `update public.dogs set price_naira = 3100000 where id = '${rambo}' returning id`))?.length === 1)
 check('a dog can\'t be moved to another store', await as('authenticated', owner, `update public.dogs set store_id = '${draft}' where id = '${rambo}'`) === null)
 
-// Messages and visits
+// Messages and visits (the test store takes visits every day, at the times these tests use)
+await db.exec(`update public.stores set visit_days = '{0,1,2,3,4,5,6}', visit_slots = '{10:30,11:00}' where id = '${k9}'`)
 const sargeId = await scalar(`select id from public.dogs where file_no = 'KD-2026-014'`)
 const otherStoreDog = await scalar(`select id from public.dogs where store_id <> '${k9}' limit 1`)
 const conv = await as('authenticated', buyer, `insert into public.conversations (store_id, dog_id) values ('${k9}', '${sargeId}') returning id, buyer_name`)
@@ -265,6 +266,23 @@ await db.query(`update public.stores set details = details || '{"care":[{"provid
 await db.exec(move)
 const moved = await db.query(`select p.public_id, l.relationship from public.store_care_links l join public.care_providers p on p.id = l.provider_id join public.stores s on s.id = l.store_id where s.public_id = 'STR-004' and p.public_id = 'CARE-07'`)
 check('the old care lists move into links (unknown providers are skipped)', moved.rows[0]?.relationship === 'Our vet' && await scalar(`select (details ? 'care')::text from public.stores where public_id = 'STR-004'`) === 'false')
+
+// Visit settings: requests must fit the store's days, times and places, and nothing comes in while paused
+const visitOn = (day, slot = '10:30', place = 'kennel') => as('authenticated', buyer, `insert into public.visits (store_id, service, day, slot, place) values ('${k9}', 'Meet the dogs', ${day}, '${slot}', '${place}') returning id`)
+check('a manager can set the store\'s visit times', (await as('authenticated', manager, `update public.stores set visit_days = '{1,2,3,4,5}', visit_slots = '{9:00,14:30}', home_visits = false where id = '${k9}' returning visit_slots`))?.length === 1)
+const nextDow = dow => `(current_date + ((${dow} - extract(dow from current_date)::int + 7) % 7 + 7))`
+check('a visit on a day the store takes visits is fine', (await visitOn(nextDow(2), '14:30'))?.length === 1)
+check('a visit on a day off is refused', await visitOn(nextDow(0), '14:30') === null)
+check('a time the store doesn\'t offer is refused', await visitOn(nextDow(2), '10:30') === null)
+check('a home visit is refused unless the store offers them', await visitOn(nextDow(3), '9:00', 'home') === null)
+await as('authenticated', manager, `update public.stores set home_visits = true where id = '${k9}'`)
+check('a home visit is fine once the store offers them', (await visitOn(nextDow(3), '9:00', 'home'))?.length === 1)
+await as('authenticated', owner, `update public.stores set visits_paused = true, pause_note = 'Back on 1 December' where id = '${k9}'`)
+check('nothing comes in while visits are paused', await visitOn(nextDow(4), '9:00') === null)
+check('a badly written time is refused', await as('authenticated', owner, `update public.stores set visit_slots = '{9am}' where id = '${k9}'`) === null)
+check('a store needs at least one visit day', await as('authenticated', owner, `update public.stores set visit_days = '{}' where id = '${k9}'`) === null)
+check('a handler can\'t change visit settings', (await as('authenticated', handler, `update public.stores set visits_paused = false where id = '${k9}' returning id`))?.length === 0)
+await db.exec(`update public.stores set visits_paused = false, pause_note = '', home_visits = false, visit_days = '{0,1,2,3,4,5,6}', visit_slots = '{10:30,11:00}' where id = '${k9}'`)
 
 // Roles
 check('a handler can\'t edit the store', (await as('authenticated', handler, `update public.stores set tagline = 'x' where id = '${k9}' returning id`))?.length === 0)

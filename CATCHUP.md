@@ -306,10 +306,12 @@ The owner should tell the person to sign in or sign up with that email; Dogeash 
 
 **What it does:** the care directory (vets, trainers, groomers, kennel builders, equipment, boarding) now comes from Supabase. Stores manage their own care team at `/dashboard/care` (was a "Coming next" page).
 
-**You need to do (soon):** run `supabase/migrations/20261111000000_care_providers.sql` in the Supabase SQL Editor (it's on your clipboard). Until you do:
-- the public site shows sample data
-- store members' dashboards won't load their store
-The site now asks for each store's care links, which only exist after the migration.
+**Status:** migration run on 4 Nov and checked live:
+- 9 providers in the directory.
+- 11 care links across the 5 stores, matching their old lists exactly.
+- The old `care` lists are gone from `details`.
+- Visitors can't write links.
+- The site reads all of it from the database, not the samples.
 
 **The migration:**
 - Creates the `care_providers` table and adds the 9 sample providers to it.
@@ -346,3 +348,49 @@ The site now asks for each store's care links, which only exist after the migrat
 - New components: `dashboard/DashboardCareMember.vue`, `dashboard/DashboardCareFinder.vue`. New page: `app/pages/dashboard/care.vue`.
 - The profile form no longer writes the care team into `details`.
 - `scripts/generate-seed.mjs`: fixed, and now includes providers and links.
+
+## 10. Store settings: kennel visit times, pausing, closing
+
+**What it does:** store owners choose when they take kennel visits, can pause visit requests, and can delete a draft store, at `/dashboard/settings` (was a "Coming next" page).
+
+**You need to do (soon):** run `supabase/migrations/20261112000000_store_visit_settings.sql` in the Supabase SQL Editor (it's on your clipboard). Until you do:
+- the public site shows sample data
+- store dashboards won't load their store
+The site now asks for the new columns, which only exist after the migration.
+
+**Kennel visits** (before this, every store offered the same fixed days and times):
+- **Days you take visits:** any of Mon–Sun. Existing stores start on Mon–Sat, as before.
+- **Times:** pick up to 12 half-hours between 7:00 and 18:00. Existing stores start on 9:00, 10:30, 12:00, 14:00 and 15:30, as before.
+- **Also visit buyers at home:** when on, buyers can choose "At my home" in the booking dialog. Off by default.
+- The "Book a kennel visit" dialog on store and dog pages offers exactly these days (the next six open days) and times.
+- The database refuses requests on other days, at other times, or at home when the store doesn't offer home visits. Buyers get a plain message for each.
+
+**Pause visit requests:**
+- Turns "Book a kennel visit" into a greyed-out "Visits paused" button, with an optional note like "Back on 1 December".
+- The store and its dogs stay listed, and buyers can still message.
+- Visits already booked aren't affected.
+- The database refuses new requests while paused.
+
+**Close your store:**
+- A store still in draft can be deleted here, after asking. Its dogs have to be deleted first.
+- A store buyers have seen is closed through Dogeash; the page says so.
+
+**Who:**
+- The Settings page is for owners.
+- The database lets owners and managers change visit settings, as with the rest of the store profile. Handlers can't.
+
+**Also fixed:** the booking dialog worked out day dates in UTC. Just after midnight in Lagos that gave yesterday's date for the chosen weekday, which the new day rule would have refused. It now uses the local date.
+
+**Not done yet:**
+- Blocking out single dates (holidays).
+- Different times on different days.
+- Notification choices for the store (no email or SMS sending exists yet).
+
+**Code:**
+- `supabase/migrations/20261112000000_store_visit_settings.sql`: new store columns, limits, and the rule on new visits.
+- `npm run db:test`: 10 new checks. All pass. The test store now takes visits every day, so the older visit tests don't depend on what day it is.
+- `app/utils/storeSettings.ts`: the form's rules, time choices, weekday labels.
+- `app/utils/stores.ts`: `VisitSettings`, `visitSettings(store)` with the old defaults for sample stores, `Store.status`.
+- `app/composables/useStoreProfile.ts`: `saveVisits()` and `deleteDraft()`. `useVisits`: plain messages for each refusal.
+- `BookingDialog.vue` takes `weekdays` and `slots`. `KennelVisitDialog.vue` passes the store's settings, or shows "Visits paused".
+- New components: `dashboard/DashboardVisitSettings.vue`, `dashboard/DashboardCloseStore.vue`. New page: `app/pages/dashboard/settings.vue`.

@@ -1,13 +1,13 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-11-04T08:14:02.514Z",
-    "fileCount": 704,
+    "lastScanned": "2026-11-04T08:19:29.136Z",
+    "fileCount": 705,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "b8b900b6a35491ac2487886dd0bfa9d258acfd4fc359b9b590d7aa212a609326",
-    "storeUpdatedAt": "2026-11-04T08:14:02.547Z",
-    "rootHash": "e79b22414e30cf73"
+    "renderedHash": "3c6f19a41a9af59defc36c53a1e7aaf9ca8291a104bc84ad443dc4bf6b80105f",
+    "storeUpdatedAt": "2026-11-04T08:19:29.167Z",
+    "rootHash": "2b23ea2513e61fdb"
   },
   "files": {
     ".gitignore": {
@@ -8595,6 +8595,15 @@
       "size": 3231,
       "mtimeMs": 1793780042073.0151,
       "updatedAt": "2026-11-04T08:14:02.512Z",
+      "source": "hook"
+    },
+    "supabase/migrations/20261112000000_store_visit_settings.sql": {
+      "description": "Store settings for kennel visits: the days and times a store takes visits, whether it also visits bu",
+      "tokens": 679,
+      "hash": "c90cbae424c15c55",
+      "size": 2545,
+      "mtimeMs": 1793780368934.5886,
+      "updatedAt": "2026-11-04T08:19:29.134Z",
       "source": "hook"
     }
   },

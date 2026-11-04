@@ -56,6 +56,11 @@ export interface Database {
           details: Json
           banner_path: string | null
           logo_path: string | null
+          visit_days: number[]
+          visit_slots: string[]
+          home_visits: boolean
+          visits_paused: boolean
+          pause_note: string
           created_by: string | null
         } & Timestamps
         Insert: {
@@ -70,7 +75,7 @@ export interface Database {
           founded?: number | null
           details?: Json
         }
-        Update: { name?: string, initials?: string, tagline?: string, city?: string, area?: string, state?: string, founded?: number | null, details?: Json, banner_path?: string | null, logo_path?: string | null }
+        Update: { name?: string, initials?: string, tagline?: string, city?: string, area?: string, state?: string, founded?: number | null, details?: Json, banner_path?: string | null, logo_path?: string | null, visit_days?: number[], visit_slots?: string[], home_visits?: boolean, visits_paused?: boolean, pause_note?: string }
         Relationships: []
       }
       store_members: {
