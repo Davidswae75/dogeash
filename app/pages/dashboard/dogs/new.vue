@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { definePageMeta, navigateTo, useSeoMeta } from '#imports' // nuxt
+import type { DogMedia } from '~/utils/dogs'
 import type { DogFormValues } from '~/utils/dogForm'
 import { useNotify } from '~/composables/useNotify'
 import { useStoreContext } from '~/composables/useStoreContext'
@@ -13,8 +14,8 @@ const { store } = useStoreContext()
 const storeDogs = useStoreDogs()
 const notify = useNotify()
 
-async function save(values: DogFormValues, photoPath: string | null, publish: boolean) {
-  const { fileNo, error } = await storeDogs.create(values, photoPath, publish)
+async function save(values: DogFormValues, media: DogMedia, publish: boolean) {
+  const { fileNo, error } = await storeDogs.create(values, media, publish)
   if (!fileNo) return error ?? null
   notify.dogUpdated(`${values.name} ${publish && !error ? 'is live' : 'saved as a draft'}`, `File number ${fileNo}.${error ? ` ${error}` : ''}`)
   await navigateTo('/dashboard/dogs')

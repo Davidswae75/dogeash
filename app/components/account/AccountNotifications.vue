@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Bell, CalendarCheck, Lock, MessageSquare, PawPrint, Star, Tag, TrendingDown, Users } from '@lucide/vue'
+import { Bell, CalendarCheck, Lock, MessageSquare, PawPrint, Star, Store, Tag, TrendingDown, Users } from '@lucide/vue'
 import type { Component } from 'vue'
 import type { NotificationKind } from '~/composables/useNotifications'
 import { cn } from '~/lib/utils'
@@ -20,6 +20,7 @@ const kinds: Record<NotificationKind, { icon: Component, tile: string }> = {
   price: { icon: TrendingDown, tile: 'bg-marigold-soft text-marigold-ink' },
   team: { icon: Users, tile: 'bg-night text-marigold' },
   review: { icon: Star, tile: 'bg-marigold-soft text-marigold-ink' },
+  store: { icon: Store, tile: 'bg-marigold text-on-marigold' },
 }
 
 let timer: ReturnType<typeof setInterval> | undefined

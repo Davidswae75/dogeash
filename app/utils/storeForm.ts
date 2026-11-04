@@ -98,3 +98,39 @@ export const storeFormFields = {
     input('ownerYears', 'Years working with dogs', '26', { attrs: { inputmode: 'numeric', maxlength: 2 } }),
   ],
 }
+
+// ── Setting up the profile in steps ─────────────────────────────────────────
+// The profile in six steps. Each step is checked against its own fields only and saved when you leave it.
+// History and the banner and logo are optional; the last step reviews everything.
+export type StoreStepKey = 'store' | 'about' | 'owner' | 'history' | 'images' | 'review'
+type FormField = keyof StoreFormValues
+
+export const storeSteps: { key: StoreStepKey, title: string, hint: string, why: string, fields: FormField[], optional?: boolean }[] = [
+  { key: 'store', title: 'Your store', hint: 'Name, tagline and where you are', why: 'Buyers search by city, and your tagline shows under your name in every list.', fields: ['name', 'tagline', 'city', 'area', 'state', 'founded'] },
+  { key: 'about', title: 'About the kennel', hint: 'Your story, services and hours', why: 'Buyers read this before they book a visit. Say what makes your dogs and your handover different.', fields: ['about', 'services', 'hours', 'deliveryAreas'] },
+  { key: 'owner', title: 'Who runs it', hint: 'The person behind the kennel', why: 'A guard dog is a serious purchase. Buyers want to know who trained it and who they will deal with.', fields: ['ownerName', 'ownerTitle', 'ownerYears', 'ownerBio', 'credentials'] },
+  { key: 'history', title: 'History', hint: 'Moments worth knowing', why: 'A timeline shows buyers how long you have done this. You can skip it and add it later.', fields: ['history'], optional: true },
+  { key: 'images', title: 'Banner and logo', hint: 'How your store looks', why: 'Stores with a banner and logo look established. Until you add them, your initials show.', fields: [], optional: true },
+  { key: 'review', title: 'Review', hint: 'Check and finish', why: 'Everything in one place before you finish. Every step is already saved.', fields: [] },
+]
+
+// The rules for one step: the same as the full form, for that step's fields only
+export const storeStepSchema = (key: StoreStepKey) => {
+  const fields = storeSteps.find(s => s.key === key)!.fields
+  return fields.length ? storeFormSchema.pick(Object.fromEntries(fields.map(f => [f, true])) as Partial<Record<FormField, true>>) : z.object({})
+}
+
+// Whether a step has what it needs, from the saved store
+export function storeStepDone(s: Store, key: StoreStepKey): boolean {
+  switch (key) {
+    case 'store': return s.name.length >= 2 && s.tagline.length >= 10 && !!s.city
+    case 'about': return s.about.length >= 40
+    case 'owner': return s.owner.name.length >= 2
+    case 'history': return s.history.length > 0
+    case 'images': return !!s.banner || !!s.logo
+    case 'review': return false
+  }
+}
+
+// Setting up (go step by step) until the three essential steps are done; after that, editing (any step, any order)
+export const storeSetupNeeded = (s: Store) => !(['store', 'about', 'owner'] as const).every(k => storeStepDone(s, k))

@@ -378,6 +378,24 @@
       "last_seen": "2026-11-04T07:38:25.163Z",
       "occurrences": 1,
       "related_bugs": []
+    },
+    {
+      "error_message": "Incorrect value in code",
+      "file": "app/layouts/admin.vue",
+      "root_cause": "Had \"w-[272px] border-0 p-0 [&>button]:text-on-night\"",
+      "fix": "Changed to \"w-full! max-w-none! border-0 p-0 [&>button]:text-",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "vue"
+      ],
+      "status": "candidate",
+      "observed_worktree": "/Users/dave/Documents/personalProjects/dogeash",
+      "id": "bug-022",
+      "timestamp": "2026-11-04T20:47:27.372Z",
+      "last_seen": "2026-11-04T20:47:27.372Z",
+      "occurrences": 1,
+      "related_bugs": []
     }
   ],
   "applied_observations": {
@@ -401,7 +419,8 @@
     "9fcd8798-2e0a-4a4a-bdbe-c0aa7d0fcb0e": true,
     "e70653e2-8691-40e3-9982-3f0bdcbf75c8": true,
     "2d4f081c-5f7d-4654-b52a-5368236f27f4": true,
-    "8b5b9a6b-e1e1-4d5c-a44e-d616ae499abf": true
+    "8b5b9a6b-e1e1-4d5c-a44e-d616ae499abf": true,
+    "422d5f35-168e-47fc-8bcc-f7051cf60461": true
   },
-  "next_id": 22
+  "next_id": 23
 }

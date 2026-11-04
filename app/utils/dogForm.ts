@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import type { FieldConfig } from '~/components/Fields.vue'
 import type { Database } from '~/types/database.types'
-import type { Dog } from './dogs'
+import type { Dog, DogMedia } from './dogs'
 import { hipGrades, sexes } from './k9'
 
 // The dashboard's add / edit dog form: what a store fills in, checked the same way the database
@@ -70,8 +70,8 @@ export const dogFormFromDog = (d: Omit<Dog, 'status'>): DogFormValues => ({
 
 type DogWrite = Database['public']['Tables']['dogs']['Update']
 
-// Form values → the dogs table's columns (status and store are set by whoever saves)
-export const dogFormToRow = (v: DogFormValues, photoPath: string | null): DogWrite => ({
+// Form values and media → the dogs table's columns (status and store are set by whoever saves)
+export const dogFormToRow = (v: DogFormValues, media: DogMedia): DogWrite => ({
   name: v.name,
   breed: v.breed,
   sex: v.sex,
@@ -83,7 +83,9 @@ export const dogFormToRow = (v: DogFormValues, photoPath: string | null): DogWri
   safe_with_children: v.safeWithChildren,
   hips: v.hips,
   price_naira: v.priceNaira,
-  photo_path: photoPath,
+  photo_path: media.photoPath,
+  gallery_paths: media.gallery,
+  videos: media.videos,
   file: {
     summary: v.summary,
     born: v.born,

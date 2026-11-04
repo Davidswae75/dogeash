@@ -61,6 +61,8 @@ export interface Database {
           home_visits: boolean
           visits_paused: boolean
           pause_note: string
+          status_note: string
+          status_changed_at: string | null
           created_by: string | null
         } & Timestamps
         Insert: {
@@ -102,6 +104,8 @@ export interface Database {
           price_naira: number
           status: Database['public']['Enums']['dog_status']
           photo_path: string | null
+          gallery_paths: string[]
+          videos: Json
           property: Database['public']['Enums']['property_type'][]
           safe_with_children: boolean
           file: Json | null
@@ -120,6 +124,8 @@ export interface Database {
           hips?: string
           status?: Database['public']['Enums']['dog_status']
           photo_path?: string | null
+          gallery_paths?: string[]
+          videos?: Json
           property?: Database['public']['Enums']['property_type'][]
           safe_with_children?: boolean
           file?: Json | null
@@ -180,6 +186,18 @@ export interface Database {
           { foreignKeyName: 'visits_store_id_fkey', columns: ['store_id'], isOneToOne: false, referencedRelation: 'stores', referencedColumns: ['id'] },
         ]
       }
+      staff: {
+        Row: { user_id: string, role: Database['public']['Enums']['staff_role'], note: string, created_at: string }
+        Insert: never
+        Update: never
+        Relationships: []
+      }
+      admin_audit: {
+        Row: { id: number, actor_id: string | null, actor_name: string, action: string, target_type: string, target_id: string, detail: Json, created_at: string }
+        Insert: never
+        Update: never
+        Relationships: []
+      }
       care_providers: {
         Row: { id: string, public_id: string, slug: string, name: string, person: string | null, type: Database['public']['Enums']['care_type'], city: string, areas: string, home_visits: boolean, verified: boolean, credential: string, rating: number, reviews_count: number, price_from: number } & Timestamps
         Insert: never
@@ -239,6 +257,10 @@ export interface Database {
       my_email: { Args: Record<string, never>, Returns: string }
       my_store_invites: { Args: Record<string, never>, Returns: { id: string, store_name: string, store_city: string, role: Database['public']['Enums']['store_role'], invited_by_name: string, created_at: string }[] }
       accept_store_invite: { Args: { target: string }, Returns: string }
+      is_staff: { Args: { roles?: Database['public']['Enums']['staff_role'][] }, Returns: boolean }
+      admin_overview: { Args: Record<string, never>, Returns: Json }
+      admin_stores: { Args: Record<string, never>, Returns: Json }
+      admin_set_store_status: { Args: { target: string, next: Database['public']['Enums']['store_status'], note?: string }, Returns: undefined }
       store_team: { Args: { target: string }, Returns: { user_id: string, name: string, email: string | null, role: Database['public']['Enums']['store_role'], joined_at: string }[] }
     }
     Enums: {
@@ -251,8 +273,9 @@ export interface Database {
       message_role: 'buyer' | 'store'
       visit_status: 'requested' | 'confirmed' | 'declined' | 'cancelled' | 'done'
       visit_place: 'kennel' | 'home'
+      staff_role: 'admin' | 'inspector'
       care_type: 'vet' | 'trainer' | 'groomer' | 'builder' | 'equipment' | 'boarding'
-      notification_kind: 'message' | 'visit' | 'reserved' | 'sold' | 'available' | 'price' | 'team' | 'review'
+      notification_kind: 'message' | 'visit' | 'reserved' | 'sold' | 'available' | 'price' | 'team' | 'review' | 'store'
     }
     CompositeTypes: { [_ in never]: never }
   }

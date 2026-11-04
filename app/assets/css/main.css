@@ -29,6 +29,12 @@
   --color-verified: var(--verified);
   --color-verified-soft: var(--verified-soft);
   --color-danger: var(--danger);
+  --color-chart-line: var(--chart-line);
+  --color-cat-1: var(--cat-1);
+  --color-cat-2: var(--cat-2);
+  --color-cat-3: var(--cat-3);
+  --color-cat-4: var(--cat-4);
+  --color-cat-5: var(--cat-5);
   --color-focus: var(--focus);
 
   /* shadcn-vue semantic names, pointed at the same tokens */

@@ -1,6 +1,6 @@
 import { computed } from 'vue'
 import { useRuntimeConfig, useState, useSupabaseClient } from '#imports'
-import type { DogRow, StoreDog } from '~/utils/dogs'
+import type { DogMedia, DogRow, StoreDog } from '~/utils/dogs'
 import type { ListingStatus } from '~/utils/k9'
 import type { DogFormValues } from '~/utils/dogForm'
 import { dogColumns, listingStatusLabels, toStoreDog } from '~/utils/dogs'
@@ -12,6 +12,8 @@ import { useStoreContext } from './useStoreContext'
 // The dogs of the store the dashboard is showing (Supabase: dogs, and the dog-photos bucket).
 // A store's people see every dog of theirs, drafts included; the public sees only live ones.
 // Errors come back as friendly messages, or null when it worked.
+
+const VIDEO_MAX_MB = 50
 
 export function useStoreDogs() {
   const supabase = useSupabaseClient()
@@ -43,15 +45,33 @@ export function useStoreDogs() {
     return error ? { error: 'The photo didn\'t upload. Check your connection and try again.' } : { path }
   }
 
-  async function removePhoto(path: string | null) {
-    if (path && !path.startsWith('dogs/')) await supabase.storage.from('dog-photos').remove([path])
+  // A video: MP4, WebM or MOV, up to 50 MB, into the store's folder in dog-videos
+  async function uploadVideo(file: File): Promise<{ path?: string, error?: string }> {
+    const ext = ({ 'video/mp4': 'mp4', 'video/webm': 'webm', 'video/quicktime': 'mov' } as Record<string, string>)[file.type]
+    if (!ext) return { error: 'Use an MP4, WebM or MOV video.' }
+    if (file.size > VIDEO_MAX_MB * 1024 * 1024) return { error: `That video is over ${VIDEO_MAX_MB} MB. Trim it or export it smaller.` }
+    const id = await storeId()
+    if (!id) return { error: 'Your store wasn\'t found. Reload and try again.' }
+    const path = `${id}/${crypto.randomUUID()}.${ext}`
+    const { error } = await supabase.storage.from('dog-videos').upload(path, file, { contentType: file.type, cacheControl: '31536000' })
+    return error ? { error: 'The video didn\'t upload. Check your connection and try again.' } : { path }
+  }
+
+  // Delete files a dog no longer uses (the photos bundled with the site are never touched)
+  async function removeFiles(before: DogMedia, after?: DogMedia) {
+    const keepPhotos = new Set([after?.photoPath, ...(after?.gallery ?? [])])
+    const keepVideos = new Set(after?.videos.map(v => v.path) ?? [])
+    const photos = [before.photoPath, ...before.gallery].filter((p): p is string => !!p && !p.startsWith('dogs/') && !keepPhotos.has(p))
+    const videos = before.videos.map(v => v.path).filter(p => !keepVideos.has(p))
+    if (photos.length) await supabase.storage.from('dog-photos').remove(photos)
+    if (videos.length) await supabase.storage.from('dog-videos').remove(videos)
   }
 
   // New dogs start as drafts; `publish` lists it straight away when the store is verified
-  async function create(values: DogFormValues, photoPath: string | null, publish: boolean): Promise<{ fileNo?: string, error?: string }> {
+  async function create(values: DogFormValues, media: DogMedia, publish: boolean): Promise<{ fileNo?: string, error?: string }> {
     const id = await storeId()
     if (!id) return { error: 'Your store wasn\'t found. Reload and try again.' }
-    const { data, error } = await supabase.from('dogs').insert({ ...dogFormToRow(values, photoPath), store_id: id, status: 'draft' } as never).select('id, file_no').single()
+    const { data, error } = await supabase.from('dogs').insert({ ...dogFormToRow(values, media), store_id: id, status: 'draft' } as never).select('id, file_no').single()
     if (error || !data) return { error: 'The dog didn\'t save. Check the form and try again.' }
     if (publish) {
       const failed = await setStatus(data.id, 'available')
@@ -61,10 +81,10 @@ export function useStoreDogs() {
     return { fileNo: data.file_no }
   }
 
-  async function update(dog: StoreDog, values: DogFormValues, photoPath: string | null): Promise<string | null> {
-    const { error } = await supabase.from('dogs').update(dogFormToRow(values, photoPath)).eq('id', dog.id)
+  async function update(dog: StoreDog, values: DogFormValues, media: DogMedia): Promise<string | null> {
+    const { error } = await supabase.from('dogs').update(dogFormToRow(values, media)).eq('id', dog.id)
     if (error) return 'Your changes didn\'t save. Check the form and try again.'
-    if (photoPath !== dog.photoPath) await removePhoto(dog.photoPath)
+    await removeFiles(dog.media, media)
     await load()
     return null
   }
@@ -80,7 +100,7 @@ export function useStoreDogs() {
   async function remove(dog: StoreDog): Promise<string | null> {
     const { data, error } = await supabase.from('dogs').delete().eq('id', dog.id).select('id')
     if (error || !data?.length) return 'Only owners and managers can delete a draft.'
-    await removePhoto(dog.photoPath)
+    await removeFiles(dog.media)
     dogs.value = dogs.value.filter(d => d.id !== dog.id)
     return null
   }
@@ -97,8 +117,8 @@ export function useStoreDogs() {
     const error = await remove(dog)
     const notify = useNotify()
     if (error) return notify.failed(error)
-    notify.dogUpdated(`${dog.name} deleted`, 'The draft and its photo are gone.')
+    notify.dogUpdated(`${dog.name} deleted`, 'The draft and its photos and videos are gone.')
   }
 
-  return { dogs, loaded, verified, load, find, uploadPhoto, create, update, setStatus, remove, changeStatus, deleteDraft }
+  return { dogs, loaded, verified, load, find, uploadPhoto, uploadVideo, create, update, setStatus, remove, changeStatus, deleteDraft }
 }

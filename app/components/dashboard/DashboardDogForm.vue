@@ -2,20 +2,20 @@
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
 import { computed, ref } from 'vue'
-import type { StoreDog } from '~/utils/dogs'
+import type { DogMedia, StoreDog } from '~/utils/dogs'
 import type { DogFormValues } from '~/utils/dogForm'
 import { dogFormFields, dogFormFromDog, dogFormSchema, emptyDogForm } from '~/utils/dogForm'
 import { breeds, hipGrades } from '~/utils/k9'
 import { propertyTypes, protectionLevels } from '~/utils/protection'
 import type { ProtectionLevel } from '~/utils/protection'
 
-// Add or edit a dog: basics, protection, health, training, the listing and a photo.
-// `save` gets the checked values, the photo path and whether to publish; it returns an error or null.
+// Add or edit a dog: basics, protection, health, training, photos and videos, and the listing.
+// `save` gets the checked values, the photos and videos, and whether to publish; it returns an error or null.
 const props = defineProps<{
   dog?: StoreDog
   city?: string
   verified: boolean
-  save: (values: DogFormValues, photoPath: string | null, publish: boolean) => Promise<string | null>
+  save: (values: DogFormValues, media: DogMedia, publish: boolean) => Promise<string | null>
 }>()
 
 const { handleSubmit, defineField, errors } = useForm<DogFormValues>({
@@ -31,7 +31,10 @@ const [hips] = defineField('hips')
 const [summary] = defineField('summary')
 const [traits] = defineField('traits')
 
-const photoPath = ref<string | null>(props.dog?.photoPath ?? null)
+// The main photo, more photos and videos, as storage paths (uploads happen as they're picked)
+const media = ref<DogMedia>(props.dog
+  ? { photoPath: props.dog.media.photoPath, gallery: [...props.dog.media.gallery], videos: props.dog.media.videos.map(v => ({ ...v })) }
+  : { photoPath: null, gallery: [], videos: [] })
 const busy = ref<'draft' | 'publish' | 'save'>()
 const error = ref('')
 
@@ -42,9 +45,9 @@ const isLive = computed(() => props.dog && ['available', 'reserved'].includes(pr
 
 function submit(mode: 'draft' | 'publish' | 'save') {
   return handleSubmit(async (values) => {
-    if (mode === 'publish' && !photoPath.value) return (error.value = 'Add a photo before the dog goes live.')
+    if (mode === 'publish' && !media.value.photoPath) return (error.value = 'Add a main photo before the dog goes live.')
     busy.value = mode
-    error.value = (await props.save(values, photoPath.value, mode === 'publish')) ?? ''
+    error.value = (await props.save(values, media.value, mode === 'publish')) ?? ''
     busy.value = undefined
   }, () => { error.value = 'Some fields need a look. They\'re marked in red.' })()
 }
@@ -58,7 +61,7 @@ const chips = 'flex w-auto flex-wrap justify-start gap-2'
   <form class="flex flex-col gap-5" novalidate @submit.prevent="submit(props.dog ? 'save' : 'draft')">
     <section :class="section" aria-labelledby="dog-basics">
       <h2 id="dog-basics" :class="heading">The dog</h2>
-      <DashboardDogPhoto v-model:path="photoPath" :preview="props.dog?.photo" />
+      <DashboardDogPhoto v-model:path="media.photoPath" :preview="props.dog?.photo" />
       <div class="grid gap-5 sm:grid-cols-2">
         <Fields :fields="dogFormFields.basics.slice(0, 1)" />
         <FieldShell label="Breed" for="dog-breed" :error="errors.breed">
@@ -117,6 +120,15 @@ const chips = 'flex w-auto flex-wrap justify-start gap-2'
     <section :class="section" aria-labelledby="dog-training">
       <h2 id="dog-training" :class="heading">Training and pedigree</h2>
       <Fields :fields="dogFormFields.training" />
+    </section>
+
+    <section :class="section" aria-labelledby="dog-media">
+      <div class="flex flex-col gap-1">
+        <h2 id="dog-media" :class="heading">More photos and videos</h2>
+        <p class="m-0 text-[13px] leading-5 text-ink-muted">Optional, but they make the listing. They appear in the gallery at the top of the dog's page, after the main photo.</p>
+      </div>
+      <DashboardDogGallery v-model:paths="media.gallery" />
+      <DashboardDogVideos v-model:videos="media.videos" />
     </section>
 
     <section :class="section" aria-labelledby="dog-listing">

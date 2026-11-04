@@ -2,6 +2,7 @@
 import { ArrowLeft } from '@lucide/vue'
 import { computed, onMounted } from 'vue'
 import { definePageMeta, useRoute, useSeoMeta } from '#imports' // nuxt
+import type { DogMedia } from '~/utils/dogs'
 import type { DogFormValues } from '~/utils/dogForm'
 import { useNotify } from '~/composables/useNotify'
 import { useStoreDogs } from '~/composables/useStoreDogs'
@@ -18,9 +19,9 @@ useSeoMeta({ title: () => `${dog.value?.name ?? 'Dog'} · Store dashboard · Dog
 
 onMounted(() => { if (!loaded.value) storeDogs.load() })
 
-async function save(values: DogFormValues, photoPath: string | null, publish: boolean) {
+async function save(values: DogFormValues, media: DogMedia, publish: boolean) {
   const d = dog.value!
-  const error = await storeDogs.update(d, values, photoPath)
+  const error = await storeDogs.update(d, values, media)
   if (error) return error
   if (publish) {
     const failed = await storeDogs.setStatus(d.id, 'available')

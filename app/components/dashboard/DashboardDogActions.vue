@@ -16,7 +16,7 @@ const emit = defineEmits<{ status: [to: ListingStatus], remove: [] }>()
         <Ellipsis class="size-4" aria-hidden="true" />
       </button>
     </DropdownMenuTrigger>
-    <DropdownMenuContent align="end" class="w-48">
+    <DropdownMenuContent align="end" class="w-48 rounded-lg border-line bg-surface p-1 shadow-[0_18px_40px_-20px_rgb(0_0_0/.45)]">
       <DropdownMenuItem as-child>
         <NuxtLink :to="`/dashboard/dogs/${props.dog.fileNo.toLowerCase()}`"><Pencil aria-hidden="true" />Edit</NuxtLink>
       </DropdownMenuItem>

@@ -7,10 +7,13 @@ import { defineNuxtConfig } from 'nuxt/config'
 if (existsSync('.env.local')) process.loadEnvFile('.env.local')
 
 export default defineNuxtConfig({
-  // Renamed pages keep their old links working
+  // Renamed pages keep their old links working; admin pages skip server rendering
   routeRules: {
     '/sell': { redirect: { to: '/open-a-store', statusCode: 301 } },
     '/dashboard/enquiries': { redirect: { to: '/dashboard/inbox?type=message', statusCode: 301 } },
+    // The admin dashboard renders in the browser only: its checks need the signed-in session and its one-time code
+    '/admin': { ssr: false },
+    '/admin/**': { ssr: false },
   },
 
   compatibilityDate: '2025-07-15',

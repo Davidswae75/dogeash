@@ -43,6 +43,17 @@
   --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
   --ease-calm: cubic-bezier(.22, .61, .36, 1);
   --dur-calm: 420ms;
+
+  /* Charts (admin dashboard). One series: marigold, deepened on light for 4:1 contrast.
+     Categories (statuses): five validated hues in a fixed order (dataviz reference palette). */
+  --chart-line: #a06e00;
+  --chart-fill: #ffc21a;
+  --chart-grid: #e4e3de;
+  --cat-1: #2a78d6;
+  --cat-2: #eb6834;
+  --cat-3: #1baf7a;
+  --cat-4: #eda100;
+  --cat-5: #e87ba4;
   color-scheme: light;
 }
 
@@ -72,6 +83,14 @@
   --danger: #f08a82;
   --focus: #ffc21a;
   color-scheme: dark;
+  --chart-line: #ffc21a;
+  --chart-fill: #ffc21a;
+  --chart-grid: #2a2a2d;
+  --cat-1: #3987e5;
+  --cat-2: #d95926;
+  --cat-3: #199e70;
+  --cat-4: #c98500;
+  --cat-5: #d55181;
 }
 
 /* No-JS fallback: follow the device setting */
@@ -101,5 +120,13 @@
     --danger: #f08a82;
     --focus: #ffc21a;
     color-scheme: dark;
+    --chart-line: #ffc21a;
+    --chart-fill: #ffc21a;
+    --chart-grid: #2a2a2d;
+    --cat-1: #3987e5;
+    --cat-2: #d95926;
+    --cat-3: #199e70;
+    --cat-4: #c98500;
+    --cat-5: #d55181;
   }
 }

@@ -34,6 +34,9 @@ export interface Dog {
   priceNaira: number
   status: 'available' | 'reserved'
   photo?: string
+  // More photos after the main one, and videos (obedience, protection work …), when the store added them
+  photos?: string[]
+  videos?: { url: string, kind: VideoKind, title: string }[]
   property: PropertyType[]
   safeWithChildren: boolean
   storeId: string
@@ -640,10 +643,19 @@ export function findDog(fileNo: string) {
 // ── From the database ───────────────────────────────────────────────────────
 
 
-// A dog as its store manages it: any status, with its database id and photo path
-export type StoreDog = Omit<Dog, 'status'> & { id: string, status: ListingStatus, photoPath: string | null, updatedAt: string }
+// What a dog's video shows; the store picks one for each
+export type VideoKind = 'obedience' | 'protection' | 'temperament' | 'health' | 'other'
+export const videoKinds: Record<VideoKind, string> = { obedience: 'Obedience', protection: 'Protection work', temperament: 'Temperament', health: 'Health', other: 'Other' }
 
-export const dogColumns = 'id, file_no, name, breed, sex, city, age, weight_kg, hips, level, price_naira, status, photo_path, property, safe_with_children, file, updated_at, stores!inner (public_id, status)'
+// A dog's photos and videos as storage paths: the main photo, up to 8 more, up to 4 videos
+export interface DogMedia { photoPath: string | null, gallery: string[], videos: { path: string, kind: VideoKind, title: string }[] }
+export const DOG_GALLERY_MAX = 8
+export const DOG_VIDEOS_MAX = 4
+
+// A dog as its store manages it: any status, with its database id and media paths
+export type StoreDog = Omit<Dog, 'status'> & { id: string, status: ListingStatus, photoPath: string | null, media: DogMedia, updatedAt: string }
+
+export const dogColumns = 'id, file_no, name, breed, sex, city, age, weight_kg, hips, level, price_naira, status, photo_path, gallery_paths, videos, property, safe_with_children, file, updated_at, stores!inner (public_id, status)'
 
 export interface DogRow {
   id: string
@@ -659,6 +671,8 @@ export interface DogRow {
   price_naira: number
   status: ListingStatus
   photo_path: string | null
+  gallery_paths: string[] | null
+  videos: DogMedia['videos'] | null
   property: PropertyType[]
   safe_with_children: boolean
   file: Partial<NonNullable<Dog['file']>> | null
@@ -674,9 +688,11 @@ export function dogPhotoUrl(path: string | null, storageUrl: string) {
   if (path.startsWith('dogs/')) return Object.entries(bundledPhotos).find(([file]) => file.endsWith(`/${path.slice(5)}`))?.[1]
   return `${storageUrl}/storage/v1/object/public/dog-photos/${path}`
 }
+export const dogVideoUrl = (path: string, storageUrl: string) => `${storageUrl}/storage/v1/object/public/dog-videos/${path}`
 
 export function toStoreDog(r: DogRow, storageUrl: string): StoreDog {
   const f = r.file ?? {}
+  const media: DogMedia = { photoPath: r.photo_path, gallery: r.gallery_paths ?? [], videos: r.videos ?? [] }
   return {
     id: r.id,
     fileNo: r.file_no,
@@ -691,7 +707,10 @@ export function toStoreDog(r: DogRow, storageUrl: string): StoreDog {
     priceNaira: Number(r.price_naira),
     status: r.status,
     photo: dogPhotoUrl(r.photo_path, storageUrl),
+    photos: media.gallery.map(p => dogPhotoUrl(p, storageUrl)).filter((u): u is string => !!u),
+    videos: media.videos.map(v => ({ url: dogVideoUrl(v.path, storageUrl), kind: v.kind, title: v.title })),
     photoPath: r.photo_path,
+    media,
     property: r.property,
     safeWithChildren: r.safe_with_children,
     storeId: r.stores.public_id,
@@ -735,6 +754,6 @@ export function listingActions(status: ListingStatus, verified: boolean): { to: 
 
 // A listed dog as buyers see it (the catalogue only loads available and reserved dogs)
 export function toDog(r: DogRow, storageUrl: string): Dog {
-  const { id: _id, photoPath: _path, updatedAt: _at, status, ...dog } = toStoreDog(r, storageUrl)
+  const { id: _id, photoPath: _path, media: _media, updatedAt: _at, status, ...dog } = toStoreDog(r, storageUrl)
   return { ...dog, status: status === 'reserved' ? 'reserved' : 'available' }
 }

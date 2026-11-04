@@ -36,14 +36,15 @@ export function useStoreProfile() {
     if (data) await refresh(data as unknown as StoreRow)
   }
 
-  async function save(values: StoreFormValues): Promise<string | null> {
+  // `quiet` skips the toast (each step of the profile saves as you go)
+  async function save(values: StoreFormValues, quiet = false): Promise<string | null> {
     const store = membership.value?.store
     if (!store) return 'Your store isn\'t loaded. Refresh the page and try again.'
     const { data, error } = await supabase.from('stores').update(storeFormToRow(values)).eq('public_id', store.id).select(storeColumns).maybeSingle()
     if (error) return error.message.includes('check constraint') ? 'Something is too long. Shorten it and try again.' : 'That didn\'t save. Try again.'
     if (!data) return 'Only the store\'s owners and managers can edit its profile.'
     const saved = await refresh(data as unknown as StoreRow)
-    useNotify().storeUpdated(saved.name)
+    if (!quiet) useNotify().storeUpdated(saved.name)
     return null
   }
 

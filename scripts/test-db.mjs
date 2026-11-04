@@ -13,6 +13,7 @@ await db.exec(`
   create schema auth;
   create table auth.users (id uuid primary key default gen_random_uuid(), email text, raw_user_meta_data jsonb default '{}');
   create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('test.uid', true), '')::uuid $$;
+  create function auth.jwt() returns jsonb language sql stable as $$ select coalesce(nullif(current_setting('test.jwt', true), ''), '{}')::jsonb $$;
   create schema storage;
   create table storage.buckets (id text primary key, name text, public boolean, file_size_limit bigint, allowed_mime_types text[]);
   create table storage.objects (id uuid primary key default gen_random_uuid(), bucket_id text references storage.buckets, name text, owner uuid default auth.uid());
@@ -21,6 +22,7 @@ await db.exec(`
   grant usage on schema storage to anon, authenticated;
   grant usage on schema auth, public to anon, authenticated, service_role;
   grant execute on function auth.uid() to anon, authenticated;
+  grant execute on function auth.jwt() to anon, authenticated;
   grant all on all tables in schema auth to service_role;
   alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
   alter default privileges in schema public grant execute on functions to anon, authenticated, service_role;
@@ -284,6 +286,20 @@ check('a store needs at least one visit day', await as('authenticated', owner, `
 check('a handler can\'t change visit settings', (await as('authenticated', handler, `update public.stores set visits_paused = false where id = '${k9}' returning id`))?.length === 0)
 await db.exec(`update public.stores set visits_paused = false, pause_note = '', home_visits = false, visit_days = '{0,1,2,3,4,5,6}', visit_slots = '{10:30,11:00}' where id = '${k9}'`)
 
+// Dog photos and videos: up to 8 more photos and 4 videos, only from the store's own folder
+const media = (sql) => as('authenticated', handler, sql)
+const g = n => `'{${Array.from({ length: n }, (_, i) => `${k9}/g${i}.jpg`).join(',')}}'`
+const vid = (path, kind = 'obedience') => `{"path":"${path}","kind":"${kind}","title":"Heel work"}`
+check('a handler can add more photos and a video', (await media(`update public.dogs set gallery_paths = ${g(3)}, videos = '[${vid(`${k9}/heel.mp4`)}]' where id = '${rambo}' returning id`))?.length === 1)
+check('up to 8 more photos', await media(`update public.dogs set gallery_paths = ${g(9)} where id = '${rambo}'`) === null)
+check('photos only from the store\'s own folder', await media(`update public.dogs set gallery_paths = '{${draft}/x.jpg}' where id = '${rambo}'`) === null)
+check('up to 4 videos', await media(`update public.dogs set videos = '[${[1, 2, 3, 4, 5].map(i => vid(`${k9}/v${i}.mp4`)).join(',')}]' where id = '${rambo}'`) === null)
+check('a video says what it shows', await media(`update public.dogs set videos = '[${vid(`${k9}/v.mp4`, 'party')}]' where id = '${rambo}'`) === null)
+check('videos only from the store\'s own folder', await media(`update public.dogs set videos = '[${vid(`${draft}/v.mp4`)}]' where id = '${rambo}'`) === null)
+check('the dog-videos bucket is public', await scalar(`select public::text from storage.buckets where id = 'dog-videos'`) === 'true')
+check('a store member can upload a video to their folder', (await media(`insert into storage.objects (bucket_id, name) values ('dog-videos', '${k9}/heel.mp4') returning id`))?.length === 1)
+check('outsiders can\'t upload videos into a store\'s folder', await as('authenticated', buyer, `insert into storage.objects (bucket_id, name) values ('dog-videos', '${k9}/fake.mp4')`) === null)
+
 // Roles
 check('a handler can\'t edit the store', (await as('authenticated', handler, `update public.stores set tagline = 'x' where id = '${k9}' returning id`))?.length === 0)
 check('a manager can edit the store', (await as('authenticated', manager, `update public.stores set tagline = 'x' where id = '${k9}' returning id`))?.length === 1)
@@ -321,6 +337,51 @@ check('only owners see the team\'s emails', teamAsHandler.every(m => m.email ===
 check('outsiders see no team', (await as('authenticated', buyer, `select * from public.store_team('${k9}')`)).length === 0)
 check('an owner can change someone\'s role', (await as('authenticated', owner, `update public.store_members set role = 'manager' where store_id = '${k9}' and user_id = '${recruit}' returning role`))?.[0]?.role === 'manager')
 check('a member can leave', (await as('authenticated', recruit, `delete from public.store_members where store_id = '${k9}' and user_id = '${recruit}' returning user_id`))?.length === 1)
+
+// Staff: added only in the SQL editor; every staff power also needs a one-time-code session (aal2)
+const admin = await user('Zainab Musa')
+const inspector = await user('Femi Ade')
+await db.exec(`insert into public.staff (user_id, role) values ('${admin}', 'admin'), ('${inspector}', 'inspector')`)
+// Run SQL as someone whose session has (aal2) or hasn't (aal1) passed a one-time code
+async function withCode(uid, aal, sql) {
+  await db.exec(`set test.jwt = '{"aal":"${aal}"}'`)
+  try { return await as('authenticated', uid, sql) }
+  finally { await db.exec(`set test.jwt = ''`) }
+}
+check('nobody can make themselves staff', await as('authenticated', buyer, `insert into public.staff (user_id, role) values ('${buyer}', 'admin')`) === null)
+check('staff can\'t promote themselves', (await withCode(inspector, 'aal2', `update public.staff set role = 'admin' where user_id = '${inspector}' returning role`)) === null)
+check('you can see your own staff role, and no one else\'s', (await as('authenticated', admin, 'select role from public.staff'))?.length === 1 && (await as('authenticated', buyer, 'select role from public.staff')).length === 0)
+check('the overview is refused to non-staff', await withCode(buyer, 'aal2', 'select public.admin_overview()') === null)
+check('the overview is refused to staff without a one-time code', await withCode(admin, 'aal1', 'select public.admin_overview()') === null)
+const overview = (await withCode(admin, 'aal2', 'select public.admin_overview() as o'))?.[0]?.o
+check('an admin with a one-time code gets the overview', overview?.stores?.verified >= 5 && typeof overview?.waiting?.storesInReview === 'number')
+check('the overview has 60 days of activity, the top stores and cities', overview?.series?.length === 60 && overview.series.at(-1).accounts >= 0 && overview.topStores.length > 0 && overview.cities[0]?.dogs > 0)
+check('the daily series can\'t be called directly', await withCode(admin, 'aal2', 'select public.admin_series()') === null)
+check('an inspector with a one-time code gets the overview too', (await withCode(inspector, 'aal2', 'select public.admin_overview() as o'))?.[0]?.o?.accounts > 0)
+check('is_staff is false without a one-time code', (await withCode(admin, 'aal1', 'select public.is_staff() as yes'))?.[0]?.yes === false)
+check('nobody writes the audit log directly', await withCode(admin, 'aal2', `insert into public.admin_audit (action, target_type, target_id) values ('x', 'store', 'STR-001')`) === null && await withCode(admin, 'aal2', `select public.admin_log('x', 'store', 'STR-001')`) === null)
+await db.exec(`set test.uid = '${admin}'; select public.admin_log('test.action', 'store', 'STR-001', '{"why":"testing"}'); reset test.uid;`)
+check('admins with a one-time code read the audit log', (await withCode(admin, 'aal2', 'select actor_name, action from public.admin_audit'))?.[0]?.actor_name === 'Zainab Musa')
+check('the audit log is closed to everyone else', (await withCode(inspector, 'aal2', 'select id from public.admin_audit')).length === 0 && (await withCode(admin, 'aal1', 'select id from public.admin_audit')).length === 0)
+
+// Store status from the admin overview: approve, decline, suspend, restore; logged and told to the store
+const savanna = await scalar(`select id from public.stores where public_id = 'STR-004'`)
+await db.exec(`insert into public.store_members (store_id, user_id, role) values ('${savanna}', '${other}', 'owner') on conflict do nothing`)
+await db.exec(`update public.stores set status = 'in_review', details = details - 'inspection' where id = '${savanna}'`)
+const allStores = (await withCode(admin, 'aal2', 'select public.admin_stores() as s'))?.[0]?.s
+check('admins see every store, any status, with its owner', allStores?.some(s => s.public_id === 'STR-004' && s.status === 'in_review' && s.owner))
+check('the store list is refused without a one-time code', await withCode(admin, 'aal1', 'select public.admin_stores()') === null)
+check('inspectors can\'t change a store\'s status', await withCode(inspector, 'aal2', `select public.admin_set_store_status('STR-004', 'verified')`) === null)
+check('owners can\'t change their own status', await withCode(other, 'aal2', `select public.admin_set_store_status('STR-004', 'verified')`) === null)
+check('declining needs a reason', await withCode(admin, 'aal2', `select public.admin_set_store_status('STR-004', 'draft')`) === null)
+check('an admin can approve a store', (await withCode(admin, 'aal2', `select public.admin_set_store_status('STR-004', 'verified', 'All checks passed')`)) !== null && await scalar(`select status::text from public.stores where id = '${savanna}'`) === 'verified')
+check('approving records the inspection', await scalar(`select details -> 'inspection' ->> 'status' from public.stores where id = '${savanna}'`) === 'passed')
+check('the store\'s owner is told, with the note', (await as('authenticated', other, `select title, body from public.notifications where topic = 'store-status:${savanna}'`))?.[0]?.body === 'All checks passed')
+check('the change is in the audit log', (await withCode(admin, 'aal2', `select detail ->> 'from' as from_status from public.admin_audit where action = 'store.verified' and target_id = 'STR-004'`))?.[0]?.from_status === 'in_review')
+check('an admin can suspend it, with a reason the store reads', (await withCode(admin, 'aal2', `select public.admin_set_store_status('STR-004', 'suspended', 'Complaints under review')`)) !== null && (await as('authenticated', other, `select status_note from public.stores where id = '${savanna}'`))?.[0]?.status_note === 'Complaints under review')
+check('a suspended store disappears from the public', (await as('anon', null, `select id from public.stores where id = '${savanna}'`)).length === 0)
+check('stores still can\'t write the inspection themselves', (await as('authenticated', other, `update public.stores set details = details || '{"inspection":{"status":"passed","by":"Me"}}' where id = '${savanna}' returning details -> 'inspection' ->> 'by' as by`))?.[0]?.by !== 'Me')
+check('changing to the same status is refused', await withCode(admin, 'aal2', `select public.admin_set_store_status('STR-004', 'suspended', 'again')`) === null)
 
 await db.close()
 console.log(failed ? `\n${failed} failed` : '\nAll access rules hold')

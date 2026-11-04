@@ -64,7 +64,7 @@ async function confirmDelete() {
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Delete {{ deleting?.name }}?</AlertDialogTitle>
-          <AlertDialogDescription>The draft and its photo are removed for good. Buyers never saw it.</AlertDialogDescription>
+          <AlertDialogDescription>The draft and its photos and videos are removed for good. Buyers never saw it.</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Keep it</AlertDialogCancel>

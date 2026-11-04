@@ -93,7 +93,7 @@ The goal: someone can land, understand Dogeash, browse dogs and read a full K9 f
 - [~] Supabase foundation: `@nuxtjs/supabase` (loads only when `.env` has keys), first migration in `supabase/migrations/`, seed from the sample data (`npm run db:seed`), access-rule tests without Docker (`npm run db:test`). Still to do: create the project and apply them
 - [~] Database schema: profiles, stores, store members, dogs (with photo storage), shortlists, saved searches, conversations, messages and kennel visits done, with row level security (`npm run db:test`). The public site reads stores and dogs from Supabase (`plugins/00.catalog.ts`), with the samples as a fallback. Still to come: care bookings, inspections, reservations, photo storage
 - [ ] Separate database `id` (uuid) from the public `fileNo` (done in the model; carry into the schema)
-- [ ] Image and video storage for dog photos and training videos
+- [x] Image and video storage for dog photos and training videos: main photo, up to 8 more photos and 4 videos per dog (`dog-photos`, `dog-videos` buckets), uploaded from the store's dog form; real gallery and full-screen viewer on the dog page
 - [~] Accounts with Supabase Auth: email and password, or a 6-digit code by email; sign-up confirms the email with a code; forgot password by code. Profile (name, phone, city) and store memberships load from the database (`useSession`, `plugins/account.ts`, `useAuth`). Email templates in `supabase/email-templates/`. Phone sign-in waits for an SMS provider
 - [~] One sign-in page (`/sign-in`) for everyone: buyers, store owners and staff, care providers, inspectors and admins
   - UI built (`app/layouts/auth.vue`): email + password, phone or email one-time code, validation, resend timer; ends on a preview of where buyers and stores land
@@ -124,7 +124,7 @@ Sellers are called **stores** everywhere buyers can see them. A store is a kenne
 - [x] Dogs (`/dashboard/dogs`): list with Live / Drafts / Sold and withdrawn filters; add and edit the K9 file with a photo (`/dashboard/dogs/new`, `/dashboard/dogs/[fileNo]`); go live, mark reserved or sold, withdraw, delete drafts. Dogeash assigns file numbers and owns the "inspected" line. Still to come: several photos and videos per dog
 - [~] Dashboard sections: Dogs, Inbox (enquiries), Bookings (kennel visits: answer, mark done), Store profile, Team, Reviews, Care team and Settings (visit days and times, pause, delete a draft store) are built; the overview's greeting, attention list and Coming up use real data (stat tiles still examples). Still "Coming next": Payouts
 - [~] Store staff: invite members with roles (Owner: everything incl. payouts · Manager: dogs, enquiries, bookings · Handler: their own dogs). Built at `/dashboard/team`: invitations by email wait in the person's account (no email sent yet); change roles, remove, leave
-- [~] Store dashboard: edit store profile (about, history, owner, services, hours, delivery areas) at `/dashboard/profile`; the database keeps Dogeash's inspection and reviews. Banner and logo upload (`store-media` bucket) done
+- [~] Store dashboard: edit store profile (about, history, owner, services, hours, delivery areas) at `/dashboard/profile`, in steps (guided setup until the essentials are done, then edit any step); the database keeps Dogeash's inspection and reviews. Banner and logo upload (`store-media` bucket) done
 - [~] Store dashboard: manage the care team (add or remove linked vets and trainers) at `/dashboard/care`; the care directory is in Supabase (`care_providers`, `store_care_links`). Still to do: provider accounts, inviting providers
 - [ ] Add a dog: multi-step form using `dogSubmissionSchema` + vee-validate
 - [ ] Edit, withdraw and mark sold
@@ -134,6 +134,8 @@ Sellers are called **stores** everywhere buyers can see them. A store is a kenne
 - [~] Store inbox (`/dashboard/inbox`, from the bell and the sidebar): real buyer conversations (reply as the store, quick replies) and kennel visit requests (confirm, decline, mark done, with a note for the buyer), filtered by kind and role. Still to come: payments, reviews and Dogeash updates; email, SMS or WhatsApp telling the other person, with a link back (`?id=`); reply-by-email via inbound email
 
 ## Phase 4 · Inspections and trust
+
+- [~] Admin dashboard (`/admin`, its own plain layout): staff set only in the SQL editor (`staff`: admin, inspector), one-time code from an authenticator app required (checked in the database too), overview of the whole site, audit log (`admin_audit`). Next: applications and inspections, then moderation of stores, dogs and reviews, people, care directory, audit log page
 
 - [ ] Inspection scheduling for kennels
 - [ ] Inspector tool: on-site checklist, photos, protection level confirmation

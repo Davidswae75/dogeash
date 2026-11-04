@@ -13,13 +13,13 @@ const props = defineProps<{ review: Review, storeName: string }>()
     <Quote class="size-8 text-marigold" aria-hidden="true" />
     <div class="flex min-w-0 flex-col gap-3">
       <blockquote class="m-0 text-[17px] leading-[27px] break-words">{{ props.review.text }}</blockquote>
-      <figcaption class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink-muted">
+      <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink-muted">
         <ReviewStars :rating="props.review.rating" />
         <span>
           <strong class="text-ink">{{ props.review.name }}</strong><template v-if="props.review.city">, {{ props.review.city }}</template> · {{ reviewDate(props.review.at) }}
           <template v-if="props.review.mine"> · <span class="font-semibold text-ink">your review</span></template>
         </span>
-      </figcaption>
+      </div>
       <p v-if="props.review.reply" class="m-0 flex gap-2.5 rounded-lg bg-surface-sunk p-3 text-[14px] leading-[21px] text-ink">
         <MessageSquareQuote class="mt-0.5 size-4 shrink-0 text-ink-muted" aria-hidden="true" />
         <span><strong class="font-semibold">{{ props.storeName }} replied:</strong> {{ props.review.reply }}</span>

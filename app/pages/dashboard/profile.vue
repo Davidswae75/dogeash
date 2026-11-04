@@ -4,7 +4,8 @@ import { definePageMeta, useSeoMeta } from '#imports' // nuxt
 import { useStoreContext } from '~/composables/useStoreContext'
 import { useStoreProfile } from '~/composables/useStoreProfile'
 
-// The store profile: what buyers read on the public store page. Owners and managers edit it;
+// The store profile: what buyers read on the public store page, set up and edited in steps
+// (DashboardStoreSetup). Owners and managers edit it;
 // the inspection record, rating and reviews are Dogeash's and shown here read-only.
 definePageMeta({ layout: 'dashboard', title: 'Store profile', middleware: 'store-member' })
 useSeoMeta({ title: 'Store profile · Store dashboard · Dogeash', robots: 'noindex' })
@@ -29,7 +30,6 @@ const { save, setImage } = useStoreProfile()
       <span>The inspection, rating and reviews come from Dogeash and buyers, so they can't be edited here.</span>
     </aside>
 
-    <DashboardStoreImages :store="store" :set="setImage" />
-    <DashboardStoreForm :key="store.id" :store="store" :save="save" />
+    <DashboardStoreSetup :key="store.id" :store="store" :save="save" :set-image="setImage" />
   </div>
 </template>

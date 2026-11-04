@@ -68,8 +68,11 @@ export interface Store {
   logoPath?: string | null
   // When it takes kennel visits; sample stores use the defaults (see visitSettings)
   visits?: VisitSettings
-  // Where it is with Dogeash; sample stores are all verified
+  // Where it is with Dogeash; sample stores are all verified. The note and date of the last change
+  // come from Dogeash (approved, sent back, suspended) and show on the store's dashboard.
   status?: 'draft' | 'in_review' | 'verified' | 'suspended'
+  statusNote?: string
+  statusChangedAt?: string | null
 }
 
 // The days (0 = Sunday) and times a store takes kennel visits, whether it also visits buyers at home,
@@ -413,9 +416,11 @@ export interface StoreRow {
   home_visits: boolean
   visits_paused: boolean
   pause_note: string
+  status_note?: string
+  status_changed_at?: string | null
 }
 
-export const storeColumns = 'public_id, slug, name, initials, tagline, city, area, state, founded, status, rating, reviews_count, details, banner_path, logo_path, visit_days, visit_slots, home_visits, visits_paused, pause_note, store_care_links (relationship, care_providers (public_id))'
+export const storeColumns = 'public_id, slug, name, initials, tagline, city, area, state, founded, status, rating, reviews_count, details, banner_path, logo_path, visit_days, visit_slots, home_visits, visits_paused, pause_note, status_note, status_changed_at, store_care_links (relationship, care_providers (public_id))'
 
 // A store image's public URL (the store-media bucket)
 export const storeMediaUrl = (path: string | null, storageUrl: string) =>
@@ -447,6 +452,8 @@ export function toStore(row: StoreRow, ownerName = '', storageUrl = ''): Store {
     founded: row.founded ?? new Date().getFullYear(),
     verified: row.status === 'verified',
     status: row.status,
+    statusNote: row.status_note ?? '',
+    statusChangedAt: row.status_changed_at ?? null,
     rating: Number(row.rating),
     reviews: row.reviews_count,
     banner: storeMediaUrl(row.banner_path, storageUrl),

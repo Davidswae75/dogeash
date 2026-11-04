@@ -7,7 +7,8 @@ import { imageAccept } from '~/utils/imageUpload'
 
 // The store's banner and logo, previewed the way buyers see them. Picking an image uploads and saves it
 // straight away; removing goes back to the initials. `set` returns an error or null.
-const props = defineProps<{ store: Store, set: (kind: StoreImage, file: File | null) => Promise<string | null> }>()
+// `bare` drops the card and heading, inside the profile steps.
+const props = defineProps<{ store: Store, set: (kind: StoreImage, file: File | null) => Promise<string | null>, bare?: boolean }>()
 
 const busy = ref<StoreImage>()
 const error = ref<Partial<Record<StoreImage, string>>>({})
@@ -32,11 +33,13 @@ const images: { kind: StoreImage, label: string, hint: string }[] = [
 </script>
 
 <template>
-  <section class="flex flex-col gap-5 rounded-xl bg-surface p-5 ring-1 ring-line sm:p-6" aria-labelledby="store-images">
-    <div class="flex flex-col gap-1">
+  <section :class="['flex flex-col gap-5', !props.bare && 'rounded-xl bg-surface p-5 ring-1 ring-line sm:p-6']" aria-labelledby="store-images">
+    <div v-if="!props.bare" class="flex flex-col gap-1">
       <h2 id="store-images" class="m-0 font-display text-[17px] leading-6 font-extrabold font-stretch-expanded">Banner and logo</h2>
       <p class="m-0 text-[13px] leading-5 text-ink-muted">These save as soon as you pick them. JPG, PNG or WebP, up to 5 MB. Without them, your store shows its initials.</p>
     </div>
+
+    <p v-else id="store-images" class="m-0 text-[13px] leading-5 text-ink-muted">These save as soon as you pick them. JPG, PNG or WebP, up to 5 MB.</p>
 
     <div class="grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
       <FieldShell v-for="img in images" :key="img.kind" :label="img.label" :hint="img.hint" :error="error[img.kind]">

@@ -6,6 +6,7 @@ import { useNotifications } from '~/composables/useNotifications'
 import { useSavedDogs } from '~/composables/useSavedDogs'
 import { useSavedSearches } from '~/composables/useSavedSearches'
 import { useSession } from '~/composables/useSession'
+import { useStaff } from '~/composables/useStaff'
 import { useStoreInvites } from '~/composables/useStoreInvites'
 import { useVisits } from '~/composables/useVisits'
 
@@ -21,7 +22,8 @@ export default defineNuxtPlugin(async () => {
   const visits = useVisits()
   const notifications = useNotifications()
   const storeInvites = useStoreInvites()
-  const loadLists = () => Promise.all([savedDogs.load(), savedSearches.load(), conversations.loadMine(), visits.loadMine(), notifications.load(), storeInvites.load()])
+  const staff = useStaff()
+  const loadLists = () => Promise.all([savedDogs.load(), savedSearches.load(), conversations.loadMine(), visits.loadMine(), notifications.load(), storeInvites.load(), staff.load()])
 
   await load()
   await loadLists()

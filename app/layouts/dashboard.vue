@@ -74,6 +74,7 @@ watch(() => route.fullPath, () => { navOpen.value = false })
       </header>
 
       <main id="main" class="mx-auto w-full max-w-[1240px] flex-1 px-4 py-8 sm:px-8">
+        <DashboardStoreStatus />
         <slot />
       </main>
     </div>

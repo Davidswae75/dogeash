@@ -40,17 +40,8 @@ const facts = [
     <OwnListingBanner v-if="store" :store="store" what="listing" />
     <K9FileTab :file-no="dog.fileNo" :detail="dog.breed" :reserved="dog.status === 'reserved'" class="rounded-md px-[18px] py-3" />
 
-    <!-- Gallery: main photo, two videos (obedience and protection), more photos -->
-    <div class="grid grid-cols-2 gap-3 md:grid-cols-[2fr_1fr_1fr] md:grid-rows-[210px_210px]">
-      <div class="relative col-span-2 grid aspect-4/3 place-items-center rounded-lg bg-surface-sunk font-mono text-[13px] text-ink-muted md:col-span-1 md:row-span-2 md:aspect-auto">
-        MAIN PHOTO
-        <VerifiedStamp class="absolute right-[18px] bottom-[18px]" />
-      </div>
-      <div class="grid h-[140px] place-items-center rounded-lg bg-night font-mono text-[13px] text-on-night md:h-auto">▶ VIDEO · OBEDIENCE</div>
-      <div class="grid h-[140px] place-items-center rounded-lg bg-night font-mono text-[13px] text-on-night md:h-auto">▶ VIDEO · PROTECTION</div>
-      <div class="hidden place-items-center rounded-lg bg-surface-sunk font-mono text-[13px] text-ink-muted md:grid">PHOTO 2</div>
-      <div class="hidden place-items-center rounded-lg bg-surface-sunk font-mono text-[13px] text-ink-muted md:grid">+ 8 MORE</div>
-    </div>
+    <!-- Gallery: main photo, then videos and more photos; any of them opens the full-screen viewer -->
+    <DogGallery :dog="dog" />
 
     <div class="grid items-start gap-12 lg:grid-cols-[1fr_380px]">
       <div class="flex flex-col gap-6">

@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-11-04T08:19:29.136Z
-> Files: 705 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-11-04T21:01:54.091Z
+> Files: 715 tracked | Anatomy hits: 0 | Misses: 0
 
 > Project structure index. Auto-maintained by OpenWolf hooks and daemon.
 > Run `openwolf scan` to generate, or wait for the first Claude Code session.
@@ -50,6 +50,7 @@
 - `ConversationReply.vue` — Vue: setup (~574 tok)
 - `ConversationThread.vue` — Vue: setup (~393 tok)
 - `DashboardNav.vue` — Vue: setup (~1090 tok)
+- `DogGallery.vue` — Vue: setup (~1969 tok)
 - `EmptyState.vue` — Vue: setup, TS, 2 props, emits (~240 tok)
 - `FactRow.vue` — Vue: setup, TS (~184 tok)
 - `FieldInput.vue` — Vue: setup (~744 tok)
@@ -123,6 +124,14 @@
 - `AccountStoreCard.vue` — Vue: setup (~392 tok)
 - `AccountStorePill.vue` — Vue: setup (~288 tok)
 
+## app/components/admin/
+
+- `Stores.vue` — Vue: setup (~2482 tok)
+
+## app/components/admin/chart/
+
+- `AreaChart.vue` — Vue: setup (~1255 tok)
+
 ## app/components/auth/
 
 - `AuthHeading.vue` — Vue: setup (~207 tok)
@@ -147,6 +156,7 @@
 - `DashboardStoreForm.vue` — Vue: setup (~1755 tok)
 - `DashboardStoreHealth.vue` — Vue: setup (~867 tok)
 - `DashboardStoreImages.vue` — Vue: setup (~931 tok)
+- `DashboardStoreSetup.vue` — Vue: setup (~2306 tok)
 - `DashboardTeamList.vue` — Vue: setup (~1044 tok)
 - `InboxDetail.vue` — Vue: setup (~1198 tok)
 - `InboxList.vue` — Vue: setup (~1022 tok)
@@ -884,6 +894,7 @@
 
 ## app/layouts/
 
+- `admin.vue` — Vue: setup (~472 tok)
 - `auth.vue` — Vue: setup (~288 tok)
 - `dashboard.vue` — Vue: setup (~842 tok)
 - `default.vue` — Vue: setup (~169 tok)
@@ -917,6 +928,11 @@
 
 - `[id].vue` — Vue: setup (~282 tok)
 - `index.vue` — Vue: setup (~396 tok)
+
+## app/pages/admin/
+
+- `index.vue` — Vue: setup (~1612 tok)
+- `verify.vue` — Vue: setup (~1019 tok)
 
 ## app/pages/care/
 
@@ -1002,3 +1018,6 @@
 - `20261109000000_store_media.sql` — Store banner and logo. Images live in the public `store-media` bucket, one folder per store (its dat (~603 tok)
 - `20261110000000_store_reviews.sql` — Store reviews. A buyer can review a store once one of their kennel visits there is marked done (~2015 tok)
 - `20261112000000_store_visit_settings.sql` — Store settings for kennel visits: the days and times a store takes visits, whether it also visits bu (~679 tok)
+- `20261113000000_admin_staff.sql` — Dogeash staff and the admin dashboard's foundations. (~1702 tok)
+- `20261115000000_dog_media.sql` — More than one photo per dog, and videos. Besides its main photo (photo_path), a dog can have up to 8 (~711 tok)
+- `20261116000000_admin_store_status.sql` — Admins change a store's status from the admin overview: approve (verified), decline (back to draft), (~1327 tok)

@@ -1,13 +1,13 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-11-04T08:19:29.136Z",
-    "fileCount": 705,
+    "lastScanned": "2026-11-04T21:01:54.091Z",
+    "fileCount": 715,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "3c6f19a41a9af59defc36c53a1e7aaf9ca8291a104bc84ad443dc4bf6b80105f",
-    "storeUpdatedAt": "2026-11-04T08:19:29.167Z",
-    "rootHash": "2b23ea2513e61fdb"
+    "renderedHash": "14325d875e43a972e5cf39bfb601b06cf3f6162e7a1be23b3fa72d62474e9404",
+    "storeUpdatedAt": "2026-11-04T21:01:54.131Z",
+    "rootHash": "c83489eab5b0f0bf"
   },
   "files": {
     ".gitignore": {
@@ -8604,6 +8604,96 @@
       "size": 2545,
       "mtimeMs": 1793780368934.5886,
       "updatedAt": "2026-11-04T08:19:29.134Z",
+      "source": "hook"
+    },
+    "app/components/dashboard/DashboardStoreSetup.vue": {
+      "description": "Vue: setup",
+      "tokens": 2306,
+      "hash": "2bbbde5466df3197",
+      "size": 8647,
+      "mtimeMs": 1793813375122.754,
+      "updatedAt": "2026-11-04T17:29:36.162Z",
+      "source": "hook"
+    },
+    "supabase/migrations/20261113000000_admin_staff.sql": {
+      "description": "Dogeash staff and the admin dashboard's foundations.",
+      "tokens": 1702,
+      "hash": "737be0ec315a0b00",
+      "size": 6774,
+      "mtimeMs": 1793813656711.4233,
+      "updatedAt": "2026-11-04T17:34:17.098Z",
+      "source": "hook"
+    },
+    "app/pages/admin/verify.vue": {
+      "description": "Vue: setup",
+      "tokens": 1019,
+      "hash": "d7d06ba63fa64b3f",
+      "size": 3823,
+      "mtimeMs": 1793813898954.6929,
+      "updatedAt": "2026-11-04T17:38:19.250Z",
+      "source": "hook"
+    },
+    "app/components/admin/chart/AreaChart.vue": {
+      "description": "Vue: setup",
+      "tokens": 1255,
+      "hash": "2d0f316cad2da9e7",
+      "size": 4706,
+      "mtimeMs": 1793816200132.0867,
+      "updatedAt": "2026-11-04T18:16:40.367Z",
+      "source": "hook"
+    },
+    "app/layouts/admin.vue": {
+      "description": "Vue: setup",
+      "tokens": 472,
+      "hash": "154bd39645696bb2",
+      "size": 1770,
+      "mtimeMs": 1793825246812.4067,
+      "updatedAt": "2026-11-04T20:47:27.222Z",
+      "source": "hook"
+    },
+    "app/pages/admin/index.vue": {
+      "description": "Vue: setup",
+      "tokens": 1612,
+      "hash": "28d9d0f19f0e6eea",
+      "size": 6050,
+      "mtimeMs": 1793816349770.9644,
+      "updatedAt": "2026-11-04T18:19:10.055Z",
+      "source": "hook"
+    },
+    "supabase/migrations/20261115000000_dog_media.sql": {
+      "description": "More than one photo per dog, and videos. Besides its main photo (photo_path), a dog can have up to 8",
+      "tokens": 711,
+      "hash": "d46c1904d041ab0a",
+      "size": 2665,
+      "mtimeMs": 1793825215316.533,
+      "updatedAt": "2026-11-04T20:46:55.567Z",
+      "source": "hook"
+    },
+    "app/components/DogGallery.vue": {
+      "description": "Vue: setup",
+      "tokens": 1969,
+      "hash": "0d6b469d6af79172",
+      "size": 7381,
+      "mtimeMs": 1793825416537.1426,
+      "updatedAt": "2026-11-04T20:50:16.748Z",
+      "source": "hook"
+    },
+    "supabase/migrations/20261116000000_admin_store_status.sql": {
+      "description": "Admins change a store's status from the admin overview: approve (verified), decline (back to draft),",
+      "tokens": 1327,
+      "hash": "c4c2e51131e4f4f0",
+      "size": 4974,
+      "mtimeMs": 1793826035678.8884,
+      "updatedAt": "2026-11-04T21:00:35.896Z",
+      "source": "hook"
+    },
+    "app/components/admin/Stores.vue": {
+      "description": "Vue: setup",
+      "tokens": 2482,
+      "hash": "4f68aaeeccab3e00",
+      "size": 9313,
+      "mtimeMs": 1793826113452.0325,
+      "updatedAt": "2026-11-04T21:01:54.089Z",
       "source": "hook"
     }
   },
