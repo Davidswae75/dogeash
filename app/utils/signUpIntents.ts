@@ -61,8 +61,9 @@ export const signUpIntents: SignUpIntentCopy[] = [
     },
     welcome: ({ storeName }) => `${storeName} is saved as a draft store, hidden until it's verified. Next: add your documents and book the inspection.`,
     nextSteps: [
-      { to: '/dashboard', title: 'Set up your store', text: 'Store profile, your dogs and your care team, in the store dashboard.', icon: LayoutDashboard },
-      { to: '/open-a-store#verification', title: 'How verification works', text: 'Apply, inspection visit, go live, stay verified.', icon: ClipboardCheck },
+      { to: '/dashboard/profile', title: 'Set up your store', text: 'Your store profile, step by step, then your dogs.', icon: LayoutDashboard },
+      { to: '/dashboard/application', title: 'Send your application', text: 'Your documents and the days that suit the inspection.', icon: ClipboardCheck },
+      { to: '/open-a-store#verification', title: 'How verification works', text: 'Apply, inspection visit, go live, stay verified.', icon: BookOpen },
     ],
   },
 ]

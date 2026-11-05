@@ -543,10 +543,7 @@ I haven't been through the authenticator set-up; that needs your account.
 
 **What it does:** you noticed the dog page shows a gallery with photos and videos, but the store's dog form only took one photo. Worse, the page didn't even use that photo: its gallery was placeholder boxes ("MAIN PHOTO", "▶ VIDEO · OBEDIENCE"). Now stores upload all of it, and the page shows it for real.
 
-**You need to do (soon):** run `supabase/migrations/20261115000000_dog_media.sql` in the Supabase SQL Editor (it's on your clipboard). Until you do:
-- the public site shows sample data
-- store dashboards can't load their dogs
-The site now asks for the new columns, which only exist after the migration.
+**Status:** migration run on 4 Nov and checked live: the new dog columns and the `dog-videos` bucket exist, and the site reads them.
 
 **What a store can add to each dog** (in the dashboard's dog form, new "More photos and videos" section):
 - **Main photo:** as before, and needed to go live.
@@ -595,11 +592,7 @@ The site now asks for the new columns, which only exist after the migration.
 
 **What it does:** a **Stores** panel on the admin overview lists every store (drafts included) and lets you approve, decline, suspend or restore it. You asked for this as a first step before the full Stores section. You can then watch the effect on the store's side.
 
-**You need to do:** run the migrations in order in the Supabase SQL Editor:
-1. `supabase/migrations/20261115000000_dog_media.sql` (dog photos and videos, section 14), if you haven't yet.
-2. `supabase/migrations/20261116000000_admin_store_status.sql` (this one, on your clipboard).
-
-Until both are in, the site shows sample data and dashboards can't load their store.
+**Status:** migration run on 4 Nov and checked live: the status columns exist, both admin functions refuse anyone without admin rights, and the site reads them.
 
 **The Stores panel (admin overview):**
 - Every store: its owner, status, live dogs out of all its dogs, and the last change with Dogeash's note.
@@ -649,3 +642,197 @@ Until both are in, the site shows sample data and dashboards can't load their st
 - `app/composables/useAdmin.ts`: `loadStores()` and `setStoreStatus()`.
 - `app/components/dashboard/DashboardStoreStatus.vue`, shown by `layouts/dashboard.vue`.
 - `Store.statusNote` and `statusChangedAt`. The `adminDone` toast. A bell icon for store notifications.
+
+## 16. Admin sections: Stores, Listings, Reviews, People, Care directory, Audit log
+
+**What it does:** every admin sidebar link now opens a working page, except Applications and Inspections, which wait for the store application flow.
+
+**Status:** migration run on 5 Nov and checked live: `dogs.admin_note` exists, all seven admin functions refuse anyone without admin rights, and the site reads the catalogue from the database again.
+
+**The pages:**
+- **Stores (`/admin/stores`):** the Stores panel from the overview as a full page: every store, filters, search, and approve, decline, suspend or restore (section 15).
+- **Listings (`/admin/listings`):** every dog in any status. Each row has its photo, store (and whether the store is verified), status, price, last update and Dogeash's note. Filter by status, and search by name, file number or store. Actions:
+  - **Take down** a live or reserved dog. A reason is required; the dog disappears at once and the store is told.
+  - **Put back live** a withdrawn dog (only if its store is verified).
+  - **Approve and put live**, or **send back to the store**, a dog pending review.
+  - Drafts and sold dogs have no actions; they're the store's business.
+- **Reviews (`/admin/reviews`):** every review as a card with stars, store, text, the store's reply, and the author's name, city and email. Filter by 1–2 stars or 4–5 stars, and search. **Remove** needs a reason, which the author is told. The store's rating is recalculated, and the removed text is kept in the audit log.
+- **People (`/admin/people`):** every account, newest first (up to 200), with search by name, email or phone as you type. Each row shows:
+  - name, email and staff badge
+  - phone and city
+  - their stores, with status and role
+  - activity: visits, conversations, reviews and shortlisted dogs
+  - when they joined, and when they last signed in
+- **Care directory (`/admin/care`):**
+  - All providers, with how many stores use each.
+  - **Add provider** opens a form: name, person, what they do, city, areas, credential, starting price, home visits, and the "checked by Dogeash" badge. **Edit** and **Remove** are in each row's ⋯ menu.
+  - New providers get the next CARE number and a web address from their name.
+  - The public directory updates straight away.
+- **Audit log (`/admin/audit`):** every admin action, newest first. Each entry shows:
+  - a readable label ("Store approved", "Listing taken down", "Review removed")
+  - who did it, what it was done to, and when
+  - the details: from → to, and the note sent
+  Filter by stores, listings, reviews or care directory. "Load older" shows 100 more at a time.
+
+**The store's side:**
+- A dog taken down or sent back shows **"Dogeash took this dog down: <reason>"** on its page in the store dashboard, and the owner and managers get a bell notification.
+- When the store moves the dog on itself, Dogeash's note is cleared, so an old reason never reappears.
+
+**Blocking people isn't built.** Banning an account in Supabase needs its secret server key, which we never put in the website. The options are a small server function that holds the key (a Supabase Edge Function or a Nuxt server route), or a "blocked" flag the database checks on every write. I'd suggest the server function; it needs your go-ahead, since the key would live on the server.
+
+**The sidebar** now loads the waiting counts (applications, listings to review) on any admin page, not only the overview.
+
+**Checked:**
+- `npm run db:test`: 20 new checks. All pass.
+- The typecheck shows no new errors, and every new page compiles.
+- In the browser (made-up listings and reviews on a temporary page, deleted after): Listings, Reviews, and the Care directory with the real providers, plus its Add form.
+- People and Audit log compile, but I haven't seen them with data; they need your admin sign-in.
+
+**Code:**
+- `supabase/migrations/20261117000000_admin_sections.sql`: `admin_dogs()`, `admin_set_dog_status()`, `admin_reviews()`, `admin_remove_review()`, `admin_people()`, `admin_save_provider()`, `admin_delete_provider()`, `dogs.admin_note`, and the rule that clears the note.
+- `app/pages/admin/stores.vue`, `listings.vue`, `reviews.vue`, `people.vue`, `care.vue`, `audit.vue`.
+- `app/components/admin/Page.vue` (section header), `Confirm.vue` (the shared confirm-with-reason dialog, now also used by Stores) and `ProviderForm.vue`.
+- `app/composables/useAdminListings.ts`, `useAdminReviews.ts`, `useAdminPeople.ts`, `useAdminCare.ts`, `useAdminAudit.ts`.
+- `app/utils/admin.ts`: the nav links, statuses, the actions per status, and the audit labels.
+- The store's dog page shows Dogeash's note (`StoreDog.adminNote`).
+
+## 17. Store applications: apply to go live, and review applications in admin
+
+**What it does:** a kennel that opened a store can now apply properly:
+- the kennel's address and a phone for the inspector
+- preferred inspection days
+- documents: ID, the CAC certificate, and optional proof of address
+- then "Send for review"
+Admins review it all on the **Applications** page and approve it or send it back.
+
+**Status:** migration run on 5 Nov and checked live: the table and both functions exist and refuse visitors, and public links to store documents are refused. To confirm the private bucket itself, run `select id, public, file_size_limit from storage.buckets where id = 'store-documents';` in the SQL Editor; it should show `public = false` and 10485760.
+
+**For the store owner (store dashboard → Application):** the sidebar shows this item only to owners, and only until the store is verified.
+- **"Before you send" checklist:** five items, ticked off as they're done, each linking to where to do it:
+  - store profile
+  - at least one dog
+  - kennel address and phone
+  - inspection days
+  - documents
+- **Kennel and inspection:**
+  - the address (only Dogeash sees it), directions, and a phone for the inspector
+  - **up to three** preferred days (Monday to Saturday, from three days out, for three weeks)
+  - an "isn't registered as a business yet" switch, which drops the CAC requirement
+  - a note for Dogeash
+- **Documents:** the owner's ID (required), the CAC certificate (required unless not registered) and proof of address (optional). PDF or photo, up to 10 MB. Each can be uploaded, replaced or opened.
+- **Send for review:** enabled only when the checklist is complete, and it asks first. The store goes to "In review" and the page locks, showing when it was sent and the chosen days.
+- **Sent back:** the page opens again, and the banner at the top shows Dogeash's reason.
+- **Links:** the draft banner on every dashboard page now has "Open the application". The sign-up welcome for new stores links to "Set up your store" and "Send your application".
+
+**For admins (`/admin/applications`, Applications in the sidebar, with the waiting count):**
+- **Waiting / Sent back** tabs.
+- Each application shows:
+  - the owner (name, email, phone)
+  - the tagline, the about text, who runs it, and how many dogs
+  - the address and directions, the phone (tap to call), the preferred days and the owner's note
+  - each document with **Open** ("Not registered yet" or "Missing" otherwise)
+- **Approve:** the store goes live and its inspection is recorded. **Send back:** a reason is required, which the owner reads. Both go in the audit log.
+- Admins get a bell notification for each new application.
+
+**Privacy and rules:**
+- Documents go in a new **private** bucket, `store-documents`. Only the store's owner and admins with a one-time code can open them, through links that work for one minute.
+- Only the owner can fill in or send the application, and only while the store is a draft. In review, it's locked, and uploads are refused too.
+- The database refuses to send an application until:
+  - the profile has a tagline, about text and who runs it
+  - there's at least one dog
+  - the address and phone are given
+  - at least one day is chosen
+  - the ID is uploaded, and the CAC certificate unless not registered
+- Documents can only come from the store's own folder.
+
+**Checked:**
+- `npm run db:test`: 19 new checks, walking one store through draft, missing pieces, sending, locked, admin review, open document, sent back and editable again. All pass.
+- The typecheck shows no new errors, and every new page compiles.
+- In the browser (made-up data on a temporary page, deleted after):
+  - the store's checklist, form and documents
+  - the three-day limit: the fourth day greys out
+  - the admin Applications card
+- I haven't uploaded real documents or sent an application end to end; that needs a store account and your admin sign-in.
+
+**Not done yet:** Inspections, meaning assigning an inspector, scheduling the visit and recording the checklist and photos. Approving currently stands in for "the inspection passed".
+
+**Code:**
+- **Migration:** `supabase/migrations/20261118000000_store_applications.sql`. The `store_applications` table, `submit_store_application()`, `admin_applications()`, the `store-documents` bucket and its rules.
+- **Store side:** `app/pages/dashboard/application.vue`; `app/components/dashboard/DashboardApplicationChecklist.vue`, `DashboardApplicationForm.vue`, `DashboardApplicationDocs.vue`; `app/composables/useStoreApplication.ts`; `app/utils/storeApplication.ts`.
+- **Admin side:** `app/pages/admin/applications.vue` and `app/composables/useAdminApplications.ts`.
+- **Also changed:** the store sidebar shows Application until verified (`dashboardNav` `beforeVerified`), the draft banner links to it, the sign-up next steps, and an `applicationSent` toast.
+
+## 18. Inspections
+
+**What it does:** admins book kennel inspections from Applications. The inspector works through an inspection sheet (a checklist, the dogs, photos and a summary) and records a pass or a fail. A pass is what makes a store verified now; "Approve now" stays as an override.
+
+**Status:** migration run on 5 Nov and checked live: the inspections table and all eight functions exist and refuse visitors, and the site still loads.
+
+**You need to do:**
+1. Nothing more for the migration.
+2. To add an inspector (optional; admins can inspect too):
+   `insert into public.staff (user_id, role) select id, 'inspector' from auth.users where email = 'inspector@example.com';`
+   They sign in, set up their authenticator app at `/admin/verify` like you did, and see only Inspections.
+
+**Booking (`/admin/applications`):**
+- An application waiting for review has **Book inspection**. It asks for:
+  - a day (the owner's preferred days are listed first, marked "preferred")
+  - a time (8:00–16:00)
+  - an inspector (any staff member)
+  - an optional note for the inspector, such as a gate code
+- The owner gets a bell notification ("Inspection booked: Tue 10 Nov at 10:00"). Their Application page shows **"Inspection booked: <when> with <inspector>"** and what to have ready.
+- The inspector gets a bell notification with a link to the sheet.
+- Once booked, the application card shows the inspection's status, time and inspector, with **Open the sheet**.
+- A store can only have one inspection booked at a time.
+- "Approve" is now **Approve now**, which approves without a sheet. Use it only when the inspection happened outside Dogeash.
+
+**The Inspections page (`/admin/inspections`):** Booked and Done tabs. Each row shows the time, store, number of dogs, how many checks are marked, the inspector and the status, and opens the sheet. Admins see every inspection; inspectors see only their own.
+
+**The inspection sheet (`/admin/inspections/<id>`):**
+- **Where to go:** the kennel's address, directions, the owner's phone (tap to call) and the booking note.
+- **Checklist:** 8 checks, each marked **Passed** or **Failed**, with a note:
+  - clean, shaded runs
+  - water
+  - vet records for every dog
+  - microchips scanned and matched
+  - protection levels tested on site
+  - dogs match their listings
+  - the owner's ID matches
+  - business registration seen
+- **Dogs:** every dog the store listed when it was booked. Mark each one **Seen**, and confirm or correct its protection level.
+- **Photos:** private, for staff only. Several can be added at once, and each saves straight away.
+- **Summary:** the inspector's verdict. On a fail, it's the reason the store reads.
+- **Save progress** at any time. **Record pass** and **Record fail** unlock once every check is marked, and both ask first. Admins can also **Cancel inspection** with a reason, and the owner is told.
+- A finished sheet is read-only.
+
+**What a result does:**
+- **Pass:**
+  - The store is **verified** and live.
+  - Its public inspection record shows the month, the inspector ("Femi Ade, Dogeash") and the checks that passed.
+  - Every dog marked seen gets **"Inspected <month> by Dogeash"** on its K9 file, and its protection level becomes the one confirmed.
+  - The owner is told.
+- **Fail:** the store goes back to its owner as a draft, with the summary as the reason (in the banner and the bell). They can fix things and apply again.
+- Booking, pass, fail and cancel all go in the **audit log**, with a new Inspections filter there.
+
+**Rules the database enforces:**
+- Only admins book or cancel.
+- Inspectors can only open and work the inspections assigned to them; admins can work any.
+- A result needs every check marked, and a fail needs a summary.
+- A finished inspection can't be changed or recorded again.
+- Photos only go in that inspection's own folder, in the private `inspection-photos` bucket.
+- The inspections table can't be read directly at all; it's only reachable through these checks.
+- The rules that stop stores writing their own inspection lines now let inspectors through, inside these functions only.
+
+**Checked:**
+- `npm run db:test`: 21 new checks, covering booking, notifications, the sheet, photos, pass (store, record and dogs), fail, cancel, and access. All pass.
+- The typecheck shows no new errors, and every new page compiles.
+- In the browser (made-up data on a temporary page, deleted after): the checklist, the dogs (the level is locked until a dog is marked seen), the photos panel and the booking dialog. I widened the level dropdown, which was cutting its label off.
+- I haven't run a real inspection end to end; that needs your admin sign-in.
+
+**Code:**
+- `supabase/migrations/20261119000000_inspections.sql`: the `inspections` table and the functions `admin_staff()`, `admin_schedule_inspection()`, `admin_cancel_inspection()`, `admin_inspections()`, `admin_inspection()`, `my_store_inspection()`, `admin_save_inspection()` and `admin_complete_inspection()`. Also the `inspection-photos` bucket, and the updated `protect_store_details()` and `prepare_dog()`.
+- `app/utils/inspections.ts` (statuses, the 8 checks, the data shapes) and `app/composables/useAdminInspections.ts`.
+- `app/pages/admin/inspections/index.vue` and `[id].vue`.
+- `app/components/admin/ScheduleInspection.vue`, `InspectionChecklist.vue`, `InspectionDogs.vue`, `InspectionPhotos.vue`.
+- Applications page: booking and the inspection link. The store's Application page shows the booked inspection.
+- Inspectors: the sidebar shows only Inspections, the guard sends them there, and their one-time code leads there.

@@ -89,6 +89,10 @@ export function useNotify() {
     teamUpdated: (title: string, text: string) =>
       show('success', Users, { kicker: 'Team', meta: 'Updated', title, text }),
 
+    // A store's application sent for review
+    applicationSent: (storeName: string) =>
+      show('success', Store, { kicker: 'Your store', meta: 'Sent', title: 'Application sent', text: `Dogeash will review ${storeName} and call to confirm the inspection day.` }),
+
     // An admin action done (a store approved, declined, suspended …)
     adminDone: (title: string, text: string) =>
       show('success', ShieldCheck, { kicker: 'Admin', meta: 'Done', title, text }),

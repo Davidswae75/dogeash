@@ -653,9 +653,10 @@ export const DOG_GALLERY_MAX = 8
 export const DOG_VIDEOS_MAX = 4
 
 // A dog as its store manages it: any status, with its database id and media paths
-export type StoreDog = Omit<Dog, 'status'> & { id: string, status: ListingStatus, photoPath: string | null, media: DogMedia, updatedAt: string }
+// `adminNote`: why Dogeash last took it down or sent it back (empty otherwise)
+export type StoreDog = Omit<Dog, 'status'> & { id: string, status: ListingStatus, photoPath: string | null, media: DogMedia, adminNote: string, updatedAt: string }
 
-export const dogColumns = 'id, file_no, name, breed, sex, city, age, weight_kg, hips, level, price_naira, status, photo_path, gallery_paths, videos, property, safe_with_children, file, updated_at, stores!inner (public_id, status)'
+export const dogColumns = 'id, file_no, name, breed, sex, city, age, weight_kg, hips, level, price_naira, status, photo_path, gallery_paths, videos, admin_note, property, safe_with_children, file, updated_at, stores!inner (public_id, status)'
 
 export interface DogRow {
   id: string
@@ -673,6 +674,7 @@ export interface DogRow {
   photo_path: string | null
   gallery_paths: string[] | null
   videos: DogMedia['videos'] | null
+  admin_note?: string
   property: PropertyType[]
   safe_with_children: boolean
   file: Partial<NonNullable<Dog['file']>> | null
@@ -711,6 +713,7 @@ export function toStoreDog(r: DogRow, storageUrl: string): StoreDog {
     videos: media.videos.map(v => ({ url: dogVideoUrl(v.path, storageUrl), kind: v.kind, title: v.title })),
     photoPath: r.photo_path,
     media,
+    adminNote: r.admin_note ?? '',
     property: r.property,
     safeWithChildren: r.safe_with_children,
     storeId: r.stores.public_id,
@@ -754,6 +757,6 @@ export function listingActions(status: ListingStatus, verified: boolean): { to: 
 
 // A listed dog as buyers see it (the catalogue only loads available and reserved dogs)
 export function toDog(r: DogRow, storageUrl: string): Dog {
-  const { id: _id, photoPath: _path, media: _media, updatedAt: _at, status, ...dog } = toStoreDog(r, storageUrl)
+  const { id: _id, photoPath: _path, media: _media, adminNote: _note, updatedAt: _at, status, ...dog } = toStoreDog(r, storageUrl)
   return { ...dog, status: status === 'reserved' ? 'reserved' : 'available' }
 }

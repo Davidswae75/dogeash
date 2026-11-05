@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-11-04T21:01:54.091Z
-> Files: 715 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-11-05T17:08:31.644Z
+> Files: 723 tracked | Anatomy hits: 0 | Misses: 0
 
 > Project structure index. Auto-maintained by OpenWolf hooks and daemon.
 > Run `openwolf scan` to generate, or wait for the first Claude Code session.
@@ -870,6 +870,7 @@
 
 - `useAccountGate.ts` — Unique per action and target, e.g. `visit:STR-001` (~550 tok)
 - `useAccountList.ts` — Lists of dog file numbers kept in this browser per person: one for the guest, one per account. (~636 tok)
+- `useAdminInspections.ts` — Admin › Inspections (Supabase: the admin_… inspection functions and the private inspection-photos bu (~1538 tok)
 - `useAuth.ts` — Every sign-up, sign-in and password call to Supabase, in one place. Each returns a plain (~1419 tok)
 - `useAuthPanel.ts` — Lets an auth page swap its side panel while it's open (sign-up shows a store panel for "Open a store (~180 tok)
 - `useConversations.ts` — Conversations between buyers and stores (Supabase: conversations, messages), for both sides. (~1450 tok)
@@ -931,8 +932,13 @@
 
 ## app/pages/admin/
 
+- `applications.vue` — Vue: setup (~1997 tok)
 - `index.vue` — Vue: setup (~1612 tok)
 - `verify.vue` — Vue: setup (~1019 tok)
+
+## app/pages/admin/inspections/
+
+- `[id].vue` — Vue: setup (~2098 tok)
 
 ## app/pages/care/
 
@@ -941,6 +947,7 @@
 ## app/pages/dashboard/
 
 - `[section].vue` — Vue: setup (~394 tok)
+- `application.vue` — Vue: setup (~1381 tok)
 - `bookings.vue` — Vue: setup (~714 tok)
 - `care.vue` — Vue: setup (~862 tok)
 - `inbox.vue` — Vue: setup (~783 tok)
@@ -1021,3 +1028,7 @@
 - `20261113000000_admin_staff.sql` — Dogeash staff and the admin dashboard's foundations. (~1702 tok)
 - `20261115000000_dog_media.sql` — More than one photo per dog, and videos. Besides its main photo (photo_path), a dog can have up to 8 (~711 tok)
 - `20261116000000_admin_store_status.sql` — Admins change a store's status from the admin overview: approve (verified), decline (back to draft), (~1327 tok)
+- `20261117000000_admin_sections.sql` — The admin console's sections: Listings, Reviews, People and the Care directory. Each is a set of fun (~2634 tok)
+- `20261118000000_store_applications.sql` — Store applications. A draft store's owner fills in an application (the kennel's address and directio (~2567 tok)
+- `20261119000000_inspections.sql` — Inspections. An admin schedules a kennel visit (day, time, inspector) for a store applying to go liv (~4860 tok)
+- `20261120000000_reports_and_blocking.sql` — Reports and blocking. (~4220 tok)

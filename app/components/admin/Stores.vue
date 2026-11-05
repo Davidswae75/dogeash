@@ -26,25 +26,17 @@ const shown = computed(() => {
 
 // The action being confirmed
 const pending = ref<{ store: AdminStore, to: StoreStatus, label: string, reason: boolean }>()
-const note = ref('')
-const busy = ref(false)
-const error = ref('')
+const confirmOpen = ref(false)
 function ask(store: AdminStore, action: { to: StoreStatus, label: string, reason: boolean }) {
   pending.value = { store, ...action }
-  note.value = ''
-  error.value = ''
+  confirmOpen.value = true
 }
-async function confirm() {
+async function run(note: string) {
   const p = pending.value!
-  if (p.reason && !note.value.trim()) return (error.value = 'Give the store a reason. They\'ll read it.')
-  busy.value = true
-  error.value = (await setStoreStatus(p.store, p.to, note.value)) ?? ''
-  busy.value = false
-  if (error.value) return
-  useNotify().adminDone(`${p.store.name}: ${storeStatusMeta[p.to].label.toLowerCase()}`, 'The store\'s owners and managers have been told. It\'s in the audit log.')
-  pending.value = undefined
+  const error = await setStoreStatus(p.store, p.to, note)
+  if (!error) useNotify().adminDone(`${p.store.name}: ${storeStatusMeta[p.to].label.toLowerCase()}`, 'The store\'s owners and managers have been told. It\'s in the audit log.')
+  return error
 }
-const dialogOpen = computed({ get: () => !!pending.value, set: (v: boolean) => { if (!v) pending.value = undefined } })
 </script>
 
 <template>
@@ -125,27 +117,16 @@ const dialogOpen = computed({ get: () => !!pending.value, set: (v: boolean) => {
       <p v-else class="m-0 border-t border-line px-5 py-4 text-[13px] text-ink-muted">{{ stores.length ? 'No stores match.' : 'No stores yet.' }}</p>
     </div>
 
-    <Dialog v-model:open="dialogOpen">
-      <DialogContent v-if="pending" class="sm:max-w-[460px]">
-        <DialogHeader>
-          <DialogTitle>{{ pending.label }}: {{ pending.store.name }}</DialogTitle>
-          <DialogDescription>
-            {{ storeStatusMeta[pending.store.status].label }} → <strong class="text-ink">{{ storeStatusMeta[pending.to].label }}</strong>. {{ storeActionEffect[pending.to] }}
-          </DialogDescription>
-        </DialogHeader>
-        <div class="flex flex-col gap-1.5">
-          <label for="store-status-note" class="text-sm font-semibold">
-            {{ pending.reason ? 'Reason for the store' : 'Note for the store' }}
-            <span class="font-normal text-ink-muted">{{ pending.reason ? '(required, they\'ll read it)' : '(optional)' }}</span>
-          </label>
-          <Textarea id="store-status-note" v-model="note" rows="3" maxlength="500" :placeholder="pending.reason ? 'What needs fixing, or why' : 'Welcome to Dogeash'" class="border-line-strong" />
-        </div>
-        <p v-if="error" class="m-0 text-sm font-semibold text-danger" role="alert">{{ error }}</p>
-        <DialogFooter>
-          <Button variant="ghost" :disabled="busy" @click="pending = undefined">Cancel</Button>
-          <Button :variant="pending.to === 'verified' ? 'marigold' : 'default'" :loading="busy" @click="confirm">{{ pending.label }}</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <AdminConfirm
+      v-if="pending"
+      v-model:open="confirmOpen"
+      :title="`${pending.label}: ${pending.store.name}`"
+      :description="`${storeStatusMeta[pending.store.status].label} → ${storeStatusMeta[pending.to].label}. ${storeActionEffect[pending.to]}`"
+      :confirm-label="pending.label"
+      :reason-required="pending.reason"
+      reason-for="the store"
+      :danger="pending.to !== 'verified'"
+      :run="run"
+    />
   </AdminCard>
 </template>

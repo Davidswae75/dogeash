@@ -28,7 +28,7 @@ export function useAdmin() {
   }
 
   // Change a store's status with a note it reads; then everything reloads. Returns an error, or null.
-  async function setStoreStatus(store: AdminStore, next: StoreStatus, note: string): Promise<string | null> {
+  async function setStoreStatus(store: Pick<AdminStore, 'public_id'>, next: StoreStatus, note: string): Promise<string | null> {
     const { error: e } = await supabase.rpc('admin_set_store_status', { target: store.public_id, next, note: note.trim() })
     if (e) return e.message.includes('reason') ? 'Give the store a reason.' : e.message.includes('Staff only') ? 'Your one-time code has expired. Sign in again.' : 'That didn\'t work. Try again.'
     await Promise.all([loadOverview(), loadStores()])

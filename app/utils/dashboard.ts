@@ -8,11 +8,13 @@ import type { StorePermission } from './storeRoles'
 import type { Store } from './stores'
 import { shortTime, visitDay } from './time'
 
-export const dashboardNav: { group: string, items: { to: string, label: string, icon: string, badge?: number, permission?: StorePermission }[] }[] = [
+// `beforeVerified`: shown only until the store is verified (the application to go live)
+export const dashboardNav: { group: string, items: { to: string, label: string, icon: string, badge?: number, permission?: StorePermission, beforeVerified?: boolean }[] }[] = [
   {
     group: 'Manage',
     items: [
       { to: '/dashboard', label: 'Overview', icon: 'LayoutDashboard' },
+      { to: '/dashboard/application', label: 'Application', icon: 'FileCheck2', permission: 'settings', beforeVerified: true },
       { to: '/dashboard/dogs', label: 'Dogs', icon: 'Dog', permission: 'dogs' },
       { to: '/dashboard/inbox', label: 'Inbox', icon: 'MessageSquare', permission: 'enquiries' },
       { to: '/dashboard/bookings', label: 'Bookings', icon: 'CalendarDays', permission: 'bookings' },

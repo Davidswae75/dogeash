@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ClipboardCheck, Dog, FileCheck2, LayoutDashboard, LogOut, ScrollText, ShieldCheck, Star, Stethoscope, Store, Users } from '@lucide/vue'
 import type { Component } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRoute } from '#imports' // nuxt
 import { useAdmin } from '~/composables/useAdmin'
 import { useSession } from '~/composables/useSession'
@@ -15,9 +16,15 @@ const emit = defineEmits<{ navigate: [] }>()
 const route = useRoute()
 const { user, initials, signOut } = useSession()
 const { role } = useStaff()
-const { overview } = useAdmin()
+const { overview, loadOverview } = useAdmin()
+// The waiting counts beside sections come from the overview; load it on any admin page
+onMounted(() => { if (!props.locked && !overview.value && role.value === 'admin') loadOverview() })
 
 const icons: Record<string, Component> = { LayoutDashboard, ScrollText, FileCheck2, ClipboardCheck, Dog, Star, Store, Users, Stethoscope }
+// Inspectors see only the sections open to them
+const groups = computed(() => adminNav
+  .map(g => ({ ...g, items: g.items.filter(i => role.value === 'admin' || i.inspector) }))
+  .filter(g => g.items.length))
 const isActive = (to?: string) => !!to && (to === '/admin' ? route.path === '/admin' : route.path.startsWith(to))
 const badgeOf = (key?: 'storesInReview' | 'dogsPendingReview') => (key && overview.value ? overview.value.waiting[key] : 0)
 </script>
@@ -33,7 +40,7 @@ const badgeOf = (key?: 'storesInReview' | 'dogsPendingReview') => (key && overvi
     </NuxtLink>
 
     <nav v-if="!props.locked" class="flex flex-1 flex-col gap-5 overflow-y-auto px-3" aria-label="Admin sections">
-      <div v-for="g in adminNav" :key="g.group" class="flex flex-col gap-0.5">
+      <div v-for="g in groups" :key="g.group" class="flex flex-col gap-0.5">
         <span class="px-2.5 pb-1 font-mono text-[10px] tracking-[.14em] text-on-night/40 uppercase">{{ g.group }}</span>
         <template v-for="item in g.items" :key="item.label">
           <NuxtLink

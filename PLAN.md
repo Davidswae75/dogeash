@@ -117,7 +117,7 @@ The goal: someone can land, understand Dogeash, browse dogs and read a full K9 f
 Sellers are called **stores** everywhere buyers can see them. A store is a kennel; its owner is the seller.
 
 
-- [~] Store application (from "Open a store" in the header, footer and `/open-a-store`): sign-up with the "Open a store" intent asks for the kennel name and city and ends on a draft-store welcome (preview). Still to do: documents, then booking the inspection. Creates the account and starts verification (ID, CAC registration, bank account, kennel address), then books the inspection
+- [~] Store application (from "Open a store" in the header, footer and `/open-a-store`): sign-up with the "Open a store" intent asks for the kennel name and city and ends on a draft-store welcome (preview). Application built (`/dashboard/application`): address, inspector phone, up to 3 inspection days, documents (ID, CAC unless not registered, proof of address) in a private bucket, Send for review; admins review on `/admin/applications`. Still to do: inspections (scheduling, inspector checklist). Creates the account and starts verification (ID, CAC registration, bank account, kennel address), then books the inspection
 - [ ] Pending stores can sign in and prepare their profile and dogs; nothing goes public until the inspection passes
 - [x] Store dashboard layout (`app/layouts/dashboard.vue`): sidebar with Overview, Dogs, Enquiries, Bookings, Care team, Store profile, Payouts, Team, Settings; store switcher menu; top bar with search, notifications, theme and "Add a dog"; phone menu sheet
 - [~] Dashboard overview (`/dashboard`): greeting with today's status, a connected numbers strip with trends, needs your attention (by urgency and role), your dogs with status filters, coming up grouped by day, store health (inspection, rating, replies, profile). One component per section in `app/components/dashboard/` (example figures)
@@ -135,11 +135,11 @@ Sellers are called **stores** everywhere buyers can see them. A store is a kenne
 
 ## Phase 4 · Inspections and trust
 
-- [~] Admin dashboard (`/admin`, its own plain layout): staff set only in the SQL editor (`staff`: admin, inspector), one-time code from an authenticator app required (checked in the database too), overview of the whole site, audit log (`admin_audit`). Next: applications and inspections, then moderation of stores, dogs and reviews, people, care directory, audit log page
+- [~] Admin dashboard (`/admin`, its own plain layout): staff set only in the SQL editor (`staff`: admin, inspector), one-time code from an authenticator app required (checked in the database too), overview of the whole site, audit log (`admin_audit`). Built: Stores (status changes), Listings (take down, put back, approve), Reviews (remove with reason), People (look-up), Care directory (add, edit, remove), Audit log. Store applications and inspections built. Next: blocking accounts (needs a server function)
 
-- [ ] Inspection scheduling for kennels
-- [ ] Inspector tool: on-site checklist, photos, protection level confirmation
-- [ ] Verified kennel stamp driven by real inspection records
+- [x] Inspection scheduling for kennels: booked from Applications (day, time, inspector), owner and inspector told
+- [x] Inspector tool: on-site checklist (8 checks), dogs seen with confirmed levels, private photos, summary; pass verifies the store and marks dogs inspected, fail sends it back
+- [x] Verified kennel stamp driven by real inspection records (a passed inspection writes the store's record)
 - [ ] Change history for inspections and prices
 - [ ] Bite and incident reporting (model done; needs forms and display)
 - [ ] Listing moderation queue for admins

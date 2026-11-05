@@ -1,13 +1,13 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-11-04T21:01:54.091Z",
-    "fileCount": 715,
+    "lastScanned": "2026-11-05T17:08:31.644Z",
+    "fileCount": 723,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "14325d875e43a972e5cf39bfb601b06cf3f6162e7a1be23b3fa72d62474e9404",
-    "storeUpdatedAt": "2026-11-04T21:01:54.131Z",
-    "rootHash": "c83489eab5b0f0bf"
+    "renderedHash": "811eb74e702dab26a85995bb8e8b12cb67a2a2f7b7e598a8c95eab519b671e3c",
+    "storeUpdatedAt": "2026-11-05T17:08:31.670Z",
+    "rootHash": "54ec67dc28e59e34"
   },
   "files": {
     ".gitignore": {
@@ -8694,6 +8694,101 @@
       "size": 9313,
       "mtimeMs": 1793826113452.0325,
       "updatedAt": "2026-11-04T21:01:54.089Z",
+      "source": "hook"
+    },
+    "supabase/migrations/20261117000000_admin_sections.sql": {
+      "description": "The admin console's sections: Listings, Reviews, People and the Care directory. Each is a set of fun",
+      "tokens": 2634,
+      "hash": "8b6d142e16c34c23",
+      "size": 10532,
+      "mtimeMs": 1793894006326.1355,
+      "updatedAt": "2026-11-05T15:53:26.445Z",
+      "source": "hook"
+    },
+    "supabase/migrations/20261118000000_store_applications.sql": {
+      "description": "Store applications. A draft store's owner fills in an application (the kennel's address and directio",
+      "tokens": 2567,
+      "hash": "f25ddc65656c7bd9",
+      "size": 10109,
+      "mtimeMs": 1793895672877.9617,
+      "updatedAt": "2026-11-05T16:21:13.048Z",
+      "source": "hook"
+    },
+    "app/pages/dashboard/application.vue": {
+      "description": "Vue: setup",
+      "tokens": 1381,
+      "hash": "aabd7015b131bea2",
+      "size": 5181,
+      "mtimeMs": 1793895846744.7048,
+      "updatedAt": "2026-11-05T16:24:08.425Z",
+      "source": "hook"
+    },
+    "app/pages/admin/applications.vue": {
+      "description": "Vue: setup",
+      "tokens": 1997,
+      "hash": "9e1c3acafdec44ba",
+      "size": 7503,
+      "mtimeMs": 1793895912816.9204,
+      "updatedAt": "2026-11-05T16:25:13.516Z",
+      "source": "hook"
+    },
+    "supabase/migrations/20261119000000_inspections.sql": {
+      "description": "Inspections. An admin schedules a kennel visit (day, time, inspector) for a store applying to go liv",
+      "tokens": 4860,
+      "hash": "56b4b050c725e1f5",
+      "size": 18958,
+      "mtimeMs": 1793897038954.5947,
+      "updatedAt": "2026-11-05T16:44:00.065Z",
+      "source": "hook"
+    },
+    "app/composables/useAdminInspections.ts": {
+      "description": "Admin › Inspections (Supabase: the admin_… inspection functions and the private inspection-photos bu",
+      "tokens": 1538,
+      "hash": "55fa809264bbfdb4",
+      "size": 5393,
+      "mtimeMs": 1793897442059.4355,
+      "updatedAt": "2026-11-05T16:50:42.457Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "StaffMember",
+          "kind": "section",
+          "startLine": 9,
+          "endLine": 10,
+          "tokens": 25
+        },
+        {
+          "name": "message",
+          "kind": "fn",
+          "startLine": 11,
+          "endLine": 19,
+          "tokens": 178
+        },
+        {
+          "name": "useAdminInspections",
+          "kind": "fn",
+          "startLine": 20,
+          "endLine": 113,
+          "tokens": 1188
+        }
+      ]
+    },
+    "app/pages/admin/inspections/[id].vue": {
+      "description": "Vue: setup",
+      "tokens": 2098,
+      "hash": "1349d058d095de9f",
+      "size": 7874,
+      "mtimeMs": 1793897346171.3262,
+      "updatedAt": "2026-11-05T16:49:06.356Z",
+      "source": "hook"
+    },
+    "supabase/migrations/20261120000000_reports_and_blocking.sql": {
+      "description": "Reports and blocking.",
+      "tokens": 4220,
+      "hash": "d66bb61af563ac37",
+      "size": 16282,
+      "mtimeMs": 1793898511463.581,
+      "updatedAt": "2026-11-05T17:08:31.643Z",
       "source": "hook"
     }
   },

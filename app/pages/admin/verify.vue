@@ -44,7 +44,7 @@ async function verify() {
   busy.value = false
   if (error.value) return (code.value = '')
   const to = String(route.query.redirect ?? '')
-  await navigateTo(to.startsWith('/admin') && to !== '/admin/verify' ? to : '/admin')
+  await navigateTo(to.startsWith('/admin') && to !== '/admin/verify' ? to : staff.role.value === 'inspector' ? '/admin/inspections' : '/admin')
 }
 </script>
 

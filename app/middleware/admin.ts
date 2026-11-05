@@ -1,8 +1,10 @@
 import { createError, defineNuxtRouteMiddleware, navigateTo } from '#imports' // nuxt
 import { useSession } from '~/composables/useSession'
 import { useStaff } from '~/composables/useStaff'
+import { inspectorMayOpen } from '~/utils/admin'
 
 // Admin pages: signed in, on the staff list, and past a one-time code (the code page itself excepted).
+// Inspectors only reach their inspections.
 // Anyone not on the staff list gets a plain "not found", so the admin dashboard doesn't advertise itself.
 // The database checks all of this again on every admin call; this only decides which page to show.
 export default defineNuxtRouteMiddleware(async (to) => {
@@ -13,4 +15,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
   if (!staff.role.value) throw createError({ statusCode: 404, statusMessage: 'Page not found' })
   if (to.path === '/admin/verify') return
   if (!(await staff.hasCode())) return navigateTo({ path: '/admin/verify', query: { redirect: to.fullPath } })
+  // Inspectors work their inspections; the rest of the console is for admins
+  if (staff.role.value === 'inspector' && !inspectorMayOpen(to.path)) return navigateTo('/admin/inspections')
 })

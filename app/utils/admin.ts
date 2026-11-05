@@ -1,23 +1,28 @@
 // The admin dashboard: its sections, and the overview the database sends (public.admin_overview()).
 // Sections not built yet are listed without a link, so the shape of the dashboard is visible.
 // `badge` names the overview count shown beside a section (what's waiting there).
-export const adminNav: { group: string, items: { to?: string, label: string, icon: string, badge?: 'storesInReview' | 'dogsPendingReview' }[] }[] = [
+// `inspector`: also shown to inspectors (everything else is admins only)
+export const adminNav: { group: string, items: { to?: string, label: string, icon: string, badge?: 'storesInReview' | 'dogsPendingReview', inspector?: boolean }[] }[] = [
   { group: 'Monitor', items: [
     { to: '/admin', label: 'Overview', icon: 'LayoutDashboard' },
-    { label: 'Audit log', icon: 'ScrollText' },
+    { to: '/admin/audit', label: 'Audit log', icon: 'ScrollText' },
   ] },
   { group: 'Review', items: [
-    { label: 'Applications', icon: 'FileCheck2', badge: 'storesInReview' },
-    { label: 'Inspections', icon: 'ClipboardCheck' },
-    { label: 'Listings', icon: 'Dog', badge: 'dogsPendingReview' },
-    { label: 'Reviews', icon: 'Star' },
+    { to: '/admin/applications', label: 'Applications', icon: 'FileCheck2', badge: 'storesInReview' },
+    { to: '/admin/inspections', label: 'Inspections', icon: 'ClipboardCheck', inspector: true },
+    { to: '/admin/listings', label: 'Listings', icon: 'Dog', badge: 'dogsPendingReview' },
+    { to: '/admin/reviews', label: 'Reviews', icon: 'Star' },
   ] },
   { group: 'Manage', items: [
-    { label: 'Stores', icon: 'Store' },
-    { label: 'People', icon: 'Users' },
-    { label: 'Care directory', icon: 'Stethoscope' },
+    { to: '/admin/stores', label: 'Stores', icon: 'Store' },
+    { to: '/admin/people', label: 'People', icon: 'Users' },
+    { to: '/admin/care', label: 'Care directory', icon: 'Stethoscope' },
   ] },
 ]
+
+// Pages an inspector may open (the one-time code page, and their inspections)
+export const inspectorPaths = ['/admin/verify', '/admin/inspections']
+export const inspectorMayOpen = (path: string) => inspectorPaths.some(p => path === p || path.startsWith(`${p}/`))
 
 type ByStatus = Partial<Record<string, number>>
 
@@ -140,4 +145,127 @@ export const storeActionEffect: Record<StoreStatus, string> = {
   in_review: 'The store stays hidden from buyers while Dogeash reviews it.',
   draft: 'The store is hidden from buyers and goes back to its owner to fix. It can\'t put dogs live.',
   suspended: 'The store and all its dogs disappear from the site at once. Its people can still sign in and see why.',
+}
+
+// ── Listings (admin_dogs(), admin_set_dog_status()) ─────────────────────────
+export type DogStatus = 'draft' | 'pending_review' | 'available' | 'reserved' | 'sold' | 'withdrawn'
+
+export interface AdminDog {
+  id: string
+  file_no: string
+  name: string
+  breed: string
+  city: string
+  level: number
+  price_naira: number
+  status: DogStatus
+  photo_path: string | null
+  admin_note: string
+  created_at: string
+  updated_at: string
+  store_id: string
+  store_name: string
+  store_status: StoreStatus
+}
+
+export const dogStatusMeta: Record<DogStatus, { label: string, color: string }> = {
+  available: { label: 'For sale', color: 'var(--cat-1)' },
+  reserved: { label: 'Reserved', color: 'var(--cat-2)' },
+  pending_review: { label: 'Pending review', color: 'var(--cat-3)' },
+  draft: { label: 'Draft', color: 'var(--line-strong)' },
+  sold: { label: 'Sold', color: 'var(--cat-4)' },
+  withdrawn: { label: 'Withdrawn', color: 'var(--cat-5)' },
+}
+
+// What an admin can do with a listing in each status (drafts and sold dogs are the store's business)
+export const dogActions: Record<DogStatus, { to: DogStatus, label: string, reason: boolean, effect: string }[]> = {
+  available: [{ to: 'withdrawn', label: 'Take down', reason: true, effect: 'The dog disappears from the site at once. The store sees your reason on the dog.' }],
+  reserved: [{ to: 'withdrawn', label: 'Take down', reason: true, effect: 'The dog disappears from the site at once. The store sees your reason on the dog.' }],
+  withdrawn: [{ to: 'available', label: 'Put back live', reason: false, effect: 'Buyers can see the dog again (its store must be verified).' }],
+  pending_review: [
+    { to: 'available', label: 'Approve and put live', reason: false, effect: 'Buyers can see the dog straight away (its store must be verified).' },
+    { to: 'draft', label: 'Send back to the store', reason: true, effect: 'The dog goes back to the store as a draft, with your reason.' },
+  ],
+  draft: [],
+  sold: [],
+}
+
+// ── Reviews (admin_reviews(), admin_remove_review()) ────────────────────────
+export interface AdminReview {
+  id: string
+  rating: number
+  body: string
+  store_reply: string | null
+  replied_at: string | null
+  created_at: string
+  author_name: string
+  author_city: string
+  author_email: string | null
+  store_id: string
+  store_name: string
+  store_slug: string
+}
+
+// ── People (admin_people()) ─────────────────────────────────────────────────
+export interface AdminPerson {
+  id: string
+  name: string
+  email: string | null
+  phone: string | null
+  city: string | null
+  created_at: string
+  last_sign_in_at: string | null
+  staff_role: 'admin' | 'inspector' | null
+  stores: { id: string, name: string, status: StoreStatus, role: 'owner' | 'manager' | 'handler' }[]
+  visits: number
+  conversations: number
+  reviews: number
+  shortlisted: number
+}
+
+// ── Audit log (admin_audit) ─────────────────────────────────────────────────
+// Kinds of action, by the start of their name ("store.verified", "dog.withdrawn" …)
+export const auditKinds = [
+  { prefix: 'store.', label: 'Stores' },
+  { prefix: 'dog.', label: 'Listings' },
+  { prefix: 'review.', label: 'Reviews' },
+  { prefix: 'care.', label: 'Care directory' },
+  { prefix: 'inspection.', label: 'Inspections' },
+]
+
+// "store.verified" → "Store approved", for the log
+const auditWords: Record<string, string> = {
+  'store.verified': 'Store approved', 'store.draft': 'Store sent back', 'store.in_review': 'Store marked in review', 'store.suspended': 'Store suspended',
+  'dog.withdrawn': 'Listing taken down', 'dog.available': 'Listing put live', 'dog.draft': 'Listing sent back',
+  'review.remove': 'Review removed',
+  'inspection.schedule': 'Inspection booked', 'inspection.pass': 'Inspection passed', 'inspection.fail': 'Inspection failed', 'inspection.cancel': 'Inspection cancelled', 'care.add': 'Provider added', 'care.edit': 'Provider edited', 'care.remove': 'Provider removed',
+}
+export const auditLabel = (action: string) => auditWords[action] ?? action
+
+// ── Applications (admin_applications()) ─────────────────────────────────────
+export interface AdminApplication {
+  public_id: string
+  name: string
+  city: string
+  area: string
+  state: string
+  status: StoreStatus
+  status_note: string
+  tagline: string
+  about: string | null
+  owner_profile: { name?: string, title?: string, yearsWithDogs?: number, credentials?: string[] } | null
+  created_at: string
+  address: string
+  directions: string
+  contact_phone: string
+  preferred_days: string[]
+  cac_registered: boolean
+  note: string
+  id_doc_path: string | null
+  cac_doc_path: string | null
+  address_doc_path: string | null
+  submitted_at: string | null
+  updated_at: string
+  owner: { name: string, email: string, phone: string | null } | null
+  dogs: number
 }

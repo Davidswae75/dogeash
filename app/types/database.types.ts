@@ -106,6 +106,7 @@ export interface Database {
           photo_path: string | null
           gallery_paths: string[]
           videos: Json
+          admin_note: string
           property: Database['public']['Enums']['property_type'][]
           safe_with_children: boolean
           file: Json | null
@@ -213,6 +214,14 @@ export interface Database {
           { foreignKeyName: 'store_care_links_provider_id_fkey', columns: ['provider_id'], isOneToOne: false, referencedRelation: 'care_providers', referencedColumns: ['id'] },
         ]
       }
+      store_applications: {
+        Row: { store_id: string, address: string, directions: string, contact_phone: string, preferred_days: string[], cac_registered: boolean, id_doc_path: string | null, cac_doc_path: string | null, address_doc_path: string | null, note: string, submitted_at: string | null, updated_at: string }
+        Insert: { store_id: string, address?: string, directions?: string, contact_phone?: string, preferred_days?: string[], cac_registered?: boolean, id_doc_path?: string | null, cac_doc_path?: string | null, address_doc_path?: string | null, note?: string }
+        Update: { address?: string, directions?: string, contact_phone?: string, preferred_days?: string[], cac_registered?: boolean, id_doc_path?: string | null, cac_doc_path?: string | null, address_doc_path?: string | null, note?: string }
+        Relationships: [
+          { foreignKeyName: 'store_applications_store_id_fkey', columns: ['store_id'], isOneToOne: true, referencedRelation: 'stores', referencedColumns: ['id'] },
+        ]
+      }
       store_reviews: {
         Row: { id: string, store_id: string, author_id: string, author_name: string, author_city: string, visit_id: string | null, rating: number, body: string, store_reply: string | null, replied_at: string | null } & Timestamps
         Insert: { store_id: string, rating: number, body: string }
@@ -260,6 +269,23 @@ export interface Database {
       is_staff: { Args: { roles?: Database['public']['Enums']['staff_role'][] }, Returns: boolean }
       admin_overview: { Args: Record<string, never>, Returns: Json }
       admin_stores: { Args: Record<string, never>, Returns: Json }
+      admin_applications: { Args: Record<string, never>, Returns: Json }
+      admin_staff: { Args: Record<string, never>, Returns: Json }
+      admin_schedule_inspection: { Args: { target: string, at: string, inspector: string, note?: string }, Returns: string }
+      admin_cancel_inspection: { Args: { target: string, note: string }, Returns: undefined }
+      admin_inspections: { Args: Record<string, never>, Returns: Json }
+      admin_inspection: { Args: { target: string }, Returns: Json }
+      my_store_inspection: { Args: { target: string }, Returns: Json }
+      admin_save_inspection: { Args: { target: string, checklist: Json, dogs: Json, photos: string[], summary: string }, Returns: undefined }
+      admin_complete_inspection: { Args: { target: string, passed: boolean }, Returns: undefined }
+      submit_store_application: { Args: { target: string }, Returns: undefined }
+      admin_dogs: { Args: Record<string, never>, Returns: Json }
+      admin_set_dog_status: { Args: { target: string, next: Database['public']['Enums']['dog_status'], note?: string }, Returns: undefined }
+      admin_reviews: { Args: Record<string, never>, Returns: Json }
+      admin_remove_review: { Args: { target: string, note: string }, Returns: undefined }
+      admin_people: { Args: { q?: string }, Returns: Json }
+      admin_save_provider: { Args: { p: Json }, Returns: string }
+      admin_delete_provider: { Args: { target: string }, Returns: undefined }
       admin_set_store_status: { Args: { target: string, next: Database['public']['Enums']['store_status'], note?: string }, Returns: undefined }
       store_team: { Args: { target: string }, Returns: { user_id: string, name: string, email: string | null, role: Database['public']['Enums']['store_role'], joined_at: string }[] }
     }

@@ -11,7 +11,7 @@ const db = new PGlite()
 await db.exec(`
   create role anon nologin; create role authenticated nologin; create role service_role nologin bypassrls;
   create schema auth;
-  create table auth.users (id uuid primary key default gen_random_uuid(), email text, raw_user_meta_data jsonb default '{}');
+  create table auth.users (id uuid primary key default gen_random_uuid(), email text, raw_user_meta_data jsonb default '{}', created_at timestamptz default now(), last_sign_in_at timestamptz);
   create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('test.uid', true), '')::uuid $$;
   create function auth.jwt() returns jsonb language sql stable as $$ select coalesce(nullif(current_setting('test.jwt', true), ''), '{}')::jsonb $$;
   create schema storage;
@@ -382,6 +382,104 @@ check('an admin can suspend it, with a reason the store reads', (await withCode(
 check('a suspended store disappears from the public', (await as('anon', null, `select id from public.stores where id = '${savanna}'`)).length === 0)
 check('stores still can\'t write the inspection themselves', (await as('authenticated', other, `update public.stores set details = details || '{"inspection":{"status":"passed","by":"Me"}}' where id = '${savanna}' returning details -> 'inspection' ->> 'by' as by`))?.[0]?.by !== 'Me')
 check('changing to the same status is refused', await withCode(admin, 'aal2', `select public.admin_set_store_status('STR-004', 'suspended', 'again')`) === null)
+
+// Admin sections: listings, reviews, people, care directory (admins with a one-time code only)
+const adm = sql => withCode(admin, 'aal2', sql)
+const sarge2 = await scalar(`select id from public.dogs where file_no = 'KD-2026-014'`)
+check('admins list every dog, any status', (await adm('select public.admin_dogs() as d'))?.[0]?.d?.length >= 18)
+check('the dog list is closed to everyone else', await withCode(inspector, 'aal2', 'select public.admin_dogs()') === null && await withCode(owner, 'aal2', 'select public.admin_dogs()') === null)
+check('taking a dog down needs a reason', await adm(`select public.admin_set_dog_status('${sarge2}', 'withdrawn')`) === null)
+await adm(`select public.admin_set_dog_status('${sarge2}', 'withdrawn', 'Photos don''t match the K9 file')`)
+check('an admin can take a dog down, with a note the store reads', (await as('authenticated', manager, `select status, admin_note from public.dogs where id = '${sarge2}'`))?.[0]?.admin_note === 'Photos don\'t match the K9 file')
+check('the store is told', (await as('authenticated', owner, `select title from public.notifications where topic = 'dog-admin:${sarge2}'`))?.[0]?.title?.includes('taken down'))
+check('a taken-down dog leaves the public listings', (await as('anon', null, `select id from public.dogs where id = '${sarge2}'`)).length === 0)
+await as('authenticated', manager, `update public.dogs set status = 'draft' where id = '${sarge2}'`)
+check('when the store moves the dog on itself, Dogeash\'s note goes', await scalar(`select admin_note from public.dogs where id = '${sarge2}'`) === '')
+await adm(`select public.admin_set_dog_status('${sarge2}', 'available', '')`)
+check('an admin can put it back', await scalar(`select status::text from public.dogs where id = '${sarge2}'`) === 'available')
+const draftStoreDog = await scalar(`select d.id from public.dogs d join public.stores s on s.id = d.store_id where s.status <> 'verified' limit 1`)
+if (draftStoreDog) check('a dog of an unverified store can\'t be put live', await adm(`select public.admin_set_dog_status('${draftStoreDog}', 'available', '')`) === null)
+
+const rv = await as('authenticated', buyer, `insert into public.store_reviews (store_id, rating, body) values ('${k9}', 1, 'Terrible, they never answered my calls at all.') returning id`)
+const rvId = rv?.[0]?.id
+check('admins list every review with its author', (await adm('select public.admin_reviews() as r'))?.[0]?.r?.some(x => x.id === rvId && x.author_email))
+check('removing a review needs a reason', await adm(`select public.admin_remove_review('${rvId}', '')`) === null)
+await adm(`select public.admin_remove_review('${rvId}', 'Breaks the review rules: no visit details')`)
+check('an admin can remove a review; the author is told', await scalar(`select count(*)::int from public.store_reviews where id = '${rvId}'`) === 0 && (await as('authenticated', buyer, `select body from public.notifications where topic = 'review-removed:${rvId}'`))?.[0]?.body?.includes('review rules'))
+check('removals are in the audit log with the review', (await adm(`select detail ->> 'body' as body from public.admin_audit where action = 'review.remove' and target_id = '${rvId}'`))?.[0]?.body?.startsWith('Terrible'))
+
+const people = (await adm(`select public.admin_people('ibrahim') as p`))?.[0]?.p
+check('admins can look people up, with their stores', people?.length === 1 && people[0].stores?.some(s => s.role === 'owner'))
+check('people search is closed to everyone else', await withCode(buyer, 'aal2', 'select public.admin_people()') === null)
+
+const newCare = (await adm(`select public.admin_save_provider('{"name":"Gwarinpa Pet Clinic","type":"vet","city":"Abuja","verified":true,"priceFrom":12000}') as id`))?.[0]?.id
+check('an admin can add a care provider', /^CARE-\d+$/.test(newCare ?? '') && await scalar(`select slug from public.care_providers where public_id = '${newCare}'`) === 'gwarinpa-pet-clinic')
+check('an admin can edit one', (await adm(`select public.admin_save_provider('{"id":"${newCare}","name":"Gwarinpa Pet Clinic","type":"vet","city":"Abuja","areas":"Abuja","verified":false}')`)) !== null && await scalar(`select verified::text from public.care_providers where public_id = '${newCare}'`) === 'false')
+check('only admins edit the directory', await withCode(inspector, 'aal2', `select public.admin_save_provider('{"name":"X Y","type":"vet","city":"Abuja"}')`) === null)
+check('an admin can remove one', (await adm(`select public.admin_delete_provider('${newCare}')`)) !== null && await scalar(`select count(*)::int from public.care_providers where public_id = '${newCare}'`) === 0)
+
+// Store applications: a draft store's owner applies with documents; admins review; sending back reopens it
+const applicant = await user('Bisi Adeyemi')
+const appStore = (await as('authenticated', applicant, `insert into public.stores (public_id, slug, name, city) values ('STR-APP', 'eko-shield', 'Eko Shield K9', 'Lagos') returning id`))?.[0]?.id
+const asApplicant = sql => as('authenticated', applicant, sql)
+check('an owner can start their store\'s application', (await asApplicant(`insert into public.store_applications (store_id, address, contact_phone, preferred_days) values ('${appStore}', '14 Admiralty Way, Lekki Phase 1', '0803 000 0000', array[current_date + 3]) returning store_id`))?.length === 1)
+check('nobody else can read it', (await as('authenticated', buyer, 'select store_id from public.store_applications')).length === 0)
+check('the owner can upload a document to their private folder', (await asApplicant(`insert into storage.objects (bucket_id, name) values ('store-documents', '${appStore}/id.pdf') returning id`))?.length === 1)
+check('the documents bucket is private', await scalar(`select public::text from storage.buckets where id = 'store-documents'`) === 'false')
+check('outsiders can\'t upload or read store documents', await as('authenticated', buyer, `insert into storage.objects (bucket_id, name) values ('store-documents', '${appStore}/x.pdf')`) === null && (await as('authenticated', buyer, `select id from storage.objects where bucket_id = 'store-documents'`)).length === 0)
+check('sending needs a finished profile', await asApplicant(`select public.submit_store_application('${appStore}')`) === null)
+await asApplicant(`update public.stores set tagline = 'Family guardians raised in Lekki', details = '{"about":"A family kennel raising calm, clear-headed guardians for homes in Lagos.","owner":{"name":"Bisi Adeyemi"}}' where id = '${appStore}'`)
+check('sending needs a dog', await asApplicant(`select public.submit_store_application('${appStore}')`) === null)
+await asApplicant(newDog(appStore, 'draft'))
+check('sending needs the owner\'s ID and the CAC certificate', await asApplicant(`select public.submit_store_application('${appStore}')`) === null)
+await asApplicant(`update public.store_applications set id_doc_path = '${appStore}/id.pdf', cac_registered = false where store_id = '${appStore}'`)
+check('documents only from the store\'s own folder', await asApplicant(`update public.store_applications set address_doc_path = '${k9}/bill.pdf' where store_id = '${appStore}'`) === null)
+check('a handler or outsider can\'t send it', await as('authenticated', buyer, `select public.submit_store_application('${appStore}')`) === null)
+check('with everything in, the owner can send it', (await asApplicant(`select public.submit_store_application('${appStore}')`)) !== null && await scalar(`select status::text from public.stores where id = '${appStore}'`) === 'in_review')
+check('admins are told about it', (await as('authenticated', admin, `select title from public.notifications where topic = 'application:${appStore}'`))?.[0]?.title === 'New store application: Eko Shield K9')
+check('in review, the application is locked', (await asApplicant(`update public.store_applications set address = 'Somewhere else entirely' where store_id = '${appStore}' returning store_id`))?.length === 0 && await asApplicant(`insert into storage.objects (bucket_id, name) values ('store-documents', '${appStore}/late.pdf')`) === null)
+const apps = (await adm('select public.admin_applications() as a'))?.[0]?.a
+check('admins see the application with its owner and documents', apps?.some(a => a.public_id === 'STR-APP' && a.owner?.email === 'bisi@test.ng' && a.id_doc_path))
+check('the applications list is closed to everyone else', await withCode(applicant, 'aal2', 'select public.admin_applications()') === null)
+check('admins can open the documents', (await adm(`select id from storage.objects where bucket_id = 'store-documents' and name = '${appStore}/id.pdf'`))?.length === 1)
+await adm(`select public.admin_set_store_status('STR-APP', 'draft', 'Your ID photo is blurry. Upload a clearer one.')`)
+check('sending it back reopens the application', (await asApplicant(`update public.store_applications set note = 'New ID uploaded' where store_id = '${appStore}' returning store_id`))?.length === 1)
+
+// Inspections: an admin books one; the inspector works the sheet; the result verifies the store (or sends it back)
+await db.exec(`update public.stores set status = 'in_review' where id = '${appStore}'`)
+const asInspector = sql => withCode(inspector, 'aal2', sql)
+const when = `now() + interval '2 days'`
+check('only admins book inspections', await asInspector(`select public.admin_schedule_inspection('STR-APP', ${when}, '${inspector}')`) === null)
+const insId = (await adm(`select public.admin_schedule_inspection('STR-APP', ${when}, '${inspector}', 'Gate code 1234') as id`))?.[0]?.id
+check('an admin books an inspection with an inspector', !!insId)
+check('a store can\'t have two booked at once', await adm(`select public.admin_schedule_inspection('STR-APP', ${when}, '${inspector}')`) === null)
+check('the owner and the inspector are told', (await asApplicant(`select title from public.notifications where topic = 'inspection:${insId}'`))?.[0]?.title?.startsWith('Inspection booked') && (await as('authenticated', inspector, `select id from public.notifications where topic = 'inspection-assigned:${insId}'`))?.length === 1)
+check('the owner sees when, and with whom', (await asApplicant(`select public.my_store_inspection('${appStore}') as i`))?.[0]?.i?.status === 'scheduled' && (await as('authenticated', buyer, `select public.my_store_inspection('${appStore}') as i`))?.[0]?.i === null)
+const sheet = (await asInspector(`select public.admin_inspection('${insId}') as s`))?.[0]?.s
+check('the inspector gets the sheet, with every listed dog and the address', sheet?.dogs?.length === 1 && sheet.address?.includes('Admiralty'))
+check('inspectors see only their own inspections; outsiders none', (await asInspector('select public.admin_inspections() as l'))?.[0]?.l?.length >= 1 && await withCode(buyer, 'aal2', `select public.admin_inspection('${insId}')`) === null)
+check('the result needs every check marked', await asInspector(`select public.admin_complete_inspection('${insId}', true)`) === null)
+check('the inspector can add photos (private, staff only)', (await asInspector(`insert into storage.objects (bucket_id, name) values ('inspection-photos', '${insId}/run.jpg') returning id`))?.length === 1 && await as('authenticated', applicant, `insert into storage.objects (bucket_id, name) values ('inspection-photos', '${insId}/x.jpg')`) === null)
+const dogId = sheet?.dogs?.[0]?.id
+const checklist = `'[{"key":"runs","label":"Clean, shaded kennel runs","ok":true,"note":""},{"key":"vet","label":"Vet records for every dog","ok":true,"note":""},{"key":"chips","label":"Microchips scanned and matched","ok":false,"note":"One chip unreadable"}]'`
+const dogsSeen = `'[{"id":"${dogId}","seen":true,"confirmed_level":4,"note":"Solid"}]'`
+check('photos must belong to the inspection', await asInspector(`select public.admin_save_inspection('${insId}', ${checklist}, ${dogsSeen}, '{${appStore}/x.jpg}', '')`) === null)
+check('the inspector saves the sheet', (await asInspector(`select public.admin_save_inspection('${insId}', ${checklist}, ${dogsSeen}, '{${insId}/run.jpg}', 'Good kennel; one chip to rescan.')`)) !== null)
+check('a pass verifies the store', (await asInspector(`select public.admin_complete_inspection('${insId}', true)`)) !== null && await scalar(`select status::text from public.stores where id = '${appStore}'`) === 'verified')
+check('the store\'s inspection record names the inspector and the checks passed', await scalar(`select (details -> 'inspection' ->> 'by') || '|' || jsonb_array_length(details -> 'inspection' -> 'checks') from public.stores where id = '${appStore}'`) === 'Femi Ade, Dogeash|2')
+check('dogs seen get their confirmed level and the inspected line', await scalar(`select level || '|' || (file ->> 'inspected') from public.dogs where id = '${dogId}'`) === `4|Inspected ${new Date().toLocaleString('en-GB', { month: 'long', timeZone: 'Africa/Lagos' })} ${new Date().getFullYear()} by Dogeash`)
+check('a finished inspection can\'t be recorded again', await asInspector(`select public.admin_complete_inspection('${insId}', false)`) === null)
+
+await db.exec(`update public.stores set status = 'in_review' where id = '${appStore}'`)
+const failId = (await adm(`select public.admin_schedule_inspection('STR-APP', ${when}, '${admin}') as id`))?.[0]?.id
+await adm(`select public.admin_save_inspection('${failId}', '[{"key":"runs","label":"Clean runs","ok":false,"note":"Flooded"}]', '[]', '{}', '')`)
+check('a fail needs a summary for the store', await adm(`select public.admin_complete_inspection('${failId}', false)`) === null)
+await adm(`select public.admin_save_inspection('${failId}', '[{"key":"runs","label":"Clean runs","ok":false,"note":"Flooded"}]', '[]', '{}', 'The runs flood when it rains. Raise the floor, then apply again.')`)
+check('a fail sends the store back with the summary', (await adm(`select public.admin_complete_inspection('${failId}', false)`)) !== null && await scalar(`select status::text || '|' || status_note from public.stores where id = '${appStore}'`) === 'draft|The runs flood when it rains. Raise the floor, then apply again.')
+const cancelId = (await adm(`select public.admin_schedule_inspection('STR-APP', ${when}, '${inspector}') as id`))?.[0]?.id
+check('cancelling needs a reason', await adm(`select public.admin_cancel_inspection('${cancelId}', '')`) === null)
+check('an admin can cancel a booked inspection', (await adm(`select public.admin_cancel_inspection('${cancelId}', 'Owner asked to move it')`)) !== null && await scalar(`select status::text from public.inspections where id = '${cancelId}'`) === 'cancelled')
+check('the inspections table is closed to direct reading', (await as('authenticated', admin, 'select id from public.inspections')) === null)
 
 await db.close()
 console.log(failed ? `\n${failed} failed` : '\nAll access rules hold')

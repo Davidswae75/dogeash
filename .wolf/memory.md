@@ -420,3 +420,12 @@ description: chronological action log per session, consolidated weekly
 | 21:50 | Created app/components/DogGallery.vue | — | ~1969 |
 | 22:00 | Created supabase/migrations/20261116000000_admin_store_status.sql | — | ~1327 |
 | 22:01 | Created app/components/admin/Stores.vue | — | ~2482 |
+| 16:53 | Created supabase/migrations/20261117000000_admin_sections.sql | — | ~2634 |
+| 17:21 | Created supabase/migrations/20261118000000_store_applications.sql | — | ~2567 |
+| 17:24 | Created app/pages/dashboard/application.vue | — | ~1381 |
+| 17:25 | Created app/pages/admin/applications.vue | — | ~1997 |
+| 17:44 | Created supabase/migrations/20261119000000_inspections.sql | — | ~4860 |
+| 17:47 | Created app/composables/useAdminInspections.ts | — | ~1535 |
+| 17:49 | Created app/pages/admin/inspections/[id].vue | — | ~2098 |
+| 17:50 | Edited app/composables/useAdminInspections.ts | inline fix | ~43 |
+| 18:08 | Created supabase/migrations/20261120000000_reports_and_blocking.sql | — | ~4220 |

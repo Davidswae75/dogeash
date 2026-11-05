@@ -45,6 +45,9 @@ async function save(values: DogFormValues, media: DogMedia, publish: boolean) {
         <span class="flex-1" />
         <DashboardDogActions :dog="dog" :verified="verified" :can-delete="false" @status="to => storeDogs.changeStatus(dog!, to)" />
       </header>
+      <p v-if="dog.adminNote && (dog.status === 'withdrawn' || dog.status === 'draft')" class="m-0 rounded-lg bg-danger/10 px-3.5 py-2.5 text-sm ring-1 ring-danger/30" role="status">
+        <strong class="font-semibold">Dogeash {{ dog.status === 'withdrawn' ? 'took this dog down' : 'sent this dog back' }}:</strong> {{ dog.adminNote }}
+      </p>
       <p v-if="dog.file?.inspected" class="m-0 rounded-lg bg-ash-soft px-3.5 py-2.5 text-sm">{{ dog.file.inspected }} · set by Dogeash</p>
       <DashboardDogForm :key="dog.id" :dog="dog" :verified="verified" :save="save" />
     </template>

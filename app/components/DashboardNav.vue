@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { X } from '@lucide/vue'
 import {
-  CalendarDays, ChevronsUpDown, Dog, ExternalLink, LayoutDashboard, LogOut, MessageSquare,
+  CalendarDays, ChevronsUpDown, Dog, ExternalLink, FileCheck2, LayoutDashboard, LogOut, MessageSquare,
   Settings, ShoppingBag, Star, Stethoscope, Store, Users, Wallet,
 } from '@lucide/vue'
 import type { Component } from 'vue'
@@ -21,9 +21,9 @@ const { unread } = useStoreInbox()
 const badgeOf = (to: string) => (to === '/dashboard/inbox' ? unread.value : 0)
 // Only the sections this person's role allows
 const nav = computed(() => dashboardNav
-  .map(g => ({ ...g, items: g.items.filter(i => !i.permission || can(i.permission)) }))
+  .map(g => ({ ...g, items: g.items.filter(i => (!i.permission || can(i.permission)) && !(i.beforeVerified && store.value.verified)) }))
   .filter(g => g.items.length))
-const icons: Record<string, Component> = { LayoutDashboard, Dog, MessageSquare, CalendarDays, Star, Stethoscope, Store, Wallet, Users, Settings }
+const icons: Record<string, Component> = { FileCheck2, LayoutDashboard, Dog, MessageSquare, CalendarDays, Star, Stethoscope, Store, Wallet, Users, Settings }
 const route = useRoute()
 
 function isActive(to: string) {
