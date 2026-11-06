@@ -26,6 +26,12 @@ export default defineNuxtConfig({
   // A missing import is an error rather than a silent auto-import. Components still auto-import.
   imports: { autoImport: false },
 
+  // Server only, never sent to the browser. Payments (server/api/payments) need PAYSTACK_SECRET_KEY, and
+  // SUPABASE_SECRET_KEY to record what Paystack confirmed. Set both in .env.local, and on the host.
+  runtimeConfig: {
+    paystackSecretKey: process.env.PAYSTACK_SECRET_KEY ?? '',
+  },
+
   // Accounts and data. Needs SUPABASE_URL and SUPABASE_KEY from .env.local, or set on the host before the build.
   // Browsing stays open to everyone; pages opt in to needing an account (useAccountGate, route middleware).
   supabase: { redirect: false },

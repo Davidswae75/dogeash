@@ -20,7 +20,7 @@ const facts = computed(() => [
 </script>
 
 <template>
-  <SectionPanel title="Store health" :see-all="`/stores/${store.slug}`" see-all-label="View as buyers">
+  <SectionPanel title="Store health" :see-all="store.verified ? `/stores/${store.slug}` : undefined" see-all-label="View as buyers">
     <div class="flex flex-col gap-4 p-3">
       <dl class="m-0 grid grid-cols-2 gap-px overflow-hidden rounded-lg bg-line ring-1 ring-line">
         <div v-for="f in facts" :key="f.label" class="flex flex-col gap-0.5 bg-surface px-3 py-2.5">
@@ -47,12 +47,19 @@ const facts = computed(() => [
         </ul>
       </div>
 
-      <NuxtLink :to="`/stores/${store.slug}`" class="group relative block overflow-hidden rounded-lg no-underline">
+      <NuxtLink v-if="store.verified" :to="`/stores/${store.slug}`" class="group relative block overflow-hidden rounded-lg no-underline">
         <StoreBanner :store="store" class="aspect-[16/5]" />
         <span class="absolute right-2.5 bottom-2.5 inline-flex items-center gap-1.5 rounded-full bg-surface px-2.5 py-1 text-xs font-bold text-ink shadow-sm">
           <Eye class="size-3.5" aria-hidden="true" />Your public page
         </span>
       </NuxtLink>
+      <!-- Not live yet: the public page would be "not found", so the banner isn't a link -->
+      <div v-else class="relative overflow-hidden rounded-lg">
+        <StoreBanner :store="store" class="aspect-[16/5]" />
+        <span class="absolute right-2.5 bottom-2.5 inline-flex items-center gap-1.5 rounded-full bg-surface px-2.5 py-1 text-xs font-bold text-ink-muted shadow-sm">
+          <Eye class="size-3.5" aria-hidden="true" />Public once inspected
+        </span>
+      </div>
     </div>
   </SectionPanel>
 </template>

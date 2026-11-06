@@ -33,7 +33,7 @@ const { handleSubmit, defineField, errors, resetForm } = useForm({ validationSch
 const [body] = defineField('body')
 const fields: FieldConfig[] = [
   { fieldType: 'input', name: 'title', label: 'Title', attrs: { placeholder: 'Maintenance on Sunday', maxlength: 80 } } as FieldConfig,
-  { fieldType: 'input', name: 'link', label: 'Link (optional)', hint: 'Where "More" goes: a page on Dogeash like /dogs, or an https:// link.', attrs: { placeholder: '/guide' } } as FieldConfig,
+  { fieldType: 'input', name: 'link', label: 'Link', optional: true, hint: 'Where "More" goes: a page on Dogeash like /dogs, or an https:// link.', attrs: { placeholder: '/guide' } } as FieldConfig,
 ]
 const audience = ref<Audience>('everyone')
 const audienceModel = computed({ get: () => audience.value, set: (v: string) => { if (v) audience.value = v as Audience } })

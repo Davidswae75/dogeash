@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-11-06T03:05:11.437Z
-> Files: 748 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-11-06T17:16:45.987Z
+> Files: 756 tracked | Anatomy hits: 0 | Misses: 0
 
 > Project structure index. Auto-maintained by OpenWolf hooks and daemon.
 > Run `openwolf scan` to generate, or wait for the first Claude Code session.
@@ -80,6 +80,7 @@
 - `ProtectionLevels.vue` — Vue: setup, TS (~319 tok)
 - `ProtectionScale.vue` — Vue: setup, TS, 2 props (~219 tok)
 - `ReportButton.vue` — Vue: setup (~1146 tok)
+- `ReserveDialog.vue` — Vue: setup (~1308 tok)
 - `SearchBar.vue` — Vue: setup, TS, 1 props, emits (~278 tok)
 - `SelectMenu.vue` — Vue: setup (~393 tok)
 - `SellerCard.vue` — Vue: setup, TS, 2 props (~454 tok)
@@ -123,6 +124,7 @@
 - `AccountNotifications.vue` — Vue: setup (~989 tok)
 - `AccountProfilePrompt.vue` — Vue: setup (~265 tok)
 - `AccountReadiness.vue` — Vue: setup (~387 tok)
+- `AccountReservationCard.vue` — Vue: setup (~1134 tok)
 - `AccountSavedSearch.vue` — Vue: setup (~864 tok)
 - `AccountSettingsContact.vue` — Vue: setup (~630 tok)
 - `AccountSettingsDetails.vue` — Vue: setup (~590 tok)
@@ -886,6 +888,7 @@
 - `useNotify.ts` — Every toast in the app goes through here, so the same action always looks and reads the same. (~2217 tok)
 - `useOwnedDogs.ts` — The signed-in person's dogs and their records (Supabase: owned_dogs, owned_dog_records; photos in th (~1884 tok)
 - `useRecentlyViewed.ts` — Dogs this browser has opened, newest first. Kept on the device until accounts exist. (~147 tok)
+- `useReservations.ts` — The buyer's reservations (Supabase: reservations, payments, refunds). Paying goes through the site's (~1103 tok)
 - `useSavedDogs.ts` — The shortlist and compare picks behind useShortlist(). Signed in: the shortlist_items table in (~1404 tok)
 - `useSession.ts` — Who is signed in: the Supabase user, their profile, and the stores they work at. (~910 tok)
 - `useShortlist.ts` — The buyer's shortlist: dogs they're considering, and up to three picked to compare. (~562 tok)
@@ -932,6 +935,7 @@
 - `index.vue` — Vue: setup (~194 tok)
 - `messages.vue` — Vue: setup (~1817 tok)
 - `profile.vue` — Vue: setup (~1759 tok)
+- `reservations.vue` — Vue: setup (~2605 tok)
 - `settings.vue` — Vue: setup (~351 tok)
 
 ## app/pages/account/dogs/
@@ -1023,6 +1027,7 @@
 - `legal.ts` — Terms of use and privacy policy, in plain words. DRAFTS: both must be reviewed by a Nigerian lawyer (~1282 tok)
 - `market.ts` — The marketplace rows on Home: which dogs and stores each one shows (~545 tok)
 - `myDogs.ts` — When it was given or happened (yyyy-mm-dd) (~1206 tok)
+- `reservations.ts` — Reserving a dog with a deposit, paying the balance, and the handover. The rules live in the database (~1415 tok)
 - `reviews.ts` — Store reviews (Supabase: store_reviews). Buyers review a store after a done kennel visit; the store  (~678 tok)
 - `searchFilters.ts` — The filters on Find a guard dog, in one shape: read from and written to the page address (~791 tok)
 - `sell.ts` — The Sell with us page: why kennels list on Dogeash, how verification works, what to have ready, and (~915 tok)
@@ -1036,6 +1041,11 @@
 ## scripts/
 
 - `render-kennel-watch.mjs` — Renders the kennel watch for the sign-in and sign-up pages: a K9 stands guard beside its kennel, (~4330 tok)
+
+## server/utils/
+
+- `payments.ts` — What start_reservation / start_balance_payment return: enough to open Paystack's checkout (~1130 tok)
+- `paystack.ts` — Paystack's API, called only from the server with the secret key (PAYSTACK_SECRET_KEY). (~558 tok)
 
 ## supabase/migrations/
 
@@ -1063,3 +1073,4 @@
 - `20261127000000_admin_search.sql` — Search across the admin console: stores (name, id, city), dogs (name, file number, breed), people (n (~684 tok)
 - `20261128000000_applications_without_form.sql` — Applications: also list stores in review that have no application form (stores added before applicat (~486 tok)
 - `20261129000000_buyer_dashboard.sql` — The buyer's dashboard, for real: (~2005 tok)
+- `20261201000000_payments.sql` — Payments with Paystack: reserving a dog with a deposit, paying the balance, handover, payouts and re (~6854 tok)

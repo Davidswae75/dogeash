@@ -457,3 +457,11 @@ description: chronological action log per session, consolidated weekly
 | 03:58 | Created app/components/ConfirmDialog.vue | — | ~381 |
 | 04:04 | Edited app/components/account/AccountNav.vue | CSS: Phones | ~378 |
 | 04:05 | Created app/pages/zz-account-preview.vue | — | ~997 |
+| 18:09 | Created supabase/migrations/20261201000000_payments.sql | — | ~6854 |
+| 18:12 | Created server/utils/paystack.ts | — | ~558 |
+| 18:13 | Created server/utils/payments.ts | — | ~1130 |
+| 18:14 | Created app/utils/reservations.ts | — | ~1415 |
+| 18:15 | Created app/composables/useReservations.ts | — | ~1103 |
+| 18:15 | Created app/components/ReserveDialog.vue | — | ~1308 |
+| 18:16 | Created app/components/account/AccountReservationCard.vue | — | ~1134 |
+| 18:16 | Created app/pages/account/reservations.vue | — | ~2605 |

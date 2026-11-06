@@ -19,6 +19,8 @@ export type FieldConfig = {
   label: string
   labelClass?: HTMLAttributes['class']
   hint?: string
+  // Can be left empty: says "(optional)" beside the label
+  optional?: boolean
   secondLabel?: SecondLabel
 } & FieldInputProps
 
@@ -37,7 +39,7 @@ const inputId = (f: FieldConfig) => f.attrs?.id ?? `field-${f.name.replace(/\./g
   <div :class="['flex flex-col gap-5', props.class]">
     <div v-for="f in props.fields" :key="f.name" class="flex flex-col gap-2">
       <div class="flex items-end justify-between gap-3">
-        <label :for="inputId(f)" :class="['text-sm font-bold text-ink', f.labelClass]">{{ f.label }}</label>
+        <label :for="inputId(f)" :class="['text-sm font-bold text-ink', f.labelClass]">{{ f.label }}<OptionalTag v-if="f.optional" /></label>
         <slot :name="`${f.name}:second-label`">
           <template v-if="f.secondLabel">
             <NuxtLink

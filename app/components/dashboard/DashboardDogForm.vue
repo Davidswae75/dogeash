@@ -93,7 +93,7 @@ const chips = 'flex w-auto flex-wrap justify-start gap-2'
           <ToggleGroupItem value="no" class="rounded-full!">No</ToggleGroupItem>
         </ToggleGroup>
       </FieldShell>
-      <FieldShell label="Traits" hint="Up to 6 short ones, like &quot;Bombproof nerves&quot;. Press Enter after each." :error="errors.traits">
+      <FieldShell label="Traits" optional hint="Up to 6 short ones, like &quot;Bombproof nerves&quot;. Press Enter after each." :error="errors.traits">
         <TagsInput v-model="traits" :max="6" class="min-h-12 border-2 border-line-strong">
           <TagsInputItem v-for="t in traits" :key="t" :value="t">
             <TagsInputItemText />
@@ -120,7 +120,7 @@ const chips = 'flex w-auto flex-wrap justify-start gap-2'
     <section :class="section" aria-labelledby="dog-media">
       <div class="flex flex-col gap-1">
         <h2 id="dog-media" :class="heading">More photos and videos</h2>
-        <p class="m-0 text-[13px] leading-5 text-ink-muted">Optional, but they make the listing. They appear in the gallery at the top of the dog's page, after the main photo.</p>
+        <p class="m-0 text-[13px] leading-5 text-ink-muted">They make the listing. They appear in the gallery at the top of the dog's page, after the main photo.</p>
       </div>
       <DashboardDogGallery v-model:paths="media.gallery" />
       <DashboardDogVideos v-model:videos="media.videos" />

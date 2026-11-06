@@ -17,7 +17,7 @@ const { handleSubmit } = useForm({ validationSchema: toTypedSchema(accountDetail
 const fields = computed(() => [
   { ...authFields.fullName(), defaultValue: user.value?.name ?? '' },
   { ...authFields.phone('Stores you book with use it to confirm visits. It\'s never shown publicly.'), defaultValue: localPhoneDigits(user.value?.phone ?? '') },
-  { ...authFields.city(), defaultValue: user.value?.city ?? '' },
+  { ...authFields.city(), optional: true, defaultValue: user.value?.city ?? '' },
 ])
 const busy = ref(false)
 const error = ref('')
@@ -27,7 +27,7 @@ const submit = handleSubmit(async (v) => {
   error.value = (await save({ full_name: v.fullName.trim(), phone: formatNigerianPhone(v.phone), city: v.city?.trim() || null })) ?? ''
   busy.value = false
   if (!error.value) notify.success({ kicker: 'Settings', meta: 'Saved', title: 'Details updated', text: 'Stores you book with will see the new details.' })
-}, ({ errors }) => notify.formErrors(errors))
+})
 </script>
 
 <template>

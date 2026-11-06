@@ -38,9 +38,9 @@ watch(open, (o) => { if (o) { resetForm({ values: props.provider ? fromProvider(
 const input = (name: keyof Values, label: string, placeholder: string, extra: Partial<FieldConfig> = {}): FieldConfig =>
   ({ fieldType: 'input', name, label, attrs: { placeholder, ...extra.attrs }, ...extra } as FieldConfig)
 const fields = {
-  who: [input('name', 'Name', 'Kuje Veterinary Clinic'), input('person', 'Person', 'Dr. Halima Sani', { hint: 'Optional. Who buyers will deal with.' })],
-  where: [input('city', 'City', 'Abuja'), input('areas', 'Areas covered', 'Abuja and environs')],
-  more: [input('credential', 'Credential', 'VCN registered veterinary surgeon'), input('priceFrom', 'Price from', '15000', { prefix: '₦', attrs: { inputmode: 'numeric' } })],
+  who: [input('name', 'Name', 'Kuje Veterinary Clinic'), input('person', 'Person', 'Dr. Halima Sani', { hint: 'Who buyers will deal with.', optional: true })],
+  where: [input('city', 'City', 'Abuja'), input('areas', 'Areas covered', 'Abuja and environs', { optional: true })],
+  more: [input('credential', 'Credential', 'VCN registered veterinary surgeon', { optional: true }), input('priceFrom', 'Price from', '15000', { prefix: '₦', attrs: { inputmode: 'numeric' } })],
 }
 
 const busy = ref(false)

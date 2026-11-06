@@ -42,7 +42,7 @@ const remove = (i: number) => { videos.value = videos.value.filter((_, j) => j !
 </script>
 
 <template>
-  <FieldShell :label="`Videos (${videos.length} of ${DOG_VIDEOS_MAX})`" hint="Buyers trust what they can see: heelwork, a recall, protection work on a decoy, the dog with children. MP4, WebM or MOV, up to 50 MB each; under a minute works best." :error="error">
+  <FieldShell :label="`Videos (${videos.length} of ${DOG_VIDEOS_MAX})`" optional hint="Buyers trust what they can see: heelwork, a recall, protection work on a decoy, the dog with children. MP4, WebM or MOV, up to 50 MB each; under a minute works best." :error="error">
     <ul v-if="videos.length" class="m-0 flex list-none flex-col gap-3 p-0">
       <li v-for="(v, i) in videos" :key="v.path" class="flex flex-col gap-3 rounded-lg bg-surface-sunk p-3 ring-1 ring-line sm:flex-row">
         <video :src="urlOf(v.path)" controls preload="metadata" class="aspect-video w-full rounded-md bg-night sm:w-56" />

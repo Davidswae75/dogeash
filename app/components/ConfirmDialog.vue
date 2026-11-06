@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 
-// "Are you sure?" for something that can't be undone (removing a dog, deleting a review).
-// `run` does it and returns an error to show, or null to close.
-const props = defineProps<{ title: string, description: string, confirmLabel: string, run: () => Promise<string | null> }>()
+// "Are you sure?" for something that can't be undone (removing a dog, deleting a review, confirming a handover).
+// `run` does it and returns an error to show, or null to close. `tone`: red for destroying, marigold for agreeing.
+const props = withDefaults(defineProps<{ title: string, description: string, confirmLabel: string, run: () => Promise<string | null>, tone?: 'danger' | 'marigold' }>(), { tone: 'danger' })
 const open = defineModel<boolean>('open', { default: false })
 const busy = ref(false)
 const error = ref('')
@@ -28,7 +28,8 @@ async function confirm() {
       <AlertDialogFooter>
         <AlertDialogCancel :disabled="busy">Cancel</AlertDialogCancel>
         <!-- A plain button, so the dialog stays open while it works and shows any error -->
-        <Button class="bg-danger text-white hover:bg-danger/90" :loading="busy" @click="confirm">{{ props.confirmLabel }}</Button>
+        <Button v-if="props.tone === 'marigold'" variant="marigold" :loading="busy" @click="confirm">{{ props.confirmLabel }}</Button>
+        <Button v-else class="bg-danger text-white hover:bg-danger/90" :loading="busy" @click="confirm">{{ props.confirmLabel }}</Button>
       </AlertDialogFooter>
     </AlertDialogContent>
   </AlertDialog>

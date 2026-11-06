@@ -8,10 +8,9 @@ import { definePageMeta, useRoute, useSeoMeta } from '#imports' // nuxt
 import { useSupabaseClient } from '#imports' // @nuxtjs/supabase
 import { useAuth } from '~/composables/useAuth'
 import { useAuthPanel } from '~/composables/useAuthPanel'
-import { useNotify } from '~/composables/useNotify'
 import { useSession } from '~/composables/useSession'
 import { useStoreApi } from '~/composables/useStoreApi'
-import { firstNameOf } from '~/utils/account'
+import { firstNameOf, savedDogsMovedText } from '~/utils/account'
 import { formatNigerianPhone, safeRedirect, signUpSchema, storeSignUpSchema } from '~/utils/auth'
 import { authFields } from '~/utils/authFields'
 import { findSignUpIntent, signUpIntents } from '~/utils/signUpIntents'
@@ -71,7 +70,6 @@ const fields = computed(() => [
 ])
 
 // Saved before the step changes: the form forgets values once their fields leave the screen
-const notify = useNotify()
 const submit = handleSubmit(async (v) => {
   account.value = {
     name: v.fullName,
@@ -84,7 +82,7 @@ const submit = handleSubmit(async (v) => {
   error.value = (await auth.signUp(v.email, v.password, v.fullName)) ?? ''
   busy.value = false
   if (!error.value) step.value = 'code'
-}, ({ errors }) => notify.formErrors(errors))
+})
 watch(values, () => { error.value = '' })
 
 // The code confirms the email and signs you in. Then: phone (and city) on the profile, the draft store
@@ -92,19 +90,19 @@ watch(values, () => { error.value = '' })
 const session = useSession()
 const supabase = useSupabaseClient()
 const stores = useStoreApi()
+// Shown on the welcome: dogs carried over from this browser, or the draft store that didn't save
+const moved = ref(0)
+const storeError = ref('')
 
 // The code step's button keeps spinning until all of this is done, so no full-screen loader here
 async function confirm(code: string) {
   const result = await auth.confirmSignUp(account.value.email, code)
   if (result.error) return result.error
-  let storeError: string | null = null
   const id = session.user.value?.id
   if (id) await supabase.from('profiles').update({ phone: account.value.phone, ...(account.value.city ? { city: account.value.city } : {}) }).eq('id', id)
-  if (isStore.value) storeError = await stores.createDraftStore(account.value.storeName, account.value.city)
+  if (isStore.value) storeError.value = (await stores.createDraftStore(account.value.storeName, account.value.city)) ?? ''
   await session.load()
-  if (!isStore.value) notify.accountCreated(firstName.value, result.moved)
-  else if (storeError) notify.error({ kicker: 'Store', title: 'Store not saved', text: storeError })
-  else notify.storeStarted(firstName.value, account.value.storeName)
+  moved.value = result.moved
   step.value = 'welcome'
   return null
 }
@@ -157,7 +155,9 @@ async function confirm(code: string) {
   />
 
   <template v-else>
-    <AuthHeading title="Welcome," :outline="firstName" done :text="intent.welcome({ storeName: account.storeName })" />
+    <AuthHeading title="Welcome," :outline="firstName" done :text="storeError ? 'Your account is ready.' : `${intent.welcome({ storeName: account.storeName })} ${savedDogsMovedText(moved)}`.trim()" />
+    <!-- The account worked but the draft store didn't: say so here, where they'll see it -->
+    <p v-if="storeError" class="m-0 rounded-lg bg-surface p-3.5 text-sm font-semibold text-danger ring-1 ring-line" role="alert">{{ account.storeName }} wasn't saved: {{ storeError }} Open a store from your account to try again.</p>
     <AuthLinkCards :items="nextSteps" />
   </template>
 </template>

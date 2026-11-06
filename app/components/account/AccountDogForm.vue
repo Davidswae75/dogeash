@@ -113,7 +113,7 @@ const field = 'h-11 border-line-strong bg-surface'
     <section class="grid gap-5 rounded-xl bg-surface p-4 ring-1 ring-line sm:grid-cols-[180px_minmax(0,1fr)] sm:items-center sm:p-5">
       <AccountDogPortrait :name="name || '?'" :photo="photoPreview" class="aspect-square w-full max-w-[180px]" />
       <div class="flex flex-col gap-2">
-        <strong class="text-[15px]">A photo</strong>
+        <strong class="text-[15px]">A photo<OptionalTag /></strong>
         <span class="text-[13px] text-ink-muted">Only you can see it. JPG, PNG or WebP, up to 5 MB.</span>
         <div class="mt-1 flex flex-wrap gap-2">
           <Button type="button" variant="outline" size="sm" :loading="photoBusy" @click="fileInput?.click()"><ImagePlus aria-hidden="true" />{{ photoPreview ? 'Change photo' : 'Add a photo' }}</Button>
@@ -131,29 +131,29 @@ const field = 'h-11 border-line-strong bg-surface'
         <FieldShell label="Name" for="dog-name" :error="errors.name">
           <Input id="dog-name" v-model="name" maxlength="40" placeholder="Bruno" :class="field" />
         </FieldShell>
-        <FieldShell label="Breed" for="dog-breed">
+        <FieldShell label="Breed" for="dog-breed" optional>
           <SelectMenu id="dog-breed" v-model="breed" :options="breedOptions" placeholder="Choose a breed" class="h-11!" />
         </FieldShell>
-        <FieldShell label="Sex">
+        <FieldShell label="Sex" optional>
           <ToggleGroup v-model="sexModel" type="single" variant="outline" aria-label="Sex" class="w-fit">
             <ToggleGroupItem value="Male" class="h-11 px-4">Male</ToggleGroupItem>
             <ToggleGroupItem value="Female" class="h-11 px-4">Female</ToggleGroupItem>
           </ToggleGroup>
         </FieldShell>
-        <FieldShell label="Born" for="dog-born" hint="Roughly is fine: the first of the month." :error="errors.bornOn">
+        <FieldShell label="Born" for="dog-born" optional hint="Roughly is fine: the first of the month." :error="errors.bornOn">
           <Input id="dog-born" v-model="bornOn" type="date" :max="todayIso" :class="field" />
         </FieldShell>
-        <FieldShell label="Weight" for="dog-weight" :error="errors.weightKg">
+        <FieldShell label="Weight" for="dog-weight" optional :error="errors.weightKg">
           <InputGroup class="h-11 border-line-strong bg-surface">
             <InputGroupInput id="dog-weight" v-model="weightKg" inputmode="decimal" placeholder="42" />
             <InputGroupAddon align="inline-end">kg</InputGroupAddon>
           </InputGroup>
         </FieldShell>
-        <FieldShell label="Microchip number" for="dog-chip" hint="On the vet card or the chip certificate." :error="errors.microchip">
+        <FieldShell label="Microchip number" for="dog-chip" optional hint="On the vet card or the chip certificate." :error="errors.microchip">
           <Input id="dog-chip" v-model="microchip" maxlength="30" placeholder="985 112 004 771 309" :class="[field, 'font-mono']" />
         </FieldShell>
       </div>
-      <FieldShell label="Protection level" for="dog-level" hint="If it was trained for protection. Leave empty for a family dog.">
+      <FieldShell label="Protection level" for="dog-level" optional hint="If it was trained for protection. Leave empty for a family dog.">
         <SelectMenu id="dog-level" v-model="level" :options="levelOptions" placeholder="Not a trained guard dog" class="h-11! sm:w-[360px]" />
       </FieldShell>
     </section>
@@ -162,14 +162,14 @@ const field = 'h-11 border-line-strong bg-surface'
     <section class="flex flex-col gap-5 rounded-xl bg-surface p-4 ring-1 ring-line sm:p-5">
       <h2 class="m-0 font-display text-lg font-extrabold font-stretch-expanded">Where it came from</h2>
       <div class="grid gap-5 sm:grid-cols-2">
-        <FieldShell label="Kennel, breeder or person" for="dog-from">
+        <FieldShell label="Kennel, breeder or person" for="dog-from" optional>
           <Input id="dog-from" v-model="cameFrom" maxlength="80" placeholder="K9 Guardian Kennels" :class="field" />
         </FieldShell>
-        <FieldShell label="With you since" for="dog-got" :error="errors.gotOn">
+        <FieldShell label="With you since" for="dog-got" optional :error="errors.gotOn">
           <Input id="dog-got" v-model="gotOn" type="date" :max="todayIso" :class="field" />
         </FieldShell>
       </div>
-      <FieldShell label="Notes" for="dog-notes" hint="Anything a vet, trainer or sitter should know: allergies, temperament, commands.">
+      <FieldShell label="Notes" for="dog-notes" optional hint="Anything a vet, trainer or sitter should know: allergies, temperament, commands.">
         <Textarea id="dog-notes" v-model="notes" rows="3" maxlength="1000" class="border-line-strong bg-surface" />
       </FieldShell>
     </section>

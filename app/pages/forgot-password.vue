@@ -6,7 +6,6 @@ import type { AuthLinkCard } from '~/components/auth/AuthLinkCards.vue'
 import { computed, ref, watch } from 'vue'
 import { definePageMeta, useSeoMeta } from '#imports' // nuxt
 import { useAuth } from '~/composables/useAuth'
-import { useNotify } from '~/composables/useNotify'
 import { emailCodeSchema, newPasswordSchema } from '~/utils/auth'
 import { authFields } from '~/utils/authFields'
 
@@ -26,7 +25,6 @@ useSeoMeta({ title: 'Reset your password · Dogeash', robots: 'noindex' })
 const step = ref<'email' | 'code' | 'password' | 'done'>('email')
 const email = ref('')
 const showPassword = ref(false)
-const notify = useNotify()
 const auth = useAuth()
 const busy = ref(false)
 const error = ref('')
@@ -53,7 +51,7 @@ const submit = handleSubmit(async () => {
     if (!error.value) step.value = 'done'
   }
   busy.value = false
-}, ({ errors }) => notify.formErrors(errors))
+})
 watch(values, () => { error.value = '' })
 
 const nextSteps: AuthLinkCard[] = [

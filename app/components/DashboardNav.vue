@@ -57,9 +57,11 @@ function isActive(to: string) {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" class="w-[var(--reka-dropdown-menu-trigger-width)] border-line bg-surface">
         <DropdownMenuLabel class="text-xs text-ink-muted">Signed in as {{ user?.name }}</DropdownMenuLabel>
-        <DropdownMenuItem as-child>
+        <!-- The public page exists once the store is live; before that it would be "not found" -->
+        <DropdownMenuItem v-if="store.verified" as-child>
           <NuxtLink :to="`/stores/${store.slug}`" class="cursor-pointer"><ExternalLink aria-hidden="true" />View public store</NuxtLink>
         </DropdownMenuItem>
+        <DropdownMenuItem v-else disabled><ExternalLink aria-hidden="true" />Public once inspected</DropdownMenuItem>
         <DropdownMenuItem as-child>
           <NuxtLink to="/dogs" class="cursor-pointer"><ShoppingBag aria-hidden="true" />Switch to buying</NuxtLink>
         </DropdownMenuItem>
@@ -104,7 +106,7 @@ function isActive(to: string) {
         <NuxtLink to="/" class="flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-semibold text-ink-muted no-underline hover:bg-canvas hover:text-ink">
           <ShoppingBag class="size-[18px]" aria-hidden="true" />Switch to buying
         </NuxtLink>
-        <NuxtLink :to="`/stores/${store.slug}`" class="flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-semibold text-ink-muted no-underline hover:bg-canvas hover:text-ink">
+        <NuxtLink v-if="store.verified" :to="`/stores/${store.slug}`" class="flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-semibold text-ink-muted no-underline hover:bg-canvas hover:text-ink">
           <ExternalLink class="size-[18px]" aria-hidden="true" />View public store
         </NuxtLink>
       </div>

@@ -3,7 +3,6 @@ import { CalendarCheck } from '@lucide/vue'
 import { computed, ref, watch } from 'vue'
 import { useAccountGate } from '~/composables/useAccountGate'
 import type { AccountGate } from '~/composables/useAccountGate'
-import { useNotify } from '~/composables/useNotify'
 
 // Book a time with someone: a care provider, or a kennel visit to see shortlisted dogs.
 // Choose a service, one of the next six days the other party works (Monday to Saturday unless `weekdays`
@@ -80,7 +79,6 @@ const confirmation = computed<BookingSummaryRow[]>(() => [
   ...(dogName.value ? [{ label: 'Dog', value: dogName.value }] : []),
 ])
 
-const notify = useNotify()
 
 const sending = ref(false)
 
@@ -94,7 +92,6 @@ async function submit() {
     if (error.value) return
   }
   step.value = 'done'
-  notify.bookingRequested(props.title, confirmation.value.find(r => r.label === 'When')!.value, !!props.send)
 }
 
 function reset() {

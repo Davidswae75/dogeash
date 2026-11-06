@@ -27,6 +27,9 @@ export interface Account {
 
 export const accountRef = (id: string) => `BYR-${id.replaceAll('-', '').slice(0, 6).toUpperCase()}`
 
+// After signing in or up: the dogs saved in this browser that moved into the account, if any
+export const savedDogsMovedText = (moved: number) => moved ? `${moved} saved ${moved === 1 ? 'dog' : 'dogs'} from this browser ${moved === 1 ? 'is' : 'are'} now in your account.` : ''
+
 export const firstNameOf = (name: string) => name.trim().split(/\s+/)[0] ?? ''
 export const initialsOf = (name: string) => name.trim().split(/\s+/).slice(0, 2).map(w => w[0]?.toUpperCase()).join('')
 
@@ -42,7 +45,7 @@ export const accountNav: { group: string, items: AccountNavItem[] }[] = [
       { label: 'My dogs', to: '/account/dogs', icon: DogIcon, inMenu: true },
       { label: 'Shortlist', to: '/account/shortlist', icon: Heart, inMenu: true },
       { label: 'Visits and bookings', to: '/account/bookings', icon: CalendarCheck, inMenu: true },
-      { label: 'Reservations', to: '/account/reservations', icon: ShieldCheck, soon: true },
+      { label: 'Reservations', to: '/account/reservations', icon: ShieldCheck, inMenu: true },
       { label: 'Messages', to: '/account/messages', icon: MessageSquare, inMenu: true },
       { label: 'Saved searches', to: '/account/alerts', icon: BellRing },
     ],
@@ -60,7 +63,6 @@ export const accountNav: { group: string, items: AccountNavItem[] }[] = [
 
 // What each unbuilt section will hold, shown on its "Coming next" page
 export const accountSections: Record<string, { title: string, text: string, plan: string[] }> = {
-  reservations: { title: 'Reservations', text: 'The dog you\'ve put a deposit on, from reservation to handover.', plan: ['Deposit held in escrow, with a countdown', 'Handover checklist and date', 'What happens if the visit doesn\'t work out'] },
   orders: { title: 'Gear orders', text: 'Harnesses, kennels and other gear you\'ve ordered.', plan: ['Track deliveries', 'Reorder food and supplies', 'Returns and receipts'] },
 }
 

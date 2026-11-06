@@ -71,7 +71,7 @@ const chips = 'flex w-auto flex-wrap justify-start gap-2'
           <span class="text-[13px] leading-5 text-ink-muted">Your store and dogs stay listed and buyers can still message you, but "Book a kennel visit" is switched off. Visits already booked aren't affected.</span>
         </span>
       </label>
-      <FieldShell v-if="paused" label="Note for buyers" for="pause-note" hint="Shown on the paused button, like &quot;Back on 1 December&quot;." :error="errors.note">
+      <FieldShell v-if="paused" label="Note for buyers" for="pause-note" optional hint="Shown on the paused button, like &quot;Back on 1 December&quot;." :error="errors.note">
         <Input id="pause-note" v-model="note" maxlength="200" class="h-11 border-2 border-line-strong" />
       </FieldShell>
     </section>

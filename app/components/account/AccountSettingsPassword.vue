@@ -24,7 +24,7 @@ const submit = handleSubmit(async (v) => {
   if (error.value) return
   resetForm()
   notify.success({ kicker: 'Settings', meta: 'Saved', title: 'Password changed', text: 'Use the new password the next time you sign in.' })
-}, ({ errors }) => notify.formErrors(errors))
+})
 </script>
 
 <template>

@@ -1287,3 +1287,80 @@ Typecheck shows no new errors.
 It's safe to run twice. Tested: garbled data and function code come back right, normal text is untouched, and visitors can't call it.
 
 **From now on** I copy with UTF-8 forced on (`LC_ALL=en_US.UTF-8 pbcopy`).
+
+## 34. Optional fields marked; public pages from the dashboard (6 Nov)
+
+### "(optional)" beside fields that can be left empty
+`FieldShell` and `Fields` now take `optional`, which shows a muted "(optional)" beside the label (`OptionalTag.vue`). Required fields carry no tag. Where a hint used to start with "Optional:", the tag replaced it. Marked:
+- **Store's dog form:** born, hips and elbows, vaccinations, microchip, titles, sire, dam, best suited to, traits, more photos, videos
+- **Store profile:** area, state, opening hours, where you deliver, owner's role, short bio, credentials, what you offer, banner, logo
+- **Buyer's "My dogs":** everything except the name (photo, breed, sex, born, weight, microchip, level, where from, since, notes)
+- **Dog record dialog:** by, note; it also says "Give at least one of the two dates"
+- **Application:** the note; **visit settings:** the pause note; **settings:** city; **report:** details (except for "Something else", where they're required)
+- **Admin:** care provider's person, areas and credential; announcement link; inspection note
+
+### Store dashboard → public store page
+Two problems:
+1. **The page showed old data.** The listing of live stores and dogs is read once per page load. Edit the profile, publish a dog, or approve a store in admin, then click through, and the public page still showed the old version (or "not found" for a dog just published). **Fix:** leaving `/dashboard` or `/admin` for the public site now re-reads it first (`middleware/catalog-fresh.global.ts`; the loading moved into `composables/useCatalog.ts`, which the start-up plugin also uses). Checked: the jump re-read 5 stores and 18 dogs, and the page opened.
+2. **A store not live yet linked to "This gate is locked" (not found).** Drafts and stores in review have no public page. **Fix:** "View public store" (sidebar and store menu) and the "Store health" panel's links only show once the store is inspected; before that the menu says "Public once inspected".
+
+Links opening in a new tab (admin, "View listing") were already fine: a new tab loads fresh.
+
+## 35. Fewer toasts: none that repeat what the page shows (6 Nov)
+A toast now only appears when nothing on the page says the same thing. Removed:
+- **The "things to fix" toast** on sign-in, sign-up, forgot password, and settings (details and password). The fields already show their errors in red.
+- **The welcome toasts** after signing in ("Welcome back"), creating an account, and opening a store. The page itself already says "Welcome back, Ada" above the choices.
+  - Saved dogs moved into the account ("2 saved dogs from this browser are now in your account.") are now in the welcome text on the page instead (`savedDogsMovedText` in `utils/account.ts`).
+  - If the draft store fails to save on "Open a store", a red note on the welcome screen says so (it used to be a toast).
+- **The "Request sent" toast** from the booking dialog, which already shows its own "Request sent" screen.
+
+Kept: toasts where the page doesn't change or the dialog closes, like a message sent, a dog saved, settings saved, undo on the shortlist and cart, and admin actions.
+
+Checked in the browser: an empty sign-in and an empty sign-up show the field errors and no toast. The signed-in welcome wasn't tested (it needs your sign-in). Typecheck shows no new errors.
+
+## 36. Payments with Paystack, part 1: reserving a dog (6 Nov)
+
+### The money rules (your choices)
+- **Deposit:** 10% of the price; it holds the dog for **5 days**.
+- **Balance:** paid through Dogeash too. Dogeash holds everything until the buyer confirms the handover.
+- **Commission:** 5%, taken from the store's payout. Buyers pay the listed price, nothing more.
+- **Refunds (my defaults; tell me if you want them different):**
+  - the store cancels → everything paid is refunded
+  - the buyer cancels, or 5 days pass without the balance → the dog goes back on sale and the deposit **waits for Dogeash** to decide (refund it, or release it to the store)
+  - money that arrives for a dog someone else already paid for (or for a lapsed checkout) is refunded automatically
+- Once paid in full, the buyer can't cancel online. A problem at the handover goes through Dogeash, and the money stays held.
+
+### How it works
+1. **Dog page:** "Reserve with a ₦320,000 deposit" (marigold, top of the price panel). Signed out → the sign-in dialog. The dialog shows the price, deposit and balance, and what happens to the money, then "Pay ₦320,000 deposit".
+2. **The site's server** (`server/api/payments/reserve`) asks the database to start the reservation as the signed-in buyer (the rules apply: listed dog, not your own store's, not blocked, nobody else paying). Then it opens **Paystack's hosted checkout** (card, transfer, USSD). The deposit is fixed by the database, not the browser.
+3. **Back from Paystack** to `/account/reservations?reference=…`: the server checks the payment **with Paystack's API** and records it with the secret key. Only then is the dog marked reserved, and the buyer and the store's owners and managers are notified. **Paystack's webhook** (`/api/paystack/webhook`, signature-checked) does the same if the buyer closes the tab. Recording twice changes nothing.
+4. **Reservations page** (`/account/reservations`, now in the nav):
+   - the hold with its countdown, a progress line (deposit → balance → handover), and price, paid and due
+   - "Pay the balance", "Cancel reservation", and, once paid in full, "I have Rambo: confirm the handover" (confirm dialog)
+   - ended ones say what happens to the money ("Dogeash will contact you…", "₦320,000 is on its way back…")
+5. **Handover confirmed:** the dog is marked sold and the store's payout (price less 5%) is recorded as due.
+6. **Holds end** every 15 minutes (pg_cron), and also whenever someone starts a reservation or pays. An unfinished checkout holds the dog for 30 minutes so two buyers can't pay at once.
+7. While a buyer has paid, the store **can't** put the dog back on sale, sell or withdraw it from the dashboard.
+
+### Files
+- **Migration** `20261201000000_payments.sql`:
+  - tables: reservations, payments, refunds, payouts, store payout accounts
+  - functions: `money_rules`, `start_reservation`, `start_balance_payment`, `cancel_reservation`, `confirm_handover`, `expire_reservations`, `record_payment`, `record_refund`
+  - nobody writes the tables directly; buyers see only theirs, stores' owners and managers see their reservations, and only owners see payouts
+- **Server:** `server/utils/paystack.ts` (API calls, webhook signature), `server/utils/payments.ts` (checkout, settle, refund), and `server/api/payments/{reserve,balance,verify}.post.ts`, `server/api/paystack/webhook.post.ts`
+- **App:** `utils/reservations.ts`, `composables/useReservations.ts`, `ReserveDialog.vue`, `AccountReservationCard.vue`, `pages/account/reservations.vue`. `ConfirmDialog` gained a marigold `tone`.
+- **Tests:** 40 new checks in `npm run db:test` (amounts, who can do what, double recording, guards, lapsed checkouts, late payments, refunds, expiry). All pass.
+
+### What you do
+1. **Run the migration** in the SQL Editor. It's ASCII-only and copied with UTF-8.
+2. **Turn on pg_cron** (Database → Extensions → pg_cron), then run this once: `select cron.schedule('dogeash-expire-reservations', '*/15 * * * *', 'select public.expire_reservations()');` (the migration schedules it by itself if pg_cron was already on).
+3. **Paystack:** create the account, then copy the **test secret key** (Settings → API Keys & Webhooks).
+4. **In `.env.local`** add `PAYSTACK_SECRET_KEY=sk_test_…` and `SUPABASE_SECRET_KEY=…` (Supabase → Project Settings → API Keys → secret). Both are server-only. Restart `npm run dev`.
+5. **Once the site is online**, set Paystack's webhook URL to `https://<your site>/api/paystack/webhook`. Locally, coming back from checkout records the payment, so the webhook isn't needed to test.
+6. Test with Paystack's test card `4084 0840 8408 4081`, any future expiry, CVV 408.
+
+### Not built yet (part 2)
+- **Store side:** Payouts page with bank account (checked by Paystack), payouts sent by Paystack Transfers, a reservations list in the dashboard, and the store cancelling (with automatic refund).
+- **Admin side:** payments, reservations waiting for a decision (refund or release), refunds and payouts.
+
+Not tested end to end yet: it needs the migration and your test keys. Checked in the browser: the button and the sign-in dialog on a dog page, and the reservation cards on desktop and phone. Typecheck shows no new errors.

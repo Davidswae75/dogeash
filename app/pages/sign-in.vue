@@ -5,9 +5,9 @@ import { computed, ref, watch } from 'vue'
 import { definePageMeta, useRoute, useSeoMeta } from '#imports' // nuxt
 import type { AuthLinkCard } from '~/components/auth/AuthLinkCards.vue'
 import { useAuth } from '~/composables/useAuth'
-import { useNotify } from '~/composables/useNotify'
 import { useSession } from '~/composables/useSession'
 import { useStaff } from '~/composables/useStaff'
+import { savedDogsMovedText } from '~/utils/account'
 import { emailSignInSchema, safeRedirect } from '~/utils/auth'
 import { authFields } from '~/utils/authFields'
 import { signInNextSteps } from '~/utils/signInNextSteps'
@@ -30,7 +30,6 @@ useSeoMeta({ title: 'Sign in · Dogeash', robots: 'noindex' })
 const route = useRoute()
 const auth = useAuth()
 const session = useSession()
-const notify = useNotify()
 
 const step = ref<'credentials' | 'code' | 'next'>('credentials')
 // Which code we're waiting for: a sign-in code, or the confirmation for an account not yet confirmed
@@ -49,7 +48,8 @@ watch(values, () => { error.value = '' })
 // Signed in: work out what this account can open (staff is checked fresh), then offer the choices.
 // The button's spinner covers the wait, so no full-screen loader here.
 const nextSteps = ref<AuthLinkCard[]>([])
-async function finish(moved: number) {
+const moved = ref(0)
+async function finish(movedDogs: number) {
   const staff = useStaff()
   await staff.load()
   nextSteps.value = signInNextSteps({
@@ -57,8 +57,8 @@ async function finish(moved: number) {
     stores: session.memberships.value,
     staffRole: staff.role.value,
   })
+  moved.value = movedDogs
   step.value = 'next'
-  notify.signedIn(session.firstName.value, moved)
 }
 
 // Saved before the step changes: the form forgets values once their fields leave the screen
@@ -74,7 +74,7 @@ const submit = handleSubmit(async (v) => {
     return
   }
   await finish(result.moved)
-}, ({ errors }) => notify.formErrors(errors))
+})
 
 // "Email me a code" only needs a valid email, not the password
 async function emailCode() {
@@ -126,7 +126,7 @@ const resendCode = () => (codeFor.value === 'confirm' ? auth.resendSignUpCode(em
   </template>
 
   <template v-else-if="step === 'next'">
-    <AuthHeading title="Welcome back," :outline="session.firstName.value || 'friend'" done text="Where would you like to go?" />
+    <AuthHeading title="Welcome back," :outline="session.firstName.value || 'friend'" done :text="`${savedDogsMovedText(moved)} Where would you like to go?`.trim()" />
     <AuthLinkCards :items="nextSteps" />
   </template>
 

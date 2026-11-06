@@ -60,7 +60,7 @@ const reasonModel = { get: () => reason.value, set: (v: string) => { if (v) reas
               <span class="flex flex-col items-start leading-tight"><span class="text-sm font-semibold">{{ r.label }}</span><span class="text-xs font-normal text-ink-muted">{{ r.hint }}</span></span>
             </ToggleGroupItem>
           </ToggleGroup>
-          <FieldShell label="Details" for="report-details" :hint="reason === 'other' ? 'Required for Something else.' : 'Optional, but it helps.'">
+          <FieldShell label="Details" for="report-details" :optional="reason !== 'other'" :hint="reason === 'other' ? 'Required for Something else.' : 'It helps Dogeash look into it.'">
             <Textarea id="report-details" v-model="details" rows="3" maxlength="1000" class="border-line-strong" />
           </FieldShell>
           <p v-if="error" class="m-0 text-sm font-semibold text-danger" role="alert">{{ error }}</p>

@@ -1,13 +1,13 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-11-06T03:05:11.437Z",
-    "fileCount": 748,
+    "lastScanned": "2026-11-06T17:16:45.987Z",
+    "fileCount": 756,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "a6f7819c9157ad21f97de0f6834ec124ffc5d02922a8daf7e162e6188e7d103e",
-    "storeUpdatedAt": "2026-11-06T03:05:11.501Z",
-    "rootHash": "79839fea477e6373"
+    "renderedHash": "c15c409b092db9ce91ec96d6d83eb32069973b77b074724f12d51b06194fe27d",
+    "storeUpdatedAt": "2026-11-06T17:16:46.021Z",
+    "rootHash": "f7e32a29b75a22fd"
   },
   "files": {
     ".gitignore": {
@@ -9116,6 +9116,219 @@
       "size": 3739,
       "mtimeMs": 1793934311241.2024,
       "updatedAt": "2026-11-06T03:05:11.433Z",
+      "source": "hook"
+    },
+    "supabase/migrations/20261201000000_payments.sql": {
+      "description": "Payments with Paystack: reserving a dog with a deposit, paying the balance, handover, payouts and re",
+      "tokens": 6854,
+      "hash": "0d583f624e76a049",
+      "size": 26501,
+      "mtimeMs": 1793984963576.286,
+      "updatedAt": "2026-11-06T17:09:23.843Z",
+      "source": "hook"
+    },
+    "server/utils/paystack.ts": {
+      "description": "Paystack's API, called only from the server with the secret key (PAYSTACK_SECRET_KEY).",
+      "tokens": 558,
+      "hash": "9f5c0ee85d3aa6c0",
+      "size": 1952,
+      "mtimeMs": 1793985179423.5488,
+      "updatedAt": "2026-11-06T17:12:59.650Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "toKobo",
+          "kind": "fn",
+          "startLine": 10,
+          "endLine": 10,
+          "tokens": 19
+        },
+        {
+          "name": "toNaira",
+          "kind": "fn",
+          "startLine": 11,
+          "endLine": 12,
+          "tokens": 19
+        },
+        {
+          "name": "secretKey",
+          "kind": "fn",
+          "startLine": 13,
+          "endLine": 19,
+          "tokens": 97
+        },
+        {
+          "name": "paystack",
+          "kind": "fn",
+          "startLine": 20,
+          "endLine": 33,
+          "tokens": 217
+        },
+        {
+          "name": "validSignature",
+          "kind": "fn",
+          "startLine": 34,
+          "endLine": 41,
+          "tokens": 98
+        }
+      ]
+    },
+    "server/utils/payments.ts": {
+      "description": "What start_reservation / start_balance_payment return: enough to open Paystack's checkout",
+      "tokens": 1130,
+      "hash": "401cc6f2fa63edbe",
+      "size": 3954,
+      "mtimeMs": 1793985180071.3806,
+      "updatedAt": "2026-11-06T17:13:00.446Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "CheckoutStart",
+          "kind": "section",
+          "startLine": 8,
+          "endLine": 18,
+          "tokens": 69
+        },
+        {
+          "name": "refused",
+          "kind": "fn",
+          "startLine": 19,
+          "endLine": 25,
+          "tokens": 115
+        },
+        {
+          "name": "openCheckout",
+          "kind": "fn",
+          "startLine": 26,
+          "endLine": 51,
+          "tokens": 333
+        },
+        {
+          "name": "settlePayment",
+          "kind": "fn",
+          "startLine": 52,
+          "endLine": 70,
+          "tokens": 348
+        },
+        {
+          "name": "sendRefund",
+          "kind": "fn",
+          "startLine": 71,
+          "endLine": 81,
+          "tokens": 166
+        }
+      ]
+    },
+    "app/utils/reservations.ts": {
+      "description": "Reserving a dog with a deposit, paying the balance, and the handover. The rules live in the database",
+      "tokens": 1415,
+      "hash": "51dac91ec8f9e781",
+      "size": 4953,
+      "mtimeMs": 1793985290748.6753,
+      "updatedAt": "2026-11-06T17:14:51.077Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "depositFor",
+          "kind": "fn",
+          "startLine": 8,
+          "endLine": 14,
+          "tokens": 110
+        },
+        {
+          "name": "Reservation",
+          "kind": "section",
+          "startLine": 15,
+          "endLine": 69,
+          "tokens": 539
+        },
+        {
+          "name": "isActive",
+          "kind": "fn",
+          "startLine": 70,
+          "endLine": 81,
+          "tokens": 199
+        },
+        {
+          "name": "reservationSteps",
+          "kind": "fn",
+          "startLine": 82,
+          "endLine": 88,
+          "tokens": 76
+        },
+        {
+          "name": "moneyNote",
+          "kind": "fn",
+          "startLine": 89,
+          "endLine": 98,
+          "tokens": 207
+        },
+        {
+          "name": "formatMoney",
+          "kind": "fn",
+          "startLine": 99,
+          "endLine": 101,
+          "tokens": 39
+        },
+        {
+          "name": "timeLeft",
+          "kind": "fn",
+          "startLine": 102,
+          "endLine": 111,
+          "tokens": 130
+        }
+      ]
+    },
+    "app/composables/useReservations.ts": {
+      "description": "The buyer's reservations (Supabase: reservations, payments, refunds). Paying goes through the site's",
+      "tokens": 1103,
+      "hash": "d8dfb1f07d192419",
+      "size": 3860,
+      "mtimeMs": 1793985309342.624,
+      "updatedAt": "2026-11-06T17:15:09.524Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "useReservations",
+          "kind": "fn",
+          "startLine": 10,
+          "endLine": 75,
+          "tokens": 853
+        },
+        {
+          "name": "fetchError",
+          "kind": "fn",
+          "startLine": 76,
+          "endLine": 80,
+          "tokens": 78
+        }
+      ]
+    },
+    "app/components/ReserveDialog.vue": {
+      "description": "Vue: setup",
+      "tokens": 1308,
+      "hash": "a42bd024c512f5be",
+      "size": 4904,
+      "mtimeMs": 1793985336508.6072,
+      "updatedAt": "2026-11-06T17:15:36.845Z",
+      "source": "hook"
+    },
+    "app/components/account/AccountReservationCard.vue": {
+      "description": "Vue: setup",
+      "tokens": 1134,
+      "hash": "39225bca67dec339",
+      "size": 4257,
+      "mtimeMs": 1793985373250.2502,
+      "updatedAt": "2026-11-06T17:16:13.635Z",
+      "source": "hook"
+    },
+    "app/pages/account/reservations.vue": {
+      "description": "Vue: setup",
+      "tokens": 2605,
+      "hash": "3bcd6ed51486c1d2",
+      "size": 9774,
+      "mtimeMs": 1793985405704.9187,
+      "updatedAt": "2026-11-06T17:16:45.984Z",
       "source": "hook"
     }
   },

@@ -14,7 +14,7 @@ const { value: services, errorMessage: servicesError } = useField<StoreService[]
     <FieldShell label="About" for="store-about-text" hint="What buyers should know: your land, your dogs' lines, how you train, what handover includes. At least a few sentences." :error="aboutError">
       <Textarea id="store-about-text" v-model="about" rows="6" maxlength="1200" class="border-2 border-line-strong" />
     </FieldShell>
-    <FieldShell label="What you offer" hint="Shown as badges on your store page." :error="servicesError">
+    <FieldShell label="What you offer" optional hint="Shown as badges on your store page." :error="servicesError">
       <ToggleGroup v-model="services" type="multiple" variant="chip" aria-label="What you offer" class="flex w-auto flex-wrap justify-start gap-2">
         <ToggleGroupItem v-for="(s, key) in storeServices" :key="key" :value="key" :title="s.hint" class="rounded-full!">{{ s.label }}</ToggleGroupItem>
       </ToggleGroup>

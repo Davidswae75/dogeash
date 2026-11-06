@@ -56,7 +56,7 @@ async function submit() {
         <FieldShell label="Inspector" for="inspection-inspector" :hint="props.staff.length ? undefined : 'No staff found. Add inspectors in the SQL editor.'">
           <SelectMenu id="inspection-inspector" v-model="inspector" :options="props.staff.map(s => ({ value: s.id, label: `${s.name} · ${s.role}` }))" placeholder="Choose an inspector" class="h-10!" />
         </FieldShell>
-        <FieldShell label="Note for the inspector" for="inspection-note" hint="Optional: gate codes, who to ask for, what to look at.">
+        <FieldShell label="Note for the inspector" for="inspection-note" optional hint="Gate codes, who to ask for, what to look at.">
           <Textarea id="inspection-note" v-model="note" rows="2" maxlength="500" class="border-line-strong" />
         </FieldShell>
         <p v-if="error" class="m-0 text-sm font-semibold text-danger" role="alert">{{ error }}</p>

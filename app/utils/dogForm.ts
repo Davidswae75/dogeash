@@ -108,22 +108,22 @@ export const dogFormFields = {
   basics: [
     input('name', 'Name', 'Rambo', { attrs: { autocomplete: 'off', maxlength: 40 } }),
     input('age', 'Age', '2.5 years'),
-    input('born', 'Born', '12 February 2024, K9 Guardian Kennels', { hint: 'Date and where, if you know it.' }),
+    input('born', 'Born', '12 February 2024, K9 Guardian Kennels', { hint: 'Date and where, if you know it.', optional: true }),
     input('weightKg', 'Weight', '32', { attrs: { inputmode: 'decimal' }, hint: 'In kilograms.' }),
     input('city', 'City', 'Abuja', { hint: 'Where buyers meet the dog.' }),
   ],
   health: [
-    input('hipsElbows', 'Hips and elbows, in full', 'Hips A1 / elbows normal, SV certified'),
-    input('vaccinations', 'Vaccinations', 'Full puppy series; annual booster due February 2027'),
-    input('microchip', 'Microchip', '985 112 004 716 204'),
+    input('hipsElbows', 'Hips and elbows, in full', 'Hips A1 / elbows normal, SV certified', { optional: true }),
+    input('vaccinations', 'Vaccinations', 'Full puppy series; annual booster due February 2027', { optional: true }),
+    input('microchip', 'Microchip', '985 112 004 716 204', { optional: true }),
   ],
   training: [
-    input('titles', 'Titles and training', 'IGP-3 (obedience, tracking, protection)'),
-    input('sire', 'Sire (father)', 'V Django vom Wolfsbane (NL)'),
-    input('dam', 'Dam (mother)', 'Xira des Guerriers Belges (BE)'),
+    input('titles', 'Titles and training', 'IGP-3 (obedience, tracking, protection)', { optional: true }),
+    input('sire', 'Sire (father)', 'V Django vom Wolfsbane (NL)', { optional: true }),
+    input('dam', 'Dam (mother)', 'Xira des Guerriers Belges (BE)', { optional: true }),
   ],
   listing: [
-    input('bestSuited', 'Best suited to', 'Gated estates with an experienced handler'),
+    input('bestSuited', 'Best suited to', 'Gated estates with an experienced handler', { optional: true }),
     input('priceNaira', 'Price', '3200000', { prefix: '₦', attrs: { inputmode: 'numeric' }, hint: 'Whole naira, no commas.' }),
   ],
 }

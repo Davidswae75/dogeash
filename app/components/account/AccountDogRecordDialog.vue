@@ -78,7 +78,7 @@ const field = 'h-10 border-line-strong bg-surface'
     <DialogContent class="max-h-[92dvh] overflow-y-auto sm:max-w-[520px]">
       <DialogHeader>
         <DialogTitle>{{ props.record ? `Change ${props.record.title}` : `Add to ${props.dogName}'s record` }}</DialogTitle>
-        <DialogDescription>{{ meta.hint }}</DialogDescription>
+        <DialogDescription>{{ meta.hint }} Give at least one of the two dates.</DialogDescription>
       </DialogHeader>
       <form class="flex flex-col gap-4" novalidate @submit.prevent="submit">
         <div class="grid gap-4 sm:grid-cols-[180px_minmax(0,1fr)]">
@@ -97,10 +97,10 @@ const field = 'h-10 border-line-strong bg-surface'
             <Input id="record-due" v-model="dueOn" type="date" :class="field" />
           </FieldShell>
         </div>
-        <FieldShell label="By" for="record-by" hint="The vet, trainer or clinic. Optional.">
+        <FieldShell label="By" for="record-by" optional hint="The vet, trainer or clinic.">
           <Input id="record-by" v-model="byWhom" maxlength="80" placeholder="Kuje Veterinary Clinic" :class="field" />
         </FieldShell>
-        <FieldShell label="Note" for="record-note">
+        <FieldShell label="Note" for="record-note" optional>
           <Textarea id="record-note" v-model="note" rows="2" maxlength="500" class="border-line-strong bg-surface" />
         </FieldShell>
         <p v-if="error" class="m-0 text-sm font-semibold text-danger" role="alert">{{ error }}</p>

@@ -41,7 +41,7 @@ const remove = (path: string) => { paths.value = paths.value.filter(p => p !== p
 </script>
 
 <template>
-  <FieldShell :label="`More photos (${paths.length} of ${DOG_GALLERY_MAX})`" hint="Different angles, at work, with people, the kennel. JPG, PNG or WebP, up to 5 MB each. You can pick several at once." :error="error">
+  <FieldShell :label="`More photos (${paths.length} of ${DOG_GALLERY_MAX})`" optional hint="Different angles, at work, with people, the kennel. JPG, PNG or WebP, up to 5 MB each. You can pick several at once." :error="error">
     <ul class="m-0 grid list-none grid-cols-3 gap-2 p-0 sm:grid-cols-4">
       <li v-for="(p, i) in paths" :key="p" class="group relative aspect-4/3 overflow-hidden rounded-lg bg-surface-sunk ring-1 ring-line">
         <img :src="urlOf(p)" :alt="`Photo ${i + 2}`" class="size-full object-cover">

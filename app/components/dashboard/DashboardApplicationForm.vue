@@ -48,7 +48,7 @@ const submit = handleSubmit(async (v) => {
           <span class="text-[13px] leading-5 text-ink-muted">Then you don't need a CAC certificate to apply. Dogeash may ask about it at the inspection.</span>
         </span>
       </label>
-      <FieldShell label="Anything Dogeash should know" for="application-note" hint="Optional: how many dogs you keep, access to the kennel, anything special." :error="errors.note">
+      <FieldShell label="Anything Dogeash should know" for="application-note" optional hint="How many dogs you keep, access to the kennel, anything special." :error="errors.note">
         <Textarea id="application-note" v-model="note" rows="3" maxlength="1000" class="border-2 border-line-strong" />
       </FieldShell>
     </fieldset>

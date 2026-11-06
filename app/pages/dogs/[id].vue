@@ -74,7 +74,8 @@ const facts = [
           <template v-if="store">
             <OwnListingActions v-if="isOwn" :store="store" :dog="dog" tone="night" />
             <template v-else>
-              <ContactStoreDialog :store="store" :dog="dog" trigger-class="w-full" />
+              <ReserveDialog :dog="dog" :store-name="store.name" trigger-class="h-11 w-full" />
+              <ContactStoreDialog :store="store" :dog="dog" variant="outline" trigger-class="w-full border-on-night/40 bg-transparent text-on-night hover:bg-on-night/10" />
               <KennelVisitDialog :store="store" :dogs="[dog]" label="Book a visit" variant="night" trigger-class="h-10 w-full" />
             </template>
           </template>

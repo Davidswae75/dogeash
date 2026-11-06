@@ -39,7 +39,7 @@ const check = (name, ok) => { console.log(`${ok ? 'ok  ' : 'FAIL'} ${name}`); if
 async function as(role, uid, sql) {
   await db.exec(`set test.uid = '${uid ?? ''}'; set role ${role};`)
   try { return (await db.query(sql)).rows }
-  catch { return null }
+  catch (e) { if (process.env.DEBUG_SQL) console.error('refused:', e.message, '\n  ', sql.slice(0, 120)); return null }
   finally { await db.exec('reset role;') }
 }
 const emailOf = name => `${name.split(' ')[0].toLowerCase()}@test.ng`
@@ -626,6 +626,67 @@ check('deleting a dog removes its record', (await as('authenticated', buyer, `de
 const freshDog = await scalar(`select id from public.dogs where id <> '${rambo}' and status = 'available' limit 1`)
 await as('authenticated', other, `insert into public.shortlist_items (user_id, dog_id) values ('${other}', '${freshDog}')`)
 check('shortlisting keeps the price at the time', await scalar(`select (s.saved_price = d.price_naira)::text from public.shortlist_items s join public.dogs d on d.id = s.dog_id where s.user_id = '${other}' and s.dog_id = '${freshDog}'`) === 'true')
+
+// Payments: reserve with a deposit, pay the balance, hand over. Only the server (service key) records payments.
+const svc = sql => as('service_role', null, sql)
+const payer = await user('Kemi Bala') // a buyer with no store (other has joined K9's team by now)
+const k9Free = await db.query(`select id, file_no, price_naira from public.dogs where store_id = '${k9}' and status = 'available' order by file_no`)
+const [payDog, lateDog, raceDog] = k9Free.rows
+check('there are three K9 dogs on sale to test payments with', !!raceDog)
+check('visitors can\'t reserve', await as('anon', null, `select public.start_reservation('${payDog.file_no}')`) === null)
+check('a store\'s own people can\'t reserve its dogs', await as('authenticated', handler, `select public.start_reservation('${payDog.file_no}')`) === null)
+const start1 = (await as('authenticated', buyer, `select public.start_reservation('${payDog.file_no}') as r`))?.[0]?.r
+check('a buyer starts a reservation: the deposit is 10% of the price', start1?.amountNaira === Math.ceil(Number(payDog.price_naira) / 10) && start1?.email === emailOf('Tunde Ade'))
+check('while they pay, nobody else can start on the same dog', await as('authenticated', payer, `select public.start_reservation('${payDog.file_no}')`) === null)
+const start2 = (await as('authenticated', buyer, `select public.start_reservation('${payDog.file_no}') as r`))?.[0]?.r
+check('starting again reuses the reservation with a new payment reference', start2?.reservationId === start1?.reservationId && start2?.reference !== start1?.reference)
+check('buyers can\'t write reservations directly', await as('authenticated', buyer, `insert into public.reservations (dog_id, store_id, buyer_id, dog_name, dog_file_no, store_name, price_naira, deposit_naira, commission_naira, expires_at) values ('${payDog.id}', '${k9}', '${buyer}', 'x', 'x', 'x', 1, 1, 0, now())`) === null)
+check('buyers can\'t mark their own payment paid', await as('authenticated', buyer, `select public.record_payment('${start2?.reference}', 999999999, true)`) === null)
+check('nor change a payment row', (await as('authenticated', buyer, `update public.payments set status = 'success' where reference = '${start2?.reference}' returning id`)) === null)
+const paid1 = (await svc(`select public.record_payment('${start2?.reference}', ${start2?.amountNaira}, true, 'card') as r`))?.[0]?.r
+check('the server records the deposit: the reservation holds the dog', paid1?.outcome === 'held' && await scalar(`select status::text from public.dogs where id = '${payDog.id}'`) === 'reserved')
+check('the hold lasts 5 days', await scalar(`select (expires_at between now() + interval '4 days 23 hours' and now() + interval '5 days 1 hour')::text from public.reservations where id = '${start1?.reservationId}'`) === 'true')
+check('recording the same payment twice changes nothing', (await svc(`select public.record_payment('${start2?.reference}', ${start2?.amountNaira}, true) as r`))?.[0]?.r?.outcome === 'already')
+check('the buyer and the store are told', await scalar(`select count(*)::int from public.notifications where kind = 'payment' and topic = 'reservation:${start1?.reservationId}'`) >= 3)
+check('the store can\'t put a paid-for dog back on sale', await as('authenticated', manager, `update public.dogs set status = 'available' where id = '${payDog.id}'`) === null)
+check('the buyer reads their reservation', (await as('authenticated', buyer, `select id from public.reservations where id = '${start1?.reservationId}'`))?.length === 1)
+check('the store\'s owner reads it too', (await as('authenticated', owner, `select id from public.reservations where id = '${start1?.reservationId}'`))?.length === 1)
+check('a handler doesn\'t see the money', (await as('authenticated', handler, `select id from public.reservations`))?.length === 0)
+check('nobody else sees it', (await as('authenticated', payer, `select id from public.reservations where id = '${start1?.reservationId}'`))?.length === 0)
+check('nobody else sees the payments', (await as('authenticated', payer, `select id from public.payments`))?.length === 0)
+check('visitors can\'t read reservations', await as('anon', null, 'select * from public.reservations') === null)
+check('someone else can\'t pay the balance', await as('authenticated', payer, `select public.start_balance_payment('${start1?.reservationId}')`) === null)
+check('confirming the handover waits for the balance', await as('authenticated', buyer, `select public.confirm_handover('${start1?.reservationId}')`) === null)
+const bal = (await as('authenticated', buyer, `select public.start_balance_payment('${start1?.reservationId}') as r`))?.[0]?.r
+check('the balance is the price less the deposit', bal?.amountNaira === Number(payDog.price_naira) - start1?.amountNaira)
+check('the balance recorded: paid in full', (await svc(`select public.record_payment('${bal?.reference}', ${bal?.amountNaira}, true, 'bank_transfer') as r`))?.[0]?.r?.outcome === 'paid')
+check('once paid in full, cancelling goes through Dogeash', await as('authenticated', buyer, `select public.cancel_reservation('${start1?.reservationId}')`) === null)
+await as('authenticated', buyer, `select public.confirm_handover('${start1?.reservationId}')`)
+check('the handover completes it and the dog is sold', await scalar(`select status::text from public.reservations where id = '${start1?.reservationId}'`) === 'completed' && await scalar(`select status::text from public.dogs where id = '${payDog.id}'`) === 'sold')
+check('the store\'s payout is the price less 5%', await scalar(`select amount_naira::bigint from public.payouts where reservation_id = '${start1?.reservationId}'`) == Number(payDog.price_naira) - Math.round(Number(payDog.price_naira) * 0.05))
+check('the owner sees the payout; a manager doesn\'t', (await as('authenticated', owner, 'select id from public.payouts'))?.length === 1 && (await as('authenticated', manager, 'select id from public.payouts'))?.length === 0)
+
+// Lapsed checkouts, late payments and refunds
+const late = (await as('authenticated', payer, `select public.start_reservation('${lateDog.file_no}') as r`))?.[0]?.r
+await db.exec(`update public.reservations set expires_at = now() - interval '1 minute' where id = '${late?.reservationId}'`)
+await svc('select public.expire_reservations()')
+check('an unpaid checkout lapses after 30 minutes', await scalar(`select status::text from public.reservations where id = '${late?.reservationId}'`) === 'expired')
+check('a late payment still reserves the dog if nobody took it', (await svc(`select public.record_payment('${late?.reference}', ${late?.amountNaira}, true) as r`))?.[0]?.r?.outcome === 'held')
+const race = (await as('authenticated', buyer, `select public.start_reservation('${raceDog.file_no}') as r`))?.[0]?.r
+await db.exec(`update public.reservations set expires_at = now() - interval '1 minute' where id = '${race?.reservationId}'`)
+const raceWin = (await as('authenticated', payer, `select public.start_reservation('${raceDog.file_no}') as r`))?.[0]?.r
+await svc(`select public.record_payment('${raceWin?.reference}', ${raceWin?.amountNaira}, true)`)
+const raceLate = (await svc(`select public.record_payment('${race?.reference}', ${race?.amountNaira}, true) as r`))?.[0]?.r
+check('a late payment for a dog someone else paid for is refunded', raceLate?.outcome === 'refund' && !!raceLate?.refundId)
+check('the buyer sees that refund', (await as('authenticated', buyer, `select id from public.refunds where id = '${raceLate?.refundId}'`))?.length === 1)
+const short = (await as('authenticated', payer, `select public.start_balance_payment('${late?.reservationId}') as r`))?.[0]?.r
+check('paying less than the balance is refunded, and the hold carries on', (await svc(`select public.record_payment('${short?.reference}', 1, true) as r`))?.[0]?.r?.outcome === 'refund' && await scalar(`select status::text from public.reservations where id = '${late?.reservationId}'`) === 'held')
+await db.exec(`update public.reservations set expires_at = now() - interval '1 minute' where id = '${late?.reservationId}'`)
+await svc('select public.expire_reservations()')
+check('a hold that runs out puts the dog back on sale; the deposit waits for Dogeash', await scalar(`select status::text || '/' || money_decision from public.reservations where id = '${late?.reservationId}'`) === 'expired/waiting' && await scalar(`select status::text from public.dogs where id = '${lateDog.id}'`) === 'available')
+await as('authenticated', payer, `select public.cancel_reservation('${raceWin?.reservationId}', 'Changed my mind')`)
+check('a buyer who cancels after the deposit frees the dog; the deposit waits for Dogeash', await scalar(`select status::text || '/' || money_decision from public.reservations where id = '${raceWin?.reservationId}'`) === 'cancelled/waiting' && await scalar(`select status::text from public.dogs where id = '${raceDog.id}'`) === 'available')
+check('the money rules are public', (await as('anon', null, 'select public.money_rules() as r'))?.[0]?.r?.depositPercent === 10)
 
 // Garbled text (UTF-8 read as Mac Roman on the way into the SQL Editor) is repaired, data and code alike
 await db.exec(`update public.stores set tagline = 'Mon‚ÄìSat ¬∑ from ‚Ç¶2m' where public_id = 'STR-002'`)

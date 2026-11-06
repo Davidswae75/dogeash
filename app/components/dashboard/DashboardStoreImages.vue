@@ -42,7 +42,7 @@ const images: { kind: StoreImage, label: string, hint: string }[] = [
     <p v-else id="store-images" class="m-0 text-[13px] leading-5 text-ink-muted">These save as soon as you pick them. JPG, PNG or WebP, up to 5 MB.</p>
 
     <div class="grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-      <FieldShell v-for="img in images" :key="img.kind" :label="img.label" :hint="img.hint" :error="error[img.kind]">
+      <FieldShell v-for="img in images" :key="img.kind" :label="img.label" optional :hint="img.hint" :error="error[img.kind]">
         <div class="relative">
           <StoreBanner v-if="img.kind === 'banner'" :store="props.store" class="aspect-[16/5] rounded-lg" />
           <StoreAvatar v-else :initials="props.store.initials" :src="props.store.logo" class="size-28 rounded-2xl" />

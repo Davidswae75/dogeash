@@ -84,17 +84,17 @@ export const storeFormFields = {
   ],
   place: [
     input('city', 'City', 'Abuja'),
-    input('area', 'Area', 'Kuje'),
-    input('state', 'State', 'FCT'),
+    input('area', 'Area', 'Kuje', { optional: true }),
+    input('state', 'State', 'FCT', { optional: true }),
     input('founded', 'Founded', '2014', { attrs: { inputmode: 'numeric', maxlength: 4 } }),
   ],
   visiting: [
-    input('hours', 'Opening hours', 'Mon–Sat, 8am–5pm. Visits by appointment.'),
-    input('deliveryAreas', 'Where you deliver', 'Abuja, Kaduna, Lagos, Port Harcourt', { hint: 'Cities or states, separated by commas.' }),
+    input('hours', 'Opening hours', 'Mon–Sat, 8am–5pm. Visits by appointment.', { optional: true }),
+    input('deliveryAreas', 'Where you deliver', 'Abuja, Kaduna, Lagos, Port Harcourt', { hint: 'Cities or states, separated by commas.', optional: true }),
   ],
   owner: [
     input('ownerName', 'Name', 'Col. (rtd) Ibrahim Danjuma'),
-    input('ownerTitle', 'Role', 'Founder and head trainer'),
+    input('ownerTitle', 'Role', 'Founder and head trainer', { optional: true }),
     input('ownerYears', 'Years working with dogs', '26', { attrs: { inputmode: 'numeric', maxlength: 2 } }),
   ],
 }

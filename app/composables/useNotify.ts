@@ -1,5 +1,5 @@
 import { BellRing, ShoppingCart } from '@lucide/vue'
-import { CalendarCheck, CircleX, Dog as DogIcon, Heart, HeartOff, Info, LogIn, LogOut, MessageSquare, Scale, ShieldCheck, Star, Stethoscope, Store, TriangleAlert, UserRoundCheck, Users } from '@lucide/vue'
+import { CalendarCheck, CircleX, Dog as DogIcon, Heart, HeartOff, Info, LogOut, MessageSquare, Scale, ShieldCheck, Star, Stethoscope, Store, TriangleAlert, Users } from '@lucide/vue'
 import type { Component } from 'vue'
 import { TYPE, useToast } from 'vue-toastification'
 import ToastContent, { type ToastAction, type ToastTone } from '~/components/ToastContent.vue'
@@ -30,7 +30,6 @@ export function useNotify() {
 
   const saved = () => `${count.value} saved`
   const viewShortlist: ToastAction = { label: 'View shortlist', onClick: () => navigateTo('/shortlist') }
-  const movedText = (moved: number) => moved ? `${moved} saved ${moved === 1 ? 'dog' : 'dogs'} from this browser ${moved === 1 ? 'is' : 'are'} now in your account.` : undefined
   const aboutDog = (dog: Dog) => `${dog.breed} · ${dog.sex} · ${formatNaira(dog.priceNaira)}`
 
   return {
@@ -54,21 +53,6 @@ export function useNotify() {
 
     cartRemoved: (name: string, undo: () => void) =>
       show('info', ShoppingCart, { kicker: 'Cart', title: `${name} removed`, action: { label: 'Undo', onClick: undo, kind: 'undo' } }),
-
-    bookingRequested: (withWhom: string, when: string, sent = false) =>
-      sent
-        ? show('success', CalendarCheck, { kicker: 'Visit', meta: 'Requested', title: 'Request sent', text: `${withWhom} · ${when}. The store will confirm the time.`, action: { label: 'My visits', onClick: () => navigateTo('/account/bookings') } })
-        : show('success', CalendarCheck, { kicker: 'Booking', meta: 'Preview', title: 'Request ready', text: `${withWhom} · ${when}. Nothing is sent yet.` }),
-
-    // `moved`: shortlisted dogs carried over from this browser into the account
-    signedIn: (firstName: string, moved: number) =>
-      show('success', LogIn, { kicker: 'Account', meta: 'Signed in', title: `Welcome back, ${firstName}`, text: movedText(moved) ?? 'Your shortlist and bookings are where you left them.' }),
-
-    accountCreated: (firstName: string, moved: number) =>
-      show('success', UserRoundCheck, { kicker: 'Account', meta: 'New', title: `Welcome, ${firstName}`, text: movedText(moved) ?? 'Your account is ready. Save dogs and they\'ll follow you to any device.' }),
-
-    storeStarted: (firstName: string, storeName: string) =>
-      show('success', Store, { kicker: 'Store', meta: 'Draft', title: `Welcome, ${firstName}`, text: `${storeName} is saved as a draft. Next: your documents and the inspection.` }),
 
     messageSent: (storeName: string, replies: string, conversationId: string) =>
       show('success', MessageSquare, { kicker: 'Message', meta: 'Sent', title: `Message sent to ${storeName}`, text: `They usually reply in ${replies}. You'll find the reply in Messages.`, action: { label: 'Open conversation', onClick: () => navigateTo({ path: '/account/messages', query: { id: conversationId } }) } }),
@@ -128,9 +112,5 @@ export function useNotify() {
       show('info', LogOut, { kicker: 'Account', meta: 'Signed out', title: 'You\'re signed out', text: 'Your saved dogs stay in your account for next time.' }),
 
     // `errors` is vee-validate's field → message map; the first message says what to fix
-    formErrors: (errors: Partial<Record<string, string>>) => {
-      const messages = Object.values(errors).filter(Boolean) as string[]
-      show('error', CircleX, { kicker: 'Form', meta: `${messages.length} ${messages.length === 1 ? 'field' : 'fields'}`, title: messages.length === 1 ? 'One thing to fix' : `${messages.length} things to fix`, text: messages[0] })
-    },
   }
 }

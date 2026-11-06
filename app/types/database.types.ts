@@ -272,6 +272,42 @@ export interface Database {
         Update: { label?: string, alerts?: boolean }
         Relationships: []
       }
+      reservations: {
+        Row: { id: string, ref: string, dog_id: string, store_id: string, buyer_id: string, dog_name: string, dog_file_no: string, dog_photo_path: string | null, store_name: string, price_naira: number, deposit_naira: number, commission_naira: number, status: Database['public']['Enums']['reservation_status'], expires_at: string, deposit_paid_at: string | null, paid_at: string | null, completed_at: string | null, closed_at: string | null, closed_by: 'buyer' | 'store' | 'dogeash' | 'system' | null, close_reason: string, money_decision: 'waiting' | 'refund' | 'release' | null, created_at: string, updated_at: string }
+        Insert: { [_ in never]: never }
+        Update: { [_ in never]: never }
+        Relationships: []
+      }
+      payments: {
+        Row: { id: string, reservation_id: string, buyer_id: string, kind: 'deposit' | 'balance', reference: string, amount_naira: number, status: Database['public']['Enums']['payment_status'], channel: string, paid_at: string | null, created_at: string }
+        Insert: { [_ in never]: never }
+        Update: { [_ in never]: never }
+        Relationships: [
+          { foreignKeyName: 'payments_reservation_id_fkey', columns: ['reservation_id'], isOneToOne: false, referencedRelation: 'reservations', referencedColumns: ['id'] },
+        ]
+      }
+      refunds: {
+        Row: { id: string, reservation_id: string, payment_id: string, amount_naira: number, reason: string, status: Database['public']['Enums']['money_move_status'], provider_id: string | null, failure: string, created_at: string, done_at: string | null }
+        Insert: { [_ in never]: never }
+        Update: { [_ in never]: never }
+        Relationships: [
+          { foreignKeyName: 'refunds_reservation_id_fkey', columns: ['reservation_id'], isOneToOne: false, referencedRelation: 'reservations', referencedColumns: ['id'] },
+        ]
+      }
+      payouts: {
+        Row: { id: string, store_id: string, reservation_id: string, amount_naira: number, status: Database['public']['Enums']['money_move_status'], transfer_reference: string | null, transfer_code: string | null, failure: string, created_at: string, done_at: string | null }
+        Insert: { [_ in never]: never }
+        Update: { [_ in never]: never }
+        Relationships: [
+          { foreignKeyName: 'payouts_reservation_id_fkey', columns: ['reservation_id'], isOneToOne: true, referencedRelation: 'reservations', referencedColumns: ['id'] },
+        ]
+      }
+      store_payout_accounts: {
+        Row: { store_id: string, bank_code: string, bank_name: string, account_name: string, account_last4: string, recipient_code: string, updated_by: string | null, updated_at: string }
+        Insert: { [_ in never]: never }
+        Update: { [_ in never]: never }
+        Relationships: []
+      }
       shortlist_items: {
         Row: { user_id: string, dog_id: string, comparing: boolean, saved_price: number | null, created_at: string }
         Insert: { user_id: string, dog_id: string, comparing?: boolean }
@@ -283,6 +319,14 @@ export interface Database {
     }
     Views: { [_ in never]: never }
     Functions: {
+      money_rules: { Args: Record<string, never>, Returns: Json }
+      start_reservation: { Args: { file_no: string }, Returns: Json }
+      start_balance_payment: { Args: { reservation: string }, Returns: Json }
+      cancel_reservation: { Args: { reservation: string, reason?: string }, Returns: undefined }
+      confirm_handover: { Args: { reservation: string }, Returns: undefined }
+      expire_reservations: { Args: Record<string, never>, Returns: number }
+      record_payment: { Args: { payment_reference: string, amount_paid_naira: number, succeeded: boolean, pay_channel?: string }, Returns: Json }
+      record_refund: { Args: { refund: string, to_status: Database['public']['Enums']['money_move_status'], provider?: string | null, why?: string }, Returns: undefined }
       has_store_role: { Args: { target_store: string, roles: Database['public']['Enums']['store_role'][] }, Returns: boolean }
       mark_conversation_read: { Args: { target: string }, Returns: undefined }
       my_email: { Args: Record<string, never>, Returns: string }
@@ -346,7 +390,10 @@ export interface Database {
       visit_place: 'kennel' | 'home'
       staff_role: 'admin' | 'inspector'
       care_type: 'vet' | 'trainer' | 'groomer' | 'builder' | 'equipment' | 'boarding'
-      notification_kind: 'message' | 'visit' | 'reserved' | 'sold' | 'available' | 'price' | 'team' | 'review' | 'store' | 'report' | 'announcement'
+      notification_kind: 'message' | 'visit' | 'reserved' | 'sold' | 'available' | 'price' | 'team' | 'review' | 'store' | 'report' | 'announcement' | 'payment'
+      reservation_status: 'pending' | 'held' | 'paid' | 'completed' | 'cancelled' | 'expired'
+      payment_status: 'pending' | 'success' | 'failed'
+      money_move_status: 'due' | 'sending' | 'done' | 'failed'
     }
     CompositeTypes: { [_ in never]: never }
   }
