@@ -13,7 +13,9 @@ const fullFooter = computed(() => route.meta.footer === 'full')
       href="#main"
       class="absolute -top-15 left-4 z-30 rounded-md bg-marigold px-3.5 py-2.5 font-bold text-on-marigold focus:top-3"
     >Skip to content</a>
+    <SiteAnnouncement />
     <SiteHeader />
+    <AccountBlockedBanner />
     <main id="main" class="flex-1 pb-12">
       <slot />
     </main>

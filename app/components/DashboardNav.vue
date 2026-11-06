@@ -64,7 +64,7 @@ function isActive(to: string) {
           <NuxtLink to="/dogs" class="cursor-pointer"><ShoppingBag aria-hidden="true" />Switch to buying</NuxtLink>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem class="cursor-pointer" @select="signOut">
+        <DropdownMenuItem class="cursor-pointer" @select="signOut()">
           <LogOut aria-hidden="true" />Sign out
         </DropdownMenuItem>
       </DropdownMenuContent>

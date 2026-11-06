@@ -21,6 +21,19 @@ export function useStoreReviews() {
     return byStore.value[storeId]!
   }
 
+  // The signed-in buyer's own reviews across every store, with the store's name and page (Reviews page)
+  const mine = useState<(Review & { storeName: string, storeSlug: string, repliedAt: string | null })[]>('my-reviews', () => [])
+  async function loadMine() {
+    if (!user.value) return (mine.value = [])
+    const { data } = await supabase
+      .from('store_reviews')
+      .select('id, author_id, author_name, author_city, rating, body, store_reply, replied_at, created_at, stores!inner (public_id, name, slug)')
+      .eq('author_id', user.value.id)
+      .order('created_at', { ascending: false })
+    type Row = ReviewRow & { stores: { public_id: string, name: string, slug: string } }
+    mine.value = ((data ?? []) as unknown as Row[]).map(r => ({ ...toReview(r, user.value?.id), storeName: r.stores.name, storeSlug: r.stores.slug, repliedAt: r.replied_at }))
+  }
+
   const reviewsOf = (storeId: string) => computed(() => byStore.value[storeId] ?? [])
   const mineFor = (storeId: string) => computed(() => byStore.value[storeId]?.find(r => r.mine))
   // A done visit with the store makes a buyer eligible (until purchases exist)
@@ -38,7 +51,7 @@ export function useStoreReviews() {
       const { error } = await supabase.from('store_reviews').insert({ store_id: store.id, rating: values.rating, body: values.text })
       if (error) return error.message.includes('after a visit') ? 'You can review a store after a visit there.' : error.code === '23505' ? 'You\'ve already reviewed this store.' : 'Your review didn\'t save. Try again.'
     }
-    await load(storeId)
+    await Promise.all([load(storeId), loadMine()])
     useNotify().reviewSaved(existing ? 'Review updated' : 'Review posted', `Thanks. Buyers see it on ${storeName}'s page.`)
     return null
   }
@@ -46,7 +59,7 @@ export function useStoreReviews() {
   async function remove(review: Review) {
     const { error } = await supabase.from('store_reviews').delete().eq('id', review.id)
     if (error) return void useNotify().failed('That didn\'t work. Try again.')
-    await load(review.storeId)
+    await Promise.all([load(review.storeId), loadMine()])
     useNotify().reviewSaved('Review deleted', 'It no longer shows on the store\'s page.')
   }
 
@@ -59,5 +72,5 @@ export function useStoreReviews() {
     return null
   }
 
-  return { load, reviewsOf, mineFor, canReview, write, remove, reply }
+  return { load, mine, loadMine, reviewsOf, mineFor, canReview, write, remove, reply }
 }

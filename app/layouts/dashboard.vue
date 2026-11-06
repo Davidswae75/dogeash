@@ -74,6 +74,7 @@ watch(() => route.fullPath, () => { navOpen.value = false })
       </header>
 
       <main id="main" class="mx-auto w-full max-w-[1240px] flex-1 px-4 py-8 sm:px-8">
+        <AccountBlockedBanner class="-mx-4 -mt-8 mb-6 sm:-mx-8" />
         <DashboardStoreStatus />
         <slot />
       </main>

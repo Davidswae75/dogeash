@@ -4,7 +4,7 @@ import { definePageMeta, useSeoMeta } from '#imports' // nuxt
 import { useAdmin } from '~/composables/useAdmin'
 
 // Admin › Stores: every store with its status, and approving, declining, suspending or restoring it
-definePageMeta({ layout: 'admin', middleware: 'admin' })
+definePageMeta({ layout: 'admin', colorMode: 'dark', middleware: 'admin' })
 useSeoMeta({ title: 'Stores · Dogeash admin', robots: 'noindex' })
 
 const { stores, loadStores } = useAdmin()

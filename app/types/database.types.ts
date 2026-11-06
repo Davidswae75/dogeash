@@ -214,6 +214,12 @@ export interface Database {
           { foreignKeyName: 'store_care_links_provider_id_fkey', columns: ['provider_id'], isOneToOne: false, referencedRelation: 'care_providers', referencedColumns: ['id'] },
         ]
       }
+      reports: {
+        Row: { id: string, reporter_id: string, kind: string, target_id: string, reason: string, details: string, status: string, resolution: string, resolved_by: string | null, resolved_at: string | null, created_at: string }
+        Insert: { kind: string, target_id: string, reason: string, details?: string }
+        Update: never
+        Relationships: []
+      }
       store_applications: {
         Row: { store_id: string, address: string, directions: string, contact_phone: string, preferred_days: string[], cac_registered: boolean, id_doc_path: string | null, cac_doc_path: string | null, address_doc_path: string | null, note: string, submitted_at: string | null, updated_at: string }
         Insert: { store_id: string, address?: string, directions?: string, contact_phone?: string, preferred_days?: string[], cac_registered?: boolean, id_doc_path?: string | null, cac_doc_path?: string | null, address_doc_path?: string | null, note?: string }
@@ -244,6 +250,22 @@ export interface Database {
         Update: { read_at?: string | null }
         Relationships: []
       }
+      owned_dogs: {
+        Row: { id: string, owner_id: string, name: string, breed: string, sex: 'Male' | 'Female' | null, born_on: string | null, weight_kg: number | null, microchip: string, level: number | null, photo_path: string | null, store_id: string | null, dog_id: string | null, came_from: string, got_on: string | null, notes: string, created_at: string, updated_at: string }
+        Insert: { name: string, breed?: string, sex?: 'Male' | 'Female' | null, born_on?: string | null, weight_kg?: number | null, microchip?: string, level?: number | null, photo_path?: string | null, store_id?: string | null, came_from?: string, got_on?: string | null, notes?: string }
+        Update: { name?: string, breed?: string, sex?: 'Male' | 'Female' | null, born_on?: string | null, weight_kg?: number | null, microchip?: string, level?: number | null, photo_path?: string | null, store_id?: string | null, came_from?: string, got_on?: string | null, notes?: string }
+        Relationships: [
+          { foreignKeyName: 'owned_dogs_store_id_fkey', columns: ['store_id'], isOneToOne: false, referencedRelation: 'stores', referencedColumns: ['id'] },
+        ]
+      }
+      owned_dog_records: {
+        Row: { id: string, owned_dog_id: string, owner_id: string, kind: Database['public']['Enums']['owned_dog_record_kind'], title: string, done_on: string | null, due_on: string | null, by_whom: string, note: string, created_at: string }
+        Insert: { owned_dog_id: string, kind: Database['public']['Enums']['owned_dog_record_kind'], title: string, done_on?: string | null, due_on?: string | null, by_whom?: string, note?: string }
+        Update: { kind?: Database['public']['Enums']['owned_dog_record_kind'], title?: string, done_on?: string | null, due_on?: string | null, by_whom?: string, note?: string }
+        Relationships: [
+          { foreignKeyName: 'owned_dog_records_owned_dog_id_fkey', columns: ['owned_dog_id'], isOneToOne: false, referencedRelation: 'owned_dogs', referencedColumns: ['id'] },
+        ]
+      }
       saved_searches: {
         Row: { id: string, user_id: string, label: string, filters: Json, alerts: boolean, created_at: string }
         Insert: { label: string, filters?: Json, alerts?: boolean }
@@ -251,7 +273,7 @@ export interface Database {
         Relationships: []
       }
       shortlist_items: {
-        Row: { user_id: string, dog_id: string, comparing: boolean, created_at: string }
+        Row: { user_id: string, dog_id: string, comparing: boolean, saved_price: number | null, created_at: string }
         Insert: { user_id: string, dog_id: string, comparing?: boolean }
         Update: { comparing?: boolean }
         Relationships: [
@@ -270,6 +292,28 @@ export interface Database {
       admin_overview: { Args: Record<string, never>, Returns: Json }
       admin_stores: { Args: Record<string, never>, Returns: Json }
       admin_applications: { Args: Record<string, never>, Returns: Json }
+      my_block: { Args: Record<string, never>, Returns: Json }
+      admin_store: { Args: { target: string }, Returns: Json }
+      admin_visits: { Args: Record<string, never>, Returns: Json }
+      admin_reinspections: { Args: Record<string, never>, Returns: Json }
+      admin_send_announcement: { Args: { audience: string, title: string, body: string, link?: string | null, banner_until?: string | null }, Returns: number }
+      admin_announcements: { Args: Record<string, never>, Returns: Json }
+      admin_settings: { Args: Record<string, never>, Returns: Json }
+      admin_history: { Args: { days: number }, Returns: Json }
+      admin_search: { Args: { q: string }, Returns: Json }
+      admin_save_settings: { Args: { s: Json }, Returns: undefined }
+      admin_end_banner: { Args: { target: string }, Returns: undefined }
+      site_banner: { Args: Record<string, never>, Returns: Json }
+      admin_send_reinspection_reminders: { Args: Record<string, never>, Returns: number }
+      my_store_verification: { Args: { target: string }, Returns: string | null }
+      admin_nudge_visit: { Args: { target: string }, Returns: undefined }
+      admin_person: { Args: { target: string }, Returns: Json }
+      admin_block_person: { Args: { target: string, reason: string }, Returns: undefined }
+      admin_unblock_person: { Args: { target: string }, Returns: undefined }
+      admin_reports: { Args: Record<string, never>, Returns: Json }
+      admin_open_reports: { Args: Record<string, never>, Returns: number }
+      admin_report_messages: { Args: { report: string }, Returns: Json }
+      admin_resolve_report: { Args: { target: string, outcome: string, note: string }, Returns: undefined }
       admin_staff: { Args: Record<string, never>, Returns: Json }
       admin_schedule_inspection: { Args: { target: string, at: string, inspector: string, note?: string }, Returns: string }
       admin_cancel_inspection: { Args: { target: string, note: string }, Returns: undefined }
@@ -290,6 +334,7 @@ export interface Database {
       store_team: { Args: { target: string }, Returns: { user_id: string, name: string, email: string | null, role: Database['public']['Enums']['store_role'], joined_at: string }[] }
     }
     Enums: {
+      owned_dog_record_kind: 'vaccination' | 'treatment' | 'vet' | 'training' | 'reminder'
       store_status: 'draft' | 'in_review' | 'verified' | 'suspended'
       store_role: 'owner' | 'manager' | 'handler'
       dog_status: 'draft' | 'pending_review' | 'available' | 'reserved' | 'sold' | 'withdrawn'
@@ -301,7 +346,7 @@ export interface Database {
       visit_place: 'kennel' | 'home'
       staff_role: 'admin' | 'inspector'
       care_type: 'vet' | 'trainer' | 'groomer' | 'builder' | 'equipment' | 'boarding'
-      notification_kind: 'message' | 'visit' | 'reserved' | 'sold' | 'available' | 'price' | 'team' | 'review' | 'store'
+      notification_kind: 'message' | 'visit' | 'reserved' | 'sold' | 'available' | 'price' | 'team' | 'review' | 'store' | 'report' | 'announcement'
     }
     CompositeTypes: { [_ in never]: never }
   }

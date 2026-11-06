@@ -1,5 +1,5 @@
 import { BellRing, ShoppingCart } from '@lucide/vue'
-import { CalendarCheck, CircleX, Heart, HeartOff, Info, LogIn, LogOut, MessageSquare, Scale, ShieldCheck, Star, Stethoscope, Store, TriangleAlert, UserRoundCheck, Users } from '@lucide/vue'
+import { CalendarCheck, CircleX, Dog as DogIcon, Heart, HeartOff, Info, LogIn, LogOut, MessageSquare, Scale, ShieldCheck, Star, Stethoscope, Store, TriangleAlert, UserRoundCheck, Users } from '@lucide/vue'
 import type { Component } from 'vue'
 import { TYPE, useToast } from 'vue-toastification'
 import ToastContent, { type ToastAction, type ToastTone } from '~/components/ToastContent.vue'
@@ -82,6 +82,10 @@ export function useNotify() {
       show('success', MessageSquare, { kicker: 'Inbox', meta: 'Sent', title: `Reply to ${to} sent`, text: `${to} sees it in their Messages.` }),
 
     // A store's dog saved, published or moved on (reserved, sold, withdrawn, deleted)
+    // A dog the buyer owns: added, changed, removed, or something in its record done
+    myDogUpdated: (title: string, text: string) =>
+      show('success', DogIcon, { kicker: 'My dogs', meta: 'Saved', title, text }),
+
     dogUpdated: (title: string, text: string, image?: string) =>
       show('success', Store, { kicker: 'Your dogs', meta: 'Saved', title, text, image }),
 

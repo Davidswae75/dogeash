@@ -5,6 +5,8 @@ import type { InspectionDog } from '~/utils/inspections'
 import { dogPhotoUrl } from '~/utils/dogs'
 import { protectionLevels } from '~/utils/protection'
 
+const levelOptions = ([1, 2, 3, 4, 5] as const).map(n => ({ value: String(n), label: `Level ${n} · ${protectionLevels[n].name}` }))
+
 // Every dog the store lists: seen on the day or not, its protection level as tested (it replaces the listed
 // level when the inspection passes), and a note. `readonly` once finished.
 const dogs = defineModel<InspectionDog[]>({ required: true })
@@ -24,9 +26,7 @@ const set = (i: number, patch: Partial<InspectionDog>) => { dogs.value = dogs.va
           <span class="font-mono text-[11px] text-ink-muted">{{ d.file_no }} · {{ d.breed }} · listed L{{ d.listed_level }}</span>
         </span>
         <label class="flex items-center gap-2 text-[13px]"><Switch :model-value="d.seen" :disabled="props.readonly" @update:model-value="v => set(i, { seen: !!v })" />Seen</label>
-        <NativeSelect :model-value="String(d.confirmed_level)" :disabled="props.readonly || !d.seen" :aria-label="`Confirmed level for ${d.name}`" class="h-9 w-64 text-sm" @change="(e: Event) => set(i, { confirmed_level: Number((e.target as HTMLSelectElement).value) })">
-          <NativeSelectOption v-for="n in [1, 2, 3, 4, 5]" :key="n" :value="String(n)">Level {{ n }} · {{ protectionLevels[n as 1].name }}</NativeSelectOption>
-        </NativeSelect>
+        <SelectMenu :model-value="String(d.confirmed_level)" :options="levelOptions" :disabled="props.readonly || !d.seen" :aria-label="`Confirmed level for ${d.name}`" class="w-full sm:w-64" @update:model-value="v => set(i, { confirmed_level: Number(v) })" />
         <Input :model-value="d.note" :disabled="props.readonly" maxlength="200" placeholder="Note" :aria-label="`Note on ${d.name}`" class="h-9 w-full text-sm sm:w-56" @update:model-value="v => set(i, { note: String(v) })" />
       </li>
     </ul>

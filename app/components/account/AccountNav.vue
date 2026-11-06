@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { LogOut } from '@lucide/vue'
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { cn } from '~/lib/utils'
 import { useRoute } from '#imports' // nuxt
 import { useConversations } from '~/composables/useConversations'
+import { useOwnedDogs } from '~/composables/useOwnedDogs'
 import { useSession } from '~/composables/useSession'
 import { useVisits } from '~/composables/useVisits'
 import { accountNav } from '~/utils/account'
+import { needsAttention } from '~/utils/myDogs'
 
 // The account area's navigation: a sidebar with who you are on wide screens, a row of tabs on phones
 const { user, initials, signOut } = useSession()
@@ -14,12 +16,19 @@ const route = useRoute()
 
 // Overview only matches itself; other sections also match their sub-pages (a dog's record under My dogs)
 const isActive = (to: string) => to === '/account' ? route.path === to : route.path.startsWith(to)
-const items = accountNav.flatMap(g => g.items)
+// Phones: the built sections only, so the row of tabs stays short
+const items = accountNav.flatMap(g => g.items).filter(i => !i.soon)
 
-// Counts beside sections that need a look: unread replies, visits coming up
+// Counts beside sections that need a look: unread replies, visits coming up, dog care overdue or due soon
 const { unread } = useConversations()
 const { upcoming } = useVisits()
-const counts = computed<Record<string, number>>(() => ({ '/account/messages': unread.value, '/account/bookings': upcoming.value.length }))
+const owned = useOwnedDogs()
+onMounted(owned.ensure)
+const counts = computed<Record<string, number>>(() => ({
+  '/account/messages': unread.value,
+  '/account/bookings': upcoming.value.length,
+  '/account/dogs': owned.dogs.value.reduce((n, d) => n + needsAttention(d), 0),
+}))
 </script>
 
 <template>
@@ -72,7 +81,7 @@ const counts = computed<Record<string, number>>(() => ({ '/account/messages': un
       </div>
     </nav>
 
-    <button type="button" class="flex cursor-pointer items-center gap-3 rounded-md border-0 bg-transparent px-3 py-2 text-left text-sm font-semibold text-ink-muted hover:bg-surface-sunk hover:text-ink" @click="signOut">
+    <button type="button" class="flex cursor-pointer items-center gap-3 rounded-md border-0 bg-transparent px-3 py-2 text-left text-sm font-semibold text-ink-muted hover:bg-surface-sunk hover:text-ink" @click="signOut()">
       <LogOut class="size-[18px]" aria-hidden="true" />Sign out
     </button>
   </aside>

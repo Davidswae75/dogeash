@@ -18,6 +18,7 @@ await db.exec(`
   create table storage.buckets (id text primary key, name text, public boolean, file_size_limit bigint, allowed_mime_types text[]);
   create table storage.objects (id uuid primary key default gen_random_uuid(), bucket_id text references storage.buckets, name text, owner uuid default auth.uid());
   alter table storage.objects enable row level security;
+  create function storage.foldername(name text) returns text[] language sql immutable as $$ select (string_to_array(name, '/'))[1:array_length(string_to_array(name, '/'), 1) - 1] $$;
   grant select, insert, update, delete on storage.objects to authenticated;
   grant usage on schema storage to anon, authenticated;
   grant usage on schema auth, public to anon, authenticated, service_role;
@@ -480,6 +481,160 @@ const cancelId = (await adm(`select public.admin_schedule_inspection('STR-APP', 
 check('cancelling needs a reason', await adm(`select public.admin_cancel_inspection('${cancelId}', '')`) === null)
 check('an admin can cancel a booked inspection', (await adm(`select public.admin_cancel_inspection('${cancelId}', 'Owner asked to move it')`)) !== null && await scalar(`select status::text from public.inspections where id = '${cancelId}'`) === 'cancelled')
 check('the inspections table is closed to direct reading', (await as('authenticated', admin, 'select id from public.inspections')) === null)
+
+// Reports: anyone signed in reports a listing, store, review or conversation; admins resolve; messages read only via a report
+const ramboNo = 'KD-2026-003'
+const rep = await as('authenticated', buyer, `insert into public.reports (kind, target_id, reason, details) values ('dog', '${ramboNo}', 'wrong_info', 'The photos show a different dog.') returning id, status`)
+const repId = rep?.[0]?.id
+check('anyone signed in can report a listing', rep?.[0]?.status === 'open')
+check('the same thing can\'t be reported twice while open', await as('authenticated', buyer, `insert into public.reports (kind, target_id, reason) values ('dog', '${ramboNo}', 'scam')`) === null)
+check('visitors can\'t report', await as('anon', null, `insert into public.reports (kind, target_id, reason) values ('dog', '${ramboNo}', 'scam')`) === null)
+check('admins are told about each report', (await as('authenticated', admin, `select id from public.notifications where topic = 'report:${repId}'`))?.length === 1)
+check('people see only their own reports', (await as('authenticated', other, 'select id from public.reports')).length === 0)
+check('you can only report a conversation you\'re in', await as('authenticated', applicant, `insert into public.reports (kind, target_id, reason) values ('conversation', '${convId}', 'abuse')`) === null)
+const convRep = (await as('authenticated', buyer, `insert into public.reports (kind, target_id, reason, details) values ('conversation', '${convId}', 'abuse', 'Rude messages') returning id`))?.[0]?.id
+const queue = (await adm('select public.admin_reports() as r'))?.[0]?.r
+check('admins see reports with what they\'re about', queue?.some(r => r.id === repId && r.target?.label?.includes('Rambo') && r.reporter_email))
+check('the reports queue is closed to everyone else', await withCode(inspector, 'aal2', 'select public.admin_reports()') === null)
+check('admins can read a reported conversation, and that\'s logged', (await adm(`select public.admin_report_messages('${convRep}') as m`))?.[0]?.m?.length > 0 && (await adm(`select id from public.admin_audit where action = 'report.read_messages' and target_id = '${convId}'`))?.length === 1)
+check('resolving needs a note for the reporter', await adm(`select public.admin_resolve_report('${repId}', 'resolved', '')`) === null)
+await adm(`select public.admin_resolve_report('${repId}', 'resolved', 'We asked the store to replace the photos.')`)
+check('resolving tells the reporter', (await as('authenticated', buyer, `select body from public.notifications where topic = 'report-done:${repId}'`))?.[0]?.body === 'We asked the store to replace the photos.')
+
+// Blocking: a blocked account can read but not write anything; staff can't be blocked
+const blockee = await user('Musa Fraud')
+check('admins can\'t block staff', await adm(`select public.admin_block_person('${inspector}', 'Testing')`) === null)
+check('blocking needs a reason', await adm(`select public.admin_block_person('${blockee}', '')`) === null)
+await adm(`select public.admin_block_person('${blockee}', 'Fake listings reported by three buyers')`)
+check('a blocked account sees why', (await as('authenticated', blockee, 'select public.my_block() as b'))?.[0]?.b?.reason === 'Fake listings reported by three buyers')
+check('a blocked account can still read', (await as('authenticated', blockee, 'select id from public.dogs limit 1'))?.length === 1)
+check('a blocked account can\'t message', await as('authenticated', blockee, `insert into public.conversations (store_id) values ('${k9}')`) === null)
+check('a blocked account can\'t open a store', await as('authenticated', blockee, `insert into public.stores (public_id, slug, name, city) values ('STR-BLK', 'blk', 'Blocked Dogs', 'Abuja')`) === null)
+check('a blocked account can\'t save dogs or upload', await as('authenticated', blockee, `insert into public.shortlist_items (user_id, dog_id) values ('${blockee}', '${rambo}')`) === null && await as('authenticated', blockee, `insert into storage.objects (bucket_id, name) values ('dog-photos', 'x/y.jpg')`) === null)
+check('a blocked account can\'t report', await as('authenticated', blockee, `insert into public.reports (kind, target_id, reason) values ('dog', '${ramboNo}', 'scam')`) === null)
+check('People shows who is blocked', (await adm(`select public.admin_people('musa fraud') as p`))?.[0]?.p?.[0]?.blocked?.reason?.startsWith('Fake'))
+await adm(`select public.admin_unblock_person('${blockee}')`)
+check('unblocking lets them write again', (await as('authenticated', blockee, `insert into public.shortlist_items (user_id, dog_id) values ('${blockee}', '${rambo}') returning dog_id`))?.length === 1)
+check('blocks and unblocks are in the audit log', (await adm(`select count(*)::int as n from public.admin_audit where action in ('person.block', 'person.unblock') and target_id = '${blockee}'`))?.[0]?.n === 2)
+
+// Detail pages: everything about one store, and one person (admins only; no message text)
+const k9Detail = (await adm(`select public.admin_store('STR-001') as d`))?.[0]?.d
+check('a store\'s page has its team, dogs, reviews, visits and history', k9Detail?.team?.some(m => m.role === 'owner' && m.email) && k9Detail.dogs.length > 0 && Array.isArray(k9Detail.reviews) && k9Detail.visits && Array.isArray(k9Detail.audit))
+const appDetail = (await adm(`select public.admin_store('STR-APP') as d`))?.[0]?.d
+check('it includes the application and inspections', !!appDetail?.application?.address && appDetail.inspections.length >= 1 && appDetail.audit.some(a => a.action.startsWith('inspection.')))
+check('the store page is for admins only', await withCode(inspector, 'aal2', `select public.admin_store('STR-001')`) === null && await withCode(owner, 'aal2', `select public.admin_store('STR-001')`) === null)
+const buyerDetail = (await adm(`select public.admin_person('${buyer}') as d`))?.[0]?.d
+check('a person\'s page has their visits, conversations, reviews and reports', buyerDetail?.person?.email === 'tunde@test.ng' && buyerDetail.visits.length > 0 && buyerDetail.conversations.length > 0 && buyerDetail.reports_made.length > 0)
+check('it never includes message text', !JSON.stringify(buyerDetail?.conversations ?? []).includes('Is Sarge still available'))
+check('the person page shows blocks and admin actions about them', (await adm(`select public.admin_person('${blockee}') as d`))?.[0]?.d?.audit?.some(a => a.action === 'person.block'))
+check('the person page is for admins only', await withCode(inspector, 'aal2', `select public.admin_person('${buyer}')`) === null)
+
+// Visit oversight: requests needing a chase, missed ones, how fast stores answer, nudging a store
+const staleVisit = (await as('authenticated', buyer, `insert into public.visits (store_id, service, day, slot) values ('${k9}', 'Meet the dogs', current_date + 5, '10:30') returning id`))?.[0]?.id
+await db.exec(`update public.visits set created_at = now() - interval '3 days' where id = '${staleVisit}'`)
+const oversight = (await adm('select public.admin_visits() as v'))?.[0]?.v
+check('admins see visits that need chasing', oversight?.visits?.some(v => v.id === staleVisit && v.needs_chasing && v.buyer_email))
+check('and how each store answers', oversight?.stores?.some(s => s.store_id === 'STR-001' && s.requests > 0))
+check('visit oversight is for admins only', await withCode(inspector, 'aal2', 'select public.admin_visits()') === null)
+await adm(`select public.admin_nudge_visit('${staleVisit}')`)
+check('nudging tells the store\'s owner and is logged', (await as('authenticated', owner, `select id from public.notifications where topic = 'visit-nudge:${staleVisit}'`))?.length === 1 && (await adm(`select id from public.admin_audit where action = 'visit.nudge'`))?.length >= 1)
+check('an answered visit can\'t be nudged', await adm(`select public.admin_nudge_visit('${doneVisit}')`) === null)
+
+// Re-inspection: a year of verification, extended by passing again; reminders 30 days before
+check('verified stores get a year', await scalar(`select (verified_until > current_date + 300)::text from public.stores where public_id = 'STR-001'`) === 'true')
+check('a store verified by its inspection got a fresh year', await scalar(`select (verified_until = (now() at time zone 'Africa/Lagos')::date + 365)::text from public.stores where id = '${appStore}'`) === 'true' || await scalar(`select status::text from public.stores where id = '${appStore}'`) !== 'verified')
+await db.exec(`update public.stores set verified_until = current_date + 10 where public_id = 'STR-001'`)
+const reminded = (await adm('select public.admin_send_reinspection_reminders() as n'))?.[0]?.n
+check('stores due within 30 days are reminded', reminded >= 1 && (await as('authenticated', owner, `select title from public.notifications where topic like 'reinspection:${k9}:%'`))?.length === 1)
+check('only once per year', (await adm('select public.admin_send_reinspection_reminders() as n'))?.[0]?.n === 0)
+check('admins see who is due', (await adm('select public.admin_reinspections() as r'))?.[0]?.r?.[0]?.public_id === 'STR-001')
+check('the store\'s people can see their date; others can\'t', !!(await as('authenticated', handler, `select public.my_store_verification('${k9}') as d`))?.[0]?.d && (await as('authenticated', buyer, `select public.my_store_verification('${k9}') as d`))?.[0]?.d === null)
+await adm(`select public.admin_set_store_status('STR-001', 'suspended', 'testing')`)
+await adm(`select public.admin_set_store_status('STR-001', 'verified', '')`)
+check('being verified again starts a fresh year', await scalar(`select (verified_until > current_date + 300)::text from public.stores where public_id = 'STR-001'`) === 'true')
+check('re-inspection lists are for admins only', await withCode(inspector, 'aal2', 'select public.admin_reinspections()') === null)
+
+// Announcements: to everyone, stores or buyers, into the bell; optionally a strip on the site for visitors too
+const toStores = (await adm(`select public.admin_send_announcement('stores', 'New photo rules', 'From December, every dog needs at least three photos.', '/dashboard/dogs') as n`))?.[0]?.n
+check('an announcement to stores reaches store teams only', toStores > 0 && (await as('authenticated', owner, `select title from public.notifications where kind = 'announcement'`))?.[0]?.title === 'New photo rules' && (await as('authenticated', blockee, `select id from public.notifications where kind = 'announcement'`)).length === 0)
+check('one to buyers reaches people with no store', (await adm(`select public.admin_send_announcement('buyers', 'Holiday hours', 'Stores answer slower over the holidays.') as n`))?.[0]?.n > 0 && (await as('authenticated', blockee, `select id from public.notifications where kind = 'announcement'`)).length === 1)
+check('only admins announce', await withCode(inspector, 'aal2', `select public.admin_send_announcement('everyone', 'Hi there', 'Testing this')`) === null)
+check('no site strip unless asked for', (await as('anon', null, 'select public.site_banner() as b'))?.[0]?.b === null)
+await adm(`select public.admin_send_announcement('everyone', 'Maintenance on Sunday', 'Dogeash is down from 2 to 3am.', null, now() + interval '2 days')`)
+const strip = (await as('anon', null, 'select public.site_banner() as b'))?.[0]?.b
+check('a strip shows to visitors until its date', strip?.title === 'Maintenance on Sunday')
+await adm(`select public.admin_end_banner('${strip?.id}')`)
+check('admins can take the strip down early', (await as('anon', null, 'select public.site_banner() as b'))?.[0]?.b === null)
+check('announcements are listed with how many got them', (await adm('select public.admin_announcements() as a'))?.[0]?.a?.length === 3)
+check('a bad link is refused', await adm(`select public.admin_send_announcement('everyone', 'Click me', 'Go here now', 'http://evil.example')`) === null)
+
+// Listing review policy: off by default; when on, a store's "go live" lands on "pending review" for Dogeash
+const freshDraft = async () => (await as('authenticated', manager, newDog(k9, 'draft')))?.[0]?.id
+const goLive = async id => (await as('authenticated', manager, `update public.dogs set status = 'available' where id = '${id}' returning status`))?.[0]?.status
+check('with no review rules, a verified store\'s dog goes live', await goLive(await freshDraft()) === 'available')
+check('only admins see or change the settings', await withCode(inspector, 'aal2', 'select public.admin_settings()') === null && await withCode(owner, 'aal2', `select public.admin_save_settings('{"review_all_listings":true}')`) === null)
+await adm(`select public.admin_save_settings('{"review_high_levels":true}')`)
+const strongDog = await freshDraft()
+await as('authenticated', manager, `update public.dogs set level = 4 where id = '${strongDog}'`)
+check('level 4–5 dogs go to review when that rule is on', await goLive(strongDog) === 'pending_review')
+check('admins are told', (await as('authenticated', admin, `select id from public.notifications where topic = 'listing-review:${strongDog}'`))?.length === 1)
+check('other levels still go live', await goLive(await freshDraft()) === 'available')
+await adm(`select public.admin_set_dog_status('${strongDog}', 'available', '')`)
+check('an admin approves it live', await scalar(`select status::text from public.dogs where id = '${strongDog}'`) === 'available')
+await adm(`select public.admin_save_settings('{"review_high_levels":false,"review_all_listings":true}')`)
+check('with every listing reviewed, any go-live waits', await goLive(await freshDraft()) === 'pending_review')
+await adm(`select public.admin_save_settings('{"review_all_listings":false,"review_first_listings":true}')`)
+check('a store with three listings already isn\'t held back by "first three"', await goLive(await freshDraft()) === 'available')
+check('settings changes are in the audit log', (await adm(`select count(*)::int as n from public.admin_audit where action = 'settings.save'`))?.[0]?.n === 3)
+await adm(`select public.admin_save_settings('{"review_first_listings":false}')`)
+
+// Longer history: day-by-day figures for 7 to 730 days
+check('admins get a year of daily figures (two, to compare)', (await adm('select public.admin_history(730) as h'))?.[0]?.h?.length === 730)
+check('the range is kept between 7 and 730 days', (await adm('select public.admin_history(5000) as h'))?.[0]?.h?.length === 730 && (await adm('select public.admin_history(1) as h'))?.[0]?.h?.length === 7)
+check('the long history is for admins only', await withCode(inspector, 'aal2', 'select public.admin_history(90)') === null)
+
+// Search across everything: stores, dogs, people, care providers (admins only)
+const found = (await adm(`select public.admin_search('guardian') as r`))?.[0]?.r
+check('search finds stores by name', found?.stores?.some(x => x.id === 'STR-001'))
+check('search finds dogs by file number', (await adm(`select public.admin_search('KD-2026-003') as r`))?.[0]?.r?.dogs?.[0]?.title === 'Rambo')
+check('search finds people by email', (await adm(`select public.admin_search('tunde@test') as r`))?.[0]?.r?.people?.length === 1)
+check('search finds care providers', (await adm(`select public.admin_search('kuje vet') as r`))?.[0]?.r?.care?.length === 1)
+check('one letter finds nothing (too broad)', (await adm(`select public.admin_search('a') as r`))?.[0]?.r?.stores?.length === 0)
+check('search is for admins only', await withCode(inspector, 'aal2', `select public.admin_search('rambo')`) === null)
+
+// Applications list stores in review even without a form (so the sidebar count and the page agree)
+const appsNow = (await adm('select public.admin_applications() as a'))?.[0]?.a
+check('a store in review without a form is listed, marked as such', appsNow?.some(a => a.public_id === 'STR-006' && a.has_form === false && Array.isArray(a.preferred_days)))
+
+// My dogs: owners only, records only on your own dogs, photos in your own folder
+const rex = (await as('authenticated', buyer, `insert into public.owned_dogs (name, breed, sex) values ('Rex', 'Boerboel', 'Male') returning id, owner_id`))?.[0]
+check('a buyer can add a dog they own (owner is always them)', rex?.owner_id === buyer)
+check('nobody else can see that dog', (await as('authenticated', other, `select id from public.owned_dogs where id = '${rex?.id}'`))?.length === 0)
+check('visitors can\'t read owned dogs', await as('anon', null, 'select * from public.owned_dogs') === null)
+check('nobody else can change that dog', (await as('authenticated', other, `update public.owned_dogs set name = 'Mine' where id = '${rex?.id}' returning id`))?.length === 0)
+check('the owner adds a vaccination with a due date', (await as('authenticated', buyer, `insert into public.owned_dog_records (owned_dog_id, kind, title, done_on, due_on) values ('${rex?.id}', 'vaccination', 'Rabies', current_date - 30, current_date + 335) returning id`))?.length === 1)
+check('nobody can add a record to someone else\'s dog', await as('authenticated', other, `insert into public.owned_dog_records (owned_dog_id, kind, title, due_on) values ('${rex?.id}', 'reminder', 'Walk', current_date)`) === null)
+check('a record needs a date', await as('authenticated', buyer, `insert into public.owned_dog_records (owned_dog_id, kind, title) values ('${rex?.id}', 'reminder', 'Walk')`) === null)
+check('a photo path in someone else\'s folder is refused', await as('authenticated', buyer, `update public.owned_dogs set photo_path = '${other}/x.jpg' where id = '${rex?.id}'`) === null)
+check('the owned-dog-photos bucket is private', await scalar(`select public::text from storage.buckets where id = 'owned-dog-photos'`) === 'false')
+check('an owner uploads into their own folder', (await as('authenticated', buyer, `insert into storage.objects (bucket_id, name) values ('owned-dog-photos', '${buyer}/rex.jpg') returning id`))?.length === 1)
+check('nobody uploads into someone else\'s folder', await as('authenticated', other, `insert into storage.objects (bucket_id, name) values ('owned-dog-photos', '${buyer}/fake.jpg')`) === null)
+check('nobody else sees an owner\'s dog photos', (await as('authenticated', other, `select id from storage.objects where bucket_id = 'owned-dog-photos'`))?.length === 0)
+check('deleting a dog removes its record', (await as('authenticated', buyer, `delete from public.owned_dogs where id = '${rex?.id}' returning id`))?.length === 1 && await scalar(`select count(*)::int from public.owned_dog_records where owned_dog_id = '${rex?.id}'`) === 0)
+
+// Shortlist: the price when saved is kept, whatever the buyer sends
+const freshDog = await scalar(`select id from public.dogs where id <> '${rambo}' and status = 'available' limit 1`)
+await as('authenticated', other, `insert into public.shortlist_items (user_id, dog_id) values ('${other}', '${freshDog}')`)
+check('shortlisting keeps the price at the time', await scalar(`select (s.saved_price = d.price_naira)::text from public.shortlist_items s join public.dogs d on d.id = s.dog_id where s.user_id = '${other}' and s.dog_id = '${freshDog}'`) === 'true')
+
+// Garbled text (UTF-8 read as Mac Roman on the way into the SQL Editor) is repaired, data and code alike
+await db.exec(`update public.stores set tagline = 'Mon‚ÄìSat ¬∑ from ‚Ç¶2m' where public_id = 'STR-002'`)
+await db.exec(`create or replace function public.garbled_sample() returns text language sql as $$ select 'Price ¬∑ ‚Ç¶1' $$`)
+await db.exec(readFileSync(join(root, 'supabase/migrations/20261130000000_fix_garbled_text.sql'), 'utf8'))
+check('garbled store text is repaired', await scalar(`select tagline from public.stores where public_id = 'STR-002'`) === 'Mon–Sat · from ₦2m')
+check('garbled function code is repaired', await scalar(`select public.garbled_sample()`) === 'Price · ₦1')
+check('ordinary text is left alone', await scalar(`select public.fix_garbled_text('Kuje, Abuja – 2014 · ₦2m')`) === 'Kuje, Abuja – 2014 · ₦2m')
+check('visitors can\'t call the repair function', await as('anon', null, `select public.fix_garbled_text('x')`) === null)
 
 await db.close()
 console.log(failed ? `\n${failed} failed` : '\nAll access rules hold')

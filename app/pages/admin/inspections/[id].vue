@@ -10,7 +10,7 @@ import { checklistFor, inspectionStatusMeta, inspectionWhen } from '~/utils/insp
 // One inspection's sheet: where and when, the checklist, the dogs, photos and a summary. Saved as you go;
 // then the result. Passed: the store goes live, with this inspection on its record and its dogs marked
 // inspected. Failed: the store goes back to its owner with the summary. Finished sheets are read-only.
-definePageMeta({ layout: 'admin', middleware: 'admin' })
+definePageMeta({ layout: 'admin', colorMode: 'dark', middleware: 'admin' })
 useSeoMeta({ title: 'Inspection · Dogeash admin', robots: 'noindex' })
 
 const route = useRoute()
@@ -80,6 +80,7 @@ const confirmText = computed(() => ({
           <span class="inline-flex items-center gap-1.5 rounded-full bg-surface px-2.5 py-1 text-xs font-medium ring-1 ring-line">
             <span class="size-2 rounded-full" :style="{ background: inspectionStatusMeta[sheet.status].color }" aria-hidden="true" />{{ inspectionStatusMeta[sheet.status].label }}
           </span>
+          <Button v-if="role === 'admin'" as-child variant="ghost" size="sm"><NuxtLink :to="`/admin/stores/${sheet.store_public_id}`">Store page</NuxtLink></Button>
           <Button v-if="!finished && role === 'admin'" variant="ghost" size="sm" @click="ask('cancel')">Cancel inspection</Button>
         </template>
 

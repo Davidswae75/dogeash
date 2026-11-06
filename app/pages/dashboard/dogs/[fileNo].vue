@@ -27,7 +27,8 @@ async function save(values: DogFormValues, media: DogMedia, publish: boolean) {
     const failed = await storeDogs.setStatus(d.id, 'available')
     if (failed) return failed
   }
-  notify.dogUpdated(publish ? `${values.name} is live` : 'Changes saved', `${d.fileNo}. ${publish || d.status === 'available' || d.status === 'reserved' ? 'Buyers see the update now.' : 'Still a draft.'}`, d.photo)
+  const held = publish && storeDogs.lastStatus.value === 'pending_review'
+  notify.dogUpdated(held ? `${values.name} is with Dogeash for review` : publish ? `${values.name} is live` : 'Changes saved', `${d.fileNo}. ${held ? 'Dogeash checks some new listings before buyers see them.' : publish || d.status === 'available' || d.status === 'reserved' ? 'Buyers see the update now.' : 'Still a draft.'}`, d.photo)
   return null
 }
 </script>

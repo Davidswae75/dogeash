@@ -35,5 +35,6 @@ const drawer = ref(false)
     <main class="w-full px-4 py-6 sm:px-6 lg:px-10 lg:py-9 2xl:px-14">
       <slot />
     </main>
+    <AdminSearch v-if="!locked" />
   </div>
 </template>

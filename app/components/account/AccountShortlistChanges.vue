@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { Lock, TrendingDown } from '@lucide/vue'
 import { computed } from 'vue'
+import { useSavedDogs } from '~/composables/useSavedDogs'
 import { useShortlist } from '~/composables/useShortlist'
 import { shortlistChanges } from '~/utils/account'
 import { formatNaira } from '~/utils/dogs'
 
-// Shortlisted dogs that changed since they were saved: reserved by another buyer, or cheaper
+// Shortlisted dogs that changed since they were saved: reserved by another buyer, or cheaper than when saved
 const { dogs } = useShortlist()
-const changes = computed(() => shortlistChanges(dogs.value))
+const { savedPrices } = useSavedDogs()
+const changes = computed(() => shortlistChanges(dogs.value, savedPrices.value))
 const link = (fileNo: string) => `/dogs/${fileNo.toLowerCase()}`
 </script>
 

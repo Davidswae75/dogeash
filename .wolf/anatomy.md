@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-11-05T17:08:31.644Z
-> Files: 723 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-11-06T03:05:11.437Z
+> Files: 748 tracked | Anatomy hits: 0 | Misses: 0
 
 > Project structure index. Auto-maintained by OpenWolf hooks and daemon.
 > Run `openwolf scan` to generate, or wait for the first Claude Code session.
@@ -46,11 +46,13 @@
 - `CareProviderCard.vue` — Vue: setup (~504 tok)
 - `CheckboxField.vue` — Vue: setup (~294 tok)
 - `ComingNext.vue` — Vue: setup (~330 tok)
+- `ConfirmDialog.vue` — Vue: setup (~381 tok)
 - `ContactStoreDialog.vue` — Vue: setup (~1039 tok)
 - `ConversationReply.vue` — Vue: setup (~574 tok)
 - `ConversationThread.vue` — Vue: setup (~393 tok)
 - `DashboardNav.vue` — Vue: setup (~1090 tok)
 - `DogGallery.vue` — Vue: setup (~1969 tok)
+- `DogMark.vue` — Vue: setup (~787 tok)
 - `EmptyState.vue` — Vue: setup, TS, 2 props, emits (~240 tok)
 - `FactRow.vue` — Vue: setup, TS (~184 tok)
 - `FieldInput.vue` — Vue: setup (~744 tok)
@@ -77,7 +79,9 @@
 - `ProtectionLevelDetail.vue` — Vue: setup (~1152 tok)
 - `ProtectionLevels.vue` — Vue: setup, TS (~319 tok)
 - `ProtectionScale.vue` — Vue: setup, TS, 2 props (~219 tok)
+- `ReportButton.vue` — Vue: setup (~1146 tok)
 - `SearchBar.vue` — Vue: setup, TS, 1 props, emits (~278 tok)
+- `SelectMenu.vue` — Vue: setup (~393 tok)
 - `SellerCard.vue` — Vue: setup, TS, 2 props (~454 tok)
 - `ShortlistButton.vue` — Vue: setup (~518 tok)
 - `SiteFooter.vue` — Vue: setup, TS (~400 tok)
@@ -104,16 +108,18 @@
 - `AccountCareChip.vue` — Vue: setup (~150 tok)
 - `AccountDogCard.vue` — Vue: setup (~579 tok)
 - `AccountDogCare.vue` — Vue: setup (~554 tok)
+- `AccountDogForm.vue` — Vue: setup (~2438 tok)
 - `AccountDogHeader.vue` — Vue: setup (~788 tok)
 - `AccountDogHealth.vue` — Vue: setup (~395 tok)
 - `AccountDogPortrait.vue` — Vue: setup (~386 tok)
+- `AccountDogRecordDialog.vue` — Vue: setup (~1515 tok)
 - `AccountDogTraining.vue` — Vue: setup (~314 tok)
 - `AccountHeading.vue` — Vue: setup (~221 tok)
 - `AccountHomeMatch.vue` — Vue: setup (~872 tok)
 - `AccountHomeProfile.vue` — Vue: setup (~286 tok)
 - `AccountMenu.vue` — Vue: setup (~908 tok)
 - `AccountMyDogs.vue` — Vue: setup (~400 tok)
-- `AccountNav.vue` — Vue: setup (~886 tok)
+- `AccountNav.vue` — Vue: setup (~1255 tok)
 - `AccountNotifications.vue` — Vue: setup (~989 tok)
 - `AccountProfilePrompt.vue` — Vue: setup (~265 tok)
 - `AccountReadiness.vue` — Vue: setup (~387 tok)
@@ -878,6 +884,7 @@
 - `useLoader.ts` — The full-screen loader (AppLoader in app.vue) for moments that change the whole page: (~282 tok)
 - `useNotifications.ts` — The header bell's notifications (Supabase: notifications). The database writes them when a store rep (~539 tok)
 - `useNotify.ts` — Every toast in the app goes through here, so the same action always looks and reads the same. (~2217 tok)
+- `useOwnedDogs.ts` — The signed-in person's dogs and their records (Supabase: owned_dogs, owned_dog_records; photos in th (~1884 tok)
 - `useRecentlyViewed.ts` — Dogs this browser has opened, newest first. Kept on the device until accounts exist. (~147 tok)
 - `useSavedDogs.ts` — The shortlist and compare picks behind useShortlist(). Signed in: the shortlist_items table in (~1404 tok)
 - `useSession.ts` — Who is signed in: the Supabase user, their profile, and the stores they work at. (~910 tok)
@@ -914,6 +921,8 @@
 - `sell.vue` — Vue: setup (~1528 tok)
 - `sign-in.vue` — Vue: setup (~1242 tok)
 - `sign-up.vue` — Vue: setup (~1370 tok)
+- `zz-account-preview.vue` — Vue: Dave Okafor, setup (~997 tok)
+- `zz-admin-preview.vue` — Vue: Lekki Guardian Kennels International, setup (~742 tok)
 
 ## app/pages/account/
 
@@ -932,13 +941,25 @@
 
 ## app/pages/admin/
 
+- `announcements.vue` — Vue: title, setup (~1834 tok)
 - `applications.vue` — Vue: setup (~1997 tok)
 - `index.vue` — Vue: setup (~1612 tok)
+- `reinspections.vue` — Vue: setup (~1438 tok)
+- `reports.vue` — Vue: setup (~1724 tok)
 - `verify.vue` — Vue: setup (~1019 tok)
+- `visits.vue` — Vue: setup (~2107 tok)
 
 ## app/pages/admin/inspections/
 
 - `[id].vue` — Vue: setup (~2098 tok)
+
+## app/pages/admin/people/
+
+- `[id].vue` — Vue: setup (~2650 tok)
+
+## app/pages/admin/stores/
+
+- `[id].vue` — Vue: setup (~3643 tok)
 
 ## app/pages/care/
 
@@ -1001,10 +1022,11 @@
 - `inbox.ts` — How the buyer hears about replies, besides Dogeash itself (~1864 tok)
 - `legal.ts` — Terms of use and privacy policy, in plain words. DRAFTS: both must be reviewed by a Nigerian lawyer (~1282 tok)
 - `market.ts` — The marketplace rows on Home: which dogs and stores each one shows (~545 tok)
-- `myDogs.ts` — Dogs a buyer owns after handover: a living record of health, training and care. (~928 tok)
+- `myDogs.ts` — When it was given or happened (yyyy-mm-dd) (~1206 tok)
 - `reviews.ts` — Store reviews (Supabase: store_reviews). Buyers review a store after a done kennel visit; the store  (~678 tok)
 - `searchFilters.ts` — The filters on Find a guard dog, in one shape: read from and written to the page address (~791 tok)
 - `sell.ts` — The Sell with us page: why kennels list on Dogeash, how verification works, what to have ready, and (~915 tok)
+- `signInNextSteps.ts` — Where someone can go straight after signing in, most likely first (the first card is the main one): (~674 tok)
 - `signUpIntents.ts` — "What brings you here?" on sign-up. Each answer changes the heading, the fields, the side panel (~1043 tok)
 - `storeForm.ts` — The dashboard's store profile form: everything buyers read on the public store page that the store (~1349 tok)
 - `storeRoles.ts` — People who work at a store, and what each role may do in the store dashboard. (~442 tok)
@@ -1032,3 +1054,12 @@
 - `20261118000000_store_applications.sql` — Store applications. A draft store's owner fills in an application (the kennel's address and directio (~2567 tok)
 - `20261119000000_inspections.sql` — Inspections. An admin schedules a kennel visit (day, time, inspector) for a store applying to go liv (~4860 tok)
 - `20261120000000_reports_and_blocking.sql` — Reports and blocking. (~4220 tok)
+- `20261121000000_admin_detail_pages.sql` — Detail pages in the admin console: everything about one store, and everything about one person, in o (~2091 tok)
+- `20261122000000_admin_visits.sql` — Visit oversight for admins: every kennel visit request with its store and buyer, which ones need cha (~980 tok)
+- `20261123000000_reinspection.sql` — Re-inspection. A store stays verified for a year after its last passed inspection (or approval): (~1411 tok)
+- `20261124000000_announcements.sql` — Announcements from Dogeash: a title and message sent to everyone, to stores (everyone on a store's t (~1236 tok)
+- `20261125000000_listing_review.sql` — Listing review policy. Platform settings (one row) say which new listings Dogeash checks before buye (~1290 tok)
+- `20261126000000_admin_history.sql` — Longer history for the admin overview: the same day-by-day figures as admin_series() (new accounts,  (~615 tok)
+- `20261127000000_admin_search.sql` — Search across the admin console: stores (name, id, city), dogs (name, file number, breed), people (n (~684 tok)
+- `20261128000000_applications_without_form.sql` — Applications: also list stores in review that have no application form (stores added before applicat (~486 tok)
+- `20261129000000_buyer_dashboard.sql` — The buyer's dashboard, for real: (~2005 tok)

@@ -89,10 +89,14 @@ export function useStoreDogs() {
     return null
   }
 
+  // Dogeash may hold a "go live" for review (its listing review rules): the status that actually saved is kept
+  const lastStatus = useState<ListingStatus | null>('store-dogs-last-status', () => null)
   async function setStatus(id: string, status: ListingStatus): Promise<string | null> {
-    const { error } = await supabase.from('dogs').update({ status }).eq('id', id)
-    if (error) return status === 'available' && !verified.value ? 'Dogs go live once your store has passed its inspection.' : 'That didn\'t save. Try again.'
-    dogs.value = dogs.value.map(d => (d.id === id ? { ...d, status } : d))
+    const { data, error } = await supabase.from('dogs').update({ status }).eq('id', id).select('status').maybeSingle()
+    if (error || !data) return status === 'available' && !verified.value ? 'Dogs go live once your store has passed its inspection.' : 'That didn\'t save. Try again.'
+    const saved = data.status as ListingStatus
+    lastStatus.value = saved
+    dogs.value = dogs.value.map(d => (d.id === id ? { ...d, status: saved } : d))
     return null
   }
 
@@ -111,6 +115,9 @@ export function useStoreDogs() {
     const error = await setStatus(dog.id, to)
     const notify = useNotify()
     if (error) return notify.failed(error)
+    if (to === 'available' && lastStatus.value === 'pending_review') {
+      return notify.dogUpdated(`${dog.name} is with Dogeash for review`, `${dog.fileNo}. Dogeash checks some new listings before buyers see them; you'll hear back in your bell.`, dog.photo)
+    }
     notify.dogUpdated(`${dog.name} ${moved[to] ?? 'is updated'}`, `${dog.fileNo} · ${listingStatusLabels[to].label}. ${to === 'available' ? 'Buyers can see it now.' : to === 'withdrawn' ? 'Hidden from buyers; you can list it again later.' : ''}`.trim(), dog.photo)
   }
   async function deleteDraft(dog: StoreDog) {
@@ -120,5 +127,5 @@ export function useStoreDogs() {
     notify.dogUpdated(`${dog.name} deleted`, 'The draft and its photos and videos are gone.')
   }
 
-  return { dogs, loaded, verified, load, find, uploadPhoto, uploadVideo, create, update, setStatus, remove, changeStatus, deleteDraft }
+  return { dogs, loaded, verified, lastStatus, load, find, uploadPhoto, uploadVideo, create, update, setStatus, remove, changeStatus, deleteDraft }
 }

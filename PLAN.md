@@ -135,14 +135,14 @@ Sellers are called **stores** everywhere buyers can see them. A store is a kenne
 
 ## Phase 4 · Inspections and trust
 
-- [~] Admin dashboard (`/admin`, its own plain layout): staff set only in the SQL editor (`staff`: admin, inspector), one-time code from an authenticator app required (checked in the database too), overview of the whole site, audit log (`admin_audit`). Built: Stores (status changes), Listings (take down, put back, approve), Reviews (remove with reason), People (look-up), Care directory (add, edit, remove), Audit log. Store applications and inspections built. Next: blocking accounts (needs a server function)
+- [~] Admin dashboard (`/admin`, its own plain layout): staff set only in the SQL editor (`staff`: admin, inspector), one-time code from an authenticator app required (checked in the database too), overview of the whole site, audit log (`admin_audit`). Built: Stores (status changes), Listings (take down, put back, approve), Reviews (remove with reason), People (look-up), Care directory (add, edit, remove), Audit log. Store applications and inspections built. Then: reports and blocking, store and person pages, visit oversight, yearly re-inspection, announcements, listing review policy, CSV exports and a year of history, search (⌘K). Next (needs a payment provider): reservations, escrow, payouts, disputes; blocking accounts (needs a server function)
 
 - [x] Inspection scheduling for kennels: booked from Applications (day, time, inspector), owner and inspector told
 - [x] Inspector tool: on-site checklist (8 checks), dogs seen with confirmed levels, private photos, summary; pass verifies the store and marks dogs inspected, fail sends it back
 - [x] Verified kennel stamp driven by real inspection records (a passed inspection writes the store's record)
 - [ ] Change history for inspections and prices
 - [ ] Bite and incident reporting (model done; needs forms and display)
-- [ ] Listing moderation queue for admins
+- [x] Listing moderation queue for admins (Listings: take down, approve pending; listing review rules in admin Settings)
 - [ ] Fake-listing detection (duplicate photos, unverified sellers)
 
 ## Phase 5 · Buyers
@@ -248,7 +248,7 @@ A normal cart and checkout, but only for equipment, never for dogs.
 ## Phase 7 · Community
 
 - [ ] Seller reviews after handover
-- [ ] Disputes: how they are raised and resolved
+- [~] Disputes: reports from users (listings, stores, reviews, conversations) with an admin queue; refund disputes wait for payments
 - [ ] Notifications by email and SMS (reservation, visit, handover)
 
 ## Phase 8 · Legal and compliance

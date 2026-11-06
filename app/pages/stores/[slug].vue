@@ -298,9 +298,12 @@ const h2 = 'm-0 mega text-[clamp(26px,2.6vw,34px)] leading-none'
             <Button variant="marigold" size="sm" @click="reviewing = true"><PenLine aria-hidden="true" />{{ myReview ? 'Edit your review' : 'Write a review' }}</Button>
           </div>
           <div v-if="shownReviews.length" class="flex flex-col gap-4">
-            <ReviewCard v-for="review in shownReviews" :key="review.id" :review="review" :store-name="store.name" />
+            <ReviewCard v-for="review in shownReviews" :key="review.id" :review="review" :store-name="store.name">
+              <ReportButton v-if="!review.mine && !review.id.startsWith('sample-')" kind="review" :target-id="review.id" what="this review" />
+            </ReviewCard>
           </div>
           <p v-else class="m-0 text-[15px] text-ink-muted">No reviews yet. Reviews come only from buyers who have visited the kennel.</p>
+          <ReportButton v-if="!isOwn" kind="store" :target-id="store.id" :what="`${store.name}`" class="mt-2 self-start" />
           <ReviewDialog
             v-model:open="reviewing"
             :store-name="store.name"

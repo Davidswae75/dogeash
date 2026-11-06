@@ -96,6 +96,7 @@ onBeforeUnmount(() => clearInterval(timer))
               About <NuxtLink :to="`/dogs/${selected.dogFileNo.toLowerCase()}`" class="font-semibold text-ink">{{ dogName(selected.dogFileNo) ?? selected.dogFileNo }}</NuxtLink>
             </span>
           </div>
+          <ReportButton kind="conversation" :target-id="selected.id" what="this conversation" class="shrink-0 text-xs" />
         </header>
         <ConversationThread :messages="messages" self="buyer" :other-name="selected.storeName" />
         <ConversationReply

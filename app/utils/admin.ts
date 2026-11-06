@@ -2,14 +2,25 @@
 // Sections not built yet are listed without a link, so the shape of the dashboard is visible.
 // `badge` names the overview count shown beside a section (what's waiting there).
 // `inspector`: also shown to inspectors (everything else is admins only)
-export const adminNav: { group: string, items: { to?: string, label: string, icon: string, badge?: 'storesInReview' | 'dogsPendingReview', inspector?: boolean }[] }[] = [
+// What each sidebar count means, for its tooltip and screen readers
+export const badgeMeaning: Record<'storesInReview' | 'dogsPendingReview' | 'visitsUnanswered' | 'reports', (n: number) => string> = {
+  storesInReview: n => `${n} store ${n === 1 ? 'application' : 'applications'} waiting for a decision`,
+  dogsPendingReview: n => `${n} ${n === 1 ? 'listing' : 'listings'} waiting for review`,
+  visitsUnanswered: n => `${n} visit ${n === 1 ? 'request' : 'requests'} unanswered for 2+ days`,
+  reports: n => `${n} open ${n === 1 ? 'report' : 'reports'}`,
+}
+
+export const adminNav: { group: string, items: { to?: string, label: string, icon: string, badge?: 'storesInReview' | 'dogsPendingReview' | 'visitsUnanswered' | 'reports', inspector?: boolean }[] }[] = [
   { group: 'Monitor', items: [
     { to: '/admin', label: 'Overview', icon: 'LayoutDashboard' },
+    { to: '/admin/visits', label: 'Visits', icon: 'CalendarClock', badge: 'visitsUnanswered' },
     { to: '/admin/audit', label: 'Audit log', icon: 'ScrollText' },
   ] },
   { group: 'Review', items: [
+    { to: '/admin/reports', label: 'Reports', icon: 'Flag', badge: 'reports' },
     { to: '/admin/applications', label: 'Applications', icon: 'FileCheck2', badge: 'storesInReview' },
     { to: '/admin/inspections', label: 'Inspections', icon: 'ClipboardCheck', inspector: true },
+    { to: '/admin/reinspections', label: 'Re-inspections', icon: 'RefreshCcw' },
     { to: '/admin/listings', label: 'Listings', icon: 'Dog', badge: 'dogsPendingReview' },
     { to: '/admin/reviews', label: 'Reviews', icon: 'Star' },
   ] },
@@ -17,6 +28,8 @@ export const adminNav: { group: string, items: { to?: string, label: string, ico
     { to: '/admin/stores', label: 'Stores', icon: 'Store' },
     { to: '/admin/people', label: 'People', icon: 'Users' },
     { to: '/admin/care', label: 'Care directory', icon: 'Stethoscope' },
+    { to: '/admin/announcements', label: 'Announcements', icon: 'Megaphone' },
+    { to: '/admin/settings', label: 'Settings', icon: 'Settings' },
   ] },
 ]
 
@@ -221,6 +234,7 @@ export interface AdminPerson {
   conversations: number
   reviews: number
   shortlisted: number
+  blocked: { reason: string, blocked_at: string } | null
 }
 
 // ── Audit log (admin_audit) ─────────────────────────────────────────────────
@@ -231,6 +245,9 @@ export const auditKinds = [
   { prefix: 'review.', label: 'Reviews' },
   { prefix: 'care.', label: 'Care directory' },
   { prefix: 'inspection.', label: 'Inspections' },
+  { prefix: 'report.', label: 'Reports' },
+  { prefix: 'person.', label: 'People' },
+  { prefix: 'announcement.', label: 'Announcements' },
 ]
 
 // "store.verified" → "Store approved", for the log
@@ -238,6 +255,12 @@ const auditWords: Record<string, string> = {
   'store.verified': 'Store approved', 'store.draft': 'Store sent back', 'store.in_review': 'Store marked in review', 'store.suspended': 'Store suspended',
   'dog.withdrawn': 'Listing taken down', 'dog.available': 'Listing put live', 'dog.draft': 'Listing sent back',
   'review.remove': 'Review removed',
+  'report.resolved': 'Report resolved', 'report.dismissed': 'Report dismissed', 'report.read_messages': 'Reported conversation read',
+  'visit.nudge': 'Store nudged about a visit',
+  'reinspection.remind': 'Re-inspection reminders sent',
+  'settings.save': 'Settings changed',
+  'announcement.send': 'Announcement sent', 'announcement.end_banner': 'Site strip taken down',
+  'person.block': 'Account blocked', 'person.unblock': 'Account unblocked',
   'inspection.schedule': 'Inspection booked', 'inspection.pass': 'Inspection passed', 'inspection.fail': 'Inspection failed', 'inspection.cancel': 'Inspection cancelled', 'care.add': 'Provider added', 'care.edit': 'Provider edited', 'care.remove': 'Provider removed',
 }
 export const auditLabel = (action: string) => auditWords[action] ?? action
@@ -255,6 +278,8 @@ export interface AdminApplication {
   about: string | null
   owner_profile: { name?: string, title?: string, yearsWithDogs?: number, credentials?: string[] } | null
   created_at: string
+  /** false for a store sent to review before applications existed (no address, days or documents) */
+  has_form: boolean
   address: string
   directions: string
   contact_phone: string

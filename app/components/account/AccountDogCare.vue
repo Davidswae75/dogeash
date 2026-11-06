@@ -1,40 +1,31 @@
 <script setup lang="ts">
-import { ShieldCheck } from '@lucide/vue'
-import type { OwnedDog } from '~/utils/myDogs'
+import { Check, Plus } from '@lucide/vue'
 import { computed } from 'vue'
-import { getStore } from '~/utils/dogs'
-import { sortedReminders } from '~/utils/myDogs'
+import type { OwnedDog, OwnedDogRecord, RecordKind } from '~/utils/myDogs'
+import { dayLabel, recordKinds, statusOf, upcomingOf } from '~/utils/myDogs'
 
-// Side column of a dog's record: reminders, most urgent first, and the health guarantee
+// Side column of a dog's record: everything with a due date (boosters, treatments, reminders),
+// most urgent first, each with "Done". "Add" sets a reminder.
 const props = defineProps<{ dog: OwnedDog }>()
-const store = computed(() => getStore(props.dog.storeId))
-const reminders = computed(() => sortedReminders(props.dog))
-const g = computed(() => props.dog.guarantee)
+const emit = defineEmits<{ add: [kind: RecordKind], open: [record: OwnedDogRecord], done: [record: OwnedDogRecord] }>()
+const due = computed(() => upcomingOf(props.dog))
 </script>
 
 <template>
-  <div class="flex flex-col gap-4 sm:gap-5">
-    <SectionPanel title="Reminders" :meta="`${reminders.length} set`">
-      <ul class="m-0 flex list-none flex-col p-0">
-        <li v-for="r in reminders" :key="r.title" class="flex items-center gap-3 rounded-lg px-3 py-2.5">
-          <span class="flex min-w-0 flex-1 flex-col">
-            <span class="text-sm font-semibold">{{ r.title }}</span>
-            <span class="font-mono text-[11px] text-ink-muted">{{ r.due }}</span>
-          </span>
-          <AccountCareChip :status="r.status" />
-        </li>
-      </ul>
-    </SectionPanel>
-
-    <section class="flex flex-col gap-3 rounded-xl bg-night p-5 text-on-night">
-      <span class="flex items-center justify-between font-mono text-[10.5px] font-semibold tracking-[.12em] uppercase opacity-80">
-        Health guarantee <ShieldCheck class="size-4 text-marigold" aria-hidden="true" />
-      </span>
-      <strong class="font-display text-2xl leading-7 font-extrabold font-stretch-expanded">{{ g.monthsLeft }} months left</strong>
-      <div class="h-1.5 overflow-hidden rounded-full bg-on-night/15" role="progressbar" :aria-valuenow="g.monthsLeft" aria-valuemin="0" :aria-valuemax="g.months" aria-label="Guarantee remaining">
-        <div class="h-full rounded-full bg-marigold" :style="{ width: `${(g.monthsLeft / g.months) * 100}%` }" />
-      </div>
-      <p class="m-0 text-[13px] leading-[19px] opacity-80">{{ g.covers }}. From {{ store?.name }}, until {{ g.until }}.</p>
-    </section>
-  </div>
+  <SectionPanel title="Coming up" :meta="due.length ? `${due.length} due` : undefined">
+    <template #actions>
+      <Button variant="outline" size="sm" class="ml-auto" @click="emit('add', 'reminder')"><Plus aria-hidden="true" />Reminder</Button>
+    </template>
+    <ul v-if="due.length" class="m-0 flex list-none flex-col p-0">
+      <li v-for="r in due" :key="r.id" class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-surface-sunk/60">
+        <button type="button" class="flex min-w-0 flex-1 cursor-pointer flex-col border-0 bg-transparent p-0 text-left text-ink" @click="emit('open', r)">
+          <span class="text-sm font-semibold">{{ r.title }}</span>
+          <span class="font-mono text-[11px] text-ink-muted">{{ recordKinds[r.kind].label }} · {{ dayLabel(r.dueOn) }}</span>
+        </button>
+        <AccountCareChip :status="statusOf(r.dueOn)" />
+        <Button variant="ghost" size="icon" class="size-8" :aria-label="`Mark ${r.title} done`" title="Done" @click="emit('done', r)"><Check aria-hidden="true" /></Button>
+      </li>
+    </ul>
+    <p v-else class="m-0 p-3 text-sm text-ink-muted">Nothing due. Add a booster date to a vaccination, or set a reminder, and it shows here.</p>
+  </SectionPanel>
 </template>

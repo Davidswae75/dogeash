@@ -47,20 +47,14 @@ async function submit() {
       <form class="flex flex-col gap-4" novalidate @submit.prevent="submit">
         <div class="grid grid-cols-[minmax(0,1fr)_auto] gap-3">
           <FieldShell label="Day" for="inspection-day">
-            <NativeSelect id="inspection-day" v-model="day" class="h-10 w-full">
-              <NativeSelectOption v-for="d in days" :key="d.value" :value="d.value">{{ d.label }}</NativeSelectOption>
-            </NativeSelect>
+            <SelectMenu id="inspection-day" v-model="day" :options="days" class="h-10!" />
           </FieldShell>
           <FieldShell label="Time" for="inspection-time">
-            <NativeSelect id="inspection-time" v-model="time" class="h-10 w-28">
-              <NativeSelectOption v-for="t in inspectionTimes" :key="t" :value="t">{{ t }}</NativeSelectOption>
-            </NativeSelect>
+            <SelectMenu id="inspection-time" v-model="time" :options="inspectionTimes.map(t => ({ value: t, label: t }))" class="h-10! w-28" />
           </FieldShell>
         </div>
         <FieldShell label="Inspector" for="inspection-inspector" :hint="props.staff.length ? undefined : 'No staff found. Add inspectors in the SQL editor.'">
-          <NativeSelect id="inspection-inspector" v-model="inspector" class="h-10 w-full">
-            <NativeSelectOption v-for="s in props.staff" :key="s.id" :value="s.id">{{ s.name }} · {{ s.role }}</NativeSelectOption>
-          </NativeSelect>
+          <SelectMenu id="inspection-inspector" v-model="inspector" :options="props.staff.map(s => ({ value: s.id, label: `${s.name} · ${s.role}` }))" placeholder="Choose an inspector" class="h-10!" />
         </FieldShell>
         <FieldShell label="Note for the inspector" for="inspection-note" hint="Optional: gate codes, who to ask for, what to look at.">
           <Textarea id="inspection-note" v-model="note" rows="2" maxlength="500" class="border-line-strong" />

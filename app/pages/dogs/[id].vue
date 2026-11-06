@@ -81,6 +81,7 @@ const facts = [
         </div>
         <ShortlistButton v-if="!isOwn" :file-no="dog.fileNo" :name="dog.name" variant="button" />
         <StoreCard v-if="store" :store="store" compact />
+        <ReportButton v-if="!isOwn" kind="dog" :target-id="dog.fileNo" what="this listing" class="self-start" />
       </aside>
     </div>
   </div>

@@ -3,13 +3,14 @@ import { MessageSquareQuote, Search } from '@lucide/vue'
 import { computed, onMounted, ref } from 'vue'
 import { definePageMeta, useSeoMeta } from '#imports' // nuxt
 import type { AdminReview } from '~/utils/admin'
+import type { CsvColumn } from '~/utils/csv'
 import { useAdminReviews } from '~/composables/useAdminReviews'
 import { useNotify } from '~/composables/useNotify'
 import { adminTime } from '~/utils/admin'
 
 // Admin › Reviews: every review on every store, newest first. Removing one needs a reason the author reads;
 // the store's rating is worked out again without it, and the review is kept in the audit log.
-definePageMeta({ layout: 'admin', middleware: 'admin' })
+definePageMeta({ layout: 'admin', colorMode: 'dark', middleware: 'admin' })
 useSeoMeta({ title: 'Reviews · Dogeash admin', robots: 'noindex' })
 
 const { reviews, loaded, load, remove } = useAdminReviews()
@@ -26,6 +27,11 @@ const shown = computed(() => {
 })
 
 const pending = ref<AdminReview>()
+const csv: CsvColumn<AdminReview>[] = [
+  { label: 'Store ID', value: r => r.store_id }, { label: 'Store', value: r => r.store_name }, { label: 'Stars', value: r => r.rating },
+  { label: 'Review', value: r => r.body }, { label: 'Author', value: r => r.author_name }, { label: 'Author email', value: r => r.author_email },
+  { label: 'Store reply', value: r => r.store_reply }, { label: 'Written', value: r => r.created_at },
+]
 const confirmOpen = ref(false)
 function ask(r: AdminReview) {
   pending.value = r
@@ -41,7 +47,8 @@ async function run(note: string) {
 <template>
   <AdminPage title="Reviews" :count="reviews.length" description="Every review buyers have written. Remove one only when it breaks the rules; the author is told why.">
     <template #actions>
-      <ToggleGroup v-model="starsModel" type="single" variant="outline" size="sm" aria-label="Show reviews">
+      <AdminExport name="reviews" :rows="shown" :columns="csv" />
+      <ToggleGroup v-model="starsModel" type="single" variant="outline" size="sm" aria-label="Show reviews" class="max-w-full flex-wrap justify-start">
         <ToggleGroupItem value="all" class="px-2.5 text-xs">All</ToggleGroupItem>
         <ToggleGroupItem value="low" class="px-2.5 text-xs">1–2 stars</ToggleGroupItem>
         <ToggleGroupItem value="high" class="px-2.5 text-xs">4–5 stars</ToggleGroupItem>

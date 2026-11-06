@@ -836,3 +836,454 @@ Admins review it all on the **Applications** page and approve it or send it back
 - `app/components/admin/ScheduleInspection.vue`, `InspectionChecklist.vue`, `InspectionDogs.vue`, `InspectionPhotos.vue`.
 - Applications page: booking and the inspection link. The store's Application page shows the booked inspection.
 - Inspectors: the sidebar shows only Inspections, the guard sends them there, and their one-time code leads there.
+
+## 19. Reports from users, and blocking accounts
+
+**What it does:** buyers and stores can report a listing, a store, a review or a conversation. Admins work through the reports in a queue. Admins can also block an account: it can still read, but it can't add or change anything.
+
+**You need to do:** run `supabase/migrations/20261120000000_reports_and_blocking.sql` in the Supabase SQL Editor. Nothing public breaks before it runs; reports just won't send.
+
+**Reporting (for everyone signed in; visitors are asked to sign in first):**
+- **Where:**
+  - **Report this listing** on a dog's page
+  - **Report <store>** under a store's reviews
+  - **Report this review** on each real review (not your own, not the samples)
+  - **Report this conversation** in My messages and in the store inbox
+- **Why:**
+  - scam or fraud
+  - wrong information
+  - abusive or offensive
+  - animal welfare
+  - something else (with details)
+- **Limits:** the other side isn't told who reported them. The same thing can be reported once while the report is open, up to 20 reports a day. You can only report a conversation you're part of.
+- **Afterwards:** "Thanks, it's with Dogeash". The reporter later gets the outcome in their bell.
+
+**Admin › Reports (`/admin/reports`, in the sidebar with the open count):**
+- **Open / Closed tabs.** Each report shows:
+  - what it's about ("Rambo · KD-2026-003 · K9 Guardian Kennels") and that thing's current status
+  - an **Act in Listings / Stores / Reviews** link
+  - the reason, the details, and the reporter's name and email
+  - how many open reports the same thing has
+- **Conversations:** **Read the conversation (logged)** shows the messages. That's the only way an admin can read private messages, and every read goes in the audit log.
+- **Resolve** (you acted) or **Dismiss** (nothing to do). Both need a note, which the reporter reads.
+- Admins get a bell notification for each new report.
+
+**Blocking (Admin › People, ⋯ on each row):**
+- **Block account** needs a reason. The person can still sign in and browse. They **can't**:
+  - message or book visits
+  - review or report
+  - list dogs or change a store
+  - save dogs or searches
+  - upload anything, or edit their profile
+- A red banner on every page (site and store dashboard) tells them they're blocked, with your reason.
+- **Unblock** restores everything. People shows a "blocked" badge (hover for the reason).
+- Staff can't be blocked, and nor can you. Blocking doesn't suspend their stores; do that in Stores if needed.
+- **How it works:** a "restrictive" access rule on every table and on uploads, applied on top of all the others. No secret key needed.
+- Blocks, unblocks, resolutions and conversation reads are all in the audit log, with new Reports and People filters.
+
+**Checked:**
+- `npm run db:test`: 22 new checks, covering reporting, duplicates, visitors, conversations you're not in, the admin queue, the logged read, resolving, and blocking (read yes, write no, staff exempt, unblock, audit). All pass.
+- The typecheck shows no new errors, and every changed page compiles. The Report links show on the dog and store pages.
+
+**Code:**
+- `supabase/migrations/20261120000000_reports_and_blocking.sql`: the `reports` and `blocked_accounts` tables, the restrictive rules, and `my_block()`, `admin_block_person()`, `admin_unblock_person()`, `admin_reports()`, `admin_open_reports()`, `admin_report_messages()`, `admin_resolve_report()`. `admin_people()` now includes blocks.
+- `app/components/ReportButton.vue`, `app/utils/reports.ts`, `app/composables/useReports.ts`.
+- `app/components/AccountBlockedBanner.vue` and `app/composables/useAccountBlock.ts` (loaded with the account).
+- `app/pages/admin/reports.vue` and `app/composables/useAdminReports.ts`. The People page and `useAdminPeople` gained block and unblock.
+
+## 20. Admin: a page for each store and each person
+
+**What it does:** clicking a store or a person anywhere in the admin console opens one page with everything about them.
+
+**You need to do:** run `supabase/migrations/20261121000000_admin_detail_pages.sql` (after section 19's). Nothing public depends on it.
+
+**Store page (`/admin/stores/<STR-…>`):**
+- **Header:** status, ID, place and opening date. **Change status** (the same actions as the Stores list), **Public page ↗** when verified, and **Application** when there is one.
+- **Notes:** Dogeash's last note to the store. A red link appears if it or its dogs have open reports.
+- **Main column:**
+  - **Dogs:** photo, status, level and price.
+  - **Reviews:** the average, and those without a reply.
+  - **Kennel visits:** counts by status, plus the last 10.
+  - **History:** admin actions on the store and its dogs.
+- **Side column:**
+  - **Team:** with emails and phones, a blocked mark, and each linked to their person page.
+  - **Profile:** tagline, about, who runs it, the inspection record, and whether visits are paused.
+  - **Application:** address, phone, days, which documents are in, and when it was sent.
+  - **Inspections:** each one linked to its sheet.
+  - **Counts:** conversations, and the size of the care team.
+
+**Person page (`/admin/people/<id>`):**
+- **Header:** name, email, phone, city, when they joined and last signed in, staff and blocked badges, and **Block account / Unblock**.
+- **Activity:**
+  - kennel visits, linked to the stores
+  - conversations: counts and dates only, **never message text** (that's only readable through a report, and logged)
+  - reviews written
+  - reports made
+- **Side column:** their stores and roles, home profile, how they like to be reached, and their shortlist size.
+- **History:** admin actions about them, or by them if they're staff.
+
+**Links in:**
+- store names in Stores, Listings and inspection sheets, plus a **Store page** button on each application
+- names in People
+- store and person names in the audit log (on its page and on these pages)
+
+**Also:**
+- The audit list is now one shared component, used by the Audit log page and both detail pages.
+- The Stores and People list pages moved to `stores/index.vue` and `people/index.vue` so the detail pages can sit beside them. Their addresses are unchanged.
+
+**Checked:**
+- `npm run db:test`: 7 new checks, including that a person's page never contains message text. All pass.
+- The typecheck shows no new errors, every page compiles, and the routes resolve.
+- I haven't seen the pages with data; they need your admin sign-in.
+
+**Code:** the migration (`admin_store()` and `admin_person()`), `app/pages/admin/stores/[id].vue`, `app/pages/admin/people/[id].vue`, `app/composables/useAdminDetail.ts` and `app/components/admin/AuditList.vue`.
+
+## 21. Admin: visit oversight
+
+**What it does:** a **Visits** page (Monitor › Visits, with the count of unanswered requests) to watch kennel visit requests across every store and chase the slow ones.
+
+**You need to do:** run `supabase/migrations/20261122000000_admin_visits.sql` (after section 20's).
+
+**The page:**
+- **Tabs:**
+  - **Needs chasing:** requested over two days ago, with the day still ahead
+  - **Missed:** the day passed with no answer
+  - **Coming up**
+  - **All:** the last 60 days and everything ahead
+- **Each row:** when (and "at the buyer's home" if so), the store (opens its page), the buyer with their email (opens their page), the status, and when they asked.
+- **Nudge** sends the store's owner and managers a bell notification: "Please answer <buyer>'s visit request … Confirm it, or decline with a note, from Bookings". Each nudge is in the audit log. Answered visits can't be nudged.
+- **How stores answer** (last 90 days): requests, the median time from request to the store's decision, and missed requests. Slow stores (over 24 hours, or any missed) are tinted.
+
+**Checked:** `npm run db:test` (5 new checks, all pass). The typecheck shows no new errors, and the page compiles.
+
+**Code:** the migration (`admin_visits()` and `admin_nudge_visit()`), `app/pages/admin/visits.vue`, `app/composables/useAdminVisits.ts`, and the sidebar item.
+
+## 22. Re-inspection every year
+
+**What it does:** a store stays verified for **a year** after its last passed inspection or approval. Stores are reminded before it runs out, and admins see who's due and book the re-inspection.
+
+**You need to do:**
+1. Run `supabase/migrations/20261123000000_reinspection.sql` (after section 21's). Stores already verified get a year from their last status change.
+2. Optional: for **daily** reminders, enable the **pg_cron** extension in Supabase (Database → Extensions) **before** running the migration. Without it, the migration skips the daily job safely, and reminders go out when an admin presses "Send reminders now". If you enable it later, let me know and I'll give you the one line that schedules the job.
+
+**How it works:**
+- Every verified store has a "verified until" date, set by the database:
+  - becoming verified (by inspection or by approval) starts a fresh year
+  - passing a new inspection while verified starts a fresh year
+- **30 days before**, the store's owner and managers get a bell notification ("… runs out on 14 Nov"), once per year. Their dashboard shows a marigold banner with the date. Once it has run out, the banner turns red.
+- **An expired store isn't hidden automatically.** It shows as overdue, and you decide: book a visit, or suspend it in Stores.
+- A failed re-inspection sends the store back to draft (hidden), the same as a failed first inspection.
+
+**Admin › Re-inspections (`/admin/reinspections`):**
+- Three groups: **Overdue** (with how many days ago), **Due within 30 days** (with days left), and **Later**.
+- Each store links to its store page. **Book re-inspection** opens the usual booking dialog. If one is already booked, it shows "Booked Tue 10 Nov, 10:00", linked to the sheet.
+- **Send reminders now** sends any due reminders and says how many stores were reminded. It's in the audit log.
+
+**Checked:** `npm run db:test` (8 new checks: a year on verifying, reminders once a year, admin list, the store's own date, a fresh year on re-approval, admins only). All pass. The typecheck shows no new errors, and the page and banner compile.
+
+**Also fixed:** stores created already verified, as the seed creates them, now get a date too. Before this fix they'd have had none.
+
+**Code:** the migration (`stores.verified_until`, the `extend_verification` rule, `send_reinspection_reminders()`, `admin_reinspections()`, `admin_send_reinspection_reminders()`, `my_store_verification()`, and the optional pg_cron job), `app/pages/admin/reinspections.vue`, `app/composables/useAdminReinspections.ts`, and the banner in `DashboardStoreStatus.vue`.
+
+## 23. Announcements
+
+**What it does:** admins send an announcement to **everyone**, **stores** (everyone on a store's team) or **buyers** (everyone else). It goes to each person's bell. For everyone, it can also show **as a strip across the top of the site** until a date, which visitors who aren't signed in see too.
+
+**You need to do:** run `supabase/migrations/20261124000000_announcements.sql` (after section 22's). Nothing public breaks before it runs; the strip just stays hidden.
+
+**Admin › Announcements (`/admin/announcements`):**
+- **Write one:** who it's for, a title, the message, and an optional link ("More": a page like `/guide`, or an `https://` link; anything else is refused). For everyone, there's also **Also show across the top of the site until <date>**. **Send** asks first, showing exactly what will go out ("This can't be unsent").
+- **Sent:** each announcement with its audience, how many people got it, who sent it, and whether its strip is still showing. **Take the strip down** ends it early.
+- Every send and every strip taken down goes in the audit log, with a new Announcements filter.
+
+**On the site:** a dark strip with a marigold megaphone above the header, with the title, message and "More". Anyone can close it, and it stays closed for that announcement in their browser. In the bell, announcements have a megaphone icon.
+
+**Checked:** `npm run db:test` (8 new checks: stores-only and buyers-only reach the right people, admins only, the strip appears only when asked and until its date, taking it down, the list, bad links refused). All pass. The typecheck shows no new errors, everything compiles, and the home page loads.
+
+**Code:** the migration (the `announcements` table, `admin_send_announcement()`, `admin_announcements()`, `admin_end_banner()`, `site_banner()`, and the "announcement" notification kind), `app/pages/admin/announcements.vue`, `app/composables/useAdminAnnouncements.ts`, and `app/components/SiteAnnouncement.vue` (in the main layout).
+
+## 24. Listing review policy, and admin Settings
+
+**What it does:** you decide which new dog listings Dogeash checks before buyers see them. Until now, every dog from a verified store went live at once, and "Pending review" was never used.
+
+**You need to do:** run `supabase/migrations/20261125000000_listing_review.sql` (after section 23's). **All rules start off**, so nothing changes until you switch one on.
+
+**Admin › Settings (`/admin/settings`):**
+- **Listing review**, three switches that take effect at once:
+  - **Review each store's first three listings:** a new store's first dogs wait for you.
+  - **Review level 4 and 5 dogs:** the strongest protection dogs are checked first.
+  - **Review every new listing:** nothing goes live until you've looked at it.
+  It shows who last changed them and when, and each change is in the audit log.
+- **Staff:** the admins and inspectors (linked to their person pages), with the SQL line for adding one. Staff are still only changed in the SQL Editor.
+
+**What happens when a rule applies:**
+- **The store:** its "Go live" lands on **Waiting for Dogeash review** (renamed from "Waiting for inspection"). Its toast says "… is with Dogeash for review", and while it waits, its only action is **Back to draft**.
+- **Admins** get a bell notification ("Listing to review: Rambo"), and the dog shows under **Pending review** in Listings (and in the overview's Waiting list). There you **Approve and put live**, or **Send back to the store** with a reason.
+- Putting a reserved dog back to available isn't held, and nor is anything staff do.
+
+**Checked:** `npm run db:test` (9 new checks: off by default, admins only, each rule, admins told, approval, the audit log). All pass. The typecheck shows no new errors, and everything compiles.
+
+**Code:**
+- **Migration:** the `platform_settings` table (one row), `listing_needs_review()`, the rule that routes a "go live" to review, the admin notification, `admin_settings()` and `admin_save_settings()`.
+- **Admin:** `app/pages/admin/settings.vue`.
+- **Store side:** `useStoreDogs` keeps the status that actually saved (`lastStatus`). Toasts on the dog pages and in the ⋯ menu, the label, and the actions while pending are updated.
+
+## 25. Exports (CSV) and longer history
+
+**What it does:** most admin lists can be downloaded as a spreadsheet, and the overview shows **90 days** and **1 year** as well as 7 and 30.
+
+**You need to do:** run `supabase/migrations/20261126000000_admin_history.sql` (after section 24's). The CSV buttons work without it; until it runs, 90 days and 1 year just show the last 60 days.
+
+**CSV downloads:** a **CSV** button on these lists:
+- Stores
+- Listings
+- People
+- Visits
+- Reviews
+- Applications
+- Reports
+- Audit log
+
+It downloads **exactly the rows on screen**, with the current tab, filter and search applied, as `dogeash-<list>-<date>.csv`. Columns are labelled in plain words (Store ID, Owner, Live dogs, Dogeash note …). Commas and quotes inside values are handled, and the file opens correctly in Excel and Google Sheets, naira signs and accents included. It's built in the browser from what's already loaded; nothing extra is fetched.
+
+**Longer history on the overview:**
+- **7 days / 30 days / 90 days / 1 year.** The headline numbers, their change against the period before, the sparklines and the activity chart all follow the period.
+- 90 days and a year load a fuller day-by-day history the first time you pick them: up to two years, so a year can be compared with the year before.
+
+**Checked:** `npm run db:test` (3 new checks: a year of days, the 7–730 limits, admins only). All pass. The typecheck shows no new errors, and every page compiles. I tested the CSV quoting.
+
+**Code:** the migration (`admin_history(days)`), `app/utils/csv.ts`, `app/components/admin/Export.vue`, the export columns on each list, `useAdmin().loadHistory()`, and the periods in `pages/admin/index.vue`.
+
+## 26. Admin search across everything
+
+**What it does:** one search box for the whole admin console. Press **⌘K** (Mac) or **Ctrl+K** (Windows) on any admin page, or use **Search** at the top of the sidebar.
+
+**You need to do:** run `supabase/migrations/20261127000000_admin_search.sql` (the last of this batch).
+
+**How it works:**
+- Type two letters or more. Results appear as you type, grouped and best matches first (up to 8 of each):
+  - **Stores:** by name, ID or city
+  - **Dogs:** by name, **file number** or breed, with their store and status
+  - **People:** by name, **email** or **phone**
+  - **Care providers:** by name, person, city or ID
+- **↑ ↓** move, **Enter** opens, **Esc** closes. Clicking works too.
+- Where results go:
+  - a store or dog opens the store's page
+  - a person opens their page
+  - a provider opens the Care directory
+- Admins only; inspectors don't get it.
+
+**Checked:** `npm run db:test` (6 new checks: by store name, file number, email, provider; too-short searches; admins only). All pass. The typecheck shows no new errors, everything compiles, and ⌘K opens the dialog in the browser.
+
+**Code:** the migration (`admin_search(q)`), `app/components/admin/Search.vue` (the dialog and the keyboard shortcut, in the admin layout), and the sidebar button.
+
+---
+
+**This batch (sections 19–26) in one go:** the migrations below, run **in this order**, after everything before them:
+1. `20261120000000_reports_and_blocking.sql`
+2. `20261121000000_admin_detail_pages.sql`
+3. `20261122000000_admin_visits.sql`
+4. `20261123000000_reinspection.sql` (enable **pg_cron** first if you want daily reminders)
+5. `20261124000000_announcements.sql`
+6. `20261125000000_listing_review.sql`
+7. `20261126000000_admin_history.sql`
+8. `20261127000000_admin_search.sql`
+
+None of them change what the public site reads, so nothing breaks while you run them. `npm run db:test` now runs **320 checks**, all passing.
+
+**Still waiting for a payment provider:** reservations and escrow, payouts to stores, and disputes with refunds.
+
+**Status of sections 19–26:** run on 6 Nov and checked live:
+- all four new tables exist, and visitors are refused
+- all twelve admin functions exist and refuse anyone without admin rights
+- the public `site_banner()` answers (no strip running)
+- stores have their "verified until" date (STR-001: 3 Nov 2027)
+- the site loads
+
+Whether the daily reminder job was scheduled depends on pg_cron, which I can't see from outside. In the SQL Editor, `select jobname, schedule from cron.job;` shows it if it's there.
+
+---
+
+## 27. Admin: dark only, what the sidebar counts mean, phones fit
+
+**Dark only.** Every admin page (all 18, including the one-time code page) is always dark, whatever the site's theme switch says. The marketplace keeps its own light/dark setting.
+
+**The sidebar counts.** The number beside a section is what's waiting there. Hover it (or use a screen reader) and it says so:
+- **Applications:** store applications waiting for a decision
+- **Listings:** listings waiting for review
+- **Visits:** visit requests unanswered for 2+ days
+- **Reports:** open reports
+
+The "1" on Applications was **Eastgate K9 Academy (STR-006)**, a sample store seeded as "in review" before the application form existed. The count included it but the Applications page didn't list it, because it had no form. Now the page lists it too, with a note: "No application form: send it back to ask for one, or approve it."
+- Migration: `20261128000000_applications_without_form.sql` (only replaces `admin_applications()`). Run on 6 Nov; live, the function exists and refuses visitors.
+
+**Phones: the blank space on the right is gone.** There were two causes:
+1. **Every table's hidden "Actions" header label** (for screen readers) was placed against the whole page rather than its scrolling table, so it sat far to the right and stretched the page to about 730px. This affected Overview (stores table), Stores, People, Listings, Visits and Care. Fixed by anchoring each table's scroll box. The same fix went into the shortlist compare table and the guide's table.
+2. **The activity chart** started at 640px wide before measuring itself. It now fits its box from the start.
+
+Also, filter buttons (audit, reviews, reports, applications, inspections, and the overview's periods) now wrap onto a second line instead of running off narrow screens.
+
+**Checked:**
+- 14 admin pages at 320px and 375px wide, using sample data: page width equals screen width on every one.
+- `npm run db:test`: new check that a store in review without a form is listed. All pass.
+- Typecheck: no new errors.
+
+---
+
+## 28. Every dropdown is now the shadcn Select
+
+All 14 browser-native dropdowns are replaced with shadcn's Select, through one shared component: `app/components/SelectMenu.vue`. You give it the options, it handles the rest: the button, the list, the tick on the current choice, the placeholder, and labels for screen readers.
+
+**Where:**
+- **Dog form:** breed and hip grade
+- **Dog videos:** what each video shows
+- **Store team:** each person's role. A change still only sticks once it's saved.
+- **Admin overview:** the chart's measure
+- **Admin:** "Book inspection" (day, time, inspector), care provider type, and the confirmed level per dog on an inspection sheet
+- **Stores directory:** sort (desktop, and the phone filter sheet)
+- **Care directory:** sort
+
+**Sort options** for stores and care now live in one place each: the stores page and `useCareDirectory`.
+
+**Checked:** typecheck (no new errors) and every changed file compiles. On the stores directory, the menu opens on a solid background and "Name, A to Z" re-sorts the list.
+
+---
+
+## 29. New loader: an outlined dog over the wordmark
+
+The sign-out loader no longer uses the kennel-watch GIF. It's now:
+- **Dogeash's dog** (`app/components/DogMark.vue`): a guard dog's head, front on, ears up, watchful brows. It's drawn in one stroke weight with a marigold nose that matches the square in the wordmark.
+- **The animation:** each line traces itself in, one after another. Then the nose pops in, it holds, fades, and starts again (a 2.8s loop). With reduced motion, it's the still drawing.
+- **Layout:** the dog in a round tile, the **dogeash** wordmark under it, a short rule, then what's happening ("Signing you out…") and a line of detail. It follows light and dark mode.
+
+**Admin sign-out** uses the same loader, with its own line: "Your admin session has ended. You'll need a new one-time code next time." Signing out now also forgets staff access in the browser, so the next sign-in checks it again.
+
+**Small fix found on the way:** five sign-out buttons (site header, account menu, account nav, dashboard menu, account settings) were passing the click event through to sign-out. They now call it cleanly.
+
+**Code:**
+- `DogMark.vue`: the mark. Use `<DogMark />` still, or `<DogMark animated />`. It's sized with `class`, and its colour comes from the text colour.
+- `AppLoader.vue`: the screen.
+- `AppLogo.vue`: gained `static` (the wordmark as plain text rather than a link home).
+- Animation keyframes are in `main.css` (`animate-dog-trace`, `animate-dog-nose`).
+
+**Still using the kennel-watch GIF:** the sign-in panel and the "Open a store" page. I didn't touch those.
+
+**Checked:** in the browser, in light and dark, with the animation running. Typecheck shows no new errors.
+
+---
+
+## 30. After signing in: choose where to go
+
+Signing in no longer sends people straight somewhere. It ends on a **"Welcome back, Name — where would you like to go?"** screen with big link cards (the same style as after sign-up), showing only what fits that account. Most likely is first, as the dark main card:
+
+1. **Carry on where you were.** Shown when a gated action sent them to sign in (booking a visit, messaging a store, opening an admin page).
+2. **Admin console** for admins, or **Your inspections** for inspectors. Both say the one-time code comes next.
+3. **"<Store name> dashboard"** for anyone on a store's team, plus **Your store's page** once the store is live.
+4. **Find a guard dog**, **Your shortlist**, **Your account**, for everyone.
+
+There are never more than 5 cards and never the same page twice. A plain buyer sees: Find a guard dog, Your shortlist, Your account. The "Welcome back" toast still shows, including how many saved dogs moved into the account.
+
+**Code:**
+- `app/utils/signInNextSteps.ts` decides the list.
+- `app/pages/sign-in.vue` has a third step (`next`) after the password or code. It checks staff access fresh at that point.
+
+**Checked:** typecheck (no new errors); the sign-in page compiles and loads. The choices screen was previewed with a sample admin who owns a live store. I couldn't sign in for real, so try it with your accounts.
+
+---
+
+## 31. Buyer dashboard: My dogs, Reviews, real checklists
+
+**Migration:** `20261129000000_buyer_dashboard.sql`. Run on 6 Nov; live, both new tables exist and refuse visitors.
+
+**My dogs is real now** (no more sample Bruno).
+- **Add a dog you own**, whether or not it came from Dogeash: photo, name, breed, sex, birthday, weight, microchip, protection level, where it came from, since when, and notes. Only the name is required.
+- **Photos** go in a private bucket, in a folder of the owner's own. They open through hour-long links.
+- **Each dog's page:**
+  - **Health:** vaccinations, treatments and vet visits, with given and next-due dates.
+  - **Training log.**
+  - **Coming up:** everything with a due date, most urgent first, each with a "Done" button.
+  - Every line can be added, changed or removed in one dialog.
+  - Edit the details, or remove the dog (asks first).
+- **Status is worked out from the dates:** overdue, due within 30 days, or up to date. It's never stale.
+- **Counts:** the sidebar's "My dogs" shows how many things need attention, and the overview panel shows each dog's next item.
+- **Database rules:** owners only. Records can only go on your own dogs, photos only in your own folder. Visitors are refused. There's a cap of 20 dogs and 300 lines per dog.
+- **Pages:** `/account/dogs`, `/account/dogs/new`, `/account/dogs/<id>`, `/account/dogs/<id>/edit`.
+
+**Reviews** (`/account/reviews`), no longer "Coming next":
+- **Waiting for your review:** stores where your visit is marked done and you haven't reviewed yet.
+- **Your written reviews,** with the store's reply. Edit or delete them here.
+
+**"Ready to reserve" is real:**
+- email confirmed
+- phone added
+- home profile filled in
+- met the dogs at a kennel (a visit marked done)
+- ID check (still coming soon)
+
+Anything not done links to where to do it.
+
+**Shortlist price drops are real.** The dog's price is saved when it's shortlisted; existing shortlist items took today's price. The overview flags a dog that's now cheaper. The made-up sample drops are gone.
+
+**Navigation:** phones no longer show the "Soon" sections in the tab row. Reservations and Gear orders still show "Coming next", because they need payments.
+
+**New shared pieces:**
+- `ConfirmDialog.vue`: "Are you sure?" for anything that can't be undone.
+- `useOwnedDogs`
+- the `myDogUpdated` toast
+
+**Checked:**
+- `npm run db:test`: 14 new checks, all pass.
+- Typecheck: no new errors.
+- The record page, add-record dialog, overview and form checked in the browser with a sample account. Nothing is wider than a phone screen.
+
+---
+
+## 32. Visit cards: the date no longer stretches, and a cleaner layout
+
+**The bug:** on Visits and bookings, the calendar leaf (weekday, date, month) stretched to the full height of the card, so its border ran to the bottom. The card is a row, and rows stretch their items to the tallest one by default. The leaf is now pinned to the top and sized to its content: the same small leaf on every card.
+
+**The card, redesigned** (`VisitCard.vue`; the same card is used in the store dashboard):
+- **Header:** the visit type on the left, the status on the right.
+- **Detail lines with icons:** the store (or the buyer, on the store's side), day and time, where, and which dogs. On wider screens they sit in two columns.
+- **Your note** shows as a quote. **The store's note** shows in a grey box.
+- **Actions** (Cancel, View store, Review) sit along the bottom, under a line, across the whole card instead of squeezed under the text.
+- **Past visits** get a grey date band instead of the whole card fading.
+- **Wording fix:** a home visit now reads "At your home" for buyers. It used to say "At the buyer's home" to the buyer.
+
+**Checked:** in the browser, desktop and phone, with sample visits. The leaf is the same 76px on every card and the month sits inside it. Typecheck shows no new errors, and the store-dashboard pages that use the card compile.
+
+---
+
+## 33. Store profile: switch steps freely, check on Save; and garbled characters repaired
+
+### Editing the store profile
+**Before:** when editing an already-set-up profile, clicking another step tried to save the open one first. If anything on it didn't pass the checks, you were stuck there with red errors. On top of that, the History step always counted as "changed", even when nothing was, because the comparison was sensitive to the order of keys. So the checks could fire with no real edits.
+
+**Now (editing):**
+- **Open any step, any time.** Nothing is checked when you move between steps.
+- **Your changes are kept** across steps until you save. Each step with unsaved changes gets a small marigold dot in the step list, and the footer says "Unsaved changes" or "Unsaved changes in 2 steps".
+- **Save changes** checks and saves everything at once, from whichever step you're on. If something needs fixing, it opens that step with the field marked in red: "Some fields in Your store need a look."
+- Changed means a real change. Key order doesn't count, and "2014" equals 2014.
+
+**First-time setup** is unchanged going forward: each step is checked and saved as you continue. Going **back** never blocks now.
+
+**Checked** with a sample store in the browser:
+1. Made the tagline too short, opened "About the kennel": it opened, with a dot on "Your store".
+2. Pressed Save: back to "Your store", the tagline marked red, nothing saved.
+3. Fixed it, moved steps, saved: the fix was saved from the other step.
+
+Typecheck shows no new errors.
+
+### Garbled characters in the database ("Mon‚ÄìSat")
+**Cause:** when I copied migrations and the seed to your clipboard, the copy tool read UTF-8 text as Mac Roman. Every character outside plain ASCII arrived garbled: "–" became "‚Äì", "·" became "¬∑", "₦" became "‚Ç¶". This affected:
+- the sample data: store hours, the dogs' files (all 18 sample dogs), and more
+- the code of a few functions: price-drop notifications (₦), admin search results, listing-review notifications and report labels (·)
+
+**Fix:** migration `20261130000000_fix_garbled_text.sql`. Run on 6 Nov; live, all stores and dogs read clean (0 garbled sequences left). It's written in plain ASCII, so copying can't garble it. It:
+- adds `fix_garbled_text()`, which turns each garbled sequence back into its character and changes nothing else
+- repairs every text and JSON column in every table
+- re-creates every function whose code was garbled
+
+It's safe to run twice. Tested: garbled data and function code come back right, normal text is untouched, and visitors can't call it.
+
+**From now on** I copy with UTF-8 forced on (`LC_ALL=en_US.UTF-8 pbcopy`).

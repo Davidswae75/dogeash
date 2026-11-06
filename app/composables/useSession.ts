@@ -70,15 +70,20 @@ export function useSession() {
   // The shortlist moves to Supabase separately (useSavedDogs().adoptGuest()).
   const mergeGuest = () => { if (user.value && import.meta.client) mergeGuestLists(user.value.id) }
 
-  // Saved dogs stay with the account; this browser goes back to the guest's (empty) lists
-  async function signOut() {
+  // Saved dogs stay with the account; this browser goes back to the guest's (empty) lists.
+  // The admin console passes its own line; staff access is forgotten either way, so the next sign-in starts fresh.
+  async function signOut(text = 'Your saved dogs stay safe in your account.') {
     const notify = useNotify()
     await useLoader().run('Signing you out…', async () => {
       await useSupabaseClient().auth.signOut()
       user.value = null
       useState('saved-dogs').value = null
+      useState('staff-role').value = null
+      useState('staff-loaded').value = false
+      useState('owned-dogs').value = []
+      useState('owned-dogs-loaded').value = false
       await navigateTo('/')
-    }, 'Your saved dogs stay safe in your account.')
+    }, text)
     notify.signedOut()
   }
 

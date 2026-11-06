@@ -737,7 +737,7 @@ export function toStoreDog(r: DogRow, storageUrl: string): StoreDog {
 // How each listing status reads in the dashboard, and what the store can do next
 export const listingStatusLabels: Record<ListingStatus, { label: string, tone: string, dot: string }> = {
   draft: { label: 'Draft', tone: 'bg-ash-soft text-ink-muted', dot: 'bg-ash' },
-  pending_review: { label: 'Waiting for inspection', tone: 'bg-ash-soft text-ink', dot: 'bg-ash' },
+  pending_review: { label: 'Waiting for Dogeash review', tone: 'bg-ash-soft text-ink', dot: 'bg-marigold' },
   available: { label: 'Live', tone: 'bg-marigold-soft text-ink', dot: 'bg-marigold' },
   reserved: { label: 'Reserved', tone: 'bg-night text-on-night', dot: 'bg-marigold' },
   sold: { label: 'Sold', tone: 'bg-ash-soft text-ink', dot: 'bg-ink' },
@@ -748,7 +748,9 @@ export const listingStatusLabels: Record<ListingStatus, { label: string, tone: s
 export function listingActions(status: ListingStatus, verified: boolean): { to: ListingStatus, label: string }[] {
   const live = verified ? [{ to: 'available' as const, label: 'Go live' }] : []
   switch (status) {
-    case 'draft': case 'pending_review': case 'withdrawn': return live
+    case 'draft': case 'withdrawn': return live
+    // Dogeash decides; the store can take it back to a draft meanwhile
+    case 'pending_review': return [{ to: 'draft', label: 'Back to draft' }]
     case 'available': return [{ to: 'reserved', label: 'Mark reserved' }, { to: 'sold', label: 'Mark sold' }, { to: 'withdrawn', label: 'Withdraw' }]
     case 'reserved': return [{ to: 'available', label: 'Back to available' }, { to: 'sold', label: 'Mark sold' }, { to: 'withdrawn', label: 'Withdraw' }]
     case 'sold': return []

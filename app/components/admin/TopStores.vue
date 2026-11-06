@@ -9,7 +9,7 @@ const props = defineProps<{ stores: AdminOverview['topStores'] }>()
 
 <template>
   <AdminCard title="Top stores" description="Verified stores by live dogs" flush>
-    <div class="overflow-x-auto">
+    <div class="relative overflow-x-auto">
       <table v-if="props.stores.length" class="w-full min-w-[520px] border-collapse text-left text-[13px]">
         <thead>
           <tr class="text-[11.5px] text-ink-muted">

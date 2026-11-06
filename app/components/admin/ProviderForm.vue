@@ -8,6 +8,8 @@ import type { ProviderDraft } from '~/composables/useAdminCare'
 import type { CareProvider, CareType } from '~/utils/care'
 import { careTypes } from '~/utils/care'
 
+const typeOptions = (Object.keys(careTypes) as CareType[]).map(k => ({ value: k, label: careTypes[k].label }))
+
 // Add or edit a care provider in the directory. `save` returns an error, or null to close.
 const props = defineProps<{ provider?: CareProvider, save: (p: ProviderDraft) => Promise<string | null> }>()
 const open = defineModel<boolean>('open', { default: false })
@@ -61,9 +63,7 @@ const submit = handleSubmit(async (v) => {
       <form class="flex flex-col gap-5" novalidate @submit.prevent="submit">
         <div class="grid gap-5 sm:grid-cols-2"><Fields :fields="fields.who.slice(0, 1)" /><Fields :fields="fields.who.slice(1)" /></div>
         <FieldShell label="What they do" for="provider-type" :error="errors.type">
-          <NativeSelect id="provider-type" v-model="type" class="h-11 w-full">
-            <NativeSelectOption v-for="(t, key) in careTypes" :key="key" :value="key">{{ t.label }}</NativeSelectOption>
-          </NativeSelect>
+          <SelectMenu id="provider-type" v-model="type" :options="typeOptions" placeholder="Choose what they do" class="h-11!" />
         </FieldShell>
         <div class="grid gap-5 sm:grid-cols-2"><Fields :fields="fields.where.slice(0, 1)" /><Fields :fields="fields.where.slice(1)" /></div>
         <div class="grid gap-5 sm:grid-cols-2"><Fields :fields="fields.more.slice(0, 1)" /><Fields :fields="fields.more.slice(1)" /></div>

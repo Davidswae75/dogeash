@@ -19,6 +19,7 @@ onBeforeUnmount(() => Object.values(local.value).forEach(u => URL.revokeObjectUR
 // Pick the kind before the file; the first one not used yet is suggested
 const nextKind = (): VideoKind => (['obedience', 'protection', 'temperament', 'health', 'other'] as VideoKind[]).find(k => !videos.value.some(v => v.kind === k)) ?? 'other'
 const kind = ref<VideoKind>(nextKind())
+const kindOptions = (Object.keys(videoKinds) as VideoKind[]).map(k => ({ value: k, label: videoKinds[k] }))
 const busy = ref(false)
 const error = ref('')
 const input = ref<HTMLInputElement>()
@@ -47,9 +48,7 @@ const remove = (i: number) => { videos.value = videos.value.filter((_, j) => j !
         <video :src="urlOf(v.path)" controls preload="metadata" class="aspect-video w-full rounded-md bg-night sm:w-56" />
         <div class="flex min-w-0 flex-1 flex-col gap-2">
           <div class="flex items-center gap-2">
-            <NativeSelect :model-value="v.kind" :aria-label="`What video ${i + 1} shows`" class="h-9 text-sm" @change="(e: Event) => update(i, { kind: (e.target as HTMLSelectElement).value as VideoKind })">
-              <NativeSelectOption v-for="(label, key) in videoKinds" :key="key" :value="key">{{ label }}</NativeSelectOption>
-            </NativeSelect>
+            <SelectMenu :model-value="v.kind" :options="kindOptions" :aria-label="`What video ${i + 1} shows`" class="w-fit" @update:model-value="k => update(i, { kind: k as VideoKind })" />
             <Button type="button" variant="ghost" size="icon" class="ml-auto" :aria-label="`Remove video ${i + 1}`" @click="remove(i)"><X aria-hidden="true" /></Button>
           </div>
           <Input :model-value="v.title" maxlength="60" :aria-label="`Title of video ${i + 1}`" placeholder="Heelwork and recall" class="h-9 border-line-strong" @update:model-value="t => update(i, { title: String(t) })" />
@@ -57,9 +56,7 @@ const remove = (i: number) => { videos.value = videos.value.filter((_, j) => j !
       </li>
     </ul>
     <div v-if="videos.length < DOG_VIDEOS_MAX" class="flex flex-wrap items-center gap-2">
-      <NativeSelect v-model="kind" aria-label="What the next video shows" class="h-9 text-sm">
-        <NativeSelectOption v-for="(label, key) in videoKinds" :key="key" :value="key">{{ label }}</NativeSelectOption>
-      </NativeSelect>
+      <SelectMenu v-model="kind" :options="kindOptions" aria-label="What the next video shows" class="w-fit" />
       <Button type="button" variant="outline" size="sm" :loading="busy" @click="input?.click()"><Film aria-hidden="true" />{{ busy ? 'Uploading…' : 'Add a video' }}</Button>
       <input ref="input" type="file" accept="video/mp4,video/webm,video/quicktime" class="sr-only" aria-label="Choose a video" @change="pick">
     </div>

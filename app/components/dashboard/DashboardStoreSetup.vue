@@ -7,12 +7,15 @@ import type { StoreImage } from '~/composables/useStoreProfile'
 import type { Store } from '~/utils/stores'
 import type { StoreFormValues } from '~/utils/storeForm'
 import { useNotify } from '~/composables/useNotify'
-import { storeFormFromStore, storeSetupNeeded, storeStepDone, storeStepSchema, storeSteps } from '~/utils/storeForm'
+import { storeFormFromStore, storeFormSchema, storeSetupNeeded, storeStepDone, storeStepSchema, storeSteps } from '~/utils/storeForm'
 
-// The store profile in steps. Each step is checked on its own and saved when you leave it (Next, Back or
-// another step), so nothing is lost if someone stops halfway.
+// The store profile in steps.
 // Setting up (the essentials not yet filled in): one step after another, from the first unfinished one,
-// ending on a review and Finish. Editing (afterwards): any step, in any order, saved on its own.
+// ending on a review and Finish. Each step is checked and saved when you go forward, so nothing is lost if
+// someone stops halfway; going back never blocks.
+// Editing (afterwards): open any step, in any order, without anything being checked. Changes are kept
+// across steps (each step with unsaved changes is marked) and "Save changes" checks and saves them all;
+// if something needs fixing, it opens that step with the fields marked.
 const props = defineProps<{
   store: Store
   save: (values: StoreFormValues, quiet?: boolean) => Promise<string | null>
@@ -26,10 +29,25 @@ const furthest = ref(step.value)
 const current = computed(() => storeSteps[step.value - 1]!)
 const last = storeSteps.length
 
-const { handleSubmit, meta, resetForm } = useForm<StoreFormValues>({
-  validationSchema: computed(() => toTypedSchema(storeStepSchema(current.value.key))),
+// Setting up checks one step at a time; editing checks the whole profile, but only on Save
+// Values of steps not on screen are kept, so changes survive moving between steps.
+const { handleSubmit, meta, resetForm, values, validate } = useForm<StoreFormValues>({
+  validationSchema: computed(() => toTypedSchema(setup.value ? storeStepSchema(current.value.key) : storeFormSchema)),
   initialValues: storeFormFromStore(props.store),
+  keepValuesOnUnmount: true,
 })
+// What's saved, to tell which steps hold unsaved changes (editing)
+const saved = computed(() => storeFormFromStore(props.store))
+// Compared by content: key order doesn't matter, and 2014 equals "2014" (what a typed field gives back)
+const plain = (v: unknown): unknown => (Array.isArray(v)
+  ? v.map(plain)
+  : v && typeof v === 'object'
+    ? Object.fromEntries(Object.keys(v).sort().map(k => [k, plain((v as Record<string, unknown>)[k])]))
+    : String(v ?? '').trim())
+const differs = (f: keyof StoreFormValues) => JSON.stringify(plain(values[f])) !== JSON.stringify(plain(saved.value[f]))
+const unsaved = (i: number) => !setup.value && storeSteps[i]!.fields.some(f => differs(f))
+const unsavedCount = computed(() => storeSteps.filter((_, i) => unsaved(i)).length)
+const changed = computed(() => unsavedCount.value > 0)
 
 const busy = ref(false)
 const error = ref('')
@@ -54,8 +72,21 @@ async function saveStep(): Promise<boolean> {
   return saved
 }
 
+function show(to: number) {
+  error.value = ''
+  step.value = to
+  furthest.value = Math.max(furthest.value, to)
+  panel.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
+
 async function go(to: number) {
   if (to === step.value || to < 1 || to > last) return
+  // Editing: just open it. Setting up, going back: save if it's ready, never block.
+  if (!setup.value) return show(to)
+  if (to < step.value) {
+    if (meta.value.valid && meta.value.dirty) await saveStep()
+    return show(to)
+  }
   if (!(await saveStep())) return
   error.value = ''
   step.value = to
@@ -63,9 +94,29 @@ async function go(to: number) {
   panel.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
-// Edit mode: save the open step and stay on it
-async function saveHere() {
-  if (await saveStep()) useNotify().storeUpdated(props.store.name)
+// Editing: check and save every change, on every step. If something needs fixing, open that step.
+async function saveAll() {
+  let ok = false
+  await handleSubmit(async (v) => {
+    busy.value = true
+    error.value = (await props.save({ ...storeFormFromStore(props.store), ...v }, true)) ?? ''
+    busy.value = false
+    ok = !error.value
+  }, ({ errors }) => {
+    const wrong = Object.keys(errors)
+    const at = storeSteps.findIndex(st => st.fields.some(f => wrong.some(w => w === f || w.startsWith(`${f}[`) || w.startsWith(`${f}.`))))
+    if (at >= 0 && at + 1 !== step.value) show(at + 1)
+    error.value = at >= 0 ? `Some fields in ${storeSteps[at]!.title} need a look. They're marked in red.` : 'Some fields need a look.'
+  })()
+  if (!ok) {
+    // Once the step with the problem is on screen, check again so its fields are marked in red
+    await nextTick()
+    await validate()
+    return
+  }
+  await nextTick()
+  resetForm({ values: storeFormFromStore(props.store) })
+  useNotify().storeUpdated(props.store.name)
 }
 
 function finish() {
@@ -96,7 +147,9 @@ const progress = computed(() => Math.round(((step.value - 1) / (last - 1)) * 100
               <span v-else>{{ i + 1 }}</span>
             </StepperIndicator>
             <span class="flex flex-col pt-1">
-              <StepperTitle class="text-sm leading-5 font-bold whitespace-normal">{{ s.title }}</StepperTitle>
+              <StepperTitle class="flex items-center gap-2 text-sm leading-5 font-bold whitespace-normal">
+                {{ s.title }}<span v-if="unsaved(i)" class="size-2 rounded-full bg-marigold" title="Unsaved changes" aria-label="Unsaved changes" />
+              </StepperTitle>
               <span class="text-xs leading-[18px] text-ink-muted">{{ s.optional ? `Optional · ${s.hint}` : s.hint }}</span>
             </span>
           </StepperTrigger>
@@ -113,7 +166,7 @@ const progress = computed(() => Math.round(((step.value - 1) / (last - 1)) * 100
         </div>
       </div>
 
-      <form class="flex flex-col gap-5 rounded-xl bg-surface p-5 ring-1 ring-line sm:p-7" novalidate @submit.prevent="setup ? go(step + 1) : saveHere()">
+      <form class="flex flex-col gap-5 rounded-xl bg-surface p-5 ring-1 ring-line sm:p-7" novalidate @submit.prevent="setup ? go(step + 1) : saveAll()">
         <header class="flex flex-col gap-1.5">
           <span class="hidden font-mono text-[11px] font-semibold tracking-[.12em] text-ink-muted uppercase lg:block">Step {{ step }} of {{ last }}{{ current.optional ? ' · optional' : '' }}</span>
           <h2 class="m-0 font-display text-[22px] leading-7 font-extrabold font-stretch-expanded">{{ current.title }}</h2>
@@ -141,8 +194,8 @@ const progress = computed(() => Math.round(((step.value - 1) / (last - 1)) * 100
             <Button v-else type="button" variant="marigold" @click="finish"><Check aria-hidden="true" />Finish</Button>
           </template>
           <template v-else>
-            <Button v-if="current.fields.length" type="submit" variant="marigold" :loading="busy" :disabled="!meta.dirty">Save changes</Button>
-            <span v-if="current.fields.length && !meta.dirty" class="text-[13px] text-ink-muted">No changes yet.</span>
+            <Button type="submit" variant="marigold" :loading="busy" :disabled="!changed">Save changes</Button>
+            <span class="text-[13px] text-ink-muted">{{ !changed ? 'No changes yet.' : unsavedCount > 1 ? `Unsaved changes in ${unsavedCount} steps` : 'Unsaved changes' }}</span>
             <span class="flex-1" />
             <Button v-if="props.store.verified" as-child variant="outline"><NuxtLink :to="`/stores/${props.store.slug}`">View your store page</NuxtLink></Button>
           </template>
@@ -151,7 +204,9 @@ const progress = computed(() => Math.round(((step.value - 1) / (last - 1)) * 100
 
       <!-- Phones: jump to any step once editing -->
       <nav v-if="!setup" class="flex flex-wrap gap-2 lg:hidden" aria-label="Profile steps">
-        <Button v-for="(s, i) in storeSteps" :key="s.key" type="button" size="sm" :variant="i + 1 === step ? 'default' : 'outline'" @click="go(i + 1)">{{ s.title }}</Button>
+        <Button v-for="(s, i) in storeSteps" :key="s.key" type="button" size="sm" :variant="i + 1 === step ? 'default' : 'outline'" @click="go(i + 1)">
+          {{ s.title }}<span v-if="unsaved(i)" class="size-1.5 rounded-full bg-marigold" aria-label="Unsaved changes" />
+        </Button>
       </nav>
     </div>
   </div>

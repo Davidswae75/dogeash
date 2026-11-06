@@ -2,6 +2,7 @@
 import { ExternalLink, MoreHorizontal, Search } from '@lucide/vue'
 import { computed, ref } from 'vue'
 import type { AdminStore, StoreStatus } from '~/utils/admin'
+import type { CsvColumn } from '~/utils/csv'
 import { useAdmin } from '~/composables/useAdmin'
 import { useNotify } from '~/composables/useNotify'
 import { initialsOf } from '~/utils/account'
@@ -17,6 +18,13 @@ const filterModel = computed({ get: () => filter.value, set: (v: string) => { if
 const query = ref('')
 const statuses = Object.keys(storeStatusMeta) as StoreStatus[]
 const countOf = (s: StoreStatus) => stores.value.filter(x => x.status === s).length
+// For the CSV export: the stores on screen
+const csv: CsvColumn<AdminStore>[] = [
+  { label: 'Store ID', value: s => s.public_id }, { label: 'Name', value: s => s.name }, { label: 'City', value: s => s.city },
+  { label: 'Status', value: s => storeStatusMeta[s.status].label }, { label: 'Owner', value: s => s.owner }, { label: 'Dogs', value: s => s.dogs },
+  { label: 'Live dogs', value: s => s.live_dogs }, { label: 'Rating', value: s => s.rating }, { label: 'Reviews', value: s => s.reviews_count },
+  { label: 'Opened', value: s => s.created_at }, { label: 'Last change', value: s => s.status_changed_at }, { label: 'Dogeash note', value: s => s.status_note },
+]
 const shown = computed(() => {
   const q = query.value.trim().toLowerCase()
   return stores.value
@@ -42,6 +50,7 @@ async function run(note: string) {
 <template>
   <AdminCard title="Stores" description="Change a store's status. Its owners and managers are told, and every change is logged." flush>
     <template #actions>
+      <AdminExport name="stores" :rows="shown" :columns="csv" />
       <label class="relative hidden sm:block">
         <span class="sr-only">Search stores</span>
         <Search class="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-ink-muted" aria-hidden="true" />
@@ -58,7 +67,7 @@ async function run(note: string) {
       </ToggleGroup>
     </div>
 
-    <div class="overflow-x-auto">
+    <div class="relative overflow-x-auto">
       <table v-if="shown.length" class="w-full min-w-[760px] border-collapse text-left text-[13px]">
         <thead>
           <tr class="text-[11.5px] text-ink-muted">
@@ -77,7 +86,7 @@ async function run(note: string) {
                 <span class="grid size-8 shrink-0 place-items-center rounded-lg bg-night text-[11px] font-bold text-on-night">{{ initialsOf(s.name) }}</span>
                 <span class="flex min-w-0 flex-col leading-tight">
                   <span class="flex items-center gap-1.5 font-medium">
-                    {{ s.name }}
+                    <NuxtLink :to="`/admin/stores/${s.public_id}`" class="text-ink hover:underline">{{ s.name }}</NuxtLink>
                     <NuxtLink v-if="s.status === 'verified'" :to="`/stores/${s.slug}`" target="_blank" class="text-ink-muted hover:text-ink" :aria-label="`Open ${s.name}'s public page`"><ExternalLink class="size-3" aria-hidden="true" /></NuxtLink>
                   </span>
                   <span class="font-mono text-[11px] text-ink-muted">{{ s.public_id }} · {{ s.city }}</span>

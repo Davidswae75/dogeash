@@ -1,14 +1,10 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useColorMode } from '#imports'
 import { useLoader } from '~/composables/useLoader'
 
-// Full-screen loader: a blurred backdrop and the kennel-watch dog keeping an eye out, for waits
-// with nothing else on screen showing progress (signing out). Shown with useLoader().run().
-// Reduced motion gets the still of the dog (KennelWatch handles that).
+// Full-screen loader for waits with nothing else on screen showing progress (signing out, on the site and
+// in the admin). Dogeash's dog traces itself in over the wordmark, with what's happening underneath.
+// Shown with useLoader().run(). Reduced motion gets the still mark (DogMark handles that).
 const { state } = useLoader()
-const colorMode = useColorMode()
-const variant = computed(() => (colorMode.value === 'dark' ? 'night' : 'day'))
 </script>
 
 <template>
@@ -21,23 +17,19 @@ const variant = computed(() => (colorMode.value === 'dark' ? 'night' : 'day'))
     >
       <div
         v-if="state"
-        class="fixed inset-0 z-50 grid place-items-center bg-canvas/75 p-6 backdrop-blur-md"
+        class="fixed inset-0 z-[60] grid place-items-center bg-canvas/90 p-6 text-ink backdrop-blur-md"
         role="status"
         aria-live="polite"
         :aria-label="state.title"
       >
-        <div class="flex w-full max-w-[320px] animate-rise flex-col items-center gap-4 rounded-xl bg-surface p-5 text-center shadow-[0_24px_60px_-24px_rgb(0_0_0/.5)] ring-1 ring-line">
-          <div class="w-full overflow-hidden rounded-lg">
-            <KennelWatch :variant="variant" />
-          </div>
-          <div class="flex flex-col gap-1">
-            <strong class="font-display text-lg leading-6 font-extrabold font-stretch-expanded">{{ state.title }}</strong>
-            <span v-if="state.text" class="text-[13px] leading-5 text-ink-muted">{{ state.text }}</span>
-          </div>
-          <!-- Three paw-step dots, so there's movement even when the GIF is a still -->
-          <span class="flex gap-1.5" aria-hidden="true">
-            <span v-for="i in 3" :key="i" class="size-1.5 animate-pulse rounded-full bg-marigold" :style="{ animationDelay: `${(i - 1) * 180}ms` }" />
+        <div class="flex animate-rise flex-col items-center text-center">
+          <span class="grid size-28 place-items-center rounded-full bg-surface ring-1 ring-line shadow-[0_24px_60px_-28px_rgb(0_0_0/.45)]">
+            <DogMark animated class="size-[72px]" />
           </span>
+          <AppLogo static class="mt-5 text-[26px]" />
+          <span class="mt-6 h-px w-10 bg-line-strong" aria-hidden="true" />
+          <strong class="mt-5 text-[15px] leading-6 font-semibold">{{ state.title }}</strong>
+          <span v-if="state.text" class="mt-1 max-w-[30ch] text-[13px] leading-5 text-ink-muted">{{ state.text }}</span>
         </div>
       </div>
     </Transition>

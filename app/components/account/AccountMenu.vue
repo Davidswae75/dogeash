@@ -60,7 +60,7 @@ const groups = accountNav.map(g => g.items.filter(i => i.inMenu)).filter(g => g.
       <DropdownMenuItem v-if="staffRole" as-child class="h-9 cursor-pointer gap-3 px-2.5 font-semibold">
         <NuxtLink to="/admin" class="text-ink no-underline"><ShieldCheck class="size-[17px]" aria-hidden="true" />Admin</NuxtLink>
       </DropdownMenuItem>
-      <DropdownMenuItem class="h-9 cursor-pointer gap-3 px-2.5 font-semibold" @select="signOut">
+      <DropdownMenuItem class="h-9 cursor-pointer gap-3 px-2.5 font-semibold" @select="signOut()">
         <LogOut class="size-[17px] text-ink" aria-hidden="true" />Sign out
       </DropdownMenuItem>
     </DropdownMenuContent>

@@ -51,7 +51,7 @@ export const accountNav: { group: string, items: AccountNavItem[] }[] = [
     group: 'Account',
     items: [
       { label: 'Home profile', to: '/account/profile', icon: House },
-      { label: 'Reviews', to: '/account/reviews', icon: Star, soon: true },
+      { label: 'Reviews', to: '/account/reviews', icon: Star },
       { label: 'Gear orders', to: '/account/orders', icon: Package, soon: true },
       { label: 'Settings', to: '/account/settings', icon: Settings, inMenu: true },
     ],
@@ -61,17 +61,21 @@ export const accountNav: { group: string, items: AccountNavItem[] }[] = [
 // What each unbuilt section will hold, shown on its "Coming next" page
 export const accountSections: Record<string, { title: string, text: string, plan: string[] }> = {
   reservations: { title: 'Reservations', text: 'The dog you\'ve put a deposit on, from reservation to handover.', plan: ['Deposit held in escrow, with a countdown', 'Handover checklist and date', 'What happens if the visit doesn\'t work out'] },
-  reviews: { title: 'Reviews', text: 'Review the stores and providers you\'ve used.', plan: ['Rate a store after handover', 'Rate vets and trainers after a booking', 'Edit or remove your reviews'] },
   orders: { title: 'Gear orders', text: 'Harnesses, kennels and other gear you\'ve ordered.', plan: ['Track deliveries', 'Reorder food and supplies', 'Returns and receipts'] },
 }
 
-// Before a store takes a deposit, the buyer completes these
-export const reserveChecklist = [
-  { label: 'Phone number confirmed', done: true },
-  { label: 'Email confirmed', done: true },
-  { label: 'Home profile filled in', done: true },
-  { label: 'ID check', done: false, text: 'Stores ask for this before taking a deposit. Coming soon.' },
-]
+// Before a store takes a deposit, the buyer completes these (worked out from the account and their visits).
+// Anything not done links to where to do it.
+export interface ReadinessItem { label: string, done: boolean, text?: string, to?: string }
+export function reserveChecklist(account: Pick<Account, 'phone' | 'home'> | null, visitedAStore: boolean): ReadinessItem[] {
+  return [
+    { label: 'Email confirmed', done: !!account },
+    { label: 'Phone number added', done: !!account?.phone, text: 'Stores use it to confirm visits.', to: '/account/settings' },
+    { label: 'Home profile filled in', done: !!account?.home, text: 'So stores can suggest dogs that suit your home.', to: '/account/profile' },
+    { label: 'Met the dogs at a kennel', done: visitedAStore, text: 'Book a visit from your shortlist.', to: '/account/shortlist' },
+    { label: 'ID check', done: false, text: 'Stores ask for this before taking a deposit. Coming soon.' },
+  ]
+}
 
 // What the buyer told us about their home; dogs are matched against it (Home profile page)
 export type HandlerExperience = 'first-time' | 'some' | 'experienced' | 'professional'
@@ -84,23 +88,15 @@ export const experienceOptions: { value: HandlerExperience, label: string, hint:
   { value: 'professional', label: 'Professional handler', hint: 'Security, police or military dog work, or a trained handler on staff.' },
 ]
 
-// Visits and care appointments
-// Earlier prices, to show drops on shortlisted dogs
-export const samplePriceDrops: Record<string, number> = {
-  'KD-2026-014': 2_600_000,
-  'KD-2026-046': 2_200_000,
-}
-
-
 // A shortlisted dog that changed since it was saved: reserved by someone else, or cheaper
 export type ShortlistChange =
   | { dog: Dog, kind: 'reserved' }
   | { dog: Dog, kind: 'price', was: number }
 
-export function shortlistChanges(dogs: Dog[]): ShortlistChange[] {
+export function shortlistChanges(dogs: Dog[], savedPrices: Record<string, number>): ShortlistChange[] {
   return dogs.flatMap((dog): ShortlistChange[] => {
     if (dog.status === 'reserved') return [{ dog, kind: 'reserved' }]
-    const was = samplePriceDrops[dog.fileNo]
+    const was = savedPrices[dog.fileNo]
     return was && was > dog.priceNaira ? [{ dog, kind: 'price', was }] : []
   })
 }

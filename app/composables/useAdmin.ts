@@ -1,5 +1,5 @@
 import { useState, useSupabaseClient } from '#imports'
-import type { AdminOverview, AdminStore, AuditEntry, StoreStatus } from '~/utils/admin'
+import type { AdminOverview, AdminStore, AuditEntry, SeriesDay, StoreStatus } from '~/utils/admin'
 
 // The admin dashboard's data (Supabase: admin_overview(), admin_audit). The database refuses all of it
 // to anyone who isn't staff with a one-time code, whatever the page does.
@@ -9,6 +9,8 @@ export function useAdmin() {
   const audit = useState<AuditEntry[]>('admin-audit', () => [])
   const error = useState('admin-error', () => '')
   const stores = useState<AdminStore[]>('admin-stores', () => [])
+  // Longer day-by-day history for 90 days or a year (twice the period, to compare with the one before)
+  const history = useState<{ days: number, series: SeriesDay[] } | null>('admin-history', () => null)
 
   async function loadOverview() {
     const [o, a] = await Promise.all([
@@ -20,6 +22,12 @@ export function useAdmin() {
     const d = o.data as unknown as Partial<AdminOverview> | null
     overview.value = d ? { ...d, series: d.series ?? [], topStores: d.topStores ?? [], cities: d.cities ?? [] } as AdminOverview : null
     audit.value = (a.data ?? []) as AuditEntry[]
+  }
+
+  async function loadHistory(days: number) {
+    if (history.value && history.value.days >= days * 2) return
+    const { data } = await supabase.rpc('admin_history', { days: days * 2 })
+    history.value = { days: days * 2, series: (data as unknown as SeriesDay[] | null) ?? [] }
   }
 
   async function loadStores() {
@@ -35,5 +43,5 @@ export function useAdmin() {
     return null
   }
 
-  return { overview, audit, error, stores, loadOverview, loadStores, setStoreStatus }
+  return { overview, audit, error, stores, history, loadOverview, loadHistory, loadStores, setStoreStatus }
 }

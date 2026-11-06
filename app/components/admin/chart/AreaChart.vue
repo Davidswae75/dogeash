@@ -12,8 +12,10 @@ const width = ref(640)
 const H = 240
 const pad = { top: 12, right: 12, bottom: 26, left: 36 }
 let observer: ResizeObserver | undefined
+const measure = (w: number) => { if (w > 0) width.value = Math.max(200, Math.round(w)) }
 onMounted(() => {
-  observer = new ResizeObserver(([e]) => { width.value = Math.max(280, e!.contentRect.width) })
+  measure(box.value?.clientWidth ?? 0)
+  observer = new ResizeObserver(([e]) => measure(e!.contentRect.width))
   if (box.value) observer.observe(box.value)
 })
 onBeforeUnmount(() => observer?.disconnect())
@@ -51,12 +53,12 @@ const total = computed(() => props.points.reduce((s, p) => s + p.value, 0))
 </script>
 
 <template>
-  <div ref="box" class="relative w-full select-none">
+  <div ref="box" class="relative w-full min-w-0 overflow-hidden select-none">
     <svg
       :width="width"
       :height="H"
       :viewBox="`0 0 ${width} ${H}`"
-      class="block touch-none"
+      class="block w-full max-w-full touch-none"
       role="img"
       :aria-label="`${props.label}: ${total} over ${props.points.length} days`"
       @pointermove="onMove"

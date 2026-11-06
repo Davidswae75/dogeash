@@ -21,6 +21,12 @@ const levels = ref<ProtectionLevel[]>([])
 const services = ref<StoreService[]>([])
 const trust = ref<string[]>([])
 const sort = ref<'rating' | 'available' | 'established' | 'name'>('rating')
+const sortOptions = [
+  { value: 'rating', label: 'Highest rated' },
+  { value: 'available', label: 'Most dogs for sale' },
+  { value: 'established', label: 'Longest running' },
+  { value: 'name', label: 'Name, A to Z' },
+] as const
 const sheetOpen = ref(false)
 
 const summaries = new Map(listedStores.value.map(s => [s.id, storeSummary(s)]))
@@ -175,12 +181,7 @@ const eyebrow = 'text-xs leading-4 font-bold tracking-[.08em] uppercase'
               </div>
               <div class="flex flex-col gap-2.5 md:hidden">
                 <label for="store-sort" :class="[eyebrow, 'text-ink-muted']">Sort by</label>
-                <NativeSelect id="store-sort" v-model="sort" class="h-10 w-full border-line-strong bg-surface font-semibold">
-                  <NativeSelectOption value="rating">Highest rated</NativeSelectOption>
-                  <NativeSelectOption value="available">Most dogs for sale</NativeSelectOption>
-                  <NativeSelectOption value="established">Longest running</NativeSelectOption>
-                  <NativeSelectOption value="name">Name, A to Z</NativeSelectOption>
-                </NativeSelect>
+                <SelectMenu id="store-sort" v-model="sort" :options="sortOptions" class="h-10! font-semibold" />
               </div>
             </div>
             <SheetFooter class="flex-row gap-2 border-t border-line px-6 py-4">
@@ -194,12 +195,7 @@ const eyebrow = 'text-xs leading-4 font-bold tracking-[.08em] uppercase'
 
         <label class="hidden shrink-0 items-center gap-2 text-sm md:flex">
           <span class="sr-only">Sort by</span>
-          <NativeSelect v-model="sort" class="h-[38px] border-line-strong bg-surface font-semibold">
-            <NativeSelectOption value="rating">Highest rated</NativeSelectOption>
-            <NativeSelectOption value="available">Most dogs for sale</NativeSelectOption>
-            <NativeSelectOption value="established">Longest running</NativeSelectOption>
-            <NativeSelectOption value="name">Name, A to Z</NativeSelectOption>
-          </NativeSelect>
+          <SelectMenu v-model="sort" :options="sortOptions" aria-label="Sort by" class="h-[38px]! w-fit font-semibold" />
         </label>
       </div>
     </div>

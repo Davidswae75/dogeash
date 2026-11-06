@@ -429,3 +429,31 @@ description: chronological action log per session, consolidated weekly
 | 17:49 | Created app/pages/admin/inspections/[id].vue | — | ~2098 |
 | 17:50 | Edited app/composables/useAdminInspections.ts | inline fix | ~43 |
 | 18:08 | Created supabase/migrations/20261120000000_reports_and_blocking.sql | — | ~4220 |
+| 02:09 | Created app/components/ReportButton.vue | — | ~1146 |
+| 02:11 | Created app/pages/admin/reports.vue | — | ~1724 |
+| 02:16 | Created supabase/migrations/20261121000000_admin_detail_pages.sql | — | ~2091 |
+| 02:18 | Created app/pages/admin/stores/[id].vue | — | ~3643 |
+| 02:18 | Created app/pages/admin/people/[id].vue | — | ~2650 |
+| 02:22 | Created supabase/migrations/20261122000000_admin_visits.sql | — | ~980 |
+| 02:24 | Created app/pages/admin/visits.vue | — | ~1951 |
+| 02:31 | Created supabase/migrations/20261123000000_reinspection.sql | — | ~1411 |
+| 02:32 | Created app/pages/admin/reinspections.vue | — | ~1438 |
+| 02:36 | Created supabase/migrations/20261124000000_announcements.sql | — | ~1236 |
+| 02:38 | Created app/pages/admin/announcements.vue | — | ~1834 |
+| 02:42 | Created supabase/migrations/20261125000000_listing_review.sql | — | ~1290 |
+| 02:48 | Created supabase/migrations/20261126000000_admin_history.sql | — | ~615 |
+| 02:51 | Edited app/pages/admin/visits.vue | 6→6 lines | ~151 |
+| 02:53 | Created supabase/migrations/20261127000000_admin_search.sql | — | ~684 |
+| 03:09 | Created supabase/migrations/20261128000000_applications_without_form.sql | — | ~486 |
+| 03:12 | Created app/pages/zz-admin-preview.vue | — | ~742 |
+| 03:22 | Created app/components/SelectMenu.vue | — | ~393 |
+| 03:33 | Created app/components/DogMark.vue | — | ~787 |
+| 03:44 | Created app/utils/signInNextSteps.ts | — | ~674 |
+| 03:52 | Created supabase/migrations/20261129000000_buyer_dashboard.sql | — | ~2005 |
+| 03:54 | Created app/utils/myDogs.ts | — | ~1206 |
+| 03:55 | Created app/composables/useOwnedDogs.ts | — | ~1884 |
+| 03:55 | Created app/components/account/AccountDogForm.vue | — | ~2438 |
+| 03:56 | Created app/components/account/AccountDogRecordDialog.vue | — | ~1515 |
+| 03:58 | Created app/components/ConfirmDialog.vue | — | ~381 |
+| 04:04 | Edited app/components/account/AccountNav.vue | CSS: Phones | ~378 |
+| 04:05 | Created app/pages/zz-account-preview.vue | — | ~997 |

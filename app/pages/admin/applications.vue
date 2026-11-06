@@ -3,6 +3,7 @@ import { CalendarClock, FileText, MapPin, Phone } from '@lucide/vue'
 import { computed, onMounted, ref } from 'vue'
 import { definePageMeta, useSeoMeta } from '#imports' // nuxt
 import type { AdminApplication } from '~/utils/admin'
+import type { CsvColumn } from '~/utils/csv'
 import { useAdminApplications } from '~/composables/useAdminApplications'
 import { useAdminInspections } from '~/composables/useAdminInspections'
 import { useNotify } from '~/composables/useNotify'
@@ -13,7 +14,7 @@ import { inspectionStatusMeta, inspectionWhen } from '~/utils/inspections'
 // Admin › Applications: stores asking to go live, with everything needed to decide: the owner, the profile,
 // the kennel's address and preferred inspection days, and the documents (private; they open for a minute).
 // Approve (the store goes live and its inspection is recorded) or send back with a reason the owner reads.
-definePageMeta({ layout: 'admin', middleware: 'admin' })
+definePageMeta({ layout: 'admin', colorMode: 'dark', middleware: 'admin' })
 useSeoMeta({ title: 'Applications · Dogeash admin', robots: 'noindex' })
 
 const { applications, loaded, load, openDoc, decide } = useAdminApplications()
@@ -38,6 +39,13 @@ const tab = ref<'in_review' | 'draft'>('in_review')
 const tabModel = computed({ get: () => tab.value, set: (v: string) => { if (v) tab.value = v as 'in_review' | 'draft' } })
 const shown = computed(() => applications.value.filter(a => a.status === tab.value))
 const countOf = (s: 'in_review' | 'draft') => applications.value.filter(a => a.status === s).length
+const csv: CsvColumn<AdminApplication>[] = [
+  { label: 'Store ID', value: a => a.public_id }, { label: 'Store', value: a => a.name }, { label: 'City', value: a => a.city }, { label: 'Status', value: a => a.status },
+  { label: 'Owner', value: a => a.owner?.name }, { label: 'Owner email', value: a => a.owner?.email }, { label: 'Owner phone', value: a => a.owner?.phone },
+  { label: 'Address', value: a => a.address }, { label: 'Inspector phone', value: a => a.contact_phone }, { label: 'Preferred days', value: a => a.preferred_days.join('; ') },
+  { label: 'Dogs', value: a => a.dogs }, { label: 'ID uploaded', value: a => !!a.id_doc_path }, { label: 'CAC', value: a => a.cac_doc_path ? 'uploaded' : a.cac_registered ? 'missing' : 'not registered' },
+  { label: 'Sent', value: a => a.submitted_at },
+]
 
 const docs = (a: AdminApplication) => [
   { label: 'Owner\'s ID', path: a.id_doc_path, missing: 'Missing' },
@@ -62,15 +70,17 @@ async function run(note: string) {
 <template>
   <AdminPage title="Applications" :count="countOf('in_review')" description="Stores asking to go live. Check the documents, book the inspection (passing it approves the store), or send it back.">
     <template #actions>
-      <ToggleGroup v-model="tabModel" type="single" variant="outline" size="sm" aria-label="Show applications">
+      <AdminExport name="applications" :rows="shown" :columns="csv" />
+      <ToggleGroup v-model="tabModel" type="single" variant="outline" size="sm" aria-label="Show applications" class="max-w-full flex-wrap justify-start">
         <ToggleGroupItem value="in_review" class="px-2.5 text-xs">Waiting <span class="ml-1 font-mono text-ink-muted">{{ countOf('in_review') }}</span></ToggleGroupItem>
         <ToggleGroupItem value="draft" class="px-2.5 text-xs">Sent back <span class="ml-1 font-mono text-ink-muted">{{ countOf('draft') }}</span></ToggleGroupItem>
       </ToggleGroup>
     </template>
 
     <div v-if="shown.length" class="flex flex-col gap-4">
-      <AdminCard v-for="a in shown" :key="a.public_id" :title="a.name" :description="`${a.public_id} · ${[...new Set([a.area, a.city, a.state].filter(Boolean))].join(', ')} · sent ${a.submitted_at ? adminTime(a.submitted_at) : '—'}`">
+      <AdminCard v-for="a in shown" :key="a.public_id" :title="a.name" :description="`${a.public_id} · ${[...new Set([a.area, a.city, a.state].filter(Boolean))].join(', ')} · ${a.submitted_at ? `sent ${adminTime(a.submitted_at)}` : 'no form'}`">
         <template #actions>
+          <Button as-child variant="ghost" size="sm"><NuxtLink :to="`/admin/stores/${a.public_id}`">Store page</NuxtLink></Button>
           <template v-if="a.status === 'in_review'">
             <Button variant="outline" size="sm" @click="ask(a, false)">Send back</Button>
             <Button v-if="inspectionOf(a)?.status !== 'scheduled'" variant="marigold" size="sm" @click="book(a)"><CalendarClock aria-hidden="true" />Book inspection</Button>
@@ -84,6 +94,7 @@ async function run(note: string) {
           · {{ inspectionWhen(inspectionOf(a)!.scheduled_for) }} · {{ inspectionOf(a)!.inspector }}
           <span class="ml-auto font-semibold underline underline-offset-4">Open the sheet</span>
         </NuxtLink>
+        <p v-if="!a.has_form" class="m-0 mb-4 rounded-lg bg-surface-sunk px-3.5 py-2.5 text-[13px]"><strong class="font-semibold">No application form:</strong> this store went to review before the form existed, so there's no address, inspection days or documents yet. Send it back to ask the owner to fill the form in, or approve it if you already know them.</p>
         <p v-if="a.status === 'draft' && a.status_note" class="m-0 mb-4 rounded-lg bg-surface-sunk px-3.5 py-2.5 text-[13px]"><strong class="font-semibold">Sent back:</strong> {{ a.status_note }} <span class="text-ink-muted">· waiting for the owner</span></p>
 
         <div class="grid gap-6 lg:grid-cols-3">

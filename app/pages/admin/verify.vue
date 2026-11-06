@@ -5,7 +5,7 @@ import { useStaff } from '~/composables/useStaff'
 
 // The one-time code every admin session needs. First time: set up an authenticator app (scan the QR code
 // or type the key), then confirm with a code from it. After that: just the 6-digit code.
-definePageMeta({ layout: 'admin', middleware: 'admin' })
+definePageMeta({ layout: 'admin', colorMode: 'dark', middleware: 'admin' })
 useSeoMeta({ title: 'One-time code · Dogeash admin', robots: 'noindex' })
 
 const route = useRoute()

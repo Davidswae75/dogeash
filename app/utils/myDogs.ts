@@ -1,27 +1,40 @@
 import type { ProtectionLevel } from './protection'
 
-// Dogs a buyer owns after handover: a living record of health, training and care.
-// One sample dog for the signed-in buyer until accounts and the API exist.
+// Dogs a person owns (bought on Dogeash or elsewhere) and each one's record: vaccinations, treatments,
+// vet visits, training and reminders (Supabase: owned_dogs, owned_dog_records; useOwnedDogs()).
+// Whether something is on time is worked out from its due date, so it's always current.
 
 export type CareStatus = 'up-to-date' | 'due-soon' | 'overdue'
+export type RecordKind = 'vaccination' | 'treatment' | 'vet' | 'training' | 'reminder'
+
+export interface OwnedDogRecord {
+  id: string
+  kind: RecordKind
+  title: string
+  /** When it was given or happened (yyyy-mm-dd) */
+  doneOn: string | null
+  /** When it's next due (yyyy-mm-dd) */
+  dueOn: string | null
+  byWhom: string
+  note: string
+}
 
 export interface OwnedDog {
-  fileNo: string
+  id: string
   name: string
   breed: string
-  sex: 'Male' | 'Female'
-  born: string
-  age: string
-  weightKg: number
-  level: ProtectionLevel
+  sex: 'Male' | 'Female' | null
+  bornOn: string | null
+  weightKg: number | null
   microchip: string
-  storeId: string
-  handedOver: string
+  level: ProtectionLevel | null
+  photoPath: string | null
+  /** A short-lived link to the photo (the bucket is private) */
   photo?: string
-  guarantee: { until: string, covers: string, monthsLeft: number, months: number }
-  vaccinations: { name: string, given: string, due: string, status: CareStatus }[]
-  training: { title: string, date: string, by: string, note: string }[]
-  reminders: { title: string, due: string, status: CareStatus }[]
+  cameFrom: string
+  gotOn: string | null
+  notes: string
+  records: OwnedDogRecord[]
 }
 
 export const careStatus: Record<CareStatus, { label: string, tone: string, dot: string }> = {
@@ -30,46 +43,50 @@ export const careStatus: Record<CareStatus, { label: string, tone: string, dot: 
   'overdue': { label: 'Overdue', tone: 'bg-danger/12 text-danger', dot: 'bg-danger' },
 }
 
-export const sampleOwnedDogs: OwnedDog[] = [
-  {
-    fileNo: 'KD-2025-118',
-    name: 'Bruno',
-    breed: 'Boerboel',
-    sex: 'Male',
-    born: 'Mar 2023',
-    age: '3 years',
-    weightKg: 61,
-    level: 4,
-    microchip: '985 112 004 771 309',
-    storeId: 'STR-001',
-    handedOver: '12 Aug 2026',
-    guarantee: { until: '12 Aug 2027', covers: 'Hips, elbows and inherited conditions', monthsLeft: 10, months: 12 },
-    vaccinations: [
-      { name: 'Rabies', given: '14 Aug 2026', due: 'Aug 2027', status: 'up-to-date' },
-      { name: 'DHPPi (5-in-1)', given: '14 Aug 2026', due: 'Aug 2027', status: 'up-to-date' },
-      { name: 'Deworming', given: '1 Aug 2026', due: '1 Nov 2026', status: 'due-soon' },
-      { name: 'Tick and flea', given: '1 Sep 2026', due: '1 Oct 2026', status: 'overdue' },
-    ],
-    training: [
-      { title: 'Refresher: gate control', date: '20 Sep 2026', by: 'Steelpaw Training', note: 'Holds at the gate until released; ignores food from strangers.' },
-      { title: 'Handover training, day 2', date: '13 Aug 2026', by: 'K9 Guardian Kennels', note: 'House staff and driver learned the commands.' },
-      { title: 'Handover training, day 1', date: '12 Aug 2026', by: 'K9 Guardian Kennels', note: 'Settled into the compound; night patrol route walked.' },
-    ],
-    reminders: [
-      { title: 'Tick and flea treatment', due: '1 Oct 2026', status: 'overdue' },
-      { title: 'Deworming', due: '1 Nov 2026', status: 'due-soon' },
-      { title: 'Training refresher', due: 'Dec 2026', status: 'up-to-date' },
-    ],
-  },
-]
+export const recordKinds: Record<RecordKind, { label: string, hint: string, example: string }> = {
+  vaccination: { label: 'Vaccination', hint: 'Rabies, 5-in-1 and boosters', example: 'Rabies' },
+  treatment: { label: 'Treatment', hint: 'Deworming, tick and flea, medicine', example: 'Deworming' },
+  vet: { label: 'Vet visit', hint: 'Check-ups, injuries, tests', example: 'Annual check-up' },
+  training: { label: 'Training', hint: 'Sessions, refreshers, commands learned', example: 'Gate control refresher' },
+  reminder: { label: 'Reminder', hint: 'Anything to remember on a date', example: 'Buy food' },
+}
 
-export const findOwnedDog = (fileNo: string) =>
-  sampleOwnedDogs.find(d => d.fileNo.toLowerCase() === fileNo.toLowerCase())
+// "Due soon" means within 30 days
+const SOON_DAYS = 30
+const today = () => new Date(new Date().toDateString())
+const asDate = (iso: string) => new Date(`${iso}T00:00:00`)
 
-// Reminders, most urgent first: overdue, then due soon
-const urgency: CareStatus[] = ['overdue', 'due-soon', 'up-to-date']
-export const sortedReminders = (dog: OwnedDog) =>
-  [...dog.reminders].sort((a, b) => urgency.indexOf(a.status) - urgency.indexOf(b.status))
-export const nextReminder = (dog: OwnedDog) => sortedReminders(dog)[0]
+export function statusOf(dueOn: string | null): CareStatus {
+  if (!dueOn) return 'up-to-date'
+  const days = (asDate(dueOn).getTime() - today().getTime()) / 864e5
+  return days < 0 ? 'overdue' : days <= SOON_DAYS ? 'due-soon' : 'up-to-date'
+}
 
-export const ownedDogLink = (dog: OwnedDog) => `/account/dogs/${dog.fileNo.toLowerCase()}`
+/** "14 Aug 2026" */
+export const dayLabel = (iso: string | null) => (iso ? asDate(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—')
+
+/** "3 years", "7 months", from the birth date */
+export function ageOf(bornOn: string | null) {
+  if (!bornOn) return ''
+  const months = Math.max(0, Math.floor((today().getTime() - asDate(bornOn).getTime()) / (864e5 * 30.44)))
+  if (months < 12) return `${months} ${months === 1 ? 'month' : 'months'}`
+  const years = Math.floor(months / 12)
+  return `${years} ${years === 1 ? 'year' : 'years'}`
+}
+
+/** The facts line under a name: "Boerboel · Male · 3 years" */
+export const dogSummary = (d: OwnedDog) => [d.breed, d.sex, ageOf(d.bornOn)].filter(Boolean).join(' · ')
+
+// Health: vaccinations, treatments and vet visits, newest first
+export const healthOf = (d: OwnedDog) =>
+  d.records.filter(r => r.kind !== 'training' && r.kind !== 'reminder').sort((a, b) => (b.doneOn ?? b.dueOn ?? '').localeCompare(a.doneOn ?? a.dueOn ?? ''))
+// Training sessions, newest first
+export const trainingOf = (d: OwnedDog) =>
+  d.records.filter(r => r.kind === 'training').sort((a, b) => (b.doneOn ?? b.dueOn ?? '').localeCompare(a.doneOn ?? a.dueOn ?? ''))
+// Everything with a due date still to come or missed, most urgent first
+export const upcomingOf = (d: OwnedDog) =>
+  d.records.filter(r => r.dueOn).sort((a, b) => a.dueOn!.localeCompare(b.dueOn!))
+export const nextDue = (d: OwnedDog) => upcomingOf(d)[0]
+export const needsAttention = (d: OwnedDog) => upcomingOf(d).filter(r => statusOf(r.dueOn) !== 'up-to-date').length
+
+export const ownedDogLink = (d: Pick<OwnedDog, 'id'>) => `/account/dogs/${d.id}`

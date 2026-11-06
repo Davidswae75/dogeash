@@ -8,7 +8,7 @@ import { inspectionStatusMeta, inspectionWhen } from '~/utils/inspections'
 
 // Admin › Inspections: kennel visits booked and done. Admins see all of them; inspectors see their own.
 // Each opens the inspection sheet. Book new ones from Applications.
-definePageMeta({ layout: 'admin', middleware: 'admin' })
+definePageMeta({ layout: 'admin', colorMode: 'dark', middleware: 'admin' })
 useSeoMeta({ title: 'Inspections · Dogeash admin', robots: 'noindex' })
 
 const { list, loaded, load } = useAdminInspections()
@@ -25,7 +25,7 @@ const shown = computed(() => (tab.value === 'upcoming' ? upcoming.value : done.v
 <template>
   <AdminPage title="Inspections" :count="upcoming.length" :description="role === 'admin' ? 'Kennel visits booked and done. Book one from Applications; passing it puts the store live.' : 'The kennel visits you\'re booked for. Open one to work through the sheet on the day.'">
     <template #actions>
-      <ToggleGroup v-model="tabModel" type="single" variant="outline" size="sm" aria-label="Show inspections">
+      <ToggleGroup v-model="tabModel" type="single" variant="outline" size="sm" aria-label="Show inspections" class="max-w-full flex-wrap justify-start">
         <ToggleGroupItem value="upcoming" class="px-2.5 text-xs">Booked <span class="ml-1 font-mono text-ink-muted">{{ upcoming.length }}</span></ToggleGroupItem>
         <ToggleGroupItem value="done" class="px-2.5 text-xs">Done <span class="ml-1 font-mono text-ink-muted">{{ done.length }}</span></ToggleGroupItem>
       </ToggleGroup>

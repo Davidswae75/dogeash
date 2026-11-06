@@ -17,7 +17,8 @@ const notify = useNotify()
 async function save(values: DogFormValues, media: DogMedia, publish: boolean) {
   const { fileNo, error } = await storeDogs.create(values, media, publish)
   if (!fileNo) return error ?? null
-  notify.dogUpdated(`${values.name} ${publish && !error ? 'is live' : 'saved as a draft'}`, `File number ${fileNo}.${error ? ` ${error}` : ''}`)
+  const held = publish && !error && storeDogs.lastStatus.value === 'pending_review'
+  notify.dogUpdated(`${values.name} ${held ? 'is with Dogeash for review' : publish && !error ? 'is live' : 'saved as a draft'}`, `File number ${fileNo}.${error ? ` ${error}` : held ? ' Dogeash checks some new listings before buyers see them.' : ''}`)
   await navigateTo('/dashboard/dogs')
   return null
 }

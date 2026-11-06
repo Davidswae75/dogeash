@@ -56,7 +56,10 @@ onBeforeUnmount(() => clearInterval(timer))
       <div class="flex min-w-0 flex-1 flex-col gap-0.5">
         <span class="font-mono text-[10.5px] font-semibold tracking-[.12em] text-ink-muted uppercase">{{ inboxKinds[props.item.kind].label }} · {{ shortTime(props.item.at) }}</span>
         <h2 class="m-0 font-display text-lg leading-6 font-extrabold font-stretch-expanded">{{ props.item.subject }}</h2>
-        <span class="text-[13px] text-ink-muted">{{ props.item.from }}</span>
+        <span class="flex flex-wrap items-center gap-x-3 text-[13px] text-ink-muted">
+          {{ props.item.from }}
+          <ReportButton v-if="props.item.conversation" kind="conversation" :target-id="props.item.conversation.id" what="this conversation" class="text-xs" />
+        </span>
       </div>
       <NuxtLink v-if="dog" :to="`/dogs/${dog.fileNo.toLowerCase()}`" class="hidden shrink-0 items-center gap-2 rounded-lg p-1.5 pr-3 text-ink no-underline ring-1 ring-line hover:ring-ink sm:flex">
         <img v-if="dog.photo" :src="dog.photo" alt="" class="size-9 rounded-md object-cover">

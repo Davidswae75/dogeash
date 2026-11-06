@@ -169,7 +169,7 @@ const lead = 'm-0 max-w-[40em] text-[17px] leading-[28px] text-ink-muted'
             <h2 :class="h2">Dog, guard, cameras <span class="text-outline">or fence?</span></h2>
             <p :class="lead">No single option does everything. The question is which gaps a dog fills for your home.</p>
           </div>
-          <div class="overflow-x-auto rounded-lg ring-1 ring-line">
+          <div class="relative overflow-x-auto rounded-lg ring-1 ring-line">
             <table class="w-full min-w-[640px] border-collapse bg-surface text-left text-sm">
               <caption class="sr-only">How a guard dog compares with a security guard, CCTV and alarm, and an electric fence</caption>
               <thead>

@@ -11,6 +11,12 @@ export function useCareDirectory() {
   const cities = ref<string[]>(route.query.city ? [String(route.query.city)] : [])
   const options = ref<string[]>([])
   const sort = ref<'rating' | 'reviews' | 'price' | 'name'>('rating')
+  const sortOptions = [
+    { value: 'rating', label: 'Highest rated' },
+    { value: 'reviews', label: 'Most reviewed' },
+    { value: 'price', label: 'Lowest price' },
+    { value: 'name', label: 'Name, A to Z' },
+  ] as const
 
   const cityOptions = [...new Set(listedProviders.value.map(p => p.city))].sort().map(c => ({ value: c, label: c }))
   const typeOptions = (Object.keys(careTypes) as CareType[])
@@ -46,5 +52,5 @@ export function useCareDirectory() {
     options.value = []
   }
 
-  return { query, type, cities, options, sort, cityOptions, typeOptions, trustOptions, providers, clear }
+  return { query, type, cities, options, sort, sortOptions, cityOptions, typeOptions, trustOptions, providers, clear }
 }

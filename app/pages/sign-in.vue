@@ -2,16 +2,20 @@
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
 import { computed, ref, watch } from 'vue'
-import { definePageMeta, navigateTo, useRoute, useSeoMeta } from '#imports' // nuxt
+import { definePageMeta, useRoute, useSeoMeta } from '#imports' // nuxt
+import type { AuthLinkCard } from '~/components/auth/AuthLinkCards.vue'
 import { useAuth } from '~/composables/useAuth'
 import { useNotify } from '~/composables/useNotify'
 import { useSession } from '~/composables/useSession'
+import { useStaff } from '~/composables/useStaff'
 import { emailSignInSchema, safeRedirect } from '~/utils/auth'
 import { authFields } from '~/utils/authFields'
+import { signInNextSteps } from '~/utils/signInNextSteps'
 
 // One sign-in for everyone: buyers, stores, care providers and Dogeash staff.
-// Email and password, or a 6-digit code by email. Afterwards: back to where you were heading,
-// to your store dashboard if you work at a store, otherwise Home.
+// Email and password, or a 6-digit code by email. Afterwards, a choice of where to go that fits the
+// account: back to what they were doing, the admin console for staff, their store for store teams, and
+// browsing, the shortlist or the account for everyone (utils/signInNextSteps).
 definePageMeta({
   layout: 'auth',
   authPanel: {
@@ -28,7 +32,7 @@ const auth = useAuth()
 const session = useSession()
 const notify = useNotify()
 
-const step = ref<'credentials' | 'code'>('credentials')
+const step = ref<'credentials' | 'code' | 'next'>('credentials')
 // Which code we're waiting for: a sign-in code, or the confirmation for an account not yet confirmed
 const codeFor = ref<'sign-in' | 'confirm'>('sign-in')
 const email = ref('')
@@ -42,10 +46,18 @@ const { handleSubmit, values, validateField } = useForm<{ email?: string, passwo
 const fields = computed(() => [authFields.email(), authFields.password({ visible: showPassword.value })])
 watch(values, () => { error.value = '' })
 
-// The button's spinner covers the wait, so no full-screen loader here
+// Signed in: work out what this account can open (staff is checked fresh), then offer the choices.
+// The button's spinner covers the wait, so no full-screen loader here.
+const nextSteps = ref<AuthLinkCard[]>([])
 async function finish(moved: number) {
-  const to = route.query.redirect ? safeRedirect(route.query.redirect) : session.hasStore.value ? '/dashboard' : '/'
-  await navigateTo(to)
+  const staff = useStaff()
+  await staff.load()
+  nextSteps.value = signInNextSteps({
+    redirect: route.query.redirect ? safeRedirect(route.query.redirect) : undefined,
+    stores: session.memberships.value,
+    staffRole: staff.role.value,
+  })
+  step.value = 'next'
   notify.signedIn(session.firstName.value, moved)
 }
 
@@ -104,13 +116,18 @@ const resendCode = () => (codeFor.value === 'confirm' ? auth.resendSignUpCode(em
 
     <div class="flex flex-col gap-4 border-t border-line pt-6">
       <HelpPanel title="Run a store on Dogeash?">
-        Sign in here with the account you used to apply. Your store dashboard opens straight after.
+        Sign in here with the account you used to apply. Your store dashboard is the first choice after.
       </HelpPanel>
       <p class="m-0 text-sm text-ink-muted">
         New here? <NuxtLink to="/sign-up" class="font-bold text-ink">Create an account</NuxtLink> or <NuxtLink to="/open-a-store" class="font-bold text-ink">open a store</NuxtLink>.
         Sign-in by text message is coming soon.
       </p>
     </div>
+  </template>
+
+  <template v-else-if="step === 'next'">
+    <AuthHeading title="Welcome back," :outline="session.firstName.value || 'friend'" done text="Where would you like to go?" />
+    <AuthLinkCards :items="nextSteps" />
   </template>
 
   <AuthCodeStep

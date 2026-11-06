@@ -119,7 +119,7 @@ watch(() => route.fullPath, () => { menuOpen.value = false })
               <strong class="truncate text-sm">{{ user.name }}</strong>
               <span class="truncate text-[13px] text-ink-muted">{{ user.email }}</span>
             </span>
-            <Button variant="outline" size="sm" @click="signOut">Sign out</Button>
+            <Button variant="outline" size="sm" @click="signOut()">Sign out</Button>
           </div>
           <div v-for="m in memberships" :key="m.storeId" :class="menuOpen && 'animate-menu-in'" :style="lastDelay">
             <AccountStoreCard :store="m.store" :role="m.role" />

@@ -9,7 +9,7 @@ useSeoMeta({
   description: 'Find and book vets, trainers, groomers, kennel builders and equipment suppliers for your guard dog in Nigeria.',
 })
 
-const { query, type, cities, options, sort, cityOptions, typeOptions, trustOptions, providers, clear } = useCareDirectory()
+const { query, type, cities, options, sort, sortOptions, cityOptions, typeOptions, trustOptions, providers, clear } = useCareDirectory()
 const providerCount = listedProviders.value.length
 const eyebrow = 'text-xs leading-4 font-bold tracking-[.08em] uppercase'
 </script>
@@ -61,12 +61,7 @@ const eyebrow = 'text-xs leading-4 font-bold tracking-[.08em] uppercase'
           <span class="text-sm font-semibold" aria-live="polite">{{ providers.length }} {{ providers.length === 1 ? 'provider' : 'providers' }}</span>
           <label class="flex items-center gap-2 text-sm">
             <span class="sr-only">Sort by</span>
-            <NativeSelect v-model="sort" class="h-[38px] border-line-strong bg-surface font-semibold">
-              <NativeSelectOption value="rating">Highest rated</NativeSelectOption>
-              <NativeSelectOption value="reviews">Most reviewed</NativeSelectOption>
-              <NativeSelectOption value="price">Lowest price</NativeSelectOption>
-              <NativeSelectOption value="name">Name, A to Z</NativeSelectOption>
-            </NativeSelect>
+            <SelectMenu v-model="sort" :options="sortOptions" aria-label="Sort by" class="h-[38px]! w-fit font-semibold" />
           </label>
         </div>
         <div v-if="providers.length" class="grid grid-cols-1 gap-4 md:grid-cols-2 rise-stagger">

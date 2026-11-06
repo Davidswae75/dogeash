@@ -23,7 +23,7 @@ const { user, signOut } = useSession()
         <strong class="text-[15px]">Signed in as {{ user?.email }}</strong>
         <span class="text-[13px] text-ink-muted">To close your account and remove your data, contact Dogeash support. Self-service deletion is coming.</span>
       </div>
-      <Button variant="outline" class="w-fit" @click="signOut"><LogOut aria-hidden="true" />Sign out</Button>
+      <Button variant="outline" class="w-fit" @click="signOut()"><LogOut aria-hidden="true" />Sign out</Button>
     </section>
   </div>
 </template>

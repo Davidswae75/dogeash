@@ -8,7 +8,7 @@ import { useSession } from './useSession'
 // Supabase, so saved dogs follow you to any device. Guests: this browser (useAccountList).
 // Changes show at once and are written in the background; if the database refuses, the list is
 // reloaded from Supabase and the person is told.
-interface Saved { fileNo: string, comparing: boolean }
+interface Saved { fileNo: string, comparing: boolean, savedPrice?: number | null }
 
 export function useSavedDogs() {
   const supabase = useSupabaseClient()
@@ -33,12 +33,12 @@ export function useSavedDogs() {
     if (!user.value) return (remote.value = null)
     const { data, error } = await supabase
       .from('shortlist_items')
-      .select('dog_id, comparing, dogs (file_no)')
+      .select('dog_id, comparing, saved_price, dogs (file_no)')
       .order('created_at', { ascending: false })
     if (error) return
     const rows = (data ?? []).filter(r => r.dogs)
     dogIds.value = { ...dogIds.value, ...Object.fromEntries(rows.map(r => [r.dogs!.file_no, r.dog_id])) }
-    remote.value = rows.map(r => ({ fileNo: r.dogs!.file_no, comparing: r.comparing }))
+    remote.value = rows.map(r => ({ fileNo: r.dogs!.file_no, comparing: r.comparing, savedPrice: r.saved_price }))
   }
 
   // Write the difference between what's saved and what should be, in the background
@@ -46,7 +46,7 @@ export function useSavedDogs() {
     const uid = user.value?.id
     if (!uid) return
     const before = remote.value ?? []
-    const next = nextList.map(fileNo => ({ fileNo, comparing: nextCompare.includes(fileNo) }))
+    const next = nextList.map(fileNo => ({ fileNo, comparing: nextCompare.includes(fileNo), savedPrice: before.find(b => b.fileNo === fileNo)?.savedPrice }))
     remote.value = next
 
     const added = next.filter(n => !before.some(b => b.fileNo === n.fileNo))
@@ -103,5 +103,8 @@ export function useSavedDogs() {
     return fresh.length
   }
 
-  return { fileNos, compareNos, load, adoptGuest }
+  // What each shortlisted dog cost when it was saved (signed in only), for "price dropped"
+  const savedPrices = computed<Record<string, number>>(() => Object.fromEntries((remote.value ?? []).filter(r => r.savedPrice).map(r => [r.fileNo, r.savedPrice!])))
+
+  return { fileNos, compareNos, savedPrices, load, adoptGuest }
 }

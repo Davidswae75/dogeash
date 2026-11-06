@@ -13,8 +13,9 @@ const emit = defineEmits<{ role: [member: TeamMember, role: StoreRole], remove: 
 // Each pick redraws the select from the saved role: it shows the new role once the team reloads with it,
 // and the old one if the change was refused (the last owner, say)
 const attempt = ref(0)
-function pickRole(m: TeamMember, e: Event) {
-  const role = (e.target as HTMLSelectElement).value as StoreRole
+const roleOptions = (Object.keys(storeRoles) as StoreRole[]).map(k => ({ value: k, label: storeRoles[k].label }))
+// The menu shows the saved role again until the change goes through (or is turned down)
+function pickRole(m: TeamMember, role: StoreRole) {
   attempt.value++
   if (role !== m.role) emit('role', m, role)
 }
@@ -33,16 +34,15 @@ const joined = (iso: string) => new Date(iso).toLocaleDateString('en-NG', { mont
           <strong class="text-sm leading-5">{{ m.name || 'No name yet' }}<span v-if="m.userId === props.self" class="font-normal text-ink-muted"> (you)</span></strong>
           <span class="text-[13px] leading-5 text-ink-muted">{{ m.email ?? storeRoles[m.role].hint }} · since {{ joined(m.joinedAt) }}</span>
         </span>
-        <NativeSelect
+        <SelectMenu
           v-if="props.manage"
           :key="`${m.userId}:${m.role}:${attempt}`"
           :model-value="m.role"
+          :options="roleOptions"
           :aria-label="`Role for ${m.name || 'this person'}`"
-          class="h-9 w-36 border-2 border-line-strong text-sm"
-          @change="pickRole(m, $event)"
-        >
-          <NativeSelectOption v-for="(r, key) in storeRoles" :key="key" :value="key">{{ r.label }}</NativeSelectOption>
-        </NativeSelect>
+          class="h-9 w-36 border-2"
+          @update:model-value="role => pickRole(m, role as StoreRole)"
+        />
         <span v-else class="rounded-full bg-surface-sunk px-2.5 py-1 text-xs font-bold">{{ storeRoles[m.role].label }}</span>
         <Button v-if="props.manage || m.userId === props.self" variant="ghost" size="sm" @click="emit('remove', m)">
           {{ m.userId === props.self ? 'Leave' : 'Remove' }}

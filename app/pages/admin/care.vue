@@ -11,7 +11,7 @@ import { storesForProvider } from '~/utils/stores'
 
 // Admin › Care directory: the vets, trainers, groomers, kennel builders, equipment and boarding providers.
 // Add, edit (including the "checked by Dogeash" badge) and remove them; stores link to them from their care team.
-definePageMeta({ layout: 'admin', middleware: 'admin' })
+definePageMeta({ layout: 'admin', colorMode: 'dark', middleware: 'admin' })
 useSeoMeta({ title: 'Care directory · Dogeash admin', robots: 'noindex' })
 
 const { providers, load, save, remove } = useAdminCare()
@@ -56,7 +56,7 @@ async function onRemove() {
     </template>
 
     <AdminCard flush>
-      <div class="overflow-x-auto">
+      <div class="relative overflow-x-auto">
         <table v-if="shown.length" class="w-full min-w-[820px] border-collapse text-left text-[13px]">
           <thead>
             <tr class="text-[11.5px] text-ink-muted">

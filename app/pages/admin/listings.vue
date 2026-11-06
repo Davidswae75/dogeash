@@ -3,6 +3,7 @@ import { Dog as DogIcon, MoreHorizontal, Search } from '@lucide/vue'
 import { computed, onMounted, ref } from 'vue'
 import { definePageMeta, useRuntimeConfig, useSeoMeta } from '#imports' // nuxt
 import type { AdminDog, DogStatus } from '~/utils/admin'
+import type { CsvColumn } from '~/utils/csv'
 import { useAdminListings } from '~/composables/useAdminListings'
 import { useNotify } from '~/composables/useNotify'
 import { adminTime, dogActions, dogStatusMeta } from '~/utils/admin'
@@ -10,7 +11,7 @@ import { dogPhotoUrl, formatNaira } from '~/utils/dogs'
 
 // Admin › Listings: every dog in any status. Take one down (the store reads why), put it back, or approve
 // one waiting for review. Drafts and sold dogs are the store's own business, so they have no actions.
-definePageMeta({ layout: 'admin', middleware: 'admin' })
+definePageMeta({ layout: 'admin', colorMode: 'dark', middleware: 'admin' })
 useSeoMeta({ title: 'Listings · Dogeash admin', robots: 'noindex' })
 
 const { dogs, loaded, load, setStatus } = useAdminListings()
@@ -22,6 +23,12 @@ const filterModel = computed({ get: () => filter.value, set: (v: string) => { if
 const query = ref('')
 const statuses = Object.keys(dogStatusMeta) as DogStatus[]
 const countOf = (s: DogStatus) => dogs.value.filter(d => d.status === s).length
+const csv: CsvColumn<AdminDog>[] = [
+  { label: 'File number', value: d => d.file_no }, { label: 'Name', value: d => d.name }, { label: 'Breed', value: d => d.breed },
+  { label: 'Level', value: d => d.level }, { label: 'City', value: d => d.city }, { label: 'Price (NGN)', value: d => d.price_naira },
+  { label: 'Status', value: d => dogStatusMeta[d.status].label }, { label: 'Store ID', value: d => d.store_id }, { label: 'Store', value: d => d.store_name },
+  { label: 'Created', value: d => d.created_at }, { label: 'Updated', value: d => d.updated_at }, { label: 'Dogeash note', value: d => d.admin_note },
+]
 const shown = computed(() => {
   const q = query.value.trim().toLowerCase()
   return dogs.value
@@ -46,6 +53,7 @@ async function run(note: string) {
 <template>
   <AdminPage title="Listings" :count="dogs.length" description="Every dog on Dogeash in any status. Taking one down hides it at once and tells the store why.">
     <template #actions>
+      <AdminExport name="listings" :rows="shown" :columns="csv" />
       <label class="relative">
         <span class="sr-only">Search listings</span>
         <Search class="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-ink-muted" aria-hidden="true" />
@@ -62,7 +70,7 @@ async function run(note: string) {
           </ToggleGroupItem>
         </ToggleGroup>
       </div>
-      <div class="overflow-x-auto">
+      <div class="relative overflow-x-auto">
         <table v-if="shown.length" class="w-full min-w-[880px] border-collapse text-left text-[13px]">
           <thead>
             <tr class="text-[11.5px] text-ink-muted">
@@ -89,7 +97,7 @@ async function run(note: string) {
               </td>
               <td class="border-t border-line px-3 py-2.5">
                 <span class="flex flex-col leading-tight">
-                  <span>{{ d.store_name }}</span>
+                  <NuxtLink :to="`/admin/stores/${d.store_id}`" class="text-ink hover:underline">{{ d.store_name }}</NuxtLink>
                   <span class="font-mono text-[11px] text-ink-muted">{{ d.store_id }}<template v-if="d.store_status !== 'verified'"> · store {{ d.store_status.replace('_', ' ') }}</template></span>
                 </span>
               </td>

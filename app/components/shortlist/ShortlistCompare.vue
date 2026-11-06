@@ -15,7 +15,7 @@ const columns = computed(() => `minmax(140px,180px) repeat(${compareDogs.value.l
     <template v-if="compareDogs.length >= 2">
       <h1 class="m-0 mega text-[clamp(30px,3.6vw,46px)] leading-none">Compare <span class="text-outline">{{ compareDogs.length }} dogs</span></h1>
 
-      <div class="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+      <div class="relative -mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
         <div role="table" aria-label="Dogs compared side by side" class="grid min-w-fit overflow-hidden rounded-xl bg-surface ring-1 ring-line" :style="{ gridTemplateColumns: columns }">
           <!-- Dogs -->
           <div role="row" class="contents">

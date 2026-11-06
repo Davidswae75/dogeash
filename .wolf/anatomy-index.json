@@ -1,13 +1,13 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-11-05T17:08:31.644Z",
-    "fileCount": 723,
+    "lastScanned": "2026-11-06T03:05:11.437Z",
+    "fileCount": 748,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "811eb74e702dab26a85995bb8e8b12cb67a2a2f7b7e598a8c95eab519b671e3c",
-    "storeUpdatedAt": "2026-11-05T17:08:31.670Z",
-    "rootHash": "54ec67dc28e59e34"
+    "renderedHash": "a6f7819c9157ad21f97de0f6834ec124ffc5d02922a8daf7e162e6188e7d103e",
+    "storeUpdatedAt": "2026-11-06T03:05:11.501Z",
+    "rootHash": "79839fea477e6373"
   },
   "files": {
     ".gitignore": {
@@ -7047,41 +7047,111 @@
       "source": "hook"
     },
     "app/utils/myDogs.ts": {
-      "description": "Dogs a buyer owns after handover: a living record of health, training and care.",
-      "tokens": 928,
-      "hash": "57c62a264eb2699a",
-      "size": 3247,
-      "mtimeMs": 1793064053858.4683,
-      "updatedAt": "2026-10-27T01:20:54.351Z",
+      "description": "When it was given or happened (yyyy-mm-dd)",
+      "tokens": 1206,
+      "hash": "355c46735d152224",
+      "size": 4226,
+      "mtimeMs": 1793933684436.261,
+      "updatedAt": "2026-11-06T02:54:44.988Z",
       "source": "hook",
       "symbols": [
         {
+          "name": "OwnedDogRecord",
+          "kind": "section",
+          "startLine": 10,
+          "endLine": 21,
+          "tokens": 74
+        },
+        {
           "name": "OwnedDog",
           "kind": "section",
-          "startLine": 8,
-          "endLine": 65,
-          "tokens": 708
+          "startLine": 22,
+          "endLine": 55,
+          "tokens": 410
         },
         {
-          "name": "findOwnedDog",
+          "name": "today",
+          "kind": "fn",
+          "startLine": 56,
+          "endLine": 56,
+          "tokens": 16
+        },
+        {
+          "name": "asDate",
+          "kind": "fn",
+          "startLine": 57,
+          "endLine": 58,
+          "tokens": 18
+        },
+        {
+          "name": "statusOf",
+          "kind": "fn",
+          "startLine": 59,
+          "endLine": 65,
+          "tokens": 76
+        },
+        {
+          "name": "dayLabel",
           "kind": "fn",
           "startLine": 66,
-          "endLine": 69,
-          "tokens": 53
+          "endLine": 68,
+          "tokens": 59
         },
         {
-          "name": "nextReminder",
+          "name": "ageOf",
           "kind": "fn",
-          "startLine": 70,
-          "endLine": 74,
-          "tokens": 62
+          "startLine": 69,
+          "endLine": 77,
+          "tokens": 119
+        },
+        {
+          "name": "dogSummary",
+          "kind": "fn",
+          "startLine": 78,
+          "endLine": 80,
+          "tokens": 49
+        },
+        {
+          "name": "healthOf",
+          "kind": "fn",
+          "startLine": 81,
+          "endLine": 83,
+          "tokens": 67
+        },
+        {
+          "name": "trainingOf",
+          "kind": "fn",
+          "startLine": 84,
+          "endLine": 86,
+          "tokens": 71
+        },
+        {
+          "name": "upcomingOf",
+          "kind": "fn",
+          "startLine": 87,
+          "endLine": 88,
+          "tokens": 36
+        },
+        {
+          "name": "nextDue",
+          "kind": "fn",
+          "startLine": 89,
+          "endLine": 89,
+          "tokens": 16
+        },
+        {
+          "name": "needsAttention",
+          "kind": "fn",
+          "startLine": 90,
+          "endLine": 91,
+          "tokens": 34
         },
         {
           "name": "ownedDogLink",
           "kind": "fn",
-          "startLine": 75,
-          "endLine": 76,
-          "tokens": 26
+          "startLine": 92,
+          "endLine": 93,
+          "tokens": 24
         }
       ]
     },
@@ -7105,11 +7175,11 @@
     },
     "app/components/account/AccountNav.vue": {
       "description": "Vue: setup",
-      "tokens": 886,
-      "hash": "a2aa37ee42f61f6d",
-      "size": 3320,
-      "mtimeMs": 1793064085993.3953,
-      "updatedAt": "2026-10-27T01:21:26.593Z",
+      "tokens": 1255,
+      "hash": "979f4931e2b77082",
+      "size": 4707,
+      "mtimeMs": 1793934291575.698,
+      "updatedAt": "2026-11-06T03:04:52.340Z",
       "source": "hook"
     },
     "app/pages/account.vue": {
@@ -8789,6 +8859,263 @@
       "size": 16282,
       "mtimeMs": 1793898511463.581,
       "updatedAt": "2026-11-05T17:08:31.643Z",
+      "source": "hook"
+    },
+    "app/components/ReportButton.vue": {
+      "description": "Vue: setup",
+      "tokens": 1146,
+      "hash": "a8b57f423dd22ee7",
+      "size": 4295,
+      "mtimeMs": 1793927386248.383,
+      "updatedAt": "2026-11-06T01:09:46.717Z",
+      "source": "hook"
+    },
+    "app/pages/admin/reports.vue": {
+      "description": "Vue: setup",
+      "tokens": 1724,
+      "hash": "2df4d9c065c44670",
+      "size": 6471,
+      "mtimeMs": 1793927493515.3608,
+      "updatedAt": "2026-11-06T01:11:36.198Z",
+      "source": "hook"
+    },
+    "supabase/migrations/20261121000000_admin_detail_pages.sql": {
+      "description": "Detail pages in the admin console: everything about one store, and everything about one person, in o",
+      "tokens": 2091,
+      "hash": "893cb1691c79561c",
+      "size": 7838,
+      "mtimeMs": 1793927773651.717,
+      "updatedAt": "2026-11-06T01:16:13.876Z",
+      "source": "hook"
+    },
+    "app/pages/admin/stores/[id].vue": {
+      "description": "Vue: setup",
+      "tokens": 3643,
+      "hash": "ccf02bb4f0f4c778",
+      "size": 13693,
+      "mtimeMs": 1793927883751.2354,
+      "updatedAt": "2026-11-06T01:18:04.146Z",
+      "source": "hook"
+    },
+    "app/pages/admin/people/[id].vue": {
+      "description": "Vue: setup",
+      "tokens": 2650,
+      "hash": "47565603c18d9183",
+      "size": 9952,
+      "mtimeMs": 1793927926354.7942,
+      "updatedAt": "2026-11-06T01:18:46.792Z",
+      "source": "hook"
+    },
+    "supabase/migrations/20261122000000_admin_visits.sql": {
+      "description": "Visit oversight for admins: every kennel visit request with its store and buyer, which ones need cha",
+      "tokens": 980,
+      "hash": "aca59b10349c8136",
+      "size": 3674,
+      "mtimeMs": 1793928124341.7288,
+      "updatedAt": "2026-11-06T01:22:04.866Z",
+      "source": "hook"
+    },
+    "app/pages/admin/visits.vue": {
+      "description": "Vue: setup",
+      "tokens": 2107,
+      "hash": "4291d0497397e8e1",
+      "size": 7908,
+      "mtimeMs": 1793929883068.6404,
+      "updatedAt": "2026-11-06T01:51:23.417Z",
+      "source": "hook"
+    },
+    "supabase/migrations/20261123000000_reinspection.sql": {
+      "description": "Re-inspection. A store stays verified for a year after its last passed inspection (or approval):",
+      "tokens": 1411,
+      "hash": "9c1238a51a562792",
+      "size": 5292,
+      "mtimeMs": 1793928683072.1147,
+      "updatedAt": "2026-11-06T01:31:23.443Z",
+      "source": "hook"
+    },
+    "app/pages/admin/reinspections.vue": {
+      "description": "Vue: setup",
+      "tokens": 1438,
+      "hash": "e09581364ee1225d",
+      "size": 5397,
+      "mtimeMs": 1793928773850.4998,
+      "updatedAt": "2026-11-06T01:32:54.693Z",
+      "source": "hook"
+    },
+    "supabase/migrations/20261124000000_announcements.sql": {
+      "description": "Announcements from Dogeash: a title and message sent to everyone, to stores (everyone on a store's t",
+      "tokens": 1236,
+      "hash": "f2b57c9929a46d92",
+      "size": 4634,
+      "mtimeMs": 1793929014720.517,
+      "updatedAt": "2026-11-06T01:36:55.327Z",
+      "source": "hook"
+    },
+    "app/pages/admin/announcements.vue": {
+      "description": "Vue: title, setup",
+      "tokens": 1834,
+      "hash": "4aea0c463a31c0af",
+      "size": 6888,
+      "mtimeMs": 1793929092810.3586,
+      "updatedAt": "2026-11-06T01:38:13.991Z",
+      "source": "hook"
+    },
+    "supabase/migrations/20261125000000_listing_review.sql": {
+      "description": "Listing review policy. Platform settings (one row) say which new listings Dogeash checks before buye",
+      "tokens": 1290,
+      "hash": "1797c8ff2eedac85",
+      "size": 4979,
+      "mtimeMs": 1793929358490.895,
+      "updatedAt": "2026-11-06T01:42:38.892Z",
+      "source": "hook"
+    },
+    "supabase/migrations/20261126000000_admin_history.sql": {
+      "description": "Longer history for the admin overview: the same day-by-day figures as admin_series() (new accounts, ",
+      "tokens": 615,
+      "hash": "ef78c08138236cdc",
+      "size": 2304,
+      "mtimeMs": 1793929697674.8481,
+      "updatedAt": "2026-11-06T01:48:18.211Z",
+      "source": "hook"
+    },
+    "supabase/migrations/20261127000000_admin_search.sql": {
+      "description": "Search across the admin console: stores (name, id, city), dogs (name, file number, breed), people (n",
+      "tokens": 684,
+      "hash": "679e29ff257f1033",
+      "size": 2572,
+      "mtimeMs": 1793930013711.2834,
+      "updatedAt": "2026-11-06T01:53:34.049Z",
+      "source": "hook"
+    },
+    "supabase/migrations/20261128000000_applications_without_form.sql": {
+      "description": "Applications: also list stores in review that have no application form (stores added before applicat",
+      "tokens": 486,
+      "hash": "b6ebd49b537fd11a",
+      "size": 1820,
+      "mtimeMs": 1793930978390.464,
+      "updatedAt": "2026-11-06T02:09:38.720Z",
+      "source": "hook"
+    },
+    "app/pages/zz-admin-preview.vue": {
+      "description": "Vue: Lekki Guardian Kennels International, setup",
+      "tokens": 742,
+      "hash": "e907fb3399790b0b",
+      "size": 2781,
+      "mtimeMs": 1793931128592.5496,
+      "updatedAt": "2026-11-06T02:12:09.074Z",
+      "source": "hook"
+    },
+    "app/components/SelectMenu.vue": {
+      "description": "Vue: setup",
+      "tokens": 393,
+      "hash": "957b1744e82ac34e",
+      "size": 1471,
+      "mtimeMs": 1793931771129.2634,
+      "updatedAt": "2026-11-06T02:22:51.688Z",
+      "source": "hook"
+    },
+    "app/components/DogMark.vue": {
+      "description": "Vue: setup",
+      "tokens": 787,
+      "hash": "9e52fda2e11404d0",
+      "size": 2948,
+      "mtimeMs": 1793932399922.406,
+      "updatedAt": "2026-11-06T02:33:20.337Z",
+      "source": "hook"
+    },
+    "app/utils/signInNextSteps.ts": {
+      "description": "Where someone can go straight after signing in, most likely first (the first card is the main one):",
+      "tokens": 674,
+      "hash": "4220ef5deabcdf31",
+      "size": 2359,
+      "mtimeMs": 1793933083546.8599,
+      "updatedAt": "2026-11-06T02:44:44.127Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "signInNextSteps",
+          "kind": "fn",
+          "startLine": 13,
+          "endLine": 34,
+          "tokens": 467
+        }
+      ]
+    },
+    "supabase/migrations/20261129000000_buyer_dashboard.sql": {
+      "description": "The buyer's dashboard, for real:",
+      "tokens": 2005,
+      "hash": "2d7d514e01de19ea",
+      "size": 7666,
+      "mtimeMs": 1793933577069.2048,
+      "updatedAt": "2026-11-06T02:52:57.354Z",
+      "source": "hook"
+    },
+    "app/composables/useOwnedDogs.ts": {
+      "description": "The signed-in person's dogs and their records (Supabase: owned_dogs, owned_dog_records; photos in th",
+      "tokens": 1884,
+      "hash": "6f1586b5adb6b5f9",
+      "size": 6592,
+      "mtimeMs": 1793933708391.9006,
+      "updatedAt": "2026-11-06T02:55:08.782Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "toRow",
+          "kind": "fn",
+          "startLine": 34,
+          "endLine": 46,
+          "tokens": 88
+        },
+        {
+          "name": "toRecordRow",
+          "kind": "fn",
+          "startLine": 47,
+          "endLine": 48,
+          "tokens": 56
+        },
+        {
+          "name": "useOwnedDogs",
+          "kind": "fn",
+          "startLine": 49,
+          "endLine": 138,
+          "tokens": 1320
+        }
+      ]
+    },
+    "app/components/account/AccountDogForm.vue": {
+      "description": "Vue: setup",
+      "tokens": 2438,
+      "hash": "25dcbd48689a84a0",
+      "size": 9141,
+      "mtimeMs": 1793933753497.187,
+      "updatedAt": "2026-11-06T02:55:53.853Z",
+      "source": "hook"
+    },
+    "app/components/account/AccountDogRecordDialog.vue": {
+      "description": "Vue: setup",
+      "tokens": 1515,
+      "hash": "e1fa289c144796ca",
+      "size": 5680,
+      "mtimeMs": 1793933773897.9446,
+      "updatedAt": "2026-11-06T02:56:14.190Z",
+      "source": "hook"
+    },
+    "app/components/ConfirmDialog.vue": {
+      "description": "Vue: setup",
+      "tokens": 381,
+      "hash": "d92e48933676b31e",
+      "size": 1427,
+      "mtimeMs": 1793933890941.1848,
+      "updatedAt": "2026-11-06T02:58:11.375Z",
+      "source": "hook"
+    },
+    "app/pages/zz-account-preview.vue": {
+      "description": "Vue: Dave Okafor, setup",
+      "tokens": 997,
+      "hash": "204516ce1a447d29",
+      "size": 3739,
+      "mtimeMs": 1793934311241.2024,
+      "updatedAt": "2026-11-06T03:05:11.433Z",
       "source": "hook"
     }
   },

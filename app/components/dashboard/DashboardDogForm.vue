@@ -65,10 +65,7 @@ const chips = 'flex w-auto flex-wrap justify-start gap-2'
       <div class="grid gap-5 sm:grid-cols-2">
         <Fields :fields="dogFormFields.basics.slice(0, 1)" />
         <FieldShell label="Breed" for="dog-breed" :error="errors.breed">
-          <NativeSelect id="dog-breed" v-model="breed" class="h-12 w-full border-2 border-line-strong">
-            <NativeSelectOption value="" disabled>Choose a breed</NativeSelectOption>
-            <NativeSelectOption v-for="b in breedOptions" :key="b" :value="b">{{ b }}</NativeSelectOption>
-          </NativeSelect>
+          <SelectMenu id="dog-breed" v-model="breed" :options="breedOptions.map(b => ({ value: b, label: b }))" placeholder="Choose a breed" class="h-12! border-2" />
         </FieldShell>
       </div>
       <FieldShell label="Sex" :error="errors.sex">
@@ -110,9 +107,7 @@ const chips = 'flex w-auto flex-wrap justify-start gap-2'
     <section :class="section" aria-labelledby="dog-health">
       <h2 id="dog-health" :class="heading">Health</h2>
       <FieldShell label="Hip grade" for="dog-hips" :error="errors.hips">
-        <NativeSelect id="dog-hips" v-model="hips" class="h-12 w-full border-2 border-line-strong sm:w-64">
-          <NativeSelectOption v-for="h in hipGrades" :key="h" :value="h">{{ h }}</NativeSelectOption>
-        </NativeSelect>
+        <SelectMenu id="dog-hips" v-model="hips" :options="hipGrades.map(h => ({ value: h, label: h }))" class="h-12! border-2 sm:w-64" />
       </FieldShell>
       <Fields :fields="dogFormFields.health" />
     </section>
