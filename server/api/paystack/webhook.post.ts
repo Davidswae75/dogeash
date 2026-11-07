@@ -20,17 +20,21 @@ export default defineEventHandler(async (event) => {
     await settlePayment(event, String(data.reference)).catch(() => null)
   }
   else if ((kind === 'refund.processed' || kind === 'refund.failed') && data?.transaction_reference) {
-    const service = serverSupabaseServiceRole<Database>(event)
-    const { data: refund } = await service.from('refunds').select('id, payments!inner(reference)')
-      .eq('payments.reference', String(data.transaction_reference)).maybeSingle()
-    if (refund) {
-      await service.rpc('record_refund', {
-        refund: refund.id,
-        to_status: kind === 'refund.processed' ? 'done' : 'failed',
-        provider: data.id != null ? String(data.id) : null,
-        why: kind === 'refund.failed' ? String(data.status ?? 'Refund failed') : '',
-      })
-    }
+    await serverSupabaseServiceRole<Database>(event).rpc('record_refund_by_payment', {
+      payment_reference: String(data.transaction_reference),
+      to_status: kind === 'refund.processed' ? 'done' : 'failed',
+      provider: data.id != null ? String(data.id) : null,
+      why: kind === 'refund.failed' ? 'Paystack couldn\'t refund it' : '',
+    })
+  }
+  else if (kind?.startsWith('transfer.') && data?.reference) {
+    // A payout to a store: transfer.success, transfer.failed or transfer.reversed
+    await serverSupabaseServiceRole<Database>(event).rpc('record_transfer', {
+      transfer_ref: String(data.reference),
+      to_status: kind === 'transfer.success' ? 'done' : 'failed',
+      code: data.transfer_code ? String(data.transfer_code) : null,
+      why: kind === 'transfer.success' ? '' : `Paystack: ${kind.replace('transfer.', '')}`,
+    })
   }
   // Paystack retries anything that isn't a 200, so everything else is acknowledged
   return { ok: true }

@@ -2,6 +2,7 @@ import type { Component } from 'vue'
 import { BellRing, CalendarCheck, Dog as DogIcon, Heart, House, LayoutGrid, MessageSquare, Package, Settings, ShieldCheck, Star } from '@lucide/vue'
 import type { Dog } from './dogs'
 import type { PropertyType } from './protection'
+import type { CareType } from './care'
 import type { Store } from './stores'
 import type { StoreMembership } from './storeRoles'
 
@@ -23,7 +24,11 @@ export interface Account {
   notify: { email: boolean, sms: boolean, whatsapp: boolean }
   /** Stores this person works at, their role in each, and the store itself */
   stores: (StoreMembership & { store: Store })[]
+  /** Care listings this person manages (a vet, a trainer…), from Dogeash's invitation */
+  providers: ProviderMembership[]
 }
+
+export interface ProviderMembership { id: string, uuid: string, name: string, slug: string, type: CareType }
 
 export const accountRef = (id: string) => `BYR-${id.replaceAll('-', '').slice(0, 6).toUpperCase()}`
 

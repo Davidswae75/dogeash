@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-11-06T17:16:45.987Z
-> Files: 756 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-11-07T04:46:19.832Z
+> Files: 769 tracked | Anatomy hits: 0 | Misses: 0
 
 > Project structure index. Auto-maintained by OpenWolf hooks and daemon.
 > Run `openwolf scan` to generate, or wait for the first Claude Code session.
@@ -42,7 +42,7 @@
 - `BigStats.vue` — Vue: setup, TS (~184 tok)
 - `BookingDialog.vue` — Offer "At my home" as well as the other party's premises (~1786 tok)
 - `BrandCover.vue` — Vue component (~322 tok)
-- `CareBookingDialog.vue` — Vue: setup (~188 tok)
+- `CareBookingDialog.vue` — Vue: setup (~672 tok)
 - `CareProviderCard.vue` — Vue: setup (~504 tok)
 - `CheckboxField.vue` — Vue: setup (~294 tok)
 - `ComingNext.vue` — Vue: setup (~330 tok)
@@ -82,6 +82,7 @@
 - `ReportButton.vue` — Vue: setup (~1146 tok)
 - `ReserveDialog.vue` — Vue: setup (~1308 tok)
 - `SearchBar.vue` — Vue: setup, TS, 1 props, emits (~278 tok)
+- `SearchSelect.vue` — Vue: setup (~591 tok)
 - `SelectMenu.vue` — Vue: setup (~393 tok)
 - `SellerCard.vue` — Vue: setup, TS, 2 props (~454 tok)
 - `ShortlistButton.vue` — Vue: setup (~518 tok)
@@ -148,6 +149,10 @@
 - `AuthPasswordStrength.vue` — Vue: setup (~246 tok)
 - `AuthPasswordToggle.vue` — Vue: setup (~158 tok)
 
+## app/components/care/
+
+- `CareBookingCard.vue` — Vue: setup (~1051 tok)
+
 ## app/components/dashboard/
 
 - `DashboardAgenda.vue` — Vue: setup (~842 tok)
@@ -160,10 +165,12 @@
 - `DashboardGreeting.vue` — Vue: setup (~448 tok)
 - `DashboardInboxDetail.vue` — Vue: setup (~1088 tok)
 - `DashboardInboxVisit.vue` — Vue: setup (~647 tok)
+- `DashboardPayoutAccount.vue` — Vue: setup (~963 tok)
 - `DashboardStats.vue` — Vue: setup (~576 tok)
 - `DashboardStoreForm.vue` — Vue: setup (~1755 tok)
 - `DashboardStoreHealth.vue` — Vue: setup (~867 tok)
 - `DashboardStoreImages.vue` — Vue: setup (~931 tok)
+- `DashboardStoreReservation.vue` — Vue: setup (~1111 tok)
 - `DashboardStoreSetup.vue` — Vue: setup (~2306 tok)
 - `DashboardTeamList.vue` — Vue: setup (~1044 tok)
 - `InboxDetail.vue` — Vue: setup (~1198 tok)
@@ -881,12 +888,14 @@
 - `useAdminInspections.ts` — Admin › Inspections (Supabase: the admin_… inspection functions and the private inspection-photos bu (~1538 tok)
 - `useAuth.ts` — Every sign-up, sign-in and password call to Supabase, in one place. Each returns a plain (~1419 tok)
 - `useAuthPanel.ts` — Lets an auth page swap its side panel while it's open (sign-up shows a store panel for "Open a store (~180 tok)
+- `useCareBookings.ts` — The buyer's care appointments (Supabase: care_bookings): requesting one from a provider's page, the (~1258 tok)
 - `useConversations.ts` — Conversations between buyers and stores (Supabase: conversations, messages), for both sides. (~1450 tok)
 - `useFirstVisit.ts` — Whether this browser has dismissed a one-time message, e.g. the "New to guard dogs?" intro (~107 tok)
 - `useLoader.ts` — The full-screen loader (AppLoader in app.vue) for moments that change the whole page: (~282 tok)
 - `useNotifications.ts` — The header bell's notifications (Supabase: notifications). The database writes them when a store rep (~539 tok)
 - `useNotify.ts` — Every toast in the app goes through here, so the same action always looks and reads the same. (~2217 tok)
 - `useOwnedDogs.ts` — The signed-in person's dogs and their records (Supabase: owned_dogs, owned_dog_records; photos in th (~1884 tok)
+- `useProviderDashboard.ts` — The provider dashboard: the listing this person manages (their first, for now), its bookings, answer (~1372 tok)
 - `useRecentlyViewed.ts` — Dogs this browser has opened, newest first. Kept on the device until accounts exist. (~147 tok)
 - `useReservations.ts` — The buyer's reservations (Supabase: reservations, payments, refunds). Paying goes through the site's (~1103 tok)
 - `useSavedDogs.ts` — The shortlist and compare picks behind useShortlist(). Signed in: the shortlist_items table in (~1404 tok)
@@ -898,6 +907,7 @@
 - `useStoreDogs.ts` — The dogs of the store the dashboard is showing (Supabase: dogs, and the dog-photos bucket). (~1489 tok)
 - `useStoreInbox.ts` — The store inbox as one list: buyer conversations and visit requests for the store being run, (~1097 tok)
 - `useStoreInvites.ts` — Invitations to join a store's team that are waiting for the signed-in person, matched by their email (~522 tok)
+- `useStoreMoney.ts` — The store dashboard's money: reservations on its dogs (owners and managers), its payouts and the ban (~1671 tok)
 - `useStoreProfile.ts` — Saving the store profile of the store the dashboard is showing (Supabase: stores, and the store-medi (~1030 tok)
 - `useStoreReviews.ts` — Store reviews (Supabase: store_reviews). Anyone reads a store's reviews; a buyer writes one per stor (~1096 tok)
 - `useStoreTeam.ts` — The team of the store the dashboard is showing (Supabase: store_members, store_invites, store_team() (~1325 tok)
@@ -948,6 +958,7 @@
 - `announcements.vue` — Vue: title, setup (~1834 tok)
 - `applications.vue` — Vue: setup (~1997 tok)
 - `index.vue` — Vue: setup (~1612 tok)
+- `payments.vue` — Vue: setup (~3607 tok)
 - `reinspections.vue` — Vue: setup (~1438 tok)
 - `reports.vue` — Vue: setup (~1724 tok)
 - `verify.vue` — Vue: setup (~1019 tok)
@@ -977,6 +988,7 @@
 - `care.vue` — Vue: setup (~862 tok)
 - `inbox.vue` — Vue: setup (~783 tok)
 - `index.vue` — Vue: setup (~228 tok)
+- `payouts.vue` — Vue: setup (~2005 tok)
 - `profile.vue` — Vue: setup (~481 tok)
 - `team.vue` — Vue: setup (~769 tok)
 
@@ -989,6 +1001,11 @@
 ## app/pages/gear/
 
 - `index.vue` — Vue: setup (~504 tok)
+
+## app/pages/provider/
+
+- `index.vue` — Vue: setup (~1809 tok)
+- `listing.vue` — Vue: setup (~1905 tok)
 
 ## app/pages/shortlist/
 
@@ -1074,3 +1091,5 @@
 - `20261128000000_applications_without_form.sql` — Applications: also list stores in review that have no application form (stores added before applicat (~486 tok)
 - `20261129000000_buyer_dashboard.sql` — The buyer's dashboard, for real: (~2005 tok)
 - `20261201000000_payments.sql` — Payments with Paystack: reserving a dog with a deposit, paying the balance, handover, payouts and re (~6854 tok)
+- `20261202000000_payments_part2.sql` — Payments, part 2: stores cancelling (with refunds), payouts to stores' banks, and Dogeash deciding o (~3687 tok)
+- `20261203000000_care_provider_dashboard.sql` — Care providers get their own side of Dogeash: vets, trainers, groomers and the rest manage their lis (~6178 tok)

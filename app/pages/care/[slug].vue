@@ -26,6 +26,7 @@ const facts = [
   { label: 'Areas covered', value: provider.areas },
   { label: 'Where', value: provider.homeVisits ? 'Home visits or at their premises' : 'At their premises' },
   { label: 'Price from', value: formatNaira(provider.priceFrom) },
+  ...(provider.hours ? [{ label: 'Hours', value: provider.hours }] : []),
 ]
 const eyebrow = 'text-xs leading-4 font-bold tracking-[.08em] uppercase'
 </script>
@@ -57,6 +58,11 @@ const eyebrow = 'text-xs leading-4 font-bold tracking-[.08em] uppercase'
             {{ provider.credential }}
           </p>
         </header>
+
+        <section v-if="provider.about" class="flex flex-col gap-3" aria-labelledby="about-title">
+          <h2 id="about-title" class="m-0 mega text-[clamp(26px,3vw,36px)] leading-none">About</h2>
+          <p class="m-0 max-w-[44em] text-[16px] leading-[26px] whitespace-pre-line">{{ provider.about }}</p>
+        </section>
 
         <section class="flex flex-col gap-4" aria-labelledby="services-title">
           <h2 id="services-title" class="m-0 mega text-[clamp(26px,3vw,36px)] leading-none">Services</h2>

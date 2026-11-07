@@ -1,13 +1,13 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-11-06T17:16:45.987Z",
-    "fileCount": 756,
+    "lastScanned": "2026-11-07T04:46:19.832Z",
+    "fileCount": 769,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "c15c409b092db9ce91ec96d6d83eb32069973b77b074724f12d51b06194fe27d",
-    "storeUpdatedAt": "2026-11-06T17:16:46.021Z",
-    "rootHash": "f7e32a29b75a22fd"
+    "renderedHash": "c4344519dffed0c830d004660441468db462671e5f905c5956699eeb93f750c9",
+    "storeUpdatedAt": "2026-11-07T04:46:19.864Z",
+    "rootHash": "b155cdb15e6209ea"
   },
   "files": {
     ".gitignore": {
@@ -6280,11 +6280,11 @@
     },
     "app/components/CareBookingDialog.vue": {
       "description": "Vue: setup",
-      "tokens": 188,
-      "hash": "155c58a59970fd05",
-      "size": 706,
-      "mtimeMs": 1793027129148.5254,
-      "updatedAt": "2026-10-26T15:05:29.516Z",
+      "tokens": 672,
+      "hash": "ce774245da07638c",
+      "size": 2519,
+      "mtimeMs": 1794026532186.5486,
+      "updatedAt": "2026-11-07T04:42:12.505Z",
       "source": "hook"
     },
     "app/pages/stores/index.vue": {
@@ -9329,6 +9329,206 @@
       "size": 9774,
       "mtimeMs": 1793985405704.9187,
       "updatedAt": "2026-11-06T17:16:45.984Z",
+      "source": "hook"
+    },
+    "supabase/migrations/20261202000000_payments_part2.sql": {
+      "description": "Payments, part 2: stores cancelling (with refunds), payouts to stores' banks, and Dogeash deciding o",
+      "tokens": 3687,
+      "hash": "ef67441028c5398f",
+      "size": 13826,
+      "mtimeMs": 1794024243237.6208,
+      "updatedAt": "2026-11-07T04:04:03.737Z",
+      "source": "hook"
+    },
+    "app/composables/useStoreMoney.ts": {
+      "description": "The store dashboard's money: reservations on its dogs (owners and managers), its payouts and the ban",
+      "tokens": 1671,
+      "hash": "a12becb85ebb1fec",
+      "size": 5847,
+      "mtimeMs": 1794024479377.5986,
+      "updatedAt": "2026-11-07T04:07:59.634Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "StoreReservation",
+          "kind": "section",
+          "startLine": 11,
+          "endLine": 35,
+          "tokens": 255
+        },
+        {
+          "name": "useStoreMoney",
+          "kind": "fn",
+          "startLine": 36,
+          "endLine": 130,
+          "tokens": 1155
+        },
+        {
+          "name": "fetchError",
+          "kind": "fn",
+          "startLine": 131,
+          "endLine": 135,
+          "tokens": 80
+        }
+      ]
+    },
+    "app/components/dashboard/DashboardPayoutAccount.vue": {
+      "description": "Vue: setup",
+      "tokens": 963,
+      "hash": "9ac7510d7d04a913",
+      "size": 3617,
+      "mtimeMs": 1794024501850.6577,
+      "updatedAt": "2026-11-07T04:08:22.060Z",
+      "source": "hook"
+    },
+    "app/components/dashboard/DashboardStoreReservation.vue": {
+      "description": "Vue: setup",
+      "tokens": 1111,
+      "hash": "2823e35cfe2d4581",
+      "size": 4169,
+      "mtimeMs": 1794024519696.7043,
+      "updatedAt": "2026-11-07T04:08:40.011Z",
+      "source": "hook"
+    },
+    "app/pages/dashboard/payouts.vue": {
+      "description": "Vue: setup",
+      "tokens": 2005,
+      "hash": "51ce59ed40b11d76",
+      "size": 7524,
+      "mtimeMs": 1794024544507.7415,
+      "updatedAt": "2026-11-07T04:09:04.723Z",
+      "source": "hook"
+    },
+    "app/pages/admin/payments.vue": {
+      "description": "Vue: setup",
+      "tokens": 3607,
+      "hash": "92e700e9654b8351",
+      "size": 13532,
+      "mtimeMs": 1794024629188.48,
+      "updatedAt": "2026-11-07T04:10:29.517Z",
+      "source": "hook"
+    },
+    "app/components/SearchSelect.vue": {
+      "description": "Vue: setup",
+      "tokens": 591,
+      "hash": "e25b3ba6a76c4649",
+      "size": 2215,
+      "mtimeMs": 1794024800814.9788,
+      "updatedAt": "2026-11-07T04:13:21.205Z",
+      "source": "hook"
+    },
+    "supabase/migrations/20261203000000_care_provider_dashboard.sql": {
+      "description": "Care providers get their own side of Dogeash: vets, trainers, groomers and the rest manage their lis",
+      "tokens": 6178,
+      "hash": "8a5c8e7d65082431",
+      "size": 23168,
+      "mtimeMs": 1794026339832.6216,
+      "updatedAt": "2026-11-07T04:39:00.124Z",
+      "source": "hook"
+    },
+    "app/composables/useCareBookings.ts": {
+      "description": "The buyer's care appointments (Supabase: care_bookings): requesting one from a provider's page, the",
+      "tokens": 1258,
+      "hash": "0e96095a0c086c74",
+      "size": 4400,
+      "mtimeMs": 1794026497759.862,
+      "updatedAt": "2026-11-07T04:41:38.029Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "CareBooking",
+          "kind": "section",
+          "startLine": 12,
+          "endLine": 28,
+          "tokens": 94
+        },
+        {
+          "name": "CareBookingRequest",
+          "kind": "section",
+          "startLine": 29,
+          "endLine": 49,
+          "tokens": 236
+        },
+        {
+          "name": "useCareBookings",
+          "kind": "fn",
+          "startLine": 50,
+          "endLine": 107,
+          "tokens": 648
+        },
+        {
+          "name": "careRefusal",
+          "kind": "fn",
+          "startLine": 108,
+          "endLine": 112,
+          "tokens": 102
+        }
+      ]
+    },
+    "app/components/care/CareBookingCard.vue": {
+      "description": "Vue: setup",
+      "tokens": 1051,
+      "hash": "b49bdfaef96c9556",
+      "size": 3940,
+      "mtimeMs": 1794026555701.9182,
+      "updatedAt": "2026-11-07T04:42:35.904Z",
+      "source": "hook"
+    },
+    "app/composables/useProviderDashboard.ts": {
+      "description": "The provider dashboard: the listing this person manages (their first, for now), its bookings, answer",
+      "tokens": 1372,
+      "hash": "9f3e30b5e56a241b",
+      "size": 4801,
+      "mtimeMs": 1794026700448.2073,
+      "updatedAt": "2026-11-07T04:45:00.689Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "ProviderBooking",
+          "kind": "section",
+          "startLine": 13,
+          "endLine": 29,
+          "tokens": 115
+        },
+        {
+          "name": "ProviderRecordDraft",
+          "kind": "section",
+          "startLine": 30,
+          "endLine": 30,
+          "tokens": 38
+        },
+        {
+          "name": "ProviderProfileDraft",
+          "kind": "section",
+          "startLine": 31,
+          "endLine": 32,
+          "tokens": 59
+        },
+        {
+          "name": "useProviderDashboard",
+          "kind": "fn",
+          "startLine": 33,
+          "endLine": 103,
+          "tokens": 966
+        }
+      ]
+    },
+    "app/pages/provider/index.vue": {
+      "description": "Vue: setup",
+      "tokens": 1809,
+      "hash": "17b3d204bf988e9e",
+      "size": 6793,
+      "mtimeMs": 1794026751287.9727,
+      "updatedAt": "2026-11-07T04:45:51.553Z",
+      "source": "hook"
+    },
+    "app/pages/provider/listing.vue": {
+      "description": "Vue: setup",
+      "tokens": 1905,
+      "hash": "6ffb52592cf1e42d",
+      "size": 7156,
+      "mtimeMs": 1794026779590.0364,
+      "updatedAt": "2026-11-07T04:46:19.825Z",
       "source": "hook"
     }
   },

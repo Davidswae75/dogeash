@@ -28,6 +28,12 @@ export interface CareProvider {
   rating: number
   reviews: number
   priceFrom: number
+  // Written by the provider once they manage the listing; bookings follow their days and times
+  about?: string
+  hours?: string
+  weekdays?: number[]
+  slots?: string[]
+  takingBookings?: boolean
 }
 
 // Example providers: the fallback when the database can't be reached, and what `npm run db:seed` writes
@@ -61,8 +67,13 @@ export interface CareRow {
   rating: number
   reviews_count: number
   price_from: number
+  about: string
+  hours: string
+  weekdays: number[]
+  slots: string[]
+  taking_bookings: boolean
 }
-export const careColumns = 'public_id, name, person, type, city, areas, home_visits, verified, credential, rating, reviews_count, price_from'
+export const careColumns = 'public_id, name, person, type, city, areas, home_visits, verified, credential, rating, reviews_count, price_from, about, hours, weekdays, slots, taking_bookings'
 
 export const toCareProvider = (r: CareRow): CareProvider => ({
   id: r.public_id,
@@ -77,6 +88,11 @@ export const toCareProvider = (r: CareRow): CareProvider => ({
   rating: Number(r.rating),
   reviews: r.reviews_count,
   priceFrom: Number(r.price_from),
+  about: r.about ?? '',
+  hours: r.hours ?? '',
+  weekdays: r.weekdays ?? undefined,
+  slots: r.slots ?? undefined,
+  takingBookings: r.taking_bookings ?? true,
 })
 
 export function findCareProvider(id: string) {

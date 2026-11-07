@@ -688,6 +688,99 @@ await as('authenticated', payer, `select public.cancel_reservation('${raceWin?.r
 check('a buyer who cancels after the deposit frees the dog; the deposit waits for Dogeash', await scalar(`select status::text || '/' || money_decision from public.reservations where id = '${raceWin?.reservationId}'`) === 'cancelled/waiting' && await scalar(`select status::text from public.dogs where id = '${raceDog.id}'`) === 'available')
 check('the money rules are public', (await as('anon', null, 'select public.money_rules() as r'))?.[0]?.r?.depositPercent === 10)
 
+// Payments, part 2: the store's view, stores cancelling, Dogeash deciding on deposits, refunds and payouts going out
+const storeRes = (await as('authenticated', owner, `select public.store_reservations('${k9}') as r`))?.[0]?.r
+check('the owner sees the store\'s reservations with the buyer\'s name', storeRes?.some(x => x.id === start1?.reservationId && x.buyer_name === 'Tunde Ade'))
+check('a handler can\'t list them', await as('authenticated', handler, `select public.store_reservations('${k9}')`) === null)
+check('the owner was asked for a bank account for the waiting payout', await scalar(`select count(*)::int from public.notifications where user_id = '${owner}' and topic = 'payout-account:${k9}'`) === 1)
+const again = (await as('authenticated', buyer, `select public.start_reservation('${raceDog.file_no}') as r`))?.[0]?.r
+await svc(`select public.record_payment('${again?.reference}', ${again?.amountNaira}, true)`)
+check('the store has to say why it cancels', await as('authenticated', manager, `select public.store_cancel_reservation('${again?.reservationId}', '')`) === null)
+check('a buyer can\'t cancel as the store', await as('authenticated', buyer, `select public.store_cancel_reservation('${again?.reservationId}', 'Not mine')`) === null)
+await as('authenticated', manager, `select public.store_cancel_reservation('${again?.reservationId}', 'The dog is unwell')`)
+check('the store cancels: everything paid is set to be refunded, and the dog is back on sale',
+  await scalar(`select count(*)::int from public.refunds where reservation_id = '${again?.reservationId}' and status = 'due'`) === 1
+  && await scalar(`select status::text from public.dogs where id = '${raceDog.id}'`) === 'available')
+check('only admins decide on a deposit', await as('authenticated', owner, `select public.admin_decide_deposit('${late?.reservationId}', 'release')`) === null)
+await adm(`select public.admin_decide_deposit('${late?.reservationId}', 'release', 'Buyer stopped answering')`)
+check('releasing a deposit pays the store, less 5%', await scalar(`select amount_naira::bigint from public.payouts where reservation_id = '${late?.reservationId}'`) == late?.amountNaira - Math.round(late?.amountNaira * 0.05))
+await adm(`select public.admin_decide_deposit('${raceWin?.reservationId}', 'refund')`)
+check('refunding a deposit sets it to go back', await scalar(`select count(*)::int from public.refunds where reservation_id = '${raceWin?.reservationId}'`) === 1)
+check('a deposit is decided once', await adm(`select public.admin_decide_deposit('${raceWin?.reservationId}', 'release')`) === null)
+check('the decision is in the audit log', await scalar(`select count(*)::int from public.admin_audit where action in ('deposit_release', 'deposit_refund')`) === 2)
+const refundId = await scalar(`select id from public.refunds where reservation_id = '${raceWin?.reservationId}'`)
+check('nobody but the server claims a refund', await as('authenticated', admin, `select public.claim_refund('${refundId}')`) === null)
+const claimed = (await svc(`select public.claim_refund('${refundId}') as r`))?.[0]?.r
+check('the server claims a refund with the payment to refund', claimed?.reference === raceWin?.reference)
+check('a refund being sent can\'t be claimed twice', (await svc(`select public.claim_refund('${refundId}') as r`))?.[0]?.r === null)
+await svc(`select public.record_refund_by_payment('${raceWin?.reference}', 'done', 'rf_1')`)
+check('Paystack\'s confirmation marks it refunded', await scalar(`select status::text from public.refunds where id = '${refundId}'`) === 'done')
+const payoutId = await scalar(`select id from public.payouts where reservation_id = '${start1?.reservationId}'`)
+check('a payout waits until the store has a bank account', (await svc(`select public.claim_payout('${payoutId}') as r`))?.[0]?.r === null)
+check('stores can\'t write their payout account directly', await as('authenticated', owner, `insert into public.store_payout_accounts values ('${k9}', '058', 'GTBank', 'K9 GUARDIAN', '1234', 'RCP_x')`) === null)
+await svc(`insert into public.store_payout_accounts (store_id, bank_code, bank_name, account_name, account_last4, recipient_code) values ('${k9}', '058', 'GTBank', 'K9 GUARDIAN KENNELS', '4321', 'RCP_test')`)
+check('only the owner sees the payout account', (await as('authenticated', owner, 'select account_last4 from public.store_payout_accounts'))?.[0]?.account_last4 === '4321' && (await as('authenticated', manager, 'select * from public.store_payout_accounts'))?.length === 0)
+const sent = (await svc(`select public.claim_payout('${payoutId}') as r`))?.[0]?.r
+check('with the account, the server claims the payout for the store\'s recipient', sent?.recipient === 'RCP_test' && sent?.reference?.startsWith('po_'))
+await svc(`select public.record_transfer('${sent?.reference}', 'done', 'TRF_1')`)
+check('the transfer confirmed: paid out, and the store is told', await scalar(`select status::text from public.payouts where id = '${payoutId}'`) === 'done' && await scalar(`select count(*)::int from public.notifications where topic = 'payout:${payoutId}'`) >= 1)
+const money = (await adm('select public.admin_money() as m'))?.[0]?.m
+check('the admin money overview adds up what was paid out', money?.totals?.paidOut == sent?.amountNaira && money?.reservations?.length >= 4)
+check('the money overview is for admins only', await as('authenticated', owner, 'select public.admin_money()') === null)
+
+// Care providers: Dogeash invites someone to manage a listing; they answer bookings and, with the owner's
+// permission for that booking, add to the dog's record
+const vet = await user('Halima Sani')
+const care01 = await scalar(`select id from public.care_providers where public_id = 'CARE-01'`)
+check('only admins invite someone to manage a listing', await as('authenticated', owner, `select public.admin_invite_provider('CARE-01', '${emailOf('Halima Sani')}')`) === null)
+await adm(`select public.admin_invite_provider('CARE-01', '${emailOf('Halima Sani')}')`)
+check('the invited person is told, and sees the invitation', await scalar(`select count(*)::int from public.notifications where user_id = '${vet}' and topic = 'provider-invite:${care01}'`) === 1
+  && (await as('authenticated', vet, 'select * from public.my_provider_invites()'))?.length === 1)
+const careInvite = await scalar(`select id from public.care_provider_invites where provider_id = '${care01}'`)
+check('nobody else can accept it', await as('authenticated', buyer, `select public.accept_provider_invite('${careInvite}')`) === null)
+check('accepting makes them a manager of the listing', (await as('authenticated', vet, `select public.accept_provider_invite('${careInvite}') as p`))?.[0]?.p === 'CARE-01'
+  && (await as('authenticated', vet, 'select provider_id from public.care_provider_members'))?.length === 1)
+check('a manager edits the listing\'s details and times', (await as('authenticated', vet, `select public.provider_save_profile('${care01}', '{"about":"Large-breed specialists","weekdays":[1,2,3,4,5],"slots":["9:00","14:00"],"priceFrom":16000}')`)) !== null
+  && await scalar(`select about || '/' || array_to_string(weekdays, ',') || '/' || price_from from public.care_providers where id = '${care01}'`) === 'Large-breed specialists/1,2,3,4,5/16000')
+check('nobody else edits it', await as('authenticated', buyer, `select public.provider_save_profile('${care01}', '{"about":"Mine now"}')`) === null)
+check('people can\'t add themselves to a listing', await as('authenticated', buyer, `insert into public.care_provider_members values ('${care01}', '${buyer}')`) === null)
+
+const bruno = (await as('authenticated', buyer, `insert into public.owned_dogs (name) values ('Bruno') returning id`))?.[0]?.id
+const workday = await scalar(`select d::date::text from generate_series(current_date + 1, current_date + 14, '1 day') d where extract(dow from d) between 1 and 5 limit 1`)
+const book = extra => as('authenticated', buyer, `insert into public.care_bookings (provider_id, service, day, slot, place, owned_dog_id, share_record) values ('${care01}', 'Vaccination', '${workday}', '9:00', 'premises', ${extra}) returning id, buyer_name, dog_name`)
+check('a booking must be for one of your own dogs', await book(`'${(await as('authenticated', other, `insert into public.owned_dogs (name) values ('Not his') returning id`))?.[0]?.id}', true`) === null)
+check('a booking must be on one of the provider\'s times', await as('authenticated', buyer, `insert into public.care_bookings (provider_id, service, day, slot) values ('${care01}', 'Vaccination', '${workday}', '10:30')`) === null)
+check('and from tomorrow on', await as('authenticated', buyer, `insert into public.care_bookings (provider_id, service, day, slot) values ('${care01}', 'Vaccination', current_date, '9:00')`) === null)
+const cb = (await book(`'${bruno}', true`))?.[0]
+check('a buyer books for their dog, sharing its record', cb?.dog_name === 'Bruno' && cb?.buyer_name === 'Tunde Ade')
+check('the provider is told', await scalar(`select count(*)::int from public.notifications where user_id = '${vet}' and topic = 'care-booking:${cb?.id}'`) === 1)
+const pb = (await as('authenticated', vet, `select public.provider_bookings('${care01}') as b`))?.[0]?.b
+check('the provider sees the booking with the dog, and can add to its record', pb?.some(b => b.id === cb?.id && b.dog_name === 'Bruno' && b.can_add_record))
+check('nobody else sees the provider\'s bookings', await as('authenticated', owner, `select public.provider_bookings('${care01}')`) === null && (await as('authenticated', other, 'select id from public.care_bookings'))?.length === 0)
+check('visitors can\'t read bookings', await as('anon', null, 'select * from public.care_bookings') === null)
+check('the record waits for the booking to be confirmed', await as('authenticated', vet, `select public.provider_add_record('${cb?.id}', 'vaccination', 'Rabies', current_date, current_date + 365)`) === null)
+check('a buyer can\'t confirm their own booking', await as('authenticated', buyer, `select public.set_care_booking_status('${cb?.id}', 'confirmed')`) === null)
+await as('authenticated', vet, `select public.set_care_booking_status('${cb?.id}', 'confirmed', 'See you at 9')`)
+check('the provider confirms; the buyer is told', await scalar(`select status::text from public.care_bookings where id = '${cb?.id}'`) === 'confirmed'
+  && await scalar(`select count(*)::int from public.notifications where user_id = '${buyer}' and topic = 'care-booking:${cb?.id}'`) === 1)
+await as('authenticated', vet, `select public.provider_add_record('${cb?.id}', 'vaccination', 'Rabies', current_date, current_date + 365, 'Batch 22A')`)
+check('the provider adds to the dog\'s record, signed with their name', await scalar(`select by_whom from public.owned_dog_records where care_booking_id = '${cb?.id}'`) === 'Kuje Veterinary Clinic')
+check('the owner sees it in the record', (await as('authenticated', buyer, `select title from public.owned_dog_records where owned_dog_id = '${bruno}'`))?.some(r => r.title === 'Rabies'))
+check('the provider sees what they added, not the rest', (await as('authenticated', vet, `select public.provider_booking_records('${cb?.id}') as r`))?.[0]?.r?.length === 1
+  && (await as('authenticated', vet, `select id from public.owned_dog_records`))?.length === 0)
+check('the owner can\'t pass a line off as the provider\'s', await as('authenticated', buyer, `update public.owned_dog_records set provider_id = null where care_booking_id = '${cb?.id}'`) === null)
+const noShare = (await book(`'${bruno}', false`))?.[0]
+await as('authenticated', vet, `select public.set_care_booking_status('${noShare?.id}', 'confirmed')`)
+check('without the owner\'s permission, nothing is added', await as('authenticated', vet, `select public.provider_add_record('${noShare?.id}', 'vet', 'Check-up', current_date, null)`) === null)
+check('owners still can\'t write records for someone else\'s dog', await as('authenticated', other, `insert into public.owned_dog_records (owned_dog_id, kind, title, done_on) values ('${bruno}', 'vet', 'Fake', current_date)`) === null)
+await as('authenticated', buyer, `select public.set_care_booking_status('${noShare?.id}', 'cancelled')`)
+check('the buyer cancels a booking; the provider is told', await scalar(`select status::text from public.care_bookings where id = '${noShare?.id}'`) === 'cancelled'
+  && await scalar(`select count(*)::int from public.notifications where user_id = '${vet}' and topic = 'care-booking:${noShare?.id}'`) === 1)
+await as('authenticated', vet, `select public.set_care_booking_status('${cb?.id}', 'done', 'Next booster in a year')`)
+check('the provider marks it done', await scalar(`select status::text from public.care_bookings where id = '${cb?.id}'`) === 'done')
+await as('authenticated', vet, `select public.provider_save_profile('${care01}', '{"takingBookings":false}')`)
+check('a paused listing takes no bookings', await book('null, false') === null)
+
 // Garbled text (UTF-8 read as Mac Roman on the way into the SQL Editor) is repaired, data and code alike
 await db.exec(`update public.stores set tagline = 'Mon‚ÄìSat ¬∑ from ‚Ç¶2m' where public_id = 'STR-002'`)
 await db.exec(`create or replace function public.garbled_sample() returns text language sql as $$ select 'Price ¬∑ ‚Ç¶1' $$`)

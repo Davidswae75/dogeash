@@ -1,31 +1,51 @@
 <script setup lang="ts">
 import type { CareProvider } from '~/utils/care'
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import type { AccountGate } from '~/composables/useAccountGate'
+import { useCareBookings } from '~/composables/useCareBookings'
+import { useOwnedDogs } from '~/composables/useOwnedDogs'
+import { useSession } from '~/composables/useSession'
 import { careTypes } from '~/utils/care'
 import { formatNaira } from '~/utils/dogs'
 
-// Book a care provider: the shared booking dialog, filled in from the provider
+// Book a care provider: the shared booking dialog, on the provider's own days and times. Buyers pick one of
+// My dogs and can let the provider add the visit to its record. The provider answers from their dashboard.
 const props = withDefaults(defineProps<{ provider: CareProvider, label?: string, variant?: 'outline' | 'default' | 'marigold' | 'night', triggerClass?: string }>(), { label: 'Book appointment', variant: 'outline' })
 
 const gate = computed<AccountGate>(() => ({
   key: `care:${props.provider.id}`,
   action: `book ${props.provider.name}`,
-  reason: 'Providers confirm appointments with a name and phone number, and the booking is added to your dog\'s record.',
+  reason: 'Providers confirm appointments with a name and phone number, and can add the visit to your dog\'s record.',
 }))
+
+const { signedIn } = useSession()
+const owned = useOwnedDogs()
+onMounted(() => { if (signedIn.value) owned.ensure() })
+const ownedDogs = computed(() => owned.dogs.value.map(d => ({ value: d.id, label: d.name })))
+
+const bookings = useCareBookings()
+const send = (b: { service: string, day: string, slot: string, place: 'home' | 'premises', ownedDogId: string | null, dogName: string, shareRecord: boolean }) =>
+  bookings.request({ providerId: props.provider.id, ...b })
 </script>
 
 <template>
   <BookingDialog
+    v-if="props.provider.takingBookings !== false"
     :title="props.provider.name"
-    :description="`${careTypes[props.provider.type].label} · ${props.provider.areas}`"
+    :description="`${careTypes[props.provider.type].label} · ${props.provider.areas}${props.provider.hours ? ` · ${props.provider.hours}` : ''}`"
     :services="careTypes[props.provider.type].services"
     :home-visits="props.provider.homeVisits"
-    :price-note="`From ${formatNaira(props.provider.priceFrom)}. You pay the provider directly for now.`"
+    :weekdays="props.provider.weekdays"
+    :slots="props.provider.slots"
+    :price-note="`From ${formatNaira(props.provider.priceFrom)}. You pay the provider directly.`"
     :trigger-label="props.label"
     :trigger-variant="props.variant"
     :trigger-class="props.triggerClass"
     :gate="gate"
+    :send="send"
+    :owned-dogs="ownedDogs"
+    confirm-text="The provider confirms the time with you."
     ask-dog-name
   />
+  <Button v-else :variant="props.variant" :class="props.triggerClass" disabled>Not taking bookings right now</Button>
 </template>

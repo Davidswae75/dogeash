@@ -200,7 +200,7 @@ export interface Database {
         Relationships: []
       }
       care_providers: {
-        Row: { id: string, public_id: string, slug: string, name: string, person: string | null, type: Database['public']['Enums']['care_type'], city: string, areas: string, home_visits: boolean, verified: boolean, credential: string, rating: number, reviews_count: number, price_from: number } & Timestamps
+        Row: { id: string, public_id: string, slug: string, name: string, person: string | null, type: Database['public']['Enums']['care_type'], city: string, areas: string, home_visits: boolean, verified: boolean, credential: string, rating: number, reviews_count: number, price_from: number, about: string, hours: string, weekdays: number[], slots: string[], taking_bookings: boolean } & Timestamps
         Insert: never
         Update: never
         Relationships: []
@@ -259,7 +259,7 @@ export interface Database {
         ]
       }
       owned_dog_records: {
-        Row: { id: string, owned_dog_id: string, owner_id: string, kind: Database['public']['Enums']['owned_dog_record_kind'], title: string, done_on: string | null, due_on: string | null, by_whom: string, note: string, created_at: string }
+        Row: { id: string, owned_dog_id: string, owner_id: string, kind: Database['public']['Enums']['owned_dog_record_kind'], title: string, done_on: string | null, due_on: string | null, by_whom: string, note: string, provider_id: string | null, care_booking_id: string | null, created_at: string }
         Insert: { owned_dog_id: string, kind: Database['public']['Enums']['owned_dog_record_kind'], title: string, done_on?: string | null, due_on?: string | null, by_whom?: string, note?: string }
         Update: { kind?: Database['public']['Enums']['owned_dog_record_kind'], title?: string, done_on?: string | null, due_on?: string | null, by_whom?: string, note?: string }
         Relationships: [
@@ -304,9 +304,29 @@ export interface Database {
       }
       store_payout_accounts: {
         Row: { store_id: string, bank_code: string, bank_name: string, account_name: string, account_last4: string, recipient_code: string, updated_by: string | null, updated_at: string }
+        Insert: { store_id: string, bank_code: string, bank_name: string, account_name: string, account_last4: string, recipient_code: string, updated_by?: string | null, updated_at?: string }
+        Update: { bank_code?: string, bank_name?: string, account_name?: string, account_last4?: string, recipient_code?: string, updated_by?: string | null, updated_at?: string }
+        Relationships: []
+      }
+      care_provider_members: {
+        Row: { provider_id: string, user_id: string, created_at: string }
         Insert: { [_ in never]: never }
         Update: { [_ in never]: never }
         Relationships: []
+      }
+      care_provider_invites: {
+        Row: { id: string, provider_id: string, email: string, invited_by: string | null, created_at: string }
+        Insert: { [_ in never]: never }
+        Update: { [_ in never]: never }
+        Relationships: []
+      }
+      care_bookings: {
+        Row: { id: string, provider_id: string, buyer_id: string, service: string, day: string, slot: string, place: 'premises' | 'home', note: string, owned_dog_id: string | null, dog_name: string, share_record: boolean, status: Database['public']['Enums']['care_booking_status'], provider_note: string, buyer_name: string, buyer_phone: string | null, created_at: string, updated_at: string }
+        Insert: { provider_id: string, service: string, day: string, slot: string, place?: 'premises' | 'home', note?: string, owned_dog_id?: string | null, dog_name?: string, share_record?: boolean }
+        Update: { [_ in never]: never }
+        Relationships: [
+          { foreignKeyName: 'care_bookings_provider_id_fkey', columns: ['provider_id'], isOneToOne: false, referencedRelation: 'care_providers', referencedColumns: ['id'] },
+        ]
       }
       shortlist_items: {
         Row: { user_id: string, dog_id: string, comparing: boolean, saved_price: number | null, created_at: string }
@@ -327,6 +347,24 @@ export interface Database {
       expire_reservations: { Args: Record<string, never>, Returns: number }
       record_payment: { Args: { payment_reference: string, amount_paid_naira: number, succeeded: boolean, pay_channel?: string }, Returns: Json }
       record_refund: { Args: { refund: string, to_status: Database['public']['Enums']['money_move_status'], provider?: string | null, why?: string }, Returns: undefined }
+      store_reservations: { Args: { target_store: string }, Returns: Json }
+      store_cancel_reservation: { Args: { reservation: string, reason: string }, Returns: undefined }
+      admin_decide_deposit: { Args: { reservation: string, decision: string, note?: string }, Returns: undefined }
+      admin_money: { Args: Record<string, never>, Returns: Json }
+      claim_refund: { Args: { refund: string }, Returns: Json }
+      claim_payout: { Args: { payout: string }, Returns: Json }
+      record_transfer: { Args: { transfer_ref: string, to_status: Database['public']['Enums']['money_move_status'], code?: string | null, why?: string }, Returns: undefined }
+      record_refund_by_payment: { Args: { payment_reference: string, to_status: Database['public']['Enums']['money_move_status'], provider?: string | null, why?: string }, Returns: undefined }
+      is_provider_member: { Args: { target: string }, Returns: boolean }
+      admin_invite_provider: { Args: { provider: string, invite_email: string }, Returns: undefined }
+      admin_provider_managers: { Args: Record<string, never>, Returns: Json }
+      my_provider_invites: { Args: Record<string, never>, Returns: { id: string, provider_name: string, provider_type: Database['public']['Enums']['care_type'], provider_city: string, created_at: string }[] }
+      accept_provider_invite: { Args: { target: string }, Returns: string }
+      provider_save_profile: { Args: { provider: string, p: Json }, Returns: undefined }
+      set_care_booking_status: { Args: { booking: string, to_status: Database['public']['Enums']['care_booking_status'], answer_note?: string }, Returns: undefined }
+      provider_bookings: { Args: { provider: string }, Returns: Json }
+      provider_add_record: { Args: { booking: string, rec_kind: Database['public']['Enums']['owned_dog_record_kind'], rec_title: string, rec_done: string | null, rec_due: string | null, rec_note?: string }, Returns: undefined }
+      provider_booking_records: { Args: { booking: string }, Returns: Json }
       has_store_role: { Args: { target_store: string, roles: Database['public']['Enums']['store_role'][] }, Returns: boolean }
       mark_conversation_read: { Args: { target: string }, Returns: undefined }
       my_email: { Args: Record<string, never>, Returns: string }
@@ -390,7 +428,8 @@ export interface Database {
       visit_place: 'kennel' | 'home'
       staff_role: 'admin' | 'inspector'
       care_type: 'vet' | 'trainer' | 'groomer' | 'builder' | 'equipment' | 'boarding'
-      notification_kind: 'message' | 'visit' | 'reserved' | 'sold' | 'available' | 'price' | 'team' | 'review' | 'store' | 'report' | 'announcement' | 'payment'
+      notification_kind: 'message' | 'visit' | 'reserved' | 'sold' | 'available' | 'price' | 'team' | 'review' | 'store' | 'report' | 'announcement' | 'payment' | 'care'
+      care_booking_status: 'requested' | 'confirmed' | 'declined' | 'cancelled' | 'done'
       reservation_status: 'pending' | 'held' | 'paid' | 'completed' | 'cancelled' | 'expired'
       payment_status: 'pending' | 'success' | 'failed'
       money_move_status: 'due' | 'sending' | 'done' | 'failed'

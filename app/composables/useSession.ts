@@ -1,4 +1,5 @@
 import type { Account } from '~/utils/account'
+import type { CareType } from '~/utils/care'
 import type { StoreRow } from '~/utils/stores'
 import type { StorePermission } from '~/utils/storeRoles'
 import { computed } from 'vue'
@@ -25,6 +26,8 @@ export function useSession() {
   const memberships = computed(() => user.value?.stores ?? [])
   const hasStore = computed(() => memberships.value.length > 0)
   const memberOf = (storeId: string) => memberships.value.find(m => m.storeId === storeId)
+  // Care listings they manage (empty for almost everyone)
+  const providers = computed(() => user.value?.providers ?? [])
   const can = (storeId: string, permission: StorePermission) => {
     const m = memberOf(storeId)
     return !!m && roleCan(m.role, permission)
@@ -39,9 +42,10 @@ export function useSession() {
     const supabase = useSupabaseClient()
     const storageUrl = useRuntimeConfig().public.supabase.url as string
 
-    const [{ data: profile }, { data: members }] = await Promise.all([
+    const [{ data: profile }, { data: members }, { data: providerRows }] = await Promise.all([
       supabase.from('profiles').select('full_name, phone, city, created_at, property, has_children, has_other_pets, experience, notify_email, notify_sms, notify_whatsapp').eq('id', id).maybeSingle(),
       supabase.from('store_members').select(`role, stores (${storeColumns})`).eq('user_id', id),
+      supabase.from('care_provider_members').select('care_providers (id, public_id, name, slug, type)').eq('user_id', id),
     ])
     const name = profile?.full_name ?? ''
     user.value = {
@@ -62,6 +66,10 @@ export function useSession() {
           const store = toStore(m.stores as unknown as StoreRow, name, storageUrl)
           return { storeId: store.id, role: m.role, store }
         }),
+      providers: (providerRows ?? [])
+        .map(r => r.care_providers as unknown as { id: string, public_id: string, name: string, slug: string, type: CareType } | null)
+        .filter(p => !!p)
+        .map(p => ({ id: p!.public_id, uuid: p!.id, name: p!.name, slug: p!.slug, type: p!.type })),
     }
     return user.value
   }
@@ -87,5 +95,5 @@ export function useSession() {
     notify.signedOut()
   }
 
-  return { user, signedIn, firstName, initials, memberships, hasStore, memberOf, can, load, mergeGuest, signOut }
+  return { user, signedIn, firstName, initials, memberships, hasStore, memberOf, can, providers, load, mergeGuest, signOut }
 }

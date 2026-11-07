@@ -11,6 +11,7 @@ useSeoMeta({ title: 'My Dogeash · Dogeash' })
   <div class="flex flex-col gap-6">
     <AccountHeading :kicker="`Overview · Member since ${user?.memberSince}`" title="My" outline="Dogeash" />
     <AccountStoreInvites />
+    <AccountProviderInvites />
     <AccountGlance />
     <div class="grid grid-cols-[minmax(0,1fr)] gap-4 sm:gap-5 xl:grid-cols-2">
       <AccountMyDogs />

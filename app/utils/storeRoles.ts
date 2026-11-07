@@ -2,13 +2,14 @@
 // One account can buy on Dogeash and also belong to one or more stores (PLAN.md Phase 5a).
 
 export type StoreRole = 'owner' | 'manager' | 'handler'
-export type StorePermission = 'dogs' | 'enquiries' | 'bookings' | 'care' | 'profile' | 'payouts' | 'team' | 'settings'
+// sales: reservations on the store's dogs; payouts: the money and the bank account (owners only)
+export type StorePermission = 'dogs' | 'enquiries' | 'bookings' | 'care' | 'profile' | 'sales' | 'payouts' | 'team' | 'settings'
 
 export interface StoreMembership { storeId: string, role: StoreRole }
 
 export const storeRoles: Record<StoreRole, { label: string, hint: string, can: StorePermission[] }> = {
-  owner: { label: 'Owner', hint: 'Everything, including payouts, the team and settings', can: ['dogs', 'enquiries', 'bookings', 'care', 'profile', 'payouts', 'team', 'settings'] },
-  manager: { label: 'Manager', hint: 'Dogs, messages, bookings, the care team and the store profile', can: ['dogs', 'enquiries', 'bookings', 'care', 'profile'] },
+  owner: { label: 'Owner', hint: 'Everything, including payouts, the team and settings', can: ['dogs', 'enquiries', 'bookings', 'care', 'profile', 'sales', 'payouts', 'team', 'settings'] },
+  manager: { label: 'Manager', hint: 'Dogs, messages, bookings, reservations, the care team and the store profile', can: ['dogs', 'enquiries', 'bookings', 'care', 'profile', 'sales'] },
   handler: { label: 'Handler', hint: 'Dogs and kennel visits', can: ['dogs', 'bookings'] },
 }
 

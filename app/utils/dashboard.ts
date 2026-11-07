@@ -26,7 +26,7 @@ export const dashboardNav: { group: string, items: { to: string, label: string, 
     group: 'Store',
     items: [
       { to: '/dashboard/profile', label: 'Store profile', icon: 'Store', permission: 'profile' },
-      { to: '/dashboard/payouts', label: 'Payouts', icon: 'Wallet', permission: 'payouts' },
+      { to: '/dashboard/payouts', label: 'Payouts', icon: 'Wallet', permission: 'sales' },
       { to: '/dashboard/team', label: 'Team', icon: 'Users', permission: 'team' },
       { to: '/dashboard/settings', label: 'Settings', icon: 'Settings', permission: 'settings' },
     ],
@@ -35,7 +35,6 @@ export const dashboardNav: { group: string, items: { to: string, label: string, 
 
 // What each section will hold, shown until it is built
 export const dashboardSections: Record<string, { title: string, text: string, plan: string[] }> = {
-  payouts: { title: 'Payouts', text: 'Deposits, sales and money paid to your bank.', plan: ['Bank account for payouts', 'Escrow deposits and releases', 'Statements and platform fees'] },
 }
 
 // Example figures for the design

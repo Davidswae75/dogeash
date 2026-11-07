@@ -1,4 +1,4 @@
-import { ClipboardCheck, Heart, LayoutDashboard, Search, ShieldCheck, Store, Undo2, UserRound } from '@lucide/vue'
+import { ClipboardCheck, Heart, LayoutDashboard, Search, ShieldCheck, Stethoscope, Store, Undo2, UserRound } from '@lucide/vue'
 import type { AuthLinkCard } from '~/components/auth/AuthLinkCards.vue'
 import type { Account } from '~/utils/account'
 
@@ -6,11 +6,12 @@ import type { Account } from '~/utils/account'
 //   1. back to what they were doing, if a gated action sent them to sign in
 //   2. the admin console (or their inspections), for Dogeash staff
 //   3. their store's dashboard, and its public page once it's live, for anyone on a store's team
+//      (and the provider dashboard, for someone who manages a care listing)
 //   4. browsing dogs, their shortlist and their account, for everyone
 // Capped so the screen stays a short choice, not a menu.
 const MAX = 5
 
-export function signInNextSteps(o: { redirect?: string, stores: Account['stores'], staffRole: 'admin' | 'inspector' | null }): AuthLinkCard[] {
+export function signInNextSteps(o: { redirect?: string, stores: Account['stores'], providers?: Account['providers'], staffRole: 'admin' | 'inspector' | null }): AuthLinkCard[] {
   const steps: AuthLinkCard[] = []
   if (o.redirect) steps.push({ to: o.redirect, title: 'Carry on where you were', text: 'Back to the page you were on, to finish what you started.', icon: Undo2 })
 
@@ -22,6 +23,9 @@ export function signInNextSteps(o: { redirect?: string, stores: Account['stores'
     steps.push({ to: '/dashboard', title: `${first.store.name} dashboard`, text: 'Your dogs, messages, visits and store settings.', icon: LayoutDashboard })
     if (first.store.verified) steps.push({ to: `/stores/${first.store.slug}`, title: 'Your store\'s page', text: 'See your store the way buyers do.', icon: Store })
   }
+
+  const listing = o.providers?.[0]
+  if (listing) steps.push({ to: '/provider', title: `${listing.name} bookings`, text: 'Answer booking requests and keep your listing up to date.', icon: Stethoscope })
 
   steps.push(
     { to: '/dogs', title: 'Find a guard dog', text: 'Browse dogs from inspected kennels by protection level and city.', icon: Search },

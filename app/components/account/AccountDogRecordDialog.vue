@@ -16,6 +16,8 @@ const props = defineProps<{
   kind?: RecordKind
   save: (r: RecordDraft) => Promise<string | null>
   remove?: () => Promise<string | null>
+  /** A care provider adding to the record: "By" is their own name, so it isn't asked */
+  hideBy?: boolean
 }>()
 const open = defineModel<boolean>('open', { default: false })
 
@@ -97,7 +99,7 @@ const field = 'h-10 border-line-strong bg-surface'
             <Input id="record-due" v-model="dueOn" type="date" :class="field" />
           </FieldShell>
         </div>
-        <FieldShell label="By" for="record-by" optional hint="The vet, trainer or clinic.">
+        <FieldShell v-if="!props.hideBy" label="By" for="record-by" optional hint="The vet, trainer or clinic.">
           <Input id="record-by" v-model="byWhom" maxlength="80" placeholder="Kuje Veterinary Clinic" :class="field" />
         </FieldShell>
         <FieldShell label="Note" for="record-note" optional>

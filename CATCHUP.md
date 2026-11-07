@@ -1364,3 +1364,129 @@ Checked in the browser: an empty sign-in and an empty sign-up show the field err
 - **Admin side:** payments, reservations waiting for a decision (refund or release), refunds and payouts.
 
 Not tested end to end yet: it needs the migration and your test keys. Checked in the browser: the button and the sign-in dialog on a dog page, and the reservation cards on desktop and phone. Typecheck shows no new errors.
+
+## 37. Payments, part 2: stores, payouts and Dogeash's decisions (7 Nov)
+
+Part 1's keys and migration were checked live on 7 Nov:
+- both keys work, and they're the right kind (Paystack test secret, Supabase secret)
+- visitors are locked out of the payment tables and functions
+- Paystack accepts the site's checkout request
+
+### Store dashboard → Payouts (`/dashboard/payouts`, now built)
+- **Who sees what:** a new `sales` permission lets owners **and managers** see reservations. Money and the bank account stay owner-only (`payouts`).
+- **Top tiles (owners):** held by Dogeash, due to you, paid out.
+- **Reservations:**
+  - each one shows the dog, the buyer's name, and their **phone while there's a handover to arrange**, plus the state ("Waiting for the balance · 3 days left", "Arrange the handover…"), and price, paid and "You get" (price less 5%)
+  - **Cancel and refund the buyer** asks for a reason, which the buyer sees; everything they paid goes back through Paystack straight away
+- **Bank account (owners):** choose the bank (a new searchable `SearchSelect`, with Paystack's bank list) and type the 10-digit number. Paystack checks it with the bank and returns the account name. Dogeash keeps the bank, that name and the last 4 digits; Paystack keeps the full number as a transfer recipient. Saving sends any payouts already waiting.
+- **Payouts list:** amount, due / sending / paid / "not sent yet".
+
+### When money moves
+- **Handover confirmed** (now through the server, `/api/payments/handover`): the payout (price less 5%) goes out **at once** by Paystack Transfer. With no bank account yet, it waits, and the owner is notified "Add your bank account to be paid".
+- **Store cancels:** refunds go out at once.
+- **Payment that can't be used:** the refund goes out at once (as in part 1).
+- **Every refund and payout is claimed first**, so it's never sent twice. Paystack's webhook confirms it later (`refund.processed`, `transfer.success/failed/reversed`). The store is notified when a payout lands.
+- If Paystack asks for an OTP on transfers, the payout is marked "failed" with a note to turn that off in Paystack's settings, then retry.
+
+### Admin → Payments (`/admin/payments`, new in the sidebar)
+- **Tiles:** held by Dogeash, commission earned, paid to stores (and refunded), needs attention.
+- **Tabs:** Needs a decision, In progress, All, Refunds, Payouts. Export to CSV.
+- **Needs a decision** (a buyer cancelled, or a hold ran out): **Refund** (back to the buyer) or **Release** (to the store, less 5%), with a note for the buyer. Both sides are told; it's in the audit log.
+- **Retry** on any refund or payout that failed (or a payout that was waiting for a bank account).
+
+### Files
+- **Migration** `20261202000000_payments_part2.sql`:
+  - functions: `store_reservations`, `store_cancel_reservation`, `admin_decide_deposit`, `admin_money`, and for the server only `claim_refund`, `claim_payout`, `record_transfer`, `record_refund_by_payment`
+  - the "add your bank account" notification
+- **Server:**
+  - `server/utils/payments.ts`: `sendDueMoney`, `sendRefund`, `sendPayout`, `sendStorePayouts`
+  - `server/api/payouts/{banks.get,account.post}.ts`, `server/api/payments/{handover,store-cancel}.post.ts`, `server/api/admin/{deposit,money-retry}.post.ts`
+  - the webhook now handles transfers too
+- **App:**
+  - `composables/useStoreMoney.ts`, `composables/useAdminMoney.ts`, `utils/fetchError.ts` (shared)
+  - `components/SearchSelect.vue`, `dashboard/DashboardPayoutAccount.vue`, `dashboard/DashboardStoreReservation.vue`
+  - `pages/dashboard/payouts.vue`, `pages/admin/payments.vue`
+- **Tests:** 25 new checks (store's view and cancelling, admin decisions and audit, claiming refunds and payouts once, bank account privacy, transfer confirmation, the money overview). All pass.
+
+### What you do
+1. **Run the migration** `20261202000000_payments_part2.sql` (copied, ASCII-only).
+2. **Paystack settings:**
+   - turn off **"Confirm transfers with OTP"** (Settings → Preferences), so payouts can go out by themselves
+   - in **live mode**, Transfers need Paystack to enable them on the business
+3. **Webhook URL** (once online): `https://<your site>/api/paystack/webhook` handles payments, refunds and transfers.
+
+### Checked
+- The bank list comes from Paystack through the site's server, and searching "guar" finds Guaranty Trust Bank.
+- The store's reservation cards and the bank account card were checked in the browser with sample data.
+- Typecheck shows no new errors.
+
+**Not yet tried:**
+- signed-in flows (paying, cancelling, saving a bank account) and the admin page in the browser: they need your accounts
+- Paystack's test-mode check of a real account number, which may be limited
+
+### Live test, 7 Nov
+- **Deposit:** RSV-A3AB3349 (Rambo), ₦320,000 by bank transfer. Recorded, Rambo reserved, buyer notified. (No store notice: K9 Guardian is a sample store with no team.)
+- **Cancel:** you cancelled as the buyer. Rambo went back on sale, and the deposit waited for a decision.
+- **Refund decision:** Admin → Payments → Refund recorded the decision and the audit entry, notified the buyer, and sent the refund to Paystack (refund 19042033, ₦320,000). Paystack has it as **pending**; Dogeash shows "sending".
+- **Gap found and fixed:** a refund or payout was only marked done by Paystack's webhook, which can't reach a laptop (or may be missed online). New `POST /api/payments/sync` (`syncSendingMoney` in `server/utils/payments.ts`) asks Paystack directly about anything still "sending". It runs when Admin → Payments opens, and on a buyer's Reservations page or a store's Payouts page when something is on its way.
+
+## 38. Care providers: their own dashboard (7 Nov)
+
+### How a provider gets in
+- **Dogeash invites them.** Admin → Care directory → ⋯ → **Invite to manage**, with their email. There's a new "Managed by" column (names, or "invited: email").
+- The invitation waits in their account (a dark card on the account overview, plus a bell notification if they already have an account). **Accept** takes them to the dashboard.
+- Listings stay Dogeash-checked: the **name, type, city, credential and badge are Dogeash's**; the provider edits the rest.
+
+### Provider dashboard (`/provider`; from the account menu, and offered after sign-in)
+- **Bookings tab:**
+  - **To answer:** Confirm, or "Can't make it" (a reason is required, and the buyer reads it)
+  - **Coming up:** Mark done (with an optional note: "Next booster in a year"), and **Add to {dog}'s record**
+  - **Earlier:** past confirmed ones to mark done, and how many record lines were added
+  - each card shows the buyer, their **phone while the booking is coming up**, the dog, and the buyer's note
+- **Your listing tab:**
+  - person in charge, price from, areas, opening hours, About
+  - "Taking bookings" and "I visit dogs at home" switches
+  - the **days and times** buyers can book
+  - Dogeash's facts shown on the side, read-only
+- The public provider page now shows **About** and the hours.
+
+### Buyers
+- **"Book appointment" now really sends** (it was a preview), on the provider's own days and times.
+- Buyers with dogs in My dogs **pick the dog**, and a checkbox (on by default) lets the provider **add this visit to the dog's record**. The provider sees only the lines they add.
+- **Visits and bookings** now has a "Care appointments" section: cancel, see the provider's answer and note, and "See Bruno's record" once done.
+- **Notifications** go both ways: the provider gets new requests and cancellations; the buyer gets confirmed, declined, done, and "Kuje Veterinary Clinic added to Bruno's record". There's a new "care" bell icon.
+
+### Rules the database enforces
+- Bookings must be from tomorrow, at most 2 months ahead, on the provider's days and times, home visits only if offered, the listing taking bookings, the dog the buyer's own, and at most 10 waiting per buyer.
+- Only the provider's people answer; buyers can only cancel.
+- Record lines need the owner's permission **for that booking**, the booking confirmed, at most 10 per booking, and are signed with the provider's name. The owner can still edit or delete them, but can't pass a line off as the provider's or the reverse.
+
+### Files
+- **Migration** `20261203000000_care_provider_dashboard.sql` (ASCII, copied):
+  - new listing columns: about, hours, weekdays, slots, taking_bookings
+  - new tables: care_provider_members, care_provider_invites, care_bookings
+  - owned_dog_records gains provider_id and care_booking_id
+  - functions: `admin_invite_provider`, `admin_provider_managers`, `my_provider_invites`, `accept_provider_invite`, `provider_save_profile`, `set_care_booking_status`, `provider_bookings`, `provider_add_record`, `provider_booking_records`
+- **App:**
+  - composables: `useCareBookings.ts`, `useProviderInvites.ts`, `useProviderDashboard.ts`
+  - components: `care/CareBookingCard.vue` (both sides), `account/AccountProviderInvites.vue`
+  - pages and middleware: `pages/provider.vue`, `provider/index.vue`, `provider/listing.vue`, `middleware/provider-member.ts`
+  - `BookingDialog` gained `ownedDogs`, `confirmText` and record sharing; `AccountDogRecordDialog` gained `hideBy`
+  - the session loads `providers` beside `stores`
+- **Tests:** 25 new checks. All pass.
+
+### Important: run the migration now
+The site reads the new listing columns. **Until the migration runs, the catalogue query fails and the site falls back to sample data.**
+
+### To try it
+1. Admin → Care directory → Kuje Veterinary Clinic → ⋯ → Invite to manage, with a second account's email.
+2. Sign in as that account and accept.
+3. As a buyer, book Kuje from its page for one of My dogs, with sharing on.
+4. As the provider: Confirm, then Add to the dog's record.
+5. As the buyer: see the line on the dog's record.
+
+### Checked
+- The care booking cards (provider and buyer sides) in the browser.
+- The signed-out "Sign in to book" prompt.
+- Typecheck shows no new errors.
+- The signed-in flows aren't tried yet: they need your accounts.

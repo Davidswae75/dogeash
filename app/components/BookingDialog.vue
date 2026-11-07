@@ -6,8 +6,9 @@ import type { AccountGate } from '~/composables/useAccountGate'
 
 // Book a time with someone: a care provider, or a kennel visit to see shortlisted dogs.
 // Choose a service, one of the next six days the other party works (Monday to Saturday unless `weekdays`
-// says otherwise), one of their times, and where. With `send` the request is saved
-// (kennel visits); without it the dialog is a preview (care bookings, until providers are in the database).
+// says otherwise), one of their times, and where. With `send` the request is saved; without it the
+// dialog is a preview. With `ownedDogs` (the buyer's My dogs) they pick the dog and can let the other
+// party add the visit to its record.
 export interface BookingSummaryRow { label: string, value: string }
 
 const props = withDefaults(defineProps<{
@@ -25,13 +26,17 @@ const props = withDefaults(defineProps<{
   /** Extra lines for the confirmation, e.g. which dogs */
   summary?: BookingSummaryRow[]
   askDogName?: boolean
+  /** The buyer's own dogs (My dogs), offered instead of typing a name */
+  ownedDogs?: { value: string, label: string }[]
   triggerLabel?: string
   triggerVariant?: 'outline' | 'default' | 'marigold' | 'night'
   triggerClass?: string
+  /** After sending: who confirms, e.g. "The provider confirms the time with you." */
+  confirmText?: string
   /** Ask signed-out visitors to sign in first (see useAccountGate) */
   gate?: AccountGate
   /** Save the request; returns an error message, or null when it was sent */
-  send?: (booking: { service: string, day: string, slot: string, place: 'home' | 'premises' }) => Promise<string | null>
+  send?: (booking: { service: string, day: string, slot: string, place: 'home' | 'premises', ownedDogId: string | null, dogName: string, shareRecord: boolean }) => Promise<string | null>
 }>(), {
   homeVisits: false,
   premisesLabel: 'At their premises',
@@ -39,6 +44,7 @@ const props = withDefaults(defineProps<{
   triggerLabel: 'Book',
   triggerVariant: 'outline',
   summary: () => [],
+  ownedDogs: () => [],
 })
 
 const open = ref(false)
@@ -51,6 +57,11 @@ const day = ref('')
 const time = ref('')
 const place = ref('premises')
 const dogName = ref('')
+// One of My dogs ('' = typing a name instead), and whether they may add the visit to its record
+const ownedDog = ref('')
+const shareRecord = ref(true)
+const dogOptions = computed(() => [...props.ownedDogs, { value: 'other', label: 'Another dog' }])
+const chosenDog = computed(() => props.ownedDogs.find(d => d.value === ownedDog.value))
 const error = ref('')
 
 const times = computed(() => props.slots ?? ['9:00', '10:30', '12:00', '14:00', '15:30'])
@@ -76,7 +87,7 @@ const confirmation = computed<BookingSummaryRow[]>(() => [
   { label: 'When', value: `${days.value.find(d => d.value === day.value)?.label}, ${time.value}` },
   { label: 'Where', value: place.value === 'home' ? 'At your home' : props.premisesLabel },
   ...props.summary,
-  ...(dogName.value ? [{ label: 'Dog', value: dogName.value }] : []),
+  ...(chosenDog.value ? [{ label: 'Dog', value: chosenDog.value.label + (shareRecord.value ? ' · record shared' : '') }] : dogName.value ? [{ label: 'Dog', value: dogName.value }] : []),
 ])
 
 
@@ -87,7 +98,15 @@ async function submit() {
   error.value = ''
   if (props.send) {
     sending.value = true
-    error.value = (await props.send({ service: service.value, day: day.value, slot: time.value, place: place.value as 'home' | 'premises' })) ?? ''
+    error.value = (await props.send({
+      service: service.value,
+      day: day.value,
+      slot: time.value,
+      place: place.value as 'home' | 'premises',
+      ownedDogId: chosenDog.value?.value ?? null,
+      dogName: chosenDog.value ? '' : dogName.value,
+      shareRecord: !!chosenDog.value && shareRecord.value,
+    })) ?? ''
     sending.value = false
     if (error.value) return
   }
@@ -96,7 +115,8 @@ async function submit() {
 
 function reset() {
   step.value = 'form'
-  service.value = day.value = time.value = dogName.value = error.value = ''
+  service.value = day.value = time.value = dogName.value = ownedDog.value = error.value = ''
+  shareRecord.value = true
   place.value = 'premises'
 }
 
@@ -150,7 +170,16 @@ const chips = 'flex w-auto flex-wrap justify-start gap-2'
             </ToggleGroup>
           </fieldset>
 
-          <div v-if="props.askDogName" class="flex flex-col gap-2">
+          <div v-if="props.askDogName && props.ownedDogs.length" class="flex flex-col gap-2">
+            <label for="booking-owned-dog" :class="legend">Which dog <span class="font-normal tracking-normal normal-case text-ink-muted">(optional)</span></label>
+            <SelectMenu id="booking-owned-dog" v-model="ownedDog" :options="dogOptions" placeholder="Choose from My dogs" />
+            <Input v-if="ownedDog === 'other'" v-model="dogName" aria-label="Your dog's name" placeholder="Kaiser" class="border-line-strong" />
+            <label v-if="chosenDog" class="flex items-start gap-2.5 text-sm leading-5">
+              <Checkbox v-model="shareRecord" class="mt-0.5" />
+              <span>Let {{ props.title }} add this visit to {{ chosenDog.label }}'s record <span class="text-ink-muted">(vaccinations, treatments, next due dates). They see only what they add.</span></span>
+            </label>
+          </div>
+          <div v-else-if="props.askDogName" class="flex flex-col gap-2">
             <label for="booking-dog" :class="legend">Your dog's name <span class="font-normal tracking-normal normal-case text-ink-muted">(optional)</span></label>
             <Input id="booking-dog" v-model="dogName" placeholder="Kaiser" class="border-line-strong" />
           </div>
@@ -173,7 +202,7 @@ const chips = 'flex w-auto flex-wrap justify-start gap-2'
           </template>
         </dl>
         <DialogDescription class="m-0 text-sm leading-[22px] text-ink-muted">
-          {{ props.send ? 'The store confirms the time with you. You\'ll find it in Visits and bookings in your account.' : 'This is a preview. Requests are not sent yet: online booking for care opens soon.' }}
+          {{ props.send ? `${props.confirmText ?? 'The store confirms the time with you.'} You'll find it in Visits and bookings in your account.` : 'This is a preview. Requests are not sent yet: online booking for care opens soon.' }}
         </DialogDescription>
         <div class="flex w-full flex-col gap-2">
           <Button v-if="props.send" as-child variant="marigold" class="w-full"><NuxtLink to="/account/bookings">See my visits</NuxtLink></Button>

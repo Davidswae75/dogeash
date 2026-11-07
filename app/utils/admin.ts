@@ -14,6 +14,7 @@ export const adminNav: { group: string, items: { to?: string, label: string, ico
   { group: 'Monitor', items: [
     { to: '/admin', label: 'Overview', icon: 'LayoutDashboard' },
     { to: '/admin/visits', label: 'Visits', icon: 'CalendarClock', badge: 'visitsUnanswered' },
+    { to: '/admin/payments', label: 'Payments', icon: 'Wallet' },
     { to: '/admin/audit', label: 'Audit log', icon: 'ScrollText' },
   ] },
   { group: 'Review', items: [

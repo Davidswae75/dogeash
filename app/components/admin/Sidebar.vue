@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { CalendarClock, Search, ClipboardCheck, Dog, FileCheck2, Flag, LayoutDashboard, LogOut, Megaphone, RefreshCcw, ScrollText, Settings, ShieldCheck, Star, Stethoscope, Store, Users } from '@lucide/vue'
+import { CalendarClock, Search, ClipboardCheck, Dog, FileCheck2, Flag, LayoutDashboard, LogOut, Megaphone, RefreshCcw, ScrollText, Settings, ShieldCheck, Star, Stethoscope, Store, Users, Wallet } from '@lucide/vue'
 import type { Component } from 'vue'
 import { computed, onMounted } from 'vue'
 import { useRoute, useState } from '#imports' // nuxt
@@ -27,7 +27,7 @@ onMounted(() => {
 })
 
 const searchOpen = useState('admin-search-open', () => false)
-const icons: Record<string, Component> = { Settings, Megaphone, RefreshCcw, CalendarClock, Flag, LayoutDashboard, ScrollText, FileCheck2, ClipboardCheck, Dog, Star, Store, Users, Stethoscope }
+const icons: Record<string, Component> = { Settings, Megaphone, RefreshCcw, CalendarClock, Flag, LayoutDashboard, ScrollText, FileCheck2, ClipboardCheck, Dog, Star, Store, Users, Stethoscope, Wallet }
 // Inspectors see only the sections open to them
 const groups = computed(() => adminNav
   .map(g => ({ ...g, items: g.items.filter(i => role.value === 'admin' || i.inspector) }))

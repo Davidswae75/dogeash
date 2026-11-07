@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { LogOut, ShieldCheck } from '@lucide/vue'
+import { LogOut, ShieldCheck, Stethoscope } from '@lucide/vue'
 import { useSession } from '~/composables/useSession'
 import { useShortlist } from '~/composables/useShortlist'
 import { useStaff } from '~/composables/useStaff'
 import { accountNav } from '~/utils/account'
 
 // The avatar in the header: who is signed in, their account pages and Sign out (and Admin, for Dogeash staff)
-const { user, initials, memberships, hasStore, signOut } = useSession()
+const { user, initials, memberships, hasStore, providers, signOut } = useSession()
 const { count } = useShortlist()
 const { role: staffRole } = useStaff()
 
@@ -57,6 +57,9 @@ const groups = accountNav.map(g => g.items.filter(i => i.inMenu)).filter(g => g.
       </template>
 
       <DropdownMenuSeparator class="bg-line" />
+      <DropdownMenuItem v-for="p in providers" :key="p.id" as-child class="h-9 cursor-pointer gap-3 px-2.5 font-semibold">
+        <NuxtLink to="/provider" class="text-ink no-underline"><Stethoscope class="size-[17px]" aria-hidden="true" /><span class="truncate">{{ p.name }} dashboard</span></NuxtLink>
+      </DropdownMenuItem>
       <DropdownMenuItem v-if="staffRole" as-child class="h-9 cursor-pointer gap-3 px-2.5 font-semibold">
         <NuxtLink to="/admin" class="text-ink no-underline"><ShieldCheck class="size-[17px]" aria-hidden="true" />Admin</NuxtLink>
       </DropdownMenuItem>

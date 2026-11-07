@@ -14,7 +14,7 @@ import { storesForProvider } from '~/utils/stores'
 definePageMeta({ layout: 'admin', colorMode: 'dark', middleware: 'admin' })
 useSeoMeta({ title: 'Care directory · Dogeash admin', robots: 'noindex' })
 
-const { providers, load, save, remove } = useAdminCare()
+const { providers, managedBy, load, save, remove, invite } = useAdminCare()
 onMounted(load)
 
 const query = ref('')
@@ -33,6 +33,27 @@ async function onSave(p: Parameters<typeof save>[0]) {
   const error = await save(p)
   if (!error) useNotify().adminDone(p.id ? `${p.name} saved` : `${p.name} added`, 'The public care directory is updated.')
   return error
+}
+
+// Inviting someone (the vet, the trainer) to manage their own listing
+const inviting = ref<CareProvider>()
+const inviteOpen = ref(false)
+const inviteEmail = ref('')
+const inviteError = ref('')
+const inviteBusy = ref(false)
+function openInvite(p: CareProvider) {
+  inviting.value = p
+  inviteEmail.value = ''
+  inviteError.value = ''
+  inviteOpen.value = true
+}
+async function sendInvite() {
+  inviteBusy.value = true
+  inviteError.value = (await invite(inviting.value!, inviteEmail.value)) ?? ''
+  inviteBusy.value = false
+  if (inviteError.value) return
+  inviteOpen.value = false
+  useNotify().adminDone(`Invitation sent for ${inviting.value!.name}`, 'It waits in their account when they sign in or sign up with that email.')
 }
 
 const removing = ref<CareProvider>()
@@ -57,7 +78,7 @@ async function onRemove() {
 
     <AdminCard flush>
       <div class="relative overflow-x-auto">
-        <table v-if="shown.length" class="w-full min-w-[820px] border-collapse text-left text-[13px]">
+        <table v-if="shown.length" class="w-full min-w-[920px] border-collapse text-left text-[13px]">
           <thead>
             <tr class="text-[11.5px] text-ink-muted">
               <th scope="col" class="px-5 py-2.5 font-medium">Provider</th>
@@ -65,6 +86,7 @@ async function onRemove() {
               <th scope="col" class="px-3 py-2.5 font-medium">Where</th>
               <th scope="col" class="px-3 py-2.5 text-right font-medium">From</th>
               <th scope="col" class="px-3 py-2.5 text-right font-medium">Stores</th>
+              <th scope="col" class="px-3 py-2.5 font-medium">Managed by</th>
               <th scope="col" class="w-12"><span class="sr-only">Actions</span></th>
             </tr>
           </thead>
@@ -84,6 +106,11 @@ async function onRemove() {
               </td>
               <td class="border-t border-line px-3 py-2.5 text-right font-mono whitespace-nowrap tabular-nums">{{ formatNaira(p.priceFrom) }}</td>
               <td class="border-t border-line px-3 py-2.5 text-right font-mono tabular-nums">{{ storesForProvider(p.id).length }}</td>
+              <td class="border-t border-line px-3 py-2.5">
+                <span v-for="m in managedBy(p.id).members" :key="m.email" class="block leading-tight" :title="m.email">{{ m.name }}</span>
+                <span v-for="i in managedBy(p.id).invites" :key="i.id" class="block font-mono text-[11px] text-ink-muted">invited: {{ i.email }}</span>
+                <span v-if="!managedBy(p.id).members.length && !managedBy(p.id).invites.length" class="text-[12px] text-ink-muted">Dogeash</span>
+              </td>
               <td class="border-t border-line pr-3 text-right">
                 <DropdownMenu>
                   <DropdownMenuTrigger as-child>
@@ -91,6 +118,7 @@ async function onRemove() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" class="w-40 rounded-lg border-line bg-surface p-1 shadow-[0_18px_40px_-20px_rgb(0_0_0/.45)]">
                     <DropdownMenuItem @select="openForm(p)">Edit</DropdownMenuItem>
+                    <DropdownMenuItem @select="openInvite(p)">Invite to manage</DropdownMenuItem>
                     <DropdownMenuItem class="text-danger" @select="removing = p; confirmOpen = true">Remove</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -103,6 +131,24 @@ async function onRemove() {
     </AdminCard>
 
     <AdminProviderForm v-model:open="formOpen" :provider="editing" :save="onSave" />
+
+    <Dialog v-model:open="inviteOpen">
+      <DialogContent class="sm:max-w-[440px]">
+        <DialogHeader>
+          <DialogTitle>Invite someone to manage {{ inviting?.name }}</DialogTitle>
+          <DialogDescription>They'll answer bookings, keep the listing's details up to date, and add visits to dogs' records when owners allow it. The name, type, city, credential and badge stay with Dogeash.</DialogDescription>
+        </DialogHeader>
+        <form class="flex flex-col gap-3" novalidate @submit.prevent="sendInvite">
+          <FieldShell label="Their email" for="provider-invite-email" hint="The email they sign in with, or will sign up with.">
+            <Input id="provider-invite-email" v-model="inviteEmail" type="email" autocomplete="off" placeholder="halima@kujevets.ng" class="h-10" />
+          </FieldShell>
+          <p v-if="inviteError" class="m-0 text-sm font-semibold text-danger" role="alert">{{ inviteError }}</p>
+          <DialogFooter>
+            <Button type="submit" variant="marigold" :loading="inviteBusy">Send invitation</Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
     <AdminConfirm
       v-if="removing"
       v-model:open="confirmOpen"

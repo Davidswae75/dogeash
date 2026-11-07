@@ -2,6 +2,7 @@ import { computed } from 'vue'
 import { useRuntimeConfig, useState, useSupabaseClient } from '#imports' // nuxt, @nuxtjs/supabase
 import type { Reservation, ReservationRow } from '~/utils/reservations'
 import { isActive, reservationColumns, toReservation } from '~/utils/reservations'
+import { fetchError } from '~/utils/fetchError'
 import { useSession } from './useSession'
 
 // The buyer's reservations (Supabase: reservations, payments, refunds). Paying goes through the site's
@@ -13,6 +14,7 @@ export function useReservations() {
   const { user } = useSession()
   const mine = useState<Reservation[]>('buyer-reservations', () => [])
   const loaded = useState('buyer-reservations-loaded', () => false)
+  let synced = false
 
   const active = computed(() => mine.value.filter(isActive).filter(r => r.status !== 'pending'))
   const earlier = computed(() => mine.value.filter(r => !isActive(r)))
@@ -24,6 +26,12 @@ export function useReservations() {
     const { data } = await supabase.from('reservations').select(reservationColumns).order('created_at', { ascending: false })
     mine.value = ((data ?? []) as unknown as ReservationRow[]).map(r => toReservation(r, storageUrl))
     loaded.value = true
+    // A refund on its way: ask Paystack if it's done (in case a webhook didn't arrive), then show the answer
+    if (!synced && mine.value.some(r => r.refunds.some(f => f.status === 'sending'))) {
+      synced = true
+      const { settled } = await $fetch<{ settled: number }>('/api/payments/sync', { method: 'POST' }).catch(() => ({ settled: 0 }))
+      if (settled) await load()
+    }
   }
 
   // Paystack's checkout: the browser leaves for Paystack and comes back to /account/reservations
@@ -59,9 +67,14 @@ export function useReservations() {
     return null
   }
 
+  // Through the server: completing the sale also sends the store's payout
   async function confirmHandover(id: string): Promise<string | null> {
-    const { error } = await supabase.rpc('confirm_handover', { reservation: id })
-    if (error) return error.message
+    try {
+      await $fetch('/api/payments/handover', { method: 'POST', body: { reservationId: id } })
+    }
+    catch (e) {
+      return fetchError(e)
+    }
     await load()
     return null
   }
@@ -70,10 +83,4 @@ export function useReservations() {
   const forDog = (fileNo: string) => computed(() => mine.value.find(r => r.dogFileNo === fileNo && isActive(r) && r.status !== 'pending'))
 
   return { mine, loaded, active, earlier, unfinished, load, reserve, payBalance, verify, cancel, confirmHandover, forDog }
-}
-
-// The server's message when it refused (the database's words), or a plain fallback
-function fetchError(e: unknown) {
-  const err = e as { data?: { message?: string, statusMessage?: string }, statusMessage?: string }
-  return err.data?.message || err.data?.statusMessage || err.statusMessage || 'That didn\'t work. Check your connection and try again.'
 }

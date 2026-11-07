@@ -8,6 +8,7 @@ import { useSavedSearches } from '~/composables/useSavedSearches'
 import { useSession } from '~/composables/useSession'
 import { useStaff } from '~/composables/useStaff'
 import { useAccountBlock } from '~/composables/useAccountBlock'
+import { useProviderInvites } from '~/composables/useProviderInvites'
 import { useStoreInvites } from '~/composables/useStoreInvites'
 import { useVisits } from '~/composables/useVisits'
 
@@ -23,9 +24,10 @@ export default defineNuxtPlugin(async () => {
   const visits = useVisits()
   const notifications = useNotifications()
   const storeInvites = useStoreInvites()
+  const providerInvites = useProviderInvites()
   const staff = useStaff()
   const accountBlock = useAccountBlock()
-  const loadLists = () => Promise.all([savedDogs.load(), savedSearches.load(), conversations.loadMine(), visits.loadMine(), notifications.load(), storeInvites.load(), staff.load(), accountBlock.load()])
+  const loadLists = () => Promise.all([savedDogs.load(), savedSearches.load(), conversations.loadMine(), visits.loadMine(), notifications.load(), storeInvites.load(), providerInvites.load(), staff.load(), accountBlock.load()])
 
   await load()
   await loadLists()

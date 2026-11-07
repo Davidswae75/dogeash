@@ -55,6 +55,7 @@ async function finish(movedDogs: number) {
   nextSteps.value = signInNextSteps({
     redirect: route.query.redirect ? safeRedirect(route.query.redirect) : undefined,
     stores: session.memberships.value,
+    providers: session.providers.value,
     staffRole: staff.role.value,
   })
   moved.value = movedDogs
