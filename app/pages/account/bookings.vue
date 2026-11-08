@@ -105,7 +105,7 @@ async function cancel() {
         :key="b.id"
         side="buyer"
         :service="b.service" :day="b.day" :slot="b.slot" :place="b.place" :status="b.status"
-        :who="b.providerName" :who-to="`/care/${b.providerSlug}`" :dog-name="b.dogName" :shared="b.shareRecord" :provider-note="b.providerNote"
+        :who="b.providerName" :who-to="b.providerSlug ? `/care/${b.providerSlug}` : undefined" :dog-name="b.dogName" :shared="b.shareRecord" :provider-note="b.providerNote"
       >
         <Button variant="outline" size="sm" @click="cancellingCare = b">Cancel appointment</Button>
       </CareBookingCard>
@@ -115,7 +115,7 @@ async function cancel() {
         side="buyer"
         muted
         :service="b.service" :day="b.day" :slot="b.slot" :place="b.place" :status="b.status"
-        :who="b.providerName" :who-to="`/care/${b.providerSlug}`" :dog-name="b.dogName" :provider-note="b.providerNote"
+        :who="b.providerName" :who-to="b.providerSlug ? `/care/${b.providerSlug}` : undefined" :dog-name="b.dogName" :provider-note="b.providerNote"
       >
         <Button v-if="b.status === 'done' && b.ownedDogId" variant="outline" size="sm" as-child><NuxtLink :to="`/account/dogs/${b.ownedDogId}`">See {{ b.dogName }}'s record</NuxtLink></Button>
       </CareBookingCard>

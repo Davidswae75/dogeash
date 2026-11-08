@@ -2,7 +2,8 @@
 import { RotateCcw } from '@lucide/vue'
 import { computed, onMounted, ref } from 'vue'
 import { definePageMeta, useSeoMeta } from '#imports' // nuxt
-import type { AdminReservation, MoneyMoveStatus } from '~/composables/useAdminMoney'
+import type { DetailSection } from '~/components/DetailDialog.vue'
+import type { AdminPayout, AdminRefund, AdminReservation, MoneyMoveStatus } from '~/composables/useAdminMoney'
 import type { CsvColumn } from '~/utils/csv'
 import { useAdminMoney } from '~/composables/useAdminMoney'
 import { useNotify } from '~/composables/useNotify'
@@ -71,6 +72,75 @@ async function decide(note: string) {
   return error
 }
 
+// Everything about one reservation, refund or payout
+const viewingRes = ref<AdminReservation>()
+const resOpen = ref(false)
+function openReservation(r: AdminReservation) {
+  viewingRes.value = r
+  resOpen.value = true
+}
+const resSections = computed<DetailSection[]>(() => {
+  const r = viewingRes.value
+  if (!r) return []
+  return [
+    { title: 'Reservation', rows: [
+      { label: 'Reference', value: r.ref, mono: true },
+      { label: 'Status', value: reservationStatus[r.status].label },
+      { label: 'Dog', value: `${r.dog_name} · ${r.dog_file_no}`, to: `/dogs/${r.dog_file_no.toLowerCase()}`, external: true },
+      { label: 'Started', value: adminTime(r.created_at) },
+      { label: 'Hold ends', value: r.status === 'held' ? adminTime(r.expires_at) : null },
+      { label: 'Ended', value: r.closed_at ? adminTime(r.closed_at) : null },
+      { label: 'Ended by', value: r.closed_by },
+      { label: 'Why it ended', value: r.close_reason, long: true },
+    ] },
+    { title: 'Money', rows: [
+      { label: 'Price', value: formatMoney(r.price_naira), mono: true },
+      { label: 'Deposit', value: formatMoney(r.deposit_naira), mono: true },
+      { label: 'Paid so far', value: formatMoney(r.paid_naira), mono: true },
+      { label: 'Deposit decision', value: r.money_decision === 'waiting' ? 'Waiting for Dogeash' : r.money_decision === 'refund' ? 'Refunded to the buyer' : r.money_decision === 'release' ? 'Released to the store' : null },
+    ] },
+    { title: 'People', rows: [
+      { label: 'Store', value: r.store_name, to: `/admin/stores/${r.store_id}` },
+      { label: 'Buyer', value: r.buyer_name, to: `/admin/people/${r.buyer_id}` },
+      { label: 'Buyer\'s email', value: r.buyer_email, mono: true },
+    ] },
+  ]
+})
+function decideFromDialog(decision: 'refund' | 'release') {
+  resOpen.value = false
+  startDecision(viewingRes.value!, decision)
+}
+
+type Move = { kind: 'refund', item: AdminRefund } | { kind: 'payout', item: AdminPayout }
+const viewingMove = ref<Move>()
+const moveOpen = ref(false)
+function openMove(kind: 'refund' | 'payout', item: AdminRefund | AdminPayout) {
+  viewingMove.value = { kind, item } as Move
+  moveOpen.value = true
+}
+const moveSections = computed<DetailSection[]>(() => {
+  const m = viewingMove.value
+  if (!m) return []
+  const i = m.item
+  const extra = m.kind === 'refund'
+    ? [{ label: 'Why', value: m.item.reason, long: true }]
+    : [{ label: 'Store', value: m.item.store_name, to: `/admin/stores/${m.item.store_id}` }, { label: 'Bank account', value: m.item.has_account ? 'Added' : 'Not added yet: sent once they add one' }]
+  return [{ rows: [
+    { label: 'Reservation', value: `${i.dog_name} · ${i.ref}`, mono: true },
+    { label: 'Amount', value: formatMoney(i.amount_naira), mono: true },
+    { label: 'Status', value: moveState[i.status].label },
+    { label: 'Created', value: adminTime(i.created_at) },
+    { label: m.kind === 'refund' ? 'Refunded' : 'Paid out', value: i.done_at ? adminTime(i.done_at) : null },
+    ...extra,
+    { label: 'What went wrong', value: i.failure, long: true },
+  ] }]
+})
+const canRetry = computed(() => {
+  const m = viewingMove.value
+  if (!m) return false
+  return (m.item.status === 'failed' || m.item.status === 'due') && (m.kind === 'refund' || m.item.has_account)
+})
+
 const retrying = ref('')
 async function retry(kind: 'refund' | 'payout', id: string) {
   retrying.value = id
@@ -107,34 +177,27 @@ const csv: CsvColumn<AdminReservation>[] = [
     <AdminCard flush>
       <div class="relative overflow-x-auto">
         <!-- Reservations -->
-        <table v-if="tab !== 'refunds' && tab !== 'payouts' && rows.length" class="w-full min-w-[820px] border-collapse text-left text-[13px]">
+        <table v-if="tab !== 'refunds' && tab !== 'payouts' && rows.length" class="w-full min-w-[560px] border-collapse text-left text-[13px]">
           <thead>
             <tr class="text-[11.5px] text-ink-muted">
               <th scope="col" class="px-5 py-2.5 font-medium">Reservation</th>
-              <th scope="col" class="px-3 py-2.5 font-medium">Store</th>
-              <th scope="col" class="px-3 py-2.5 font-medium">Buyer</th>
               <th scope="col" class="px-3 py-2.5 text-right font-medium">Paid</th>
               <th scope="col" class="px-3 py-2.5 font-medium">Status</th>
               <th scope="col" class="w-48"><span class="sr-only">Actions</span></th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="r in rows" :key="r.id" class="align-top hover:bg-surface-sunk/60">
+            <!-- A row shows the essentials; clicking it opens everything about the reservation -->
+            <tr v-for="r in rows" :key="r.id" class="cursor-pointer align-top hover:bg-surface-sunk/60" @click="openReservation(r)">
               <td class="border-t border-line px-5 py-2.5">
-                <span class="block">{{ r.dog_name }}</span>
-                <span class="font-mono text-[11px] text-ink-muted" :title="adminTime(r.created_at)">{{ r.ref }} · {{ shortTime(r.created_at) }}</span>
+                <button type="button" class="block cursor-pointer border-0 bg-transparent p-0 text-left text-ink hover:underline" @click.stop="openReservation(r)">{{ r.dog_name }}</button>
+                <span class="font-mono text-[11px] text-ink-muted">{{ r.ref }} · {{ r.store_name }}</span>
               </td>
-              <td class="border-t border-line px-3 py-2.5"><NuxtLink :to="`/admin/stores/${r.store_id}`" class="text-ink hover:underline">{{ r.store_name }}</NuxtLink></td>
+              <td class="border-t border-line px-3 py-2.5 text-right font-mono whitespace-nowrap tabular-nums">{{ formatMoney(r.paid_naira) }}</td>
               <td class="border-t border-line px-3 py-2.5">
-                <NuxtLink :to="`/admin/people/${r.buyer_id}`" class="flex flex-col leading-tight text-ink no-underline hover:underline"><span>{{ r.buyer_name }}</span><span class="font-mono text-[11px] text-ink-muted">{{ r.buyer_email }}</span></NuxtLink>
+                <span class="text-xs font-semibold">{{ r.money_decision === 'waiting' ? 'Needs a decision' : reservationStatus[r.status].label }}</span>
               </td>
-              <td class="border-t border-line px-3 py-2.5 text-right font-mono whitespace-nowrap tabular-nums">{{ formatMoney(r.paid_naira) }}<span class="block text-[11px] text-ink-muted">of {{ formatMoney(r.price_naira) }}</span></td>
-              <td class="border-t border-line px-3 py-2.5">
-                <span class="text-xs font-semibold">{{ reservationStatus[r.status].label }}</span>
-                <span v-if="r.close_reason" class="block max-w-[22em] text-[11.5px] text-ink-muted">{{ r.closed_by === 'buyer' ? 'Buyer: ' : r.closed_by === 'store' ? 'Store: ' : '' }}{{ r.close_reason }}</span>
-                <span v-if="r.money_decision && r.money_decision !== 'waiting'" class="block text-[11.5px] text-ink-muted">Deposit {{ r.money_decision === 'refund' ? 'refunded' : 'released' }}</span>
-              </td>
-              <td class="border-t border-line pr-4 text-right">
+              <td class="border-t border-line pr-4 text-right" @click.stop>
                 <div v-if="r.money_decision === 'waiting'" class="mt-1 flex justify-end gap-1.5">
                   <Button variant="outline" size="sm" class="h-8" @click="startDecision(r, 'refund')">Refund</Button>
                   <Button variant="outline" size="sm" class="h-8" @click="startDecision(r, 'release')">Release</Button>
@@ -149,19 +212,20 @@ const csv: CsvColumn<AdminReservation>[] = [
           <thead>
             <tr class="text-[11.5px] text-ink-muted">
               <th scope="col" class="px-5 py-2.5 font-medium">For</th>
-              <th scope="col" class="px-3 py-2.5 font-medium">Why</th>
               <th scope="col" class="px-3 py-2.5 text-right font-medium">Amount</th>
               <th scope="col" class="px-3 py-2.5 font-medium">Status</th>
               <th scope="col" class="w-28"><span class="sr-only">Actions</span></th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="f in refunds" :key="f.id" class="align-top">
-              <td class="border-t border-line px-5 py-2.5">{{ f.dog_name }}<span class="block font-mono text-[11px] text-ink-muted">{{ f.ref }} · {{ shortTime(f.created_at) }}</span></td>
-              <td class="border-t border-line px-3 py-2.5 text-ink-muted">{{ f.reason }}<span v-if="f.failure" class="block text-[11.5px] text-danger">{{ f.failure }}</span></td>
+            <tr v-for="f in refunds" :key="f.id" class="cursor-pointer align-top hover:bg-surface-sunk/60" @click="openMove('refund', f)">
+              <td class="border-t border-line px-5 py-2.5">
+                <button type="button" class="block cursor-pointer border-0 bg-transparent p-0 text-left text-ink hover:underline" @click.stop="openMove('refund', f)">{{ f.dog_name }}</button>
+                <span class="font-mono text-[11px] text-ink-muted">{{ f.ref }} · {{ shortTime(f.created_at) }}</span>
+              </td>
               <td class="border-t border-line px-3 py-2.5 text-right font-mono tabular-nums">{{ formatMoney(f.amount_naira) }}</td>
               <td :class="['border-t border-line px-3 py-2.5 text-xs', moveState[f.status].tone]">{{ moveState[f.status].label }}</td>
-              <td class="border-t border-line pr-4 text-right">
+              <td class="border-t border-line pr-4 text-right" @click.stop>
                 <Button v-if="f.status === 'failed' || f.status === 'due'" variant="outline" size="sm" class="mt-1 h-8" :loading="retrying === f.id" @click="retry('refund', f.id)"><RotateCcw aria-hidden="true" />Retry</Button>
               </td>
             </tr>
@@ -178,16 +242,15 @@ const csv: CsvColumn<AdminReservation>[] = [
             </tr>
           </thead>
           <tbody>
-            <tr v-for="o in payouts" :key="o.id" class="align-top">
-              <td class="border-t border-line px-5 py-2.5">{{ o.dog_name }}<span class="block font-mono text-[11px] text-ink-muted">{{ o.ref }} · {{ shortTime(o.created_at) }}</span></td>
-              <td class="border-t border-line px-3 py-2.5">
-                <NuxtLink :to="`/admin/stores/${o.store_id}`" class="text-ink hover:underline">{{ o.store_name }}</NuxtLink>
-                <span v-if="!o.has_account && o.status !== 'done'" class="block text-[11.5px] text-ink-muted">No bank account yet: sent once they add one</span>
-                <span v-if="o.failure" class="block text-[11.5px] text-danger">{{ o.failure }}</span>
+            <tr v-for="o in payouts" :key="o.id" class="cursor-pointer align-top hover:bg-surface-sunk/60" @click="openMove('payout', o)">
+              <td class="border-t border-line px-5 py-2.5">
+                <button type="button" class="block cursor-pointer border-0 bg-transparent p-0 text-left text-ink hover:underline" @click.stop="openMove('payout', o)">{{ o.dog_name }}</button>
+                <span class="font-mono text-[11px] text-ink-muted">{{ o.ref }} · {{ shortTime(o.created_at) }}</span>
               </td>
+              <td class="border-t border-line px-3 py-2.5">{{ o.store_name }}<span v-if="!o.has_account && o.status !== 'done'" class="block text-[11.5px] text-ink-muted">No bank account yet</span></td>
               <td class="border-t border-line px-3 py-2.5 text-right font-mono tabular-nums">{{ formatMoney(o.amount_naira) }}</td>
               <td :class="['border-t border-line px-3 py-2.5 text-xs', moveState[o.status].tone]">{{ moveState[o.status].label }}</td>
-              <td class="border-t border-line pr-4 text-right">
+              <td class="border-t border-line pr-4 text-right" @click.stop>
                 <Button v-if="o.has_account && (o.status === 'failed' || o.status === 'due')" variant="outline" size="sm" class="mt-1 h-8" :loading="retrying === o.id" @click="retry('payout', o.id)"><RotateCcw aria-hidden="true" />Retry</Button>
               </td>
             </tr>
@@ -197,6 +260,18 @@ const csv: CsvColumn<AdminReservation>[] = [
         <p v-else class="m-0 px-5 py-4 text-[13px] text-ink-muted">{{ tab === 'waiting' ? 'No deposits waiting for a decision.' : 'Nothing here yet.' }}</p>
       </div>
     </AdminCard>
+
+    <DetailDialog v-if="viewingRes" v-model:open="resOpen" :title="`${viewingRes.dog_name} · ${viewingRes.ref}`" :subtitle="`${viewingRes.store_name} · ${viewingRes.buyer_name}`" :sections="resSections">
+      <template v-if="viewingRes.money_decision === 'waiting'" #actions>
+        <Button variant="outline" @click="decideFromDialog('refund')">Refund</Button>
+        <Button variant="marigold" @click="decideFromDialog('release')">Release</Button>
+      </template>
+    </DetailDialog>
+    <DetailDialog v-if="viewingMove" v-model:open="moveOpen" :title="`${viewingMove.kind === 'refund' ? 'Refund' : 'Payout'} · ${viewingMove.item.dog_name}`" :subtitle="viewingMove.item.ref" :sections="moveSections">
+      <template v-if="canRetry" #actions>
+        <Button variant="outline" :loading="retrying === viewingMove.item.id" @click="retry(viewingMove.kind, viewingMove.item.id)"><RotateCcw aria-hidden="true" />Retry</Button>
+      </template>
+    </DetailDialog>
 
     <AdminConfirm
       v-if="deciding"

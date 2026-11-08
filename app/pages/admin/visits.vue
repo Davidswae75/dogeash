@@ -3,6 +3,7 @@ import { BellRing } from '@lucide/vue'
 import { computed, onMounted, ref } from 'vue'
 import { definePageMeta, useSeoMeta } from '#imports' // nuxt
 import type { AdminVisit } from '~/composables/useAdminVisits'
+import type { DetailSection } from '~/components/DetailDialog.vue'
 import type { CsvColumn } from '~/utils/csv'
 import { useAdminVisits } from '~/composables/useAdminVisits'
 import { useNotify } from '~/composables/useNotify'
@@ -40,6 +41,34 @@ async function onNudge(v: AdminVisit) {
   nudged.value = new Set([...nudged.value, v.id])
   useNotify().adminDone(`${v.store_name} reminded`, `About ${v.buyer_name || 'a buyer'}'s visit on ${visitDay(v.day).label}. It's in the audit log.`)
 }
+// Everything about one visit
+const viewing = ref<AdminVisit>()
+const viewOpen = ref(false)
+function openVisit(v: AdminVisit) {
+  viewing.value = v
+  viewOpen.value = true
+}
+const visitSections = computed<DetailSection[]>(() => {
+  const v = viewing.value
+  if (!v) return []
+  return [
+    { title: 'Visit', rows: [
+      { label: 'When', value: `${visitDay(v.day).label} at ${v.slot}`, mono: true },
+      { label: 'Where', value: v.place === 'home' ? 'At the buyer\'s home' : 'At the kennel' },
+      { label: 'Service', value: v.service },
+      { label: 'Status', value: v.missed ? 'missed (never answered)' : v.needs_chasing ? `${v.status}, waiting 2+ days` : v.status },
+      { label: 'Asked', value: adminTime(v.created_at) },
+      { label: 'Last change', value: adminTime(v.updated_at) },
+      { label: 'Store\'s note', value: v.store_note, long: true },
+    ] },
+    { title: 'People', rows: [
+      { label: 'Store', value: v.store_name, to: `/admin/stores/${v.store_id}` },
+      { label: 'Buyer', value: v.buyer_name || 'A buyer', to: `/admin/people/${v.buyer_id}` },
+      { label: 'Buyer\'s email', value: v.buyer_email, mono: true },
+    ] },
+  ]
+})
+
 const slow = computed(() => stores.value.filter(s => s.missed > 0 || (s.median_hours ?? 0) > 24))
 const csv: CsvColumn<AdminVisit>[] = [
   { label: 'Day', value: v => v.day }, { label: 'Time', value: v => v.slot }, { label: 'Status', value: v => v.missed ? 'missed' : v.status },
@@ -60,30 +89,27 @@ const csv: CsvColumn<AdminVisit>[] = [
     <div class="grid grid-cols-[minmax(0,1fr)] gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
       <AdminCard flush>
         <div class="relative overflow-x-auto">
-          <table v-if="groups[tab].length" class="w-full min-w-[720px] border-collapse text-left text-[13px]">
+          <table v-if="groups[tab].length" class="w-full min-w-[520px] border-collapse text-left text-[13px]">
             <thead>
               <tr class="text-[11.5px] text-ink-muted">
                 <th scope="col" class="px-5 py-2.5 font-medium">When</th>
                 <th scope="col" class="px-3 py-2.5 font-medium">Store</th>
-                <th scope="col" class="px-3 py-2.5 font-medium">Buyer</th>
                 <th scope="col" class="px-3 py-2.5 font-medium">Status</th>
-                <th scope="col" class="px-3 py-2.5 font-medium">Asked</th>
                 <th scope="col" class="w-24"><span class="sr-only">Actions</span></th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="v in groups[tab]" :key="v.id" class="align-top hover:bg-surface-sunk/60">
-                <td class="border-t border-line px-5 py-2.5 font-mono text-[12px] whitespace-nowrap">{{ visitDay(v.day).label }} · {{ v.slot }}<span v-if="v.place === 'home'" class="block text-[11px] text-ink-muted">at the buyer's home</span></td>
-                <td class="border-t border-line px-3 py-2.5"><NuxtLink :to="`/admin/stores/${v.store_id}`" class="text-ink hover:underline">{{ v.store_name }}</NuxtLink></td>
-                <td class="border-t border-line px-3 py-2.5">
-                  <NuxtLink :to="`/admin/people/${v.buyer_id}`" class="flex flex-col leading-tight text-ink no-underline hover:underline"><span>{{ v.buyer_name || 'A buyer' }}</span><span class="font-mono text-[11px] text-ink-muted">{{ v.buyer_email }}</span></NuxtLink>
+              <!-- A row shows the essentials; clicking it opens everything about the visit -->
+              <tr v-for="v in groups[tab]" :key="v.id" class="cursor-pointer align-top hover:bg-surface-sunk/60" @click="openVisit(v)">
+                <td class="border-t border-line px-5 py-2.5 font-mono text-[12px] whitespace-nowrap">
+                  <button type="button" class="cursor-pointer border-0 bg-transparent p-0 text-left font-mono text-[12px] text-ink" @click.stop="openVisit(v)">{{ visitDay(v.day).label }} · {{ v.slot }}</button>
                 </td>
+                <td class="border-t border-line px-3 py-2.5">{{ v.store_name }}</td>
                 <td class="border-t border-line px-3 py-2.5">
                   <span :class="['text-xs font-semibold', v.missed ? 'text-danger' : v.needs_chasing ? 'text-ink' : 'text-ink-muted']">{{ v.missed ? 'missed' : v.needs_chasing ? 'waiting 2+ days' : v.status }}</span>
                 </td>
-                <td class="border-t border-line px-3 py-2.5 font-mono text-[11.5px] whitespace-nowrap text-ink-muted" :title="adminTime(v.created_at)">{{ shortTime(v.created_at) }}</td>
                 <td class="border-t border-line pr-4 text-right">
-                  <Button v-if="v.status === 'requested' && !v.missed" variant="outline" size="sm" class="mt-1 h-8" :disabled="nudged.has(v.id)" @click="onNudge(v)">
+                  <Button v-if="v.status === 'requested' && !v.missed" variant="outline" size="sm" class="mt-1 h-8" :disabled="nudged.has(v.id)" @click.stop="onNudge(v)">
                     <BellRing aria-hidden="true" />{{ nudged.has(v.id) ? 'Nudged' : 'Nudge' }}
                   </Button>
                 </td>
@@ -117,5 +143,10 @@ const csv: CsvColumn<AdminVisit>[] = [
         <p v-else class="m-0 border-t border-line px-5 py-4 text-[13px] text-ink-muted">No visit requests in the last 90 days.</p>
       </AdminCard>
     </div>
+    <DetailDialog v-if="viewing" v-model:open="viewOpen" :title="`${viewing.service} · ${viewing.store_name}`" :subtitle="`${visitDay(viewing.day).label} at ${viewing.slot}`" :sections="visitSections">
+      <template v-if="viewing.status === 'requested' && !viewing.missed" #actions>
+        <Button variant="marigold" :disabled="nudged.has(viewing.id)" @click="onNudge(viewing)"><BellRing aria-hidden="true" />{{ nudged.has(viewing.id) ? 'Nudged' : 'Nudge the store' }}</Button>
+      </template>
+    </DetailDialog>
   </AdminPage>
 </template>

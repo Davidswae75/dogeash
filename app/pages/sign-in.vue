@@ -5,6 +5,8 @@ import { computed, ref, watch } from 'vue'
 import { definePageMeta, useRoute, useSeoMeta } from '#imports' // nuxt
 import type { AuthLinkCard } from '~/components/auth/AuthLinkCards.vue'
 import { useAuth } from '~/composables/useAuth'
+import { useAuthPanel } from '~/composables/useAuthPanel'
+import { useInviteLink } from '~/composables/useInviteLink'
 import { useSession } from '~/composables/useSession'
 import { useStaff } from '~/composables/useStaff'
 import { savedDogsMovedText } from '~/utils/account'
@@ -43,7 +45,13 @@ const { handleSubmit, values, validateField } = useForm<{ email?: string, passwo
   validationSchema: toTypedSchema(emailSignInSchema),
 })
 // From an invitation email (?email=…): the address is filled in
-const invitedEmail = typeof route.query.email === 'string' ? route.query.email.slice(0, 254) : undefined
+// From an invitation email (?invite=…&kind=…): what's being accepted, the invited email filled in, and the
+// invitation accepted once signed in. (?email=… alone just fills the address in.)
+const invite = await useInviteLink()
+const inviteCopy = invite.copy
+useAuthPanel(() => inviteCopy.value?.panel ?? route.meta.authPanel)
+const inviteError = ref('')
+const invitedEmail = invite.preview.value?.email ?? (typeof route.query.email === 'string' ? route.query.email.slice(0, 254) : undefined)
 const fields = computed(() => [{ ...authFields.email(), defaultValue: invitedEmail }, authFields.password({ visible: showPassword.value })])
 watch(values, () => { error.value = '' })
 
@@ -60,6 +68,11 @@ async function finish(movedDogs: number) {
     providers: session.providers.value,
     staffRole: staff.role.value,
   })
+  // Signed in from an invitation: accept it, then lead with its dashboard
+  if (inviteCopy.value) {
+    inviteError.value = (await invite.accept()) ?? ''
+    if (!inviteError.value) nextSteps.value = [inviteCopy.value.nextSteps[0]!, ...nextSteps.value.filter(n => n.to !== inviteCopy.value!.to)].slice(0, 5)
+  }
   moved.value = movedDogs
   step.value = 'next'
 }
@@ -101,7 +114,11 @@ const resendCode = () => (codeFor.value === 'confirm' ? auth.resendSignUpCode(em
 
 <template>
   <template v-if="step === 'credentials'">
-    <AuthHeading title="Sign" outline="in" text="One account for buying, running a store and booking on Dogeash." />
+    <template v-if="inviteCopy">
+      <AuthHeading title="Sign in to" outline="accept" :text="`Sign in with ${invite.preview.value!.email} and the invitation is accepted for you.`" />
+      <AuthInviteCard :card="inviteCopy.card" />
+    </template>
+    <AuthHeading v-else title="Sign" outline="in" text="One account for buying, running a store and booking on Dogeash." />
 
     <!-- method="post" keeps typed values out of the URL if someone submits before the page loads -->
     <form class="flex flex-col gap-5" method="post" novalidate @submit.prevent="submit">
@@ -118,18 +135,19 @@ const resendCode = () => (codeFor.value === 'confirm' ? auth.resendSignUpCode(em
     </form>
 
     <div class="flex flex-col gap-4 border-t border-line pt-6">
-      <HelpPanel title="Run a store on Dogeash?">
+      <HelpPanel v-if="!inviteCopy" title="Run a store on Dogeash?">
         Sign in here with the account you used to apply. Your store dashboard is the first choice after.
       </HelpPanel>
       <p class="m-0 text-sm text-ink-muted">
-        New here? <NuxtLink to="/sign-up" class="font-bold text-ink">Create an account</NuxtLink> or <NuxtLink to="/open-a-store" class="font-bold text-ink">open a store</NuxtLink>.
+        New here? <NuxtLink :to="{ path: '/sign-up', query: invite.query }" class="font-bold text-ink">Create an account</NuxtLink> or <NuxtLink to="/open-a-store" class="font-bold text-ink">open a store</NuxtLink>.
         Sign-in by text message is coming soon.
       </p>
     </div>
   </template>
 
   <template v-else-if="step === 'next'">
-    <AuthHeading title="Welcome back," :outline="session.firstName.value || 'friend'" done :text="`${savedDogsMovedText(moved)} Where would you like to go?`.trim()" />
+    <AuthHeading title="Welcome back," :outline="session.firstName.value || 'friend'" done :text="inviteCopy && !inviteError ? inviteCopy.welcome : `${savedDogsMovedText(moved)} Where would you like to go?`.trim()" />
+    <p v-if="inviteError" class="m-0 rounded-lg bg-surface p-3.5 text-sm font-semibold text-danger ring-1 ring-line" role="alert">{{ inviteError }}</p>
     <AuthLinkCards :items="nextSteps" />
   </template>
 

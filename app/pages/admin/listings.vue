@@ -3,6 +3,7 @@ import { Dog as DogIcon, MoreHorizontal, Search } from '@lucide/vue'
 import { computed, onMounted, ref } from 'vue'
 import { definePageMeta, useRuntimeConfig, useSeoMeta } from '#imports' // nuxt
 import type { AdminDog, DogStatus } from '~/utils/admin'
+import type { DetailSection } from '~/components/DetailDialog.vue'
 import type { CsvColumn } from '~/utils/csv'
 import { useAdminListings } from '~/composables/useAdminListings'
 import { useNotify } from '~/composables/useNotify'
@@ -42,6 +43,41 @@ function ask(dog: AdminDog, action: { to: DogStatus, label: string, reason: bool
   pending.value = { dog, ...action }
   confirmOpen.value = true
 }
+// Everything about one listing
+const viewing = ref<AdminDog>()
+const viewOpen = ref(false)
+function openDog(d: AdminDog) {
+  viewing.value = d
+  viewOpen.value = true
+}
+const isLive = (d: AdminDog) => d.status === 'available' || d.status === 'reserved'
+const dogSections = computed<DetailSection[]>(() => {
+  const d = viewing.value
+  if (!d) return []
+  return [
+    { title: 'Listing', rows: [
+      { label: 'File number', value: d.file_no, mono: true, ...(isLive(d) ? { to: `/dogs/${d.file_no.toLowerCase()}`, external: true } : {}) },
+      { label: 'Status', value: dogStatusMeta[d.status].label },
+      { label: 'Breed', value: d.breed },
+      { label: 'Protection level', value: `Level ${d.level}` },
+      { label: 'City', value: d.city },
+      { label: 'Price', value: formatNaira(d.price_naira), mono: true },
+      { label: 'Listed', value: adminTime(d.created_at) },
+      { label: 'Last change', value: adminTime(d.updated_at) },
+    ] },
+    { title: 'Store', rows: [
+      { label: 'Store', value: d.store_name, to: `/admin/stores/${d.store_id}` },
+      { label: 'Store ID', value: d.store_id, mono: true },
+      { label: 'Store status', value: d.store_status.replace('_', ' ') },
+    ] },
+    { title: 'Dogeash', rows: [{ label: 'Note to the store', value: d.admin_note, long: true }] },
+  ]
+})
+function askFromDialog(a: { to: DogStatus, label: string, reason: boolean, effect: string }) {
+  viewOpen.value = false
+  ask(viewing.value!, a)
+}
+
 async function run(note: string) {
   const p = pending.value!
   const error = await setStatus(p.dog, p.to, note)
@@ -71,34 +107,26 @@ async function run(note: string) {
         </ToggleGroup>
       </div>
       <div class="relative overflow-x-auto">
-        <table v-if="shown.length" class="w-full min-w-[880px] border-collapse text-left text-[13px]">
+        <table v-if="shown.length" class="w-full min-w-[560px] border-collapse text-left text-[13px]">
           <thead>
             <tr class="text-[11.5px] text-ink-muted">
               <th scope="col" class="border-t border-line px-5 py-2 font-medium">Dog</th>
-              <th scope="col" class="border-t border-line px-3 py-2 font-medium">Store</th>
               <th scope="col" class="border-t border-line px-3 py-2 font-medium">Status</th>
               <th scope="col" class="border-t border-line px-3 py-2 text-right font-medium">Price</th>
-              <th scope="col" class="border-t border-line px-3 py-2 font-medium">Updated · Dogeash note</th>
               <th scope="col" class="w-12 border-t border-line"><span class="sr-only">Actions</span></th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="d in shown" :key="d.id" class="align-top hover:bg-surface-sunk/60">
+            <!-- A row shows the essentials; clicking it opens everything about the listing -->
+            <tr v-for="d in shown" :key="d.id" class="cursor-pointer align-top hover:bg-surface-sunk/60" @click="openDog(d)">
               <td class="border-t border-line px-5 py-2.5">
                 <span class="flex items-center gap-3">
                   <img v-if="d.photo_path" :src="dogPhotoUrl(d.photo_path, storageUrl)" alt="" class="size-10 shrink-0 rounded-md object-cover">
                   <span v-else class="grid size-10 shrink-0 place-items-center rounded-md bg-surface-sunk text-ink-muted"><DogIcon class="size-4" aria-hidden="true" /></span>
                   <span class="flex min-w-0 flex-col leading-tight">
-                    <NuxtLink v-if="d.status === 'available' || d.status === 'reserved'" :to="`/dogs/${d.file_no.toLowerCase()}`" target="_blank" class="font-medium text-ink">{{ d.name }}</NuxtLink>
-                    <span v-else class="font-medium">{{ d.name }}</span>
-                    <span class="font-mono text-[11px] text-ink-muted">{{ d.file_no }} · {{ d.breed }} · L{{ d.level }}</span>
+                    <button type="button" class="w-fit cursor-pointer border-0 bg-transparent p-0 text-left font-medium text-ink hover:underline" @click.stop="openDog(d)">{{ d.name }}</button>
+                    <span class="font-mono text-[11px] text-ink-muted">{{ d.file_no }} · {{ d.store_name }}</span>
                   </span>
-                </span>
-              </td>
-              <td class="border-t border-line px-3 py-2.5">
-                <span class="flex flex-col leading-tight">
-                  <NuxtLink :to="`/admin/stores/${d.store_id}`" class="text-ink hover:underline">{{ d.store_name }}</NuxtLink>
-                  <span class="font-mono text-[11px] text-ink-muted">{{ d.store_id }}<template v-if="d.store_status !== 'verified'"> · store {{ d.store_status.replace('_', ' ') }}</template></span>
                 </span>
               </td>
               <td class="border-t border-line px-3 py-2.5">
@@ -107,13 +135,7 @@ async function run(note: string) {
                 </span>
               </td>
               <td class="border-t border-line px-3 py-2.5 text-right font-mono whitespace-nowrap tabular-nums">{{ formatNaira(d.price_naira) }}</td>
-              <td class="max-w-[260px] border-t border-line px-3 py-2.5">
-                <span class="flex flex-col leading-snug">
-                  <span class="font-mono text-[11px] text-ink-muted">{{ adminTime(d.updated_at) }}</span>
-                  <span v-if="d.admin_note" class="line-clamp-2 text-[12.5px]" :title="d.admin_note">{{ d.admin_note }}</span>
-                </span>
-              </td>
-              <td class="border-t border-line pr-3 text-right">
+              <td class="border-t border-line pr-3 text-right" @click.stop>
                 <DropdownMenu v-if="dogActions[d.status].length">
                   <DropdownMenuTrigger as-child>
                     <Button variant="ghost" size="icon" class="mt-1 size-8" :aria-label="`Actions for ${d.name}`"><MoreHorizontal aria-hidden="true" /></Button>
@@ -132,6 +154,19 @@ async function run(note: string) {
         <p v-else class="m-0 border-t border-line px-5 py-4 text-[13px] text-ink-muted">{{ dogs.length ? 'No listings match.' : 'No dogs yet.' }}</p>
       </div>
     </AdminCard>
+
+    <DetailDialog v-if="viewing" v-model:open="viewOpen" :title="viewing.name" :subtitle="`${viewing.breed} · ${viewing.store_name}`" :sections="dogSections">
+      <template #top>
+        <img v-if="viewing.photo_path" :src="dogPhotoUrl(viewing.photo_path, storageUrl)" alt="" class="aspect-[16/9] w-full rounded-lg object-cover">
+      </template>
+      <template #actions>
+        <Button v-if="isLive(viewing)" as-child variant="ghost"><NuxtLink :to="`/dogs/${viewing.file_no.toLowerCase()}`" target="_blank">Public page</NuxtLink></Button>
+        <!-- Putting a dog live is the main action (marigold); taking one down is red; sending back is plain -->
+        <Button v-for="a in dogActions[viewing.status]" :key="a.to" :variant="a.to === 'available' ? 'marigold' : 'outline'" :class="a.to === 'withdrawn' && 'border-danger/50 text-danger hover:bg-danger/10 hover:text-danger'" @click="askFromDialog(a)">
+          <span class="size-2 rounded-full" :style="{ background: dogStatusMeta[a.to].color }" aria-hidden="true" />{{ a.label }}
+        </Button>
+      </template>
+    </DetailDialog>
 
     <AdminConfirm
       v-if="pending"

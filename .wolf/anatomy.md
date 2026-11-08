@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-11-08T01:31:59.850Z
-> Files: 772 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-11-08T10:59:20.004Z
+> Files: 777 tracked | Anatomy hits: 0 | Misses: 0
 
 > Project structure index. Auto-maintained by OpenWolf hooks and daemon.
 > Run `openwolf scan` to generate, or wait for the first Claude Code session.
@@ -52,6 +52,7 @@
 - `ConversationReply.vue` — Vue: setup (~574 tok)
 - `ConversationThread.vue` — Vue: setup (~393 tok)
 - `DashboardNav.vue` — Vue: setup (~1090 tok)
+- `DetailDialog.vue` — File numbers, references, amounts: monospaced (~760 tok)
 - `DogGallery.vue` — Vue: setup (~1969 tok)
 - `DogMark.vue` — Vue: setup (~787 tok)
 - `EmptyState.vue` — Vue: setup, TS, 2 props, emits (~240 tok)
@@ -893,6 +894,7 @@
 - `useCareBookings.ts` — The buyer's care appointments (Supabase: care_bookings): requesting one from a provider's page, the (~1258 tok)
 - `useConversations.ts` — Conversations between buyers and stores (Supabase: conversations, messages), for both sides. (~1450 tok)
 - `useFirstVisit.ts` — Whether this browser has dismissed a one-time message, e.g. the "New to guard dogs?" intro (~107 tok)
+- `useInviteLink.ts` — An invitation link (?invite=<id>&kind=provider|store, from the invitation email) on sign-up and sign (~1544 tok)
 - `useLoader.ts` — The full-screen loader (AppLoader in app.vue) for moments that change the whole page: (~282 tok)
 - `useNotifications.ts` — The header bell's notifications (Supabase: notifications). The database writes them when a store rep (~539 tok)
 - `useNotify.ts` — Every toast in the app goes through here, so the same action always looks and reads the same. (~2217 tok)
@@ -1059,6 +1061,7 @@
 
 ## scripts/
 
+- `render-icons.mjs` — The dog mark as Dogeash's icons and share image, drawn from the same paths as the app's logo (~1388 tok)
 - `render-kennel-watch.mjs` — Renders the kennel watch for the sign-in and sign-up pages: a K9 stands guard beside its kennel, (~4330 tok)
 
 ## server/utils/
@@ -1096,3 +1099,5 @@
 - `20261201000000_payments.sql` — Payments with Paystack: reserving a dog with a deposit, paying the balance, handover, payouts and re (~6854 tok)
 - `20261202000000_payments_part2.sql` — Payments, part 2: stores cancelling (with refunds), payouts to stores' banks, and Dogeash deciding o (~3687 tok)
 - `20261203000000_care_provider_dashboard.sql` — Care providers get their own side of Dogeash: vets, trainers, groomers and the rest manage their lis (~6178 tok)
+- `20261205000000_care_listing.sql` — Care listings: Dogeash adds a provider's business, invites the people who'll manage it, and lists it (~819 tok)
+- `20261206000000_invite_links.sql` — Invitation links: the email's link carries the invitation's id, so sign-up and sign-in can say what  (~394 tok)

@@ -22,7 +22,7 @@ export function useCatalog() {
     const [stores, dogs, providers] = await Promise.all([
       supabase.from('stores').select(storeColumns).eq('status', 'verified').order('rating', { ascending: false }),
       supabase.from('dogs').select(dogColumns).in('status', ['available', 'reserved']).eq('stores.status', 'verified').order('file_no'),
-      supabase.from('care_providers').select(careColumns).order('rating', { ascending: false }),
+      supabase.from('care_providers').select(careColumns).eq('listed', true).order('rating', { ascending: false }),
     ])
     if (stores.error || dogs.error || providers.error) return null
     return { stores: stores.data as unknown as StoreRow[], dogs: dogs.data as unknown as DogRow[], providers: providers.data as unknown as CareRow[] }

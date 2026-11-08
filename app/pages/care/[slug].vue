@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { Check, MapPin, Star } from '@lucide/vue'
+import { computed } from 'vue'
 import { createError, useRoute, useSeoMeta } from '#imports' // nuxt
+import { useSession } from '~/composables/useSession'
 import { careTypes, findCareProviderBySlug, listedProviders } from '~/utils/care'
 import { formatNaira } from '~/utils/dogs'
 import { storesForProvider } from '~/utils/stores'
@@ -9,6 +11,9 @@ import { storesForProvider } from '~/utils/stores'
 const route = useRoute()
 const provider = findCareProviderBySlug(String(route.params.slug))
 if (!provider) throw createError({ statusCode: 404, statusMessage: 'No provider with that name' })
+// Whoever manages this listing sees a note and a way to change it, and can't book it
+const { providers } = useSession()
+const managesIt = computed(() => providers.value.some(p => p.id === provider.id))
 
 const typeLabel = careTypes[provider.type].label
 useSeoMeta({
@@ -40,6 +45,13 @@ const eyebrow = 'text-xs leading-4 font-bold tracking-[.08em] uppercase'
       <span aria-hidden="true"> / </span>
       <span class="text-ink">{{ provider.name }}</span>
     </nav>
+
+    <!-- Someone who manages this listing sees it as buyers do, with the way to change it -->
+    <div v-if="managesIt" class="flex flex-wrap items-center gap-3 rounded-xl bg-night px-4 py-3 text-on-night">
+      <span class="min-w-0 flex-1 text-sm"><strong>This is your listing.</strong> <span class="opacity-80">Buyers see it like this. You answer its bookings; you can't book it yourself.</span></span>
+      <Button as-child variant="marigold" size="sm"><NuxtLink to="/provider/listing">Edit your listing</NuxtLink></Button>
+      <Button as-child variant="outline" size="sm" class="border-on-night/30 bg-transparent text-on-night hover:bg-on-night/10"><NuxtLink to="/provider">Bookings</NuxtLink></Button>
+    </div>
 
     <!-- Source order is details, booking, similar so booking comes before similar providers when stacked -->
     <div class="grid items-start gap-10 lg:grid-cols-[1fr_340px]">

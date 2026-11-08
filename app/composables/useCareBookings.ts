@@ -45,7 +45,7 @@ export const careBookingStatus: Record<CareBookingStatus, { label: string, tone:
   done: { label: 'Done', tone: 'bg-ash-soft text-ink' },
 }
 
-const columns = 'id, service, day, slot, place, dog_name, owned_dog_id, share_record, status, provider_note, created_at, care_providers!inner (public_id, name, slug)'
+const columns = 'id, service, day, slot, place, dog_name, owned_dog_id, share_record, status, provider_note, created_at, care_providers (public_id, name, slug)'
 
 export function useCareBookings() {
   const supabase = useSupabaseClient()
@@ -61,9 +61,10 @@ export function useCareBookings() {
     const { data } = await supabase.from('care_bookings').select(columns).eq('buyer_id', user.value.id).order('day').order('slot')
     mine.value = (data ?? []).map((r: any) => ({
       id: r.id,
-      providerId: r.care_providers.public_id,
-      providerName: r.care_providers.name,
-      providerSlug: r.care_providers.slug,
+      // A provider Dogeash has since hidden can't be read; the booking still shows
+      providerId: r.care_providers?.public_id ?? '',
+      providerName: r.care_providers?.name ?? 'A care provider',
+      providerSlug: r.care_providers?.slug ?? '',
       service: r.service,
       day: r.day,
       slot: r.slot,
@@ -108,6 +109,6 @@ export function useCareBookings() {
 
 // The database's refusal of a booking, in words for the buyer (its messages are already written for people)
 function careRefusal(message: string) {
-  const known = ['isn\'t taking bookings', 'from tomorrow', 'next two months', 'doesn\'t work on that day', 'provider\'s times', 'doesn\'t visit homes', 'waiting for an answer', 'can\'t make bookings']
+  const known = ['manage this listing', 'isn\'t taking bookings', 'from tomorrow', 'next two months', 'doesn\'t work on that day', 'provider\'s times', 'doesn\'t visit homes', 'waiting for an answer', 'can\'t make bookings']
   return known.some(k => message.includes(k)) ? message.replace(/^.*?: /, '') : 'That didn\'t send. Try again.'
 }

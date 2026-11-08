@@ -200,7 +200,7 @@ export interface Database {
         Relationships: []
       }
       care_providers: {
-        Row: { id: string, public_id: string, slug: string, name: string, person: string | null, type: Database['public']['Enums']['care_type'], city: string, areas: string, home_visits: boolean, verified: boolean, credential: string, rating: number, reviews_count: number, price_from: number, about: string, hours: string, weekdays: number[], slots: string[], taking_bookings: boolean } & Timestamps
+        Row: { id: string, public_id: string, slug: string, name: string, person: string | null, type: Database['public']['Enums']['care_type'], city: string, areas: string, home_visits: boolean, verified: boolean, credential: string, rating: number, reviews_count: number, price_from: number, about: string, hours: string, weekdays: number[], slots: string[], taking_bookings: boolean, listed: boolean } & Timestamps
         Insert: never
         Update: never
         Relationships: []
@@ -365,6 +365,7 @@ export interface Database {
       provider_bookings: { Args: { provider: string }, Returns: Json }
       provider_add_record: { Args: { booking: string, rec_kind: Database['public']['Enums']['owned_dog_record_kind'], rec_title: string, rec_done: string | null, rec_due: string | null, rec_note?: string }, Returns: undefined }
       provider_booking_records: { Args: { booking: string }, Returns: Json }
+      invite_preview: { Args: { kind: string, invite: string }, Returns: Json }
       account_exists: { Args: { check_email: string }, Returns: boolean }
       has_store_role: { Args: { target_store: string, roles: Database['public']['Enums']['store_role'][] }, Returns: boolean }
       mark_conversation_read: { Args: { target: string }, Returns: undefined }

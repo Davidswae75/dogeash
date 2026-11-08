@@ -3,6 +3,7 @@ import { ArrowLeft } from '@lucide/vue'
 import { computed } from 'vue'
 import { useRoute } from '#imports' // nuxt
 import { useAuthPanel } from '~/composables/useAuthPanel'
+import { invitePanels } from '~/composables/useInviteLink'
 
 // Sign-in and sign-up: logo, a way back and the page's form on the left; the brand panel on the right
 // stays put at full window height while the form scrolls.
@@ -10,7 +11,9 @@ import { useAuthPanel } from '~/composables/useAuthPanel'
 // and can swap it while open with useAuthPanel().
 const route = useRoute()
 const override = useAuthPanel()
-const panel = computed(() => override.value ?? route.meta.authPanel)
+// An invitation link (?invite=…&kind=…) gets its panel from the first paint
+const invitePanel = computed(() => (typeof route.query.invite === 'string' ? invitePanels[route.query.kind === 'store' ? 'store' : 'provider'] : undefined))
+const panel = computed(() => override.value ?? invitePanel.value ?? route.meta.authPanel)
 </script>
 
 <template>

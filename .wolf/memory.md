@@ -495,3 +495,10 @@ description: chronological action log per session, consolidated weekly
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
 | 02:31 | Created app/components/ListSkeleton.vue | — | ~727 |
+| 10:17 | Created supabase/migrations/20261205000000_care_listing.sql | — | ~819 |
+<!-- session:NjRmZTgyMzMtMzg3Yi00ZTE5LTlkMzgtYWJmMzRmMGM2OTFm -->
+| 2026-11-08T09:43:23.259Z | Loading placeholders (ListSkeleton) for lists that load after the page; provider form gets manager emails (tags) and Listed/Hidden switch, care_providers.listed migration, invite email failures shown with reason, dev server restarts on .env.local change | app/components/ListSkeleton.vue,app/components/admin/ProviderForm.vue,app/pages/admin/care.vue,app/composables/useAdminCare.ts,supabase/migrations/20261205000000_care_listing.sql,nuxt.config.ts | db:test all pass; typecheck clean; live: migration applied, resend not yet done |
+| 10:55 | Created supabase/migrations/20261206000000_invite_links.sql | — | ~394 |
+| 10:57 | Created app/composables/useInviteLink.ts | — | ~1544 |
+| 11:25 | Created app/components/DetailDialog.vue | — | ~760 |
+| 11:59 | Created scripts/render-icons.mjs | — | ~1388 |

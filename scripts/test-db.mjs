@@ -781,6 +781,41 @@ check('the provider marks it done', await scalar(`select status::text from publi
 await as('authenticated', vet, `select public.provider_save_profile('${care01}', '{"takingBookings":false}')`)
 check('a paused listing takes no bookings', await book('null, false') === null)
 
+// Care listings: Dogeash can add a provider hidden, invite its managers, and list it when ready
+const hiddenId = (await adm(`select public.admin_save_provider('{"name":"Ikoyi Canine Physio","type":"vet","city":"Lagos","listed":false}') as id`))?.[0]?.id
+check('a provider can be added hidden', !!hiddenId && await scalar(`select listed::text from public.care_providers where public_id = '${hiddenId}'`) === 'false')
+check('buyers and visitors don\'t see a hidden listing', (await as('anon', null, `select id from public.care_providers where public_id = '${hiddenId}'`))?.length === 0
+  && (await as('authenticated', buyer, `select id from public.care_providers where public_id = '${hiddenId}'`))?.length === 0)
+check('Dogeash sees it', (await adm(`select id from public.care_providers where public_id = '${hiddenId}'`))?.length === 1)
+await adm(`select public.admin_invite_provider('${hiddenId}', '${emailOf('Halima Sani')}')`)
+const hiddenInvite = await scalar(`select i.id from public.care_provider_invites i join public.care_providers p on p.id = i.provider_id where p.public_id = '${hiddenId}'`)
+check('the invited manager can see and accept it while it\'s hidden', (await as('authenticated', vet, 'select provider_name from public.my_provider_invites()'))?.some(i => i.provider_name === 'Ikoyi Canine Physio')
+  && (await as('authenticated', vet, `select public.accept_provider_invite('${hiddenInvite}') as p`))?.[0]?.p === hiddenId)
+check('its manager sees it before it\'s listed', (await as('authenticated', vet, `select id from public.care_providers where public_id = '${hiddenId}'`))?.length === 1)
+await adm(`select public.admin_save_provider('{"id":"${hiddenId}","name":"Ikoyi Canine Physio","type":"vet","city":"Lagos","listed":true}')`)
+check('listing it shows it to everyone', (await as('anon', null, `select id from public.care_providers where public_id = '${hiddenId}'`))?.length === 1)
+check('editing without the switch keeps it listed', (await adm(`select public.admin_save_provider('{"id":"${hiddenId}","name":"Ikoyi Canine Physio","type":"vet","city":"Lagos"}')`)) !== null
+  && await scalar(`select listed::text from public.care_providers where public_id = '${hiddenId}'`) === 'true')
+
+// A listing's own managers can't book it, and a hidden listing can't be booked
+const ownDay = await scalar(`select d::date::text from generate_series(current_date + 1, current_date + 14, '1 day') d where extract(dow from d) between 1 and 5 limit 1`)
+await as('authenticated', vet, `select public.provider_save_profile('${care01}', '{"takingBookings":true}')`)
+check('a provider can\'t book their own listing', await as('authenticated', vet, `insert into public.care_bookings (provider_id, service, day, slot) values ('${care01}', 'Vaccination', '${ownDay}', '9:00')`) === null)
+check('a buyer still can', (await as('authenticated', buyer, `insert into public.care_bookings (provider_id, service, day, slot) values ('${care01}', 'Vaccination', '${ownDay}', '9:00') returning id`))?.length === 1)
+const hiddenUuid = await scalar(`select id from public.care_providers where public_id = '${hiddenId}'`)
+await adm(`select public.admin_save_provider('{"id":"${hiddenId}","name":"Ikoyi Canine Physio","type":"vet","city":"Lagos","listed":false}')`)
+check('a hidden listing can\'t be booked', await as('authenticated', buyer, `insert into public.care_bookings (provider_id, service, day, slot) values ('${hiddenUuid}', 'Health check', '${ownDay}', '9:00')`) === null)
+
+// Invitation links: sign-up and sign-in read what's being accepted from the link's id
+const storeInviteId = (await as('authenticated', owner, `insert into public.store_invites (store_id, email, role) values ('${k9}', 'newhand@test.ng', 'handler') returning id`))?.[0]?.id
+const sp = (await as('anon', null, `select public.invite_preview('store', '${storeInviteId}') as p`))?.[0]?.p
+check('a store invitation link shows the store, the role and the email', sp?.name === 'K9 Guardian Kennels' && sp?.role === 'handler' && sp?.email === 'newhand@test.ng')
+await adm(`select public.admin_invite_provider('CARE-02', 'trainer@test.ng')`)
+const careInviteId = await scalar(`select id from public.care_provider_invites where email = 'trainer@test.ng'`)
+const cp = (await as('anon', null, `select public.invite_preview('provider', '${careInviteId}') as p`))?.[0]?.p
+check('a provider invitation link shows the listing', cp?.kind === 'provider' && !!cp?.name && !!cp?.type)
+check('an unknown or mismatched link shows nothing', (await as('anon', null, `select public.invite_preview('store', '${careInviteId}') as p`))?.[0]?.p === null)
+
 // Invitation emails: the server checks whether an invited email has an account (sign-in link) or not (sign-up link)
 check('the server can tell an invited email has an account', (await as('service_role', null, `select public.account_exists('${emailOf('Tunde Ade').toUpperCase()}') as e`))?.[0]?.e === true)
 check('and when it doesn\'t', (await as('service_role', null, `select public.account_exists('nobody@nowhere.ng') as e`))?.[0]?.e === false)

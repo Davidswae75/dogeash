@@ -34,6 +34,8 @@ export interface CareProvider {
   weekdays?: number[]
   slots?: string[]
   takingBookings?: boolean
+  /** Shown to buyers; Dogeash can keep a listing hidden while it's set up */
+  listed?: boolean
 }
 
 // Example providers: the fallback when the database can't be reached, and what `npm run db:seed` writes
@@ -72,8 +74,9 @@ export interface CareRow {
   weekdays: number[]
   slots: string[]
   taking_bookings: boolean
+  listed: boolean
 }
-export const careColumns = 'public_id, name, person, type, city, areas, home_visits, verified, credential, rating, reviews_count, price_from, about, hours, weekdays, slots, taking_bookings'
+export const careColumns = 'public_id, name, person, type, city, areas, home_visits, verified, credential, rating, reviews_count, price_from, about, hours, weekdays, slots, taking_bookings, listed'
 
 export const toCareProvider = (r: CareRow): CareProvider => ({
   id: r.public_id,
@@ -93,6 +96,7 @@ export const toCareProvider = (r: CareRow): CareProvider => ({
   weekdays: r.weekdays ?? undefined,
   slots: r.slots ?? undefined,
   takingBookings: r.taking_bookings ?? true,
+  listed: r.listed ?? true,
 })
 
 export function findCareProvider(id: string) {

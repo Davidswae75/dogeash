@@ -26,7 +26,7 @@ const { state } = useLoader()
           <span class="grid size-28 place-items-center rounded-full bg-surface ring-1 ring-line shadow-[0_24px_60px_-28px_rgb(0_0_0/.45)]">
             <DogMark animated class="size-[72px]" />
           </span>
-          <AppLogo static class="mt-5 text-[26px]" />
+          <AppLogo static :mark="false" class="mt-5 text-[26px]" />
           <span class="mt-6 h-px w-10 bg-line-strong" aria-hidden="true" />
           <strong class="mt-5 text-[15px] leading-6 font-semibold">{{ state.title }}</strong>
           <span v-if="state.text" class="mt-1 max-w-[30ch] text-[13px] leading-5 text-ink-muted">{{ state.text }}</span>

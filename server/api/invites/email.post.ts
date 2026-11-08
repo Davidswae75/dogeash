@@ -6,8 +6,8 @@ import { careTypes } from '~/utils/care'
 import { storeRoles } from '~/utils/storeRoles'
 
 // Email an invitation just made: to join a store's team (made by the store's owner) or to manage a care
-// listing (made by Dogeash). The link goes to sign-up with the email filled in, or to sign-in if that email
-// already has an account; either way the invitation is waiting in their account afterwards.
+// listing (made by Dogeash). The link goes to sign-up, or to sign-in if that email already has an account,
+// with the invitation's id: the page shows what they're accepting, fills in the email and accepts it for them.
 // Only whoever could see the invitation (the owner, or Dogeash) can send it, and only within 15 minutes of making it.
 export default defineEventHandler(async (event) => {
   const { kind, id } = await readBody<{ kind?: 'store' | 'provider', id?: string }>(event)
@@ -24,11 +24,12 @@ export default defineEventHandler(async (event) => {
   const service = serverSupabaseServiceRole<Database>(event)
   const { data: hasAccount } = await service.rpc('account_exists', { check_email: invite.email })
   const origin = getRequestURL(event, { xForwardedHost: true, xForwardedProto: true }).origin
-  const link = `${origin}/${hasAccount ? 'sign-in' : 'sign-up'}?email=${encodeURIComponent(invite.email)}&redirect=${encodeURIComponent('/account')}`
+  // The link names the invitation, so the page can say what they're accepting and accept it for them
+  const link = `${origin}/${hasAccount ? 'sign-in' : 'sign-up'}?invite=${encodeURIComponent(invite.id)}&kind=${kind}`
   const button = { label: hasAccount ? 'Sign in to accept' : 'Create your account', url: link }
   const how = hasAccount
-    ? `Sign in with ${invite.email} and the invitation is at the top of your account.`
-    : `Create a free account with ${invite.email} (it takes a minute), and the invitation is waiting at the top of your account.`
+    ? `Sign in with ${invite.email} and it's accepted for you.`
+    : `Create a free account with ${invite.email} (it takes a minute) and it's accepted for you.`
 
   let message
   if (kind === 'store') {
@@ -65,5 +66,6 @@ export default defineEventHandler(async (event) => {
   }
 
   const result = await sendEmail(event, message)
-  return { sent: result.sent, hasAccount: !!hasAccount }
+  if (!result.sent) console.warn(`[invite email] not sent to ${invite.email}: ${result.error}`)
+  return { sent: result.sent, error: result.error ?? null, hasAccount: !!hasAccount }
 })

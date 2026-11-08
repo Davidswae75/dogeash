@@ -9,8 +9,9 @@ export const toggleVariants = cva(
     variants: {
       variant: {
         default: "bg-transparent",
+        // Selected is solid (ink, so white in Night and in the admin), not a faint tint: easy to tell which is on
         outline:
-          "border border-input bg-transparent shadow-xs hover:bg-accent hover:text-accent-foreground",
+          "border border-input bg-transparent shadow-xs hover:bg-accent hover:text-accent-foreground data-[state=on]:border-ink data-[state=on]:bg-ink data-[state=on]:font-semibold data-[state=on]:text-canvas data-[state=on]:hover:bg-ink data-[state=on]:hover:text-canvas data-[state=on]:[&_.text-ink-muted]:text-canvas/70",
         // Dogeash filter chip: pill, ink when pressed. See design/ash-marigold/components/SearchFilters
         chip:
           "h-9 px-3.5 rounded-full border-[1.5px] border-line-strong bg-surface text-ink font-semibold hover:bg-surface hover:text-ink data-[state=on]:bg-ink data-[state=on]:border-ink data-[state=on]:text-canvas",

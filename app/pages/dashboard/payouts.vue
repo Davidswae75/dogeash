@@ -32,6 +32,8 @@ const payoutState: Record<StorePayout['status'], { label: string, tone: string }
 const when = (iso: string) => new Date(iso).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })
 
 // Cancelling: the buyer gets everything back, so the store says why
+// The past reservation whose full card is open
+const pastOpen = ref<StoreReservation>()
 const cancelling = ref<StoreReservation>()
 const reason = ref('')
 const busy = ref(false)
@@ -79,7 +81,17 @@ async function confirmCancel() {
 
         <section v-if="finished.length" class="flex flex-col gap-3" aria-labelledby="finished">
           <h2 id="finished" class="m-0 font-mono text-[11px] leading-4 font-semibold tracking-[.12em] text-ink-muted uppercase">Earlier · {{ finished.length }}</h2>
-          <DashboardStoreReservation v-for="r in finished" :key="r.id" :reservation="r" />
+          <!-- One line each; the full card opens in a dialog -->
+          <SummaryRow
+            v-for="r in finished"
+            :key="r.id"
+            :title="r.dogName"
+            :subtitle="`${r.buyerName} · ${r.status === 'completed' ? 'Sold' : r.status === 'cancelled' ? 'Cancelled' : 'Hold ended'}`"
+            :meta="formatMoney(r.paidNaira)"
+            :name="r.dogName"
+            :photo="r.photo"
+            @click="pastOpen = r"
+          />
         </section>
       </div>
 
@@ -105,6 +117,10 @@ async function confirmCancel() {
         </section>
       </div>
     </div>
+
+    <DetailDialog :open="!!pastOpen" :title="pastOpen?.dogName ?? ''" :subtitle="pastOpen ? `${pastOpen.buyerName} · ${pastOpen.ref}` : ''" :sections="[]" @update:open="o => !o && (pastOpen = undefined)">
+      <DashboardStoreReservation v-if="pastOpen" :reservation="pastOpen" />
+    </DetailDialog>
 
     <AlertDialog :open="!!cancelling" @update:open="o => !o && (cancelling = undefined)">
       <AlertDialogContent>

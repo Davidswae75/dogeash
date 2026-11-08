@@ -8,6 +8,7 @@ import { definePageMeta, useRoute, useSeoMeta } from '#imports' // nuxt
 import { useSupabaseClient } from '#imports' // @nuxtjs/supabase
 import { useAuth } from '~/composables/useAuth'
 import { useAuthPanel } from '~/composables/useAuthPanel'
+import { useInviteLink } from '~/composables/useInviteLink'
 import { useSession } from '~/composables/useSession'
 import { useStoreApi } from '~/composables/useStoreApi'
 import { firstNameOf, savedDogsMovedText } from '~/utils/account'
@@ -19,6 +20,9 @@ import type { SignUpIntent } from '~/utils/signUpIntents'
 // Create an account: what brings you here, details, confirm the email with a 6-digit code, then a welcome.
 // "Open a store" (/sign-up?as=store) asks for the kennel's name and city too, creates the store as a draft
 // once the email is confirmed, and changes the copy and panel.
+// From an invitation email (?invite=…&kind=provider|store): the page says what's being accepted (to manage a
+// care listing, or to join a store's team) instead of asking, the invited email is filled in and fixed, and
+// the invitation is accepted once the email is confirmed, so the welcome leads straight to the dashboard.
 definePageMeta({
   layout: 'auth',
   authPanel: {
@@ -41,13 +45,22 @@ const intentModel = computed({
 })
 const intent = computed(() => findSignUpIntent(intentValue.value))
 
+const invite = await useInviteLink()
+const inviteCopy = invite.copy
+// An invited person is joining something that exists: no store of their own to open here
+if (inviteCopy.value) intentValue.value = 'buy'
+const inviteError = ref('')
+
 // Sent here from a gated action ("Sign in to message …"): the welcome leads straight back to it
 const redirect = route.query.redirect ? safeRedirect(route.query.redirect) : undefined
-const nextSteps = computed<AuthLinkCard[]>(() => redirect && !isStore.value
+const nextSteps = computed<AuthLinkCard[]>(() => inviteCopy.value && !inviteError.value
+  ? inviteCopy.value.nextSteps
+  : redirect && !isStore.value
   ? [{ to: redirect, title: 'Carry on where you were', text: 'Back to the page you were on, to finish what you started.', icon: Undo2 }, ...intent.value.nextSteps.slice(0, 2)]
   : intent.value.nextSteps)
 const isStore = computed(() => intent.value.value === 'store')
-useAuthPanel(() => intent.value.panel)
+// Always set, so a broken invitation link falls back to the usual panel rather than the layout's invitation one
+useAuthPanel(() => inviteCopy.value?.panel ?? intent.value.panel ?? route.meta.authPanel)
 
 const account = ref({ name: '', email: '', phone: '', storeName: '', city: '' })
 const firstName = computed(() => firstNameOf(account.value.name))
@@ -62,8 +75,10 @@ const { handleSubmit, values } = useForm({
 const fields = computed(() => [
   authFields.fullName(isStore.value ? 'The owner or manager of the kennel.' : undefined),
   ...(isStore.value ? [authFields.storeName(), authFields.city()] : []),
-  // From an invitation email (?email=…): the address is filled in
-  { ...authFields.email(), defaultValue: typeof route.query.email === 'string' ? route.query.email.slice(0, 254) : undefined },
+  // From an invitation: the invited address, fixed (the invitation is matched to it). From ?email=…: filled in.
+  invite.preview.value
+    ? { ...authFields.email(), defaultValue: invite.preview.value.email, attrs: { ...authFields.email().attrs, readonly: true }, hint: 'The address the invitation was sent to.' }
+    : { ...authFields.email(), defaultValue: typeof route.query.email === 'string' ? route.query.email.slice(0, 254) : undefined },
   authFields.phone(isStore.value
     ? 'Dogeash uses it to reach you about your store. Buyers contact you through Dogeash, not this number.'
     : 'Stores you book with use it to confirm visits. It\'s never shown publicly.'),
@@ -103,6 +118,7 @@ async function confirm(code: string) {
   if (id) await supabase.from('profiles').update({ phone: account.value.phone, ...(account.value.city ? { city: account.value.city } : {}) }).eq('id', id)
   if (isStore.value) storeError.value = (await stores.createDraftStore(account.value.storeName, account.value.city)) ?? ''
   await session.load()
+  if (inviteCopy.value) inviteError.value = (await invite.accept()) ?? ''
   moved.value = result.moved
   step.value = 'welcome'
   return null
@@ -111,9 +127,13 @@ async function confirm(code: string) {
 
 <template>
   <template v-if="step === 'details'">
-    <AuthHeading :title="intent.heading.title" :outline="intent.heading.outline" :text="intent.heading.text" />
+    <template v-if="inviteCopy">
+      <AuthHeading :title="inviteCopy.heading.title" :outline="inviteCopy.heading.outline" :text="inviteCopy.heading.text" />
+      <AuthInviteCard :card="inviteCopy.card" not-you="/sign-up" />
+    </template>
+    <AuthHeading v-else :title="intent.heading.title" :outline="intent.heading.outline" :text="intent.heading.text" />
 
-    <div class="flex flex-col gap-2.5">
+    <div v-if="!inviteCopy" class="flex flex-col gap-2.5">
       <span id="intent-label" class="text-sm font-bold">What brings you here?</span>
       <ToggleGroup v-model="intentModel" type="single" variant="chip" aria-labelledby="intent-label" class="flex w-auto flex-wrap justify-start gap-2">
         <ToggleGroupItem v-for="i in signUpIntents" :key="i.value" :value="i.value" class="rounded-full!">
@@ -137,11 +157,11 @@ async function confirm(code: string) {
         I agree to the <NuxtLink to="/terms" class="font-bold text-ink">terms of use</NuxtLink> and the <NuxtLink to="/privacy" class="font-bold text-ink">privacy policy</NuxtLink>.
       </CheckboxField>
       <p v-if="error" class="m-0 text-sm font-semibold text-danger" role="alert">{{ error }}</p>
-      <Button type="submit" class="h-12 w-full" :loading="busy">{{ busy ? 'Creating your account…' : intent.submitLabel }}</Button>
+      <Button type="submit" class="h-12 w-full" :loading="busy">{{ busy ? 'Creating your account…' : inviteCopy?.submitLabel ?? intent.submitLabel }}</Button>
     </form>
 
     <p class="m-0 border-t border-line pt-6 text-sm text-ink-muted">
-      Already have an account? <NuxtLink to="/sign-in" class="font-bold text-ink">Sign in</NuxtLink>
+      Already have an account? <NuxtLink :to="{ path: '/sign-in', query: invite.query }" class="font-bold text-ink">Sign in{{ inviteCopy ? ' to accept' : '' }}</NuxtLink>
     </p>
   </template>
 
@@ -156,7 +176,8 @@ async function confirm(code: string) {
   />
 
   <template v-else>
-    <AuthHeading title="Welcome," :outline="firstName" done :text="storeError ? 'Your account is ready.' : `${intent.welcome({ storeName: account.storeName })} ${savedDogsMovedText(moved)}`.trim()" />
+    <AuthHeading title="Welcome," :outline="firstName" done :text="storeError || inviteError ? 'Your account is ready.' : `${inviteCopy?.welcome ?? intent.welcome({ storeName: account.storeName })} ${savedDogsMovedText(moved)}`.trim()" />
+    <p v-if="inviteError" class="m-0 rounded-lg bg-surface p-3.5 text-sm font-semibold text-danger ring-1 ring-line" role="alert">{{ inviteError }}</p>
     <!-- The account worked but the draft store didn't: say so here, where they'll see it -->
     <p v-if="storeError" class="m-0 rounded-lg bg-surface p-3.5 text-sm font-semibold text-danger ring-1 ring-line" role="alert">{{ account.storeName }} wasn't saved: {{ storeError }} Open a store from your account to try again.</p>
     <AuthLinkCards :items="nextSteps" />

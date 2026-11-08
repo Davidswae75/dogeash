@@ -1,13 +1,13 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-11-08T01:31:59.850Z",
-    "fileCount": 772,
+    "lastScanned": "2026-11-08T10:59:20.004Z",
+    "fileCount": 777,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "361c6c537ba1653c051f884c0198cdd51e05cdf7a8b428dfd62fb91a3a99655e",
-    "storeUpdatedAt": "2026-11-08T01:31:59.873Z",
-    "rootHash": "0426de77245524af"
+    "renderedHash": "5dfd12265e0c1a7ab3fb40d02e9c0646391dc0d7e2dedf8d41ce96e8bf6161ba",
+    "storeUpdatedAt": "2026-11-08T10:59:20.083Z",
+    "rootHash": "55d555c8767dd2e0"
   },
   "files": {
     ".gitignore": {
@@ -9594,6 +9594,104 @@
       "mtimeMs": 1794101519667.465,
       "updatedAt": "2026-11-08T01:31:59.848Z",
       "source": "hook"
+    },
+    "supabase/migrations/20261205000000_care_listing.sql": {
+      "description": "Care listings: Dogeash adds a provider's business, invites the people who'll manage it, and lists it",
+      "tokens": 819,
+      "hash": "1a04df3eea643e58",
+      "size": 3069,
+      "mtimeMs": 1794129444371.8286,
+      "updatedAt": "2026-11-08T09:17:24.644Z",
+      "source": "hook"
+    },
+    "supabase/migrations/20261206000000_invite_links.sql": {
+      "description": "Invitation links: the email's link carries the invitation's id, so sign-up and sign-in can say what ",
+      "tokens": 394,
+      "hash": "359930ffdb21d078",
+      "size": 1477,
+      "mtimeMs": 1794131740504.0613,
+      "updatedAt": "2026-11-08T09:55:40.793Z",
+      "source": "hook"
+    },
+    "app/composables/useInviteLink.ts": {
+      "description": "An invitation link (?invite=<id>&kind=provider|store, from the invitation email) on sign-up and sign",
+      "tokens": 1544,
+      "hash": "c0da1fc3f9a104a8",
+      "size": 5405,
+      "mtimeMs": 1794131821941.8352,
+      "updatedAt": "2026-11-08T09:57:02.260Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "InvitePreview",
+          "kind": "section",
+          "startLine": 16,
+          "endLine": 25,
+          "tokens": 48
+        },
+        {
+          "name": "InviteCopy",
+          "kind": "section",
+          "startLine": 26,
+          "endLine": 35,
+          "tokens": 73
+        },
+        {
+          "name": "useInviteLink",
+          "kind": "fn",
+          "startLine": 36,
+          "endLine": 101,
+          "tokens": 1159
+        }
+      ]
+    },
+    "app/components/DetailDialog.vue": {
+      "description": "File numbers, references, amounts: monospaced",
+      "tokens": 760,
+      "hash": "dda3b34a5fc7f42e",
+      "size": 2847,
+      "mtimeMs": 1794133512866.903,
+      "updatedAt": "2026-11-08T10:25:13.186Z",
+      "source": "hook"
+    },
+    "scripts/render-icons.mjs": {
+      "description": "The dog mark as Dogeash's icons and share image, drawn from the same paths as the app's logo",
+      "tokens": 1388,
+      "hash": "2569ed81d90172ea",
+      "size": 5205,
+      "mtimeMs": 1794135559635.093,
+      "updatedAt": "2026-11-08T10:59:20.001Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "out",
+          "kind": "fn",
+          "startLine": 11,
+          "endLine": 19,
+          "tokens": 121
+        },
+        {
+          "name": "iconSvg",
+          "kind": "fn",
+          "startLine": 20,
+          "endLine": 33,
+          "tokens": 208
+        },
+        {
+          "name": "png",
+          "kind": "fn",
+          "startLine": 34,
+          "endLine": 36,
+          "tokens": 52
+        },
+        {
+          "name": "ico",
+          "kind": "fn",
+          "startLine": 37,
+          "endLine": 92,
+          "tokens": 919
+        }
+      ]
     }
   },
   "preamble": [

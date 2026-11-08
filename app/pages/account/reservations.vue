@@ -4,7 +4,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter, useSeoMeta } from '#imports' // nuxt
 import type { Reservation } from '~/utils/reservations'
 import { useReservations } from '~/composables/useReservations'
-import { formatMoney, moneyRules } from '~/utils/reservations'
+import { formatMoney, moneyRules, reservationStatus } from '~/utils/reservations'
 
 // Dogs the buyer has put a deposit on: the hold and its countdown, paying the balance, confirming the
 // handover, and what happened to the money when one ended early. Paystack sends the buyer back here
@@ -15,6 +15,8 @@ const reservations = useReservations()
 const { active, earlier, unfinished, loaded } = reservations
 // Earlier ones worth showing: money changed hands (a checkout that was never paid isn't)
 const pastShown = computed(() => earlier.value.filter(r => r.depositPaidAt || r.refunds.length))
+// The past reservation whose full card is open
+const pastOpen = ref<Reservation>()
 const route = useRoute()
 const router = useRouter()
 
@@ -134,10 +136,24 @@ const confirmOpen = ref(false)
 
     <section v-if="pastShown.length" class="flex flex-col gap-3" aria-labelledby="earlier-reservations">
       <h2 id="earlier-reservations" class="m-0 font-mono text-[11px] leading-4 font-semibold tracking-[.12em] text-ink-muted uppercase">Earlier · {{ pastShown.length }}</h2>
-      <AccountReservationCard v-for="r in pastShown" :key="r.id" :reservation="r" muted>
-        <Button v-if="r.status === 'completed'" variant="outline" size="sm" as-child><NuxtLink to="/account/dogs/new">Start {{ r.dogName }}'s care record</NuxtLink></Button>
-      </AccountReservationCard>
+      <!-- One line each; the full card opens in a dialog -->
+      <SummaryRow
+        v-for="r in pastShown"
+        :key="r.id"
+        :title="r.dogName"
+        :subtitle="`${r.storeName} · ${reservationStatus[r.status].label}`"
+        :meta="formatMoney(r.paidNaira)"
+        :name="r.dogName"
+        :photo="r.photo"
+        @click="pastOpen = r"
+      />
     </section>
+
+    <DetailDialog :open="!!pastOpen" :title="pastOpen?.dogName ?? ''" :subtitle="pastOpen ? `${pastOpen.storeName} · ${pastOpen.ref}` : ''" :sections="[]" @update:open="o => !o && (pastOpen = undefined)">
+      <AccountReservationCard v-if="pastOpen" :reservation="pastOpen" muted>
+        <Button v-if="pastOpen.status === 'completed'" variant="outline" size="sm" as-child><NuxtLink to="/account/dogs/new">Start {{ pastOpen.dogName }}'s care record</NuxtLink></Button>
+      </AccountReservationCard>
+    </DetailDialog>
 
     <ConfirmDialog
       v-if="cancelling"

@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { MessageSquareQuote, Search } from '@lucide/vue'
+import { Search } from '@lucide/vue'
 import { computed, onMounted, ref } from 'vue'
 import { definePageMeta, useSeoMeta } from '#imports' // nuxt
 import type { AdminReview } from '~/utils/admin'
+import type { DetailSection } from '~/components/DetailDialog.vue'
 import type { CsvColumn } from '~/utils/csv'
 import { useAdminReviews } from '~/composables/useAdminReviews'
 import { useNotify } from '~/composables/useNotify'
@@ -33,6 +34,39 @@ const csv: CsvColumn<AdminReview>[] = [
   { label: 'Store reply', value: r => r.store_reply }, { label: 'Written', value: r => r.created_at },
 ]
 const confirmOpen = ref(false)
+
+// The whole review in a dialog
+const viewing = ref<AdminReview>()
+const viewOpen = ref(false)
+function openReview(r: AdminReview) {
+  viewing.value = r
+  viewOpen.value = true
+}
+const reviewSections = computed<DetailSection[]>(() => {
+  const r = viewing.value
+  if (!r) return []
+  return [
+    { title: 'Review', rows: [
+      { label: 'Stars', value: `${r.rating} out of 5` },
+      { label: 'Written', value: adminTime(r.created_at) },
+      { label: 'What they wrote', value: r.body, long: true },
+    ] },
+    { title: 'Store', rows: [
+      { label: 'Store', value: r.store_name, to: `/admin/stores/${r.store_id}` },
+      { label: 'Public page', value: 'Open its reviews', to: `/stores/${r.store_slug}#reviews`, external: true },
+      { label: 'Replied', value: r.replied_at ? adminTime(r.replied_at) : null },
+      { label: 'Store\'s reply', value: r.store_reply, long: true },
+    ] },
+    { title: 'Author', rows: [
+      { label: 'Name', value: [r.author_name || 'A buyer', r.author_city].filter(Boolean).join(', ') },
+      { label: 'Email', value: r.author_email, mono: true },
+    ] },
+  ]
+})
+function removeFromDialog() {
+  viewOpen.value = false
+  ask(viewing.value!)
+}
 function ask(r: AdminReview) {
   pending.value = r
   confirmOpen.value = true
@@ -62,23 +96,18 @@ async function run(note: string) {
 
     <ul v-if="shown.length" class="m-0 grid list-none grid-cols-[minmax(0,1fr)] gap-3 p-0 xl:grid-cols-2">
       <li v-for="r in shown" :key="r.id">
-        <AdminCard class="h-full">
-          <div class="flex h-full flex-col gap-3 pt-4">
+        <!-- The essentials; clicking opens the full review, the store's reply and who wrote it -->
+        <AdminCard class="h-full cursor-pointer transition-shadow hover:ring-line-strong" @click="openReview(r)">
+          <div class="flex h-full flex-col gap-2.5 pt-4">
             <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
               <ReviewStars :rating="r.rating" />
-              <NuxtLink :to="`/stores/${r.store_slug}#reviews`" target="_blank" class="text-[13.5px] font-semibold text-ink">{{ r.store_name }}</NuxtLink>
+              <span class="text-[13.5px] font-semibold">{{ r.store_name }}</span>
               <span class="ml-auto font-mono text-[11px] text-ink-muted">{{ adminTime(r.created_at) }}</span>
             </div>
-            <p class="m-0 text-[14px] leading-[21px] break-words">{{ r.body }}</p>
-            <p v-if="r.store_reply" class="m-0 flex gap-2 rounded-lg bg-surface-sunk p-2.5 text-[13px] leading-[19px]">
-              <MessageSquareQuote class="mt-px size-4 shrink-0 text-ink-muted" aria-hidden="true" /><span><strong class="font-semibold">Store replied:</strong> {{ r.store_reply }}</span>
-            </p>
+            <p class="m-0 line-clamp-2 text-[14px] leading-[21px] break-words">{{ r.body }}</p>
             <div class="mt-auto flex items-center gap-3 border-t border-line pt-3">
-              <span class="flex min-w-0 flex-col text-[12.5px] leading-tight">
-                <span class="font-medium">{{ r.author_name || 'A buyer' }}<template v-if="r.author_city">, {{ r.author_city }}</template></span>
-                <span class="truncate font-mono text-[11px] text-ink-muted">{{ r.author_email }}</span>
-              </span>
-              <Button variant="outline" size="sm" class="ml-auto" @click="ask(r)">Remove</Button>
+              <span class="text-[12.5px]">{{ r.author_name || 'A buyer' }}<span v-if="r.store_reply" class="text-ink-muted"> · store replied</span></span>
+              <Button variant="outline" size="sm" class="ml-auto" @click.stop="openReview(r)">Details</Button>
             </div>
           </div>
         </AdminCard>
@@ -86,6 +115,12 @@ async function run(note: string) {
     </ul>
     <ListSkeleton v-else-if="!loaded" variant="card" :rows="3" />
     <p v-else class="m-0 text-sm text-ink-muted">{{ reviews.length ? 'No reviews match.' : 'No reviews yet.' }}</p>
+
+    <DetailDialog v-if="viewing" v-model:open="viewOpen" :title="`${viewing.rating}/5 for ${viewing.store_name}`" :subtitle="`By ${viewing.author_name || 'a buyer'}`" :sections="reviewSections">
+      <template #actions>
+        <Button variant="outline" class="text-danger" @click="removeFromDialog">Remove review</Button>
+      </template>
+    </DetailDialog>
 
     <AdminConfirm
       v-if="pending"

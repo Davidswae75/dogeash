@@ -1566,3 +1566,124 @@ Pages arrive drawn from the server, but some lists load just after: your reserva
 - Lists the server already loads with the page (your messages, kennel visits, saved dogs, notifications) needed nothing.
 
 **Checked:** all 37 changed files compile (Vue's compiler) and the type check is clean. The four shapes were checked in the browser in Day and Night. Not seen in real use with your account, because they appear only for a moment while signed in.
+
+## 42. Provider form: managers' emails and listing (8 Nov)
+
+### Why the invitation email didn't arrive
+The invite to `ju***5@gmail.com` (Kuje, 7 Nov 16:45) never reached Brevo: its log has only sign-up codes. The cause: **`.env.local` was last fixed at 16:41, but the dev server only reads it when it starts.** It was still running with the old `EMAIL_FROM` (the address ending "2@gmail.com", not a Brevo sender), so Brevo refused it, and the admin message only said "email isn't set up".
+
+**Fixed:**
+- **Editing `.env.local` now restarts the dev server** (`watch` in `nuxt.config.ts`).
+- The real reason comes back from the server and is **shown in the form** ("invited, but the email wasn't sent (reason)", with **Try again**), and logged on the server.
+- **Email it again** beside every waiting invitation. That's how to send the Kuje one now: Care directory → Kuje → ⋯ → Edit or Invite to manage → "Email it again".
+
+### Adding a provider
+The Add / Edit provider form now has:
+- **Who manages it:** type one or more emails, pressing Enter (or a comma) after each. Each becomes a chip; anything that isn't an email is dropped with a message. When editing, it lists who already manages it and who's invited but hasn't accepted, each with "Email it again".
+- **Listed / Hidden switch:** "Listed: buyers can find and book it" or "Hidden: only Dogeash and its managers see it". It's on by default; keep it off while the managers set up, then list it. The button says **Add and list** or **Add, hidden for now**.
+- On save: the business is saved, everyone added is invited and emailed, and the form closes with "Invitations emailed to 2 people". If any email fails, the form stays open saying which and why.
+- "Invite to manage" in the ⋯ menu now opens this form (the separate invite dialog is gone). Hidden providers are marked **hidden** in the table.
+
+### Hidden listings in the database
+- Migration `20261205000000_care_listing.sql` (ASCII, copied): `care_providers.listed` (existing ones stay listed).
+- Visitors and buyers read listed providers only; a provider's managers and Dogeash read theirs even while hidden.
+- `admin_save_provider` takes `listed`.
+- The catalogue asks for listed ones explicitly.
+- A buyer's earlier bookings still show if a provider is later hidden.
+
+**Run the migration now:** the catalogue asks for the new `listed` column, so until it runs, the site falls back to sample data.
+
+### Checked
+- 7 new database checks (hidden from visitors and buyers, seen by Dogeash and by its invited manager, listing it, edits keep it listed). All pass.
+- In the browser: email chips, the bad-email message, and the "email wasn't sent" panel with its reason.
+- Typecheck shows no new errors.
+- **Update:** "Email it again" and "Try again" now show a toast either way: "Invitation emailed" (with the address), or "The email to … wasn't sent: <reason>". Saving the form with invitations does the same: "Invitations emailed to 2 people", or which addresses weren't emailed.
+
+## 43. Invitation links open a tailored sign-up (8 Nov)
+The invitation email's link now carries the invitation (`/sign-up?invite=<id>&kind=provider|store`, or `/sign-in?…` if the email already has an account), so the page is built around it:
+- **Sign-up:**
+  - the heading reads "You're invited to manage **Kuje Veterinary Clinic**" (or "Join **K9 Guardian Kennels**")
+  - a dark card replaces "What brings you here?": "Care provider · Vet, Abuja" (or "Store team · Manager") and what it means
+  - a "Not you?" link goes to the ordinary sign-up
+  - the side panel speaks to providers or store teams
+  - the **email is filled in and fixed** to the invited address, because the invitation is matched to it
+  - the button reads "Create account and manage Kuje Veterinary Clinic"
+- **Accepted for them:** after the code is confirmed, the invitation is accepted automatically. The welcome says "You now manage Kuje Veterinary Clinic", with **Open your dashboard** (`/provider`, or `/dashboard` for a store team) as the first choice.
+- **Sign-in:** "Sign in to **accept**", with the same card and the email filled in. Once signed in, it's accepted and the dashboard leads the choices.
+- **If accepting fails** (withdrawn, or a different email used), a clear note says so, and the invitation can still be accepted from the account.
+- The service type and listing come from what Dogeash entered; the invitee doesn't choose them. Self-signup for uninvited providers is left for later (as a reviewed application).
+
+**Files:**
+- migration `20261206000000_invite_links.sql`: `invite_preview(kind, id)`, readable by anyone with the link (the id is random and only emailed to that person)
+- `composables/useInviteLink.ts`: reads it with the page on the server, and holds the words, panel and accepting
+- `components/auth/AuthInviteCard.vue`
+- sign-up and sign-in pages, and the email route's link
+
+**Checked:** 3 new database checks pass, the typecheck is clean, and both pages load normally with no link or a bad link. The tailored page isn't seen yet: it needs the migration.
+- **Live on 8 Nov:** your first run of `20261206000000_invite_links.sql` worked; the "already exists" error came from running it a second time. Checked with the real Kuje invitation: sign-up and sign-in show the provider heading, card and panel from the first paint (the layout now picks the panel from the link), the email is fixed, and the button says "Create account and manage Kuje Veterinary Clinic". The store help note is hidden on invitations.
+
+## 44. Providers can't book themselves (8 Nov)
+Your test showed the Kuje invitation works end to end: your second account accepted it and manages Kuje. But that account could then book Kuje too (Microchip scan, 11 Nov 15:00, which it confirmed itself).
+
+**Now:**
+- **The database refuses it:** someone who manages a listing can't book it ("You manage this listing, so you can't book it"). A **hidden** (unlisted) listing can't be booked either. Migration `20261207000000_no_self_booking.sql` (ASCII, copied).
+- **On the site:** wherever "Book appointment" or "Book" appears for a listing you manage (its page, the care directory, a store's care team), it's **"Your listing"** instead, linking to your provider dashboard.
+- **On your own provider page:** a dark note says "This is your listing. Buyers see it like this…", with **Edit your listing** and **Bookings**.
+- **Tests:** 3 new checks (a provider can't book their own listing, a buyer still can, a hidden listing can't be booked). All pass.
+- Visitors still see "Book appointment" as before (checked).
+
+**Removed (8 Nov):** the self-booking from your test (Microchip scan, 11 Nov 15:00); no dog record lines were tied to it.
+
+## 45. Clear selected tabs; short lists that open full details (8 Nov)
+
+### Selected tab
+The "outline" toggle (every admin tab bar, and Sex on My dogs) showed the selected tab as a faint tint. Selected is now **solid**: white with dark text in the admin (Night), ink with light text in Day, and it stays solid on hover. One change in `components/ui/toggle/index.ts`.
+
+### Lists show a few facts; a click opens everything
+New **`DetailDialog.vue`**:
+- a title and subtitle, and labelled groups of facts (two to a line, never an empty half-cell; long text full width; links to the store, the person or the public page)
+- an optional picture or extra content
+- a bottom bar, pinned while the details scroll, with **Close** always there and the item's actions beside it
+- on phones, the actions share one row in equal widths, with Close underneath; wider, it's one line with Close on the left; buttons are compact (36px)
+
+**Admin:**
+- **Payments:** reservations show dog, ref, store, paid and status. The dialog has the buyer and email, price, deposit, hold, why it ended and the deposit decision, with **Refund** / **Release**. Refunds and payouts show dog, amount and status; the dialog has why, failures, the bank-account state and **Retry**.
+- **Listings:** dog (photo, file number, store), status, price. The dialog has the photo, breed, level, city, dates, the store and its status, Dogeash's note, the actions (take down, approve …) and the public page.
+- **Visits:** when, store, status. The dialog has where, service, asked, last change, the store's note, buyer and email, and **Nudge**.
+- **Care directory:** provider, type, city, managed by. The dialog has the whole listing (listed or hidden, credential, badge, about, areas, price, hours, booking days and times), managers, invitations and stores, with **Edit or invite managers** and **Remove**.
+- **Reviews:** stars, store, two lines of the review, author. The dialog has the full text, the store's reply, the author's email and the public page, with **Remove review**.
+- **Reports:** kind, reason, what it's about, two lines of details. The dialog has everything, the reported conversation (read on request, logged) and **Resolve** / **Dismiss** / **Act in …**. Resolve and Dismiss stay on the card too.
+- **Unchanged:** People and Stores already open full detail pages. Applications keeps its full cards, because they're the working space for documents and inspections.
+
+**Elsewhere:** the "Earlier" reservations on a buyer's **Reservations** page and on a store's **Payouts** page are now one-line rows (`SummaryRow.vue`: dog, store or buyer, status, amount). The full card opens in the dialog.
+
+**Checked:**
+- In the browser, on phone and desktop: the selected tab, a row opening the dialog, the bottom bar on both sizes, and no empty cells.
+- Every changed file compiles, and the typecheck is clean.
+- Not tried in your admin with real data.
+- **Bottom bar, refined after your feedback:**
+  - It's **one compact row on every screen**: about 48px tall, Close (small) on the left, the actions on the right. On phones the actions share the space and a long label wraps rather than being cut.
+  - Labels are shorter where the title already says it: **Refund** / **Release**, **Edit**, **Open**.
+  - **Each dialog has one main action in marigold**, and the rest are outline (or red for removing and taking down):
+    - Payments: Release is marigold, Refund is outline
+    - Listings: Approve or Put back live is marigold, Take down is red, Send back is outline
+    - Care directory: Edit is marigold, Remove is red
+    - Visits: Nudge is marigold
+    - Reports: Resolve is marigold, Dismiss and Open are plain
+
+## 46. The dog mark is the logo, the icons and the share image (8 Nov)
+- **Logo** (`AppLogo.vue`): the dog mark, in its full stroke, sits beside the "dogeash" wordmark everywhere the logo appears: the site header, the store dashboard, the sign-in and sign-up pages. It follows Day/Night (ink strokes, marigold nose), with a slightly heavier stroke so the face reads at header size. The loader keeps its large animated dog and shows the wordmark alone (`:mark="false"`).
+- **One drawing for everything:** the mark's paths moved to `app/utils/dogMarkPaths.mjs`, used by `DogMark.vue` and the icon script. `DogMark` gained `weight` (stroke width).
+- **Icons and share image**, made by `npm run render:icons` (`scripts/render-icons.mjs`, which uses the resvg renderer already in the project) into `public/`:
+  - `favicon.svg` and `favicon.ico` (16, 32, 48): the mark on a dark rounded tile, heavier at 16px so it still reads
+  - `apple-touch-icon.png` (180), `icon-192.png`, `icon-512.png`, and `icon-maskable-512.png` (the mark inside Android's safe circle)
+  - `og-image.png` (1200 × 630): the mark, the wordmark with its marigold square, "Trained guard dogs from kennels we inspect in person.", and the hazard stripe
+- **PWA:** `public/site.webmanifest` (name, standalone, dark theme, the three icons).
+- **Head tags** (`nuxt.config.ts` and `app.vue`): the icons, the manifest, theme-color for Day and Night, app name tags, and Open Graph and Twitter share tags (the share image, its size, its alt text, a large card).
+- **`SITE_URL`** (optional, in `.env.example`): once the site is online, set it, for example `https://dogeash.ng`, so share previews get the image's full address. WhatsApp and Facebook need that.
+
+**Checked:**
+- All 8 files are served with the right types, and the head tags are present.
+- The logo checked in Day and Night, in the header and on sign-in.
+- The icons and share image looked at after generating.
+- Typecheck shows no new errors.
