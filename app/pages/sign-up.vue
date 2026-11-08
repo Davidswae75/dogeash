@@ -62,7 +62,8 @@ const { handleSubmit, values } = useForm({
 const fields = computed(() => [
   authFields.fullName(isStore.value ? 'The owner or manager of the kennel.' : undefined),
   ...(isStore.value ? [authFields.storeName(), authFields.city()] : []),
-  authFields.email(),
+  // From an invitation email (?email=…): the address is filled in
+  { ...authFields.email(), defaultValue: typeof route.query.email === 'string' ? route.query.email.slice(0, 254) : undefined },
   authFields.phone(isStore.value
     ? 'Dogeash uses it to reach you about your store. Buyers contact you through Dogeash, not this number.'
     : 'Stores you book with use it to confirm visits. It\'s never shown publicly.'),

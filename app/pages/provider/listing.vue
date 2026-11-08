@@ -125,5 +125,5 @@ const field = 'h-11 border-line-strong bg-surface'
       </dl>
     </aside>
   </div>
-  <p v-else class="m-0 text-sm text-ink-muted">Loading…</p>
+  <ListSkeleton v-else :rows="2" label="Loading your listing" />
 </template>

@@ -365,6 +365,7 @@ export interface Database {
       provider_bookings: { Args: { provider: string }, Returns: Json }
       provider_add_record: { Args: { booking: string, rec_kind: Database['public']['Enums']['owned_dog_record_kind'], rec_title: string, rec_done: string | null, rec_due: string | null, rec_note?: string }, Returns: undefined }
       provider_booking_records: { Args: { booking: string }, Returns: Json }
+      account_exists: { Args: { check_email: string }, Returns: boolean }
       has_store_role: { Args: { target_store: string, roles: Database['public']['Enums']['store_role'][] }, Returns: boolean }
       mark_conversation_read: { Args: { target: string }, Returns: undefined }
       my_email: { Args: Record<string, never>, Returns: string }

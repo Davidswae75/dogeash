@@ -128,7 +128,8 @@ async function run(note: string) {
             </tr>
           </tbody>
         </table>
-        <p v-else class="m-0 border-t border-line px-5 py-4 text-[13px] text-ink-muted">{{ !loaded ? 'Loading…' : dogs.length ? 'No listings match.' : 'No dogs yet.' }}</p>
+        <ListSkeleton v-else-if="!loaded" variant="table" :rows="5" />
+        <p v-else class="m-0 border-t border-line px-5 py-4 text-[13px] text-ink-muted">{{ dogs.length ? 'No listings match.' : 'No dogs yet.' }}</p>
       </div>
     </AdminCard>
 

@@ -14,7 +14,7 @@ useSeoMeta({ title: 'Team · Store dashboard · Dogeash', robots: 'noindex' })
 const { user } = useSession()
 const { store, can } = useStoreContext()
 const team = useStoreTeam()
-const { members, invites } = team
+const { members, invites, loaded } = team
 onMounted(team.load)
 
 const removing = ref<TeamMember>()
@@ -38,6 +38,7 @@ async function confirmRemove() {
     <div class="grid grid-cols-[minmax(0,1fr)] gap-5 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
       <DashboardTeamList
         :members="members"
+        :loading="!loaded"
         :invites="invites"
         :manage="can('team')"
         :self="user?.id"

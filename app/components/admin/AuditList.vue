@@ -5,7 +5,8 @@ import { adminTime, auditLabel } from '~/utils/admin'
 
 // Admin actions as a list: who, what, on what (linked to its page where there is one), when, and the details
 // worth reading (from → to, the note sent, a removed review's text)
-const props = defineProps<{ entries: AuditEntry[], empty?: string }>()
+// `loading` shows placeholder rows until the entries have arrived
+const props = defineProps<{ entries: AuditEntry[], empty?: string, loading?: boolean }>()
 
 const detailLine = (d: Record<string, unknown>) => [
   d.from && d.to ? `${String(d.from).replace('_', ' ')} → ${String(d.to).replace('_', ' ')}` : '',
@@ -34,5 +35,6 @@ const linkOf = (a: AuditEntry) => (a.target_type === 'store' ? `/admin/stores/${
       </span>
     </li>
   </ol>
+  <ListSkeleton v-else-if="props.loading" variant="table" :rows="5" label="Loading" />
   <p v-else class="m-0 px-5 py-4 text-[13px] text-ink-muted">{{ props.empty ?? 'No admin actions yet.' }}</p>
 </template>

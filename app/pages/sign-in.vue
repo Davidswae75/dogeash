@@ -42,7 +42,9 @@ const error = ref('')
 const { handleSubmit, values, validateField } = useForm<{ email?: string, password?: string }>({
   validationSchema: toTypedSchema(emailSignInSchema),
 })
-const fields = computed(() => [authFields.email(), authFields.password({ visible: showPassword.value })])
+// From an invitation email (?email=…): the address is filled in
+const invitedEmail = typeof route.query.email === 'string' ? route.query.email.slice(0, 254) : undefined
+const fields = computed(() => [{ ...authFields.email(), defaultValue: invitedEmail }, authFields.password({ visible: showPassword.value })])
 watch(values, () => { error.value = '' })
 
 // Signed in: work out what this account can open (staff is checked fresh), then offer the choices.

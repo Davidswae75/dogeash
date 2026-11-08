@@ -52,7 +52,8 @@ async function confirmDelete() {
       </ToggleGroupItem>
     </ToggleGroup>
 
-    <DashboardDogTable v-if="shown.length" :dogs="shown" :verified="verified" :can-delete="role !== 'handler'" @status="storeDogs.changeStatus" @remove="d => (deleting = d)" />
+    <ListSkeleton v-if="!loaded" variant="table" :rows="4" class="overflow-hidden rounded-xl bg-surface ring-1 ring-line" label="Loading your dogs" />
+    <DashboardDogTable v-else-if="shown.length" :dogs="shown" :verified="verified" :can-delete="role !== 'handler'" @status="storeDogs.changeStatus" @remove="d => (deleting = d)" />
     <p v-else-if="dogs.length" class="m-0 rounded-xl bg-surface p-8 text-center text-sm text-ink-muted ring-1 ring-line">No dogs here.</p>
     <div v-else-if="loaded" class="flex flex-col items-center gap-4 rounded-xl bg-surface px-6 py-14 text-center ring-1 ring-line">
       <h2 class="m-0 font-display text-2xl font-extrabold font-stretch-expanded">No dogs yet</h2>

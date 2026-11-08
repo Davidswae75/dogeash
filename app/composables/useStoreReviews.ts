@@ -14,6 +14,8 @@ export function useStoreReviews() {
   const { user } = useSession()
   const visits = useVisits()
   const byStore = useState<Record<string, Review[]>>('store-reviews', () => ({}))
+  // Whether a store's reviews have arrived yet (for a placeholder instead of "No reviews yet")
+  const hasLoaded = (storeId: string) => computed(() => storeId in byStore.value)
 
   async function load(storeId: string) {
     const { data } = await supabase.from('store_reviews').select(reviewColumns(!!user.value)).eq('stores.public_id', storeId).order('created_at', { ascending: false })
@@ -23,6 +25,7 @@ export function useStoreReviews() {
 
   // The signed-in buyer's own reviews across every store, with the store's name and page (Reviews page)
   const mine = useState<(Review & { storeName: string, storeSlug: string, repliedAt: string | null })[]>('my-reviews', () => [])
+  const mineLoaded = useState('my-reviews-loaded', () => false)
   async function loadMine() {
     if (!user.value) return (mine.value = [])
     const { data } = await supabase
@@ -32,6 +35,7 @@ export function useStoreReviews() {
       .order('created_at', { ascending: false })
     type Row = ReviewRow & { stores: { public_id: string, name: string, slug: string } }
     mine.value = ((data ?? []) as unknown as Row[]).map(r => ({ ...toReview(r, user.value?.id), storeName: r.stores.name, storeSlug: r.stores.slug, repliedAt: r.replied_at }))
+    mineLoaded.value = true
   }
 
   const reviewsOf = (storeId: string) => computed(() => byStore.value[storeId] ?? [])
@@ -72,5 +76,5 @@ export function useStoreReviews() {
     return null
   }
 
-  return { load, mine, loadMine, reviewsOf, mineFor, canReview, write, remove, reply }
+  return { load, mine, mineLoaded, loadMine, reviewsOf, hasLoaded, mineFor, canReview, write, remove, reply }
 }

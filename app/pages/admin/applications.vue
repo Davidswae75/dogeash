@@ -138,7 +138,8 @@ async function run(note: string) {
         </div>
       </AdminCard>
     </div>
-    <p v-else class="m-0 text-sm text-ink-muted">{{ !loaded ? 'Loading…' : tab === 'in_review' ? 'No applications waiting.' : 'No applications sent back.' }}</p>
+    <ListSkeleton v-else-if="!loaded" variant="card" :rows="3" />
+    <p v-else class="m-0 text-sm text-ink-muted">{{ tab === 'in_review' ? 'No applications waiting.' : 'No applications sent back.' }}</p>
 
     <AdminScheduleInspection
       v-if="booking"

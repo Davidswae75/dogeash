@@ -59,7 +59,7 @@ async function onBook(day: string, time: string, inspector: string, note: string
       <Button variant="outline" size="sm" :loading="reminding" @click="sendNow"><BellRing aria-hidden="true" />Send reminders now</Button>
     </template>
 
-    <p v-if="!loaded" class="m-0 text-sm text-ink-muted">Loading…</p>
+    <ListSkeleton v-if="!loaded" :rows="3" />
     <template v-else>
       <AdminCard v-for="g in groups" :key="g.key" :title="`${g.title} (${g.rows.length})`" :description="g.hint || undefined" flush>
         <ul v-if="g.rows.length" class="m-0 flex list-none flex-col p-0">

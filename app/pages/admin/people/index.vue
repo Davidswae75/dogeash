@@ -116,7 +116,8 @@ async function run(note: string) {
             </tr>
           </tbody>
         </table>
-        <p v-else class="m-0 px-5 py-4 text-[13px] text-ink-muted">{{ loading ? 'Searching…' : 'Nobody matches.' }}</p>
+        <ListSkeleton v-else-if="loading" variant="table" :rows="5" label="Searching" />
+        <p v-else class="m-0 px-5 py-4 text-[13px] text-ink-muted">Nobody matches.</p>
       </div>
       <p class="m-0 border-t border-line px-5 py-2.5 text-[11.5px] text-ink-muted">Activity: kennel visits · conversations · reviews · dogs shortlisted.</p>
     </AdminCard>

@@ -33,7 +33,7 @@ const csv: CsvColumn<AuditEntry>[] = [
     </template>
 
     <AdminCard flush>
-      <AdminAuditList :entries="entries" :empty="loading ? 'Loading…' : 'Nothing yet. Admin actions appear here as they happen.'" />
+      <AdminAuditList :entries="entries" :loading="loading && !entries.length" empty="Nothing yet. Admin actions appear here as they happen." />
       <div v-if="more" class="border-t border-line px-5 py-3">
         <Button variant="outline" size="sm" :loading="loading" @click="load(kind, true)">Load older</Button>
       </div>

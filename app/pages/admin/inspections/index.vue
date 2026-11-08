@@ -48,7 +48,8 @@ const shown = computed(() => (tab.value === 'upcoming' ? upcoming.value : done.v
           </NuxtLink>
         </li>
       </ul>
-      <p v-else class="m-0 px-5 py-4 text-[13px] text-ink-muted">{{ !loaded ? 'Loading…' : tab === 'upcoming' ? 'No inspections booked.' : 'No inspections done yet.' }}</p>
+      <ListSkeleton v-else-if="!loaded" variant="table" :rows="5" />
+      <p v-else class="m-0 px-5 py-4 text-[13px] text-ink-muted">{{ tab === 'upcoming' ? 'No inspections booked.' : 'No inspections done yet.' }}</p>
     </AdminCard>
   </AdminPage>
 </template>

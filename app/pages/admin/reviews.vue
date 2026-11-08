@@ -84,7 +84,8 @@ async function run(note: string) {
         </AdminCard>
       </li>
     </ul>
-    <p v-else class="m-0 text-sm text-ink-muted">{{ !loaded ? 'Loading…' : reviews.length ? 'No reviews match.' : 'No reviews yet.' }}</p>
+    <ListSkeleton v-else-if="!loaded" variant="card" :rows="3" />
+    <p v-else class="m-0 text-sm text-ink-muted">{{ reviews.length ? 'No reviews match.' : 'No reviews yet.' }}</p>
 
     <AdminConfirm
       v-if="pending"

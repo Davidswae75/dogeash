@@ -8,7 +8,8 @@ import { shortTime } from '~/utils/time'
 
 // The team: who's on it and their role, then invitations still waiting.
 // Owners (`manage`) change roles, remove people and withdraw invitations; everyone else reads it.
-const props = defineProps<{ members: TeamMember[], invites: TeamInvite[], manage: boolean, self?: string }>()
+// `loading` shows placeholder rows until the team has arrived
+const props = defineProps<{ members: TeamMember[], invites: TeamInvite[], manage: boolean, self?: string, loading?: boolean }>()
 const emit = defineEmits<{ role: [member: TeamMember, role: StoreRole], remove: [member: TeamMember], withdraw: [invite: TeamInvite] }>()
 // Each pick redraws the select from the saved role: it shows the new role once the team reloads with it,
 // and the old one if the change was refused (the last owner, say)
@@ -27,7 +28,8 @@ const joined = (iso: string) => new Date(iso).toLocaleDateString('en-NG', { mont
     <h2 class="m-0 border-b border-line px-5 py-3.5 font-display text-[17px] leading-6 font-extrabold font-stretch-expanded">
       Your team <span class="font-mono text-sm font-normal text-ink-muted">{{ props.members.length }}</span>
     </h2>
-    <ul class="m-0 flex list-none flex-col p-0">
+    <ListSkeleton v-if="props.loading" variant="row" :rows="2" class="px-5" label="Loading the team" />
+    <ul v-else class="m-0 flex list-none flex-col p-0">
       <li v-for="m in props.members" :key="m.userId" class="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-line px-5 py-3 last:border-b-0">
         <span class="grid size-10 shrink-0 place-items-center rounded-full bg-ash-soft text-sm font-bold">{{ initialsOf(m.name || '?') }}</span>
         <span class="flex min-w-[10rem] flex-1 flex-col">

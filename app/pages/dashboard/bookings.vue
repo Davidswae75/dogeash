@@ -8,7 +8,7 @@ import { useStoreInbox } from '~/composables/useStoreInbox'
 definePageMeta({ layout: 'dashboard', title: 'Bookings', middleware: 'store-member' })
 useSeoMeta({ title: 'Bookings · Store dashboard · Dogeash', robots: 'noindex' })
 
-const { waiting, confirmed, earlier, decideVisit } = useStoreInbox()
+const { waiting, confirmed, earlier, decideVisit, loaded } = useStoreInbox()
 </script>
 
 <template>
@@ -33,7 +33,8 @@ const { waiting, confirmed, earlier, decideVisit } = useStoreInbox()
       <div v-for="v in confirmed" :key="v.id" class="rounded-xl bg-surface ring-1 ring-line">
         <DashboardInboxVisit :visit="v" :decide="(status, note) => decideVisit(v, status, note)" />
       </div>
-      <div v-if="!confirmed.length" class="flex flex-col items-center gap-3 rounded-xl bg-surface px-6 py-10 text-center ring-1 ring-line">
+      <ListSkeleton v-if="!loaded" :rows="2" label="Loading visits" />
+      <div v-else-if="!confirmed.length" class="flex flex-col items-center gap-3 rounded-xl bg-surface px-6 py-10 text-center ring-1 ring-line">
         <CalendarDays class="size-6 text-ink-muted" aria-hidden="true" />
         <p class="m-0 max-w-[32em] text-sm leading-[21px] text-ink-muted">
           No confirmed visits ahead.{{ waiting.length ? ' Confirm a request above and it moves here.' : ' Requests from buyers appear here and in your inbox.' }}

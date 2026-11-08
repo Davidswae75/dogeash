@@ -18,7 +18,7 @@ onMounted(ensure)
       :outline="dogs.length === 1 ? 'dog' : 'dogs'"
       text="Each dog's record in one place: vaccinations, treatments, vet visits and training, with reminders for what's due."
     />
-    <p v-if="!loaded" class="m-0 text-sm text-ink-muted">Loading…</p>
+    <ListSkeleton v-if="!loaded" variant="tile" label="Loading your dogs" />
     <div v-else class="grid grid-cols-[minmax(0,1fr)] gap-5 sm:grid-cols-2 xl:grid-cols-3">
       <AccountDogCard v-for="dog in dogs" :key="dog.id" :dog="dog" />
       <NuxtLink

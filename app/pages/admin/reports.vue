@@ -92,7 +92,8 @@ async function run(note: string) {
         </div>
       </AdminCard>
     </div>
-    <p v-else class="m-0 text-sm text-ink-muted">{{ !loaded ? 'Loading…' : tab === 'open' ? 'No open reports.' : 'No closed reports yet.' }}</p>
+    <ListSkeleton v-else-if="!loaded" variant="card" :rows="3" />
+    <p v-else class="m-0 text-sm text-ink-muted">{{ tab === 'open' ? 'No open reports.' : 'No closed reports yet.' }}</p>
 
     <AdminConfirm
       v-if="pending"

@@ -6,7 +6,7 @@ import { visitDogNames } from '~/composables/useVisits'
 import { todayIso, visitDay } from '~/utils/time'
 
 // Coming up: kennel visits from today on, requests and confirmed, grouped by day. The one dark card on the page.
-const { upcoming } = useStoreInbox()
+const { upcoming, loaded } = useStoreInbox()
 
 const days = computed(() => {
   const groups = new Map<string, Visit[]>()
@@ -22,7 +22,8 @@ const days = computed(() => {
       <NuxtLink to="/dashboard/bookings" class="text-[13px] font-bold text-marigold underline underline-offset-4">All bookings</NuxtLink>
     </header>
 
-    <ol v-if="days.length" class="m-0 flex list-none flex-col p-0">
+    <ListSkeleton v-if="!loaded" variant="row" :rows="2" class="opacity-40" label="Loading visits" />
+    <ol v-else-if="days.length" class="m-0 flex list-none flex-col p-0">
       <li v-for="(d, i) in days" :key="d.day" class="relative flex gap-4 pb-4 last:pb-0">
         <!-- Day marker on a dashed patrol line -->
         <span class="relative flex w-11 shrink-0 flex-col items-center">

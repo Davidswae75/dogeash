@@ -97,7 +97,8 @@ const showing = (until: string | null) => !!until && new Date(until).getTime() >
             </span>
           </li>
         </ul>
-        <p v-else class="m-0 border-t border-line px-5 py-4 text-[13px] text-ink-muted">{{ loaded ? 'None sent yet.' : 'Loading…' }}</p>
+        <ListSkeleton v-else-if="!loaded" variant="table" :rows="3" />
+        <p v-else class="m-0 border-t border-line px-5 py-4 text-[13px] text-ink-muted">{{ 'None sent yet.' }}</p>
       </AdminCard>
     </div>
 

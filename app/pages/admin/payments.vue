@@ -193,7 +193,8 @@ const csv: CsvColumn<AdminReservation>[] = [
             </tr>
           </tbody>
         </table>
-        <p v-else class="m-0 px-5 py-4 text-[13px] text-ink-muted">{{ !loaded ? 'Loading…' : tab === 'waiting' ? 'No deposits waiting for a decision.' : 'Nothing here yet.' }}</p>
+        <ListSkeleton v-else-if="!loaded" variant="table" :rows="5" />
+        <p v-else class="m-0 px-5 py-4 text-[13px] text-ink-muted">{{ tab === 'waiting' ? 'No deposits waiting for a decision.' : 'Nothing here yet.' }}</p>
       </div>
     </AdminCard>
 

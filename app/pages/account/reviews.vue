@@ -45,7 +45,7 @@ async function remove() {
 <template>
   <div class="flex flex-col gap-6">
     <AccountHeading kicker="Reviews" title="Your" outline="reviews" text="After a kennel visit, tell other buyers how it went. Your review shows on the store's page with your first name and city." />
-    <p v-if="!loaded" class="m-0 text-sm text-ink-muted">Loading…</p>
+    <ListSkeleton v-if="!loaded" :rows="2" label="Loading your reviews" />
 
     <template v-else>
       <SectionPanel v-if="waiting.length" title="Waiting for your review" :meta="`${waiting.length}`">

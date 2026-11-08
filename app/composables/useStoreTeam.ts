@@ -34,7 +34,7 @@ export function useStoreTeam() {
   async function invite(email: string, role: StoreRole): Promise<string | null> {
     const id = await storeUuid()
     if (!id) return 'Your store isn\'t loaded. Refresh the page and try again.'
-    const { error } = await supabase.from('store_invites').insert({ store_id: id, email, role })
+    const { data: made, error } = await supabase.from('store_invites').insert({ store_id: id, email, role }).select('id').single()
     if (error) {
       if (error.message.includes('already on the team')) return 'That person is already on your team.'
       if (error.code === '23505') return 'You\'ve already invited that email.'
@@ -42,7 +42,11 @@ export function useStoreTeam() {
       return 'The invitation didn\'t save. Check the email and try again.'
     }
     await load()
-    useNotify().teamUpdated('Invitation sent', `${email} sees it in their account when they sign in or sign up with that email.`)
+    // Email them a link (to sign up, or sign in if they have an account); the invitation waits in their account either way
+    const mail = await $fetch<{ sent: boolean }>('/api/invites/email', { method: 'POST', body: { kind: 'store', id: made.id } }).catch(() => ({ sent: false }))
+    useNotify().teamUpdated('Invitation sent', mail.sent
+      ? `We emailed ${email} a link. It also waits in their account when they sign in or sign up with that email.`
+      : `${email} sees it in their account when they sign in or sign up with that email.`)
     return null
   }
 

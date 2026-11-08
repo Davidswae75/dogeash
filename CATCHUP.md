@@ -1490,3 +1490,79 @@ The site reads the new listing columns. **Until the migration runs, the catalogu
 - The signed-out "Sign in to book" prompt.
 - Typecheck shows no new errors.
 - The signed-in flows aren't tried yet: they need your accounts.
+
+## 39. Invitation emails with Resend (7 Nov)
+
+**Why Brevo is there:** on 3 Nov you chose Brevo for Supabase's own emails (sign-up codes, password resets) because you had **no domain**, and Brevo only needs one verified sender address. That stays as it is. Resend is for the **site's own emails**, starting with invitations.
+
+### What happens now
+When an owner invites someone to the store team (Team page), or Dogeash invites someone to manage a care listing (Admin → Care directory), the site's server emails them:
+- "Join K9 Guardian Kennels on Dogeash" (with the role and what it covers), or "Manage Kuje Veterinary Clinic on Dogeash"
+- **No account with that email:** the button is **Create your account** → sign-up with the email already filled in → back to the account, where the invitation waits.
+- **Already has an account:** the button is **Sign in to accept** → sign-in with the email filled in → the account.
+- The bell notification and the invitation card in the account work as before. The email is extra.
+- Only the invitation's maker (the store owner, or Dogeash) can trigger the email, and only within 15 minutes of making it, so it can't be used to send mail at will.
+- **No Resend key yet:** nothing is sent, and the toast says the invitation waits in their account (admin's says email isn't set up).
+
+### Files
+- `server/utils/email.ts`: `sendEmail()` through Resend's API, and a plain branded HTML layout (logo, lines, marigold button, the link as text, small print)
+- `server/api/invites/email.post.ts`: checks who's asking, picks the sign-up or sign-in link, writes the email
+- migration `20261204000000_invite_emails.sql`: `account_exists(email)`, server only (nobody else can fish for accounts)
+- `useStoreTeam.invite` and `useAdminCare.invite` send the email after creating the invitation
+- sign-in and sign-up fill in `?email=`
+- `nuxt.config.ts` runtimeConfig, `.env.example`
+- tests: 3 new checks; all pass
+
+### Checked
+- The email's design (previewed in the browser; the "·" needed a charset, fixed).
+- Sign-up and sign-in arrive with the email filled in.
+- Typecheck shows no new errors.
+- No real email sent yet: that needs your Resend key and domain.
+
+### What you do
+1. **Run the migration** `20261204000000_invite_emails.sql` (copied).
+2. **Resend:**
+   - create an account at resend.com
+   - **add and verify your domain** (DNS records at wherever the domain is registered). **Without a verified domain, Resend only delivers to your own Resend account's email**, so real invitees won't get anything.
+   - create an API key
+3. **In `.env.local`:** `RESEND_API_KEY=re_…` and `EMAIL_FROM="Dogeash <hello@yourdomain.com>"`, then restart `npm run dev`.
+4. **Optional, later:** once the domain is verified, Resend can also replace Brevo as Supabase's mailer (Authentication → SMTP: host `smtp.resend.com`, port 465, user `resend`, password = the API key), so all emails come from your domain.
+
+### Update, 7 Nov: Brevo for now
+You don't have a domain yet, so the site's own emails go through **Brevo** too, from the sender address already verified there. Resend stays built in for later.
+- `server/utils/email.ts` sends through Brevo's API when `BREVO_API_KEY` is set, and through Resend when `RESEND_API_KEY` is set (Resend wins if both are). The emails and links are identical either way.
+- **What you do:**
+  1. Run the migration `20261204000000_invite_emails.sql`, if you haven't.
+  2. In Brevo, open **Settings → SMTP & API → API Keys** and create an **API key** (starts `xkeysib-`). It isn't the SMTP key Supabase uses.
+  3. In `.env.local`, add `BREVO_API_KEY=xkeysib-…` and `EMAIL_FROM="Dogeash <your verified sender>"`, then restart `npm run dev`.
+- **Keep in mind:** a Gmail sender sent through Brevo often lands in spam or is refused by other providers. That's fine for testing; for real users, the domain fixes it.
+- **Later, with a domain:** verify it in Resend, set `RESEND_API_KEY` and an `EMAIL_FROM` on the domain, and remove `BREVO_API_KEY`.
+
+## 40. No blank page on refresh (7 Nov)
+**Where it was blank:** the admin pages render only in the browser (`ssr: false`). On a refresh or a fresh visit there was nothing on screen until the app had loaded and checked the session, the staff role and the one-time code. Every other page is rendered by the server, so it arrives already drawn.
+
+**Fix:** `app/spa-loading-template.html` is Nuxt's loading screen for browser-only pages, built to match the existing loader:
+- the dog traces itself in over the wordmark, with "Opening the admin console…"
+- it's always dark in the admin (and follows Day/Night elsewhere)
+- it's still for reduced motion
+- it's plain HTML and CSS, because none of the site's styles have loaded at that point
+
+`nuxt.config.ts` sets `spaLoadingTemplateLocation: 'body'`, so it **stays until the page is actually ready** (after the access checks), not just until the app starts.
+
+**Checked:** a refresh on `/admin` while signed out shows the loader, then goes to sign-in, with no blank moment. It took about 3.5 s on the dev server (production is faster). Normal pages don't include it.
+
+## 41. Placeholders while lists load (8 Nov)
+Pages arrive drawn from the server, but some lists load just after: your reservations, care bookings, reviews, My dogs; the store's dogs, inbox, visits, reviews, team, payouts; the provider's bookings; every admin table. Before, some of them first said "No reservations" or "Nothing booked yet", or a bare "Loading…", then switched to your real items.
+
+**Now:** each of those shows grey placeholders shaped like what's coming until its data has arrived. Only then does it show your items, or the "nothing here" message if there really is nothing.
+- **New `ListSkeleton.vue`, one component in four shapes:**
+  - `card`: reservations, bookings, reviews, provider bookings
+  - `tile`: My dogs
+  - `row`: payouts, team, inbox, the overview's panels
+  - `table`: the admin tables and the store's dog list
+- It uses the site's shimmer, works in Day and Night, and screen readers hear "Loading…".
+- **Load tracking added where it was missing:** the store inbox, store reviews, care bookings, your reviews, the admin store list, the care directory and the audit log.
+- **Also gated on loading:** the store's Payouts tiles (no "₦0" flash), the review average and count, and the inbox's "0 unread" line.
+- Lists the server already loads with the page (your messages, kennel visits, saved dogs, notifications) needed nothing.
+
+**Checked:** all 37 changed files compile (Vue's compiler) and the type check is clean. The four shapes were checked in the browser in Day and Night. Not seen in real use with your account, because they appear only for a moment while signed in.

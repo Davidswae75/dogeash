@@ -12,7 +12,7 @@ import { formatMoney, moneyRules } from '~/utils/reservations'
 useSeoMeta({ title: 'Reservations · My Dogeash' })
 
 const reservations = useReservations()
-const { active, earlier, unfinished } = reservations
+const { active, earlier, unfinished, loaded } = reservations
 // Earlier ones worth showing: money changed hands (a checkout that was never paid isn't)
 const pastShown = computed(() => earlier.value.filter(r => r.depositPaidAt || r.refunds.length))
 const route = useRoute()
@@ -104,6 +104,7 @@ const confirmOpen = ref(false)
 
     <section class="flex flex-col gap-3" aria-labelledby="active-reservations">
       <h2 id="active-reservations" class="m-0 font-mono text-[11px] leading-4 font-semibold tracking-[.12em] text-ink-muted uppercase">In progress · {{ active.length }}</h2>
+      <ListSkeleton v-if="!loaded && !checking" :rows="2" label="Loading your reservations" />
       <AccountReservationCard v-for="r in active" :key="r.id" :reservation="r">
         <template v-if="r.status === 'held'">
           <Button variant="marigold" :loading="busyId === r.id" @click="payBalance(r)">Pay the {{ formatMoney(r.balanceNaira) }} balance</Button>
@@ -123,7 +124,7 @@ const confirmOpen = ref(false)
         <p v-if="actionError[r.id]" class="m-0 basis-full text-sm font-semibold text-danger" role="alert">{{ actionError[r.id] }}</p>
       </div>
 
-      <div v-if="!active.length && !unfinished.length && !checking" class="flex flex-col items-center gap-4 rounded-xl bg-surface px-6 py-12 text-center ring-1 ring-line">
+      <div v-if="loaded && !active.length && !unfinished.length && !checking" class="flex flex-col items-center gap-4 rounded-xl bg-surface px-6 py-12 text-center ring-1 ring-line">
         <span class="grid size-14 place-items-center rounded-full bg-marigold-soft"><ShieldCheck class="size-6" aria-hidden="true" /></span>
         <h3 class="m-0 font-display text-2xl font-extrabold font-stretch-expanded">No reservations</h3>
         <p class="m-0 max-w-[32em] text-[15px] leading-6 text-ink-muted">Found the one? Reserve it from its page with a {{ moneyRules.depositPercent }}% deposit. It's held for you for {{ moneyRules.holdDays }} days while you arrange the handover.</p>

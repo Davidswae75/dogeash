@@ -10,7 +10,7 @@ import { attentionItems } from '~/utils/dashboard'
 // What needs doing, most urgent first. Only items this person's role can act on.
 const { can } = useStoreContext()
 const inbox = useStoreInbox()
-const { dogs } = useStoreDogs()
+const { dogs, loaded: dogsLoaded } = useStoreDogs()
 const items = computed(() => attentionItems(
   inbox.items.value.filter(i => i.kind === 'message' && i.unread),
   inbox.waiting.value,
@@ -27,7 +27,8 @@ const tone: Record<string, { tile: string, rail: string }> = {
 
 <template>
   <SectionPanel title="Needs your attention" :meta="items.length ? `${items.length} to do` : undefined">
-    <p v-if="!items.length" class="m-0 flex items-center gap-2.5 p-3 text-sm text-ink-muted">
+    <ListSkeleton v-if="!inbox.loaded.value || !dogsLoaded" variant="row" :rows="2" class="px-3" label="Loading what needs your attention" />
+    <p v-else-if="!items.length" class="m-0 flex items-center gap-2.5 p-3 text-sm text-ink-muted">
       <CheckCheck class="size-5 text-marigold" aria-hidden="true" />All caught up. New messages, visit requests and drafts show up here.
     </p>
     <ul v-else class="m-0 flex list-none flex-col p-0">

@@ -51,6 +51,7 @@ export function useCareBookings() {
   const supabase = useSupabaseClient()
   const { user } = useSession()
   const mine = useState<CareBooking[]>('buyer-care-bookings', () => [])
+  const loaded = useState('buyer-care-bookings-loaded', () => false)
   const isUpcoming = (b: CareBooking) => (b.status === 'requested' || b.status === 'confirmed') && b.day >= todayIso()
   const upcoming = computed(() => mine.value.filter(isUpcoming))
   const past = computed(() => mine.value.filter(b => !isUpcoming(b)).reverse())
@@ -74,6 +75,7 @@ export function useCareBookings() {
       providerNote: r.provider_note,
       createdAt: r.created_at,
     }))
+    loaded.value = true
   }
 
   async function request(b: CareBookingRequest): Promise<string | null> {
@@ -101,7 +103,7 @@ export function useCareBookings() {
     return null
   }
 
-  return { mine, upcoming, past, loadMine, request, cancel }
+  return { mine, loaded, upcoming, past, loadMine, request, cancel }
 }
 
 // The database's refusal of a booking, in words for the buyer (its messages are already written for people)

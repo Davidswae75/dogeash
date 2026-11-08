@@ -47,7 +47,7 @@ async function toggle(key: typeof rules[number]['key'], value: boolean) {
           </span>
         </li>
       </ul>
-      <p v-else class="m-0 border-t border-line px-5 py-4 text-[13px] text-ink-muted">Loading…</p>
+      <ListSkeleton v-else variant="table" :rows="3" />
       <p v-if="settings" class="m-0 border-t border-line px-5 py-2.5 text-[11.5px] text-ink-muted">Last changed {{ adminTime(settings.updated_at) }}<template v-if="settings.updated_by"> by {{ settings.updated_by }}</template>.</p>
     </AdminCard>
 

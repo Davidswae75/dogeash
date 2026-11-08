@@ -44,6 +44,8 @@ const decided: Partial<Record<VisitStatus, string>> = { confirmed: 'Visit confir
 export function useStoreInbox() {
   const conversations = useState<ConversationSummary[]>('store-inbox-conversations', () => [])
   const visits = useState<Visit[]>('store-inbox-visits', () => [])
+  // Whether the inbox has arrived yet (it loads once the dashboard is on screen)
+  const loaded = useState('store-inbox-loaded', () => false)
   const { membership, can } = useStoreContext()
   const chats = useConversations()
   const bookings = useVisits()
@@ -78,6 +80,7 @@ export function useStoreInbox() {
     ])
     conversations.value = c
     visits.value = v
+    loaded.value = true
   }
 
   async function markRead(id: string) {
@@ -108,5 +111,5 @@ export function useStoreInbox() {
 
   const decideVisit = (v: Visit, status: VisitStatus, note?: string) => decide(`v-${v.id}`, status, note)
 
-  return { items, unread, unreadMessages, find, load, markRead, reply, decide, waiting, confirmed, earlier, today, upcoming, decideVisit }
+  return { items, loaded, unread, unreadMessages, find, load, markRead, reply, decide, waiting, confirmed, earlier, today, upcoming, decideVisit }
 }

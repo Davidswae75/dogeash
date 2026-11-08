@@ -6,7 +6,8 @@ import { inboxKinds } from '~/utils/inbox'
 import { shortTime } from '~/utils/time'
 
 // The inbox list: filter by kind, unread first in bold, the open item highlighted
-const props = defineProps<{ items: InboxItem[], selected?: string }>()
+// `loading` shows placeholders until the inbox has arrived, rather than "Nothing here yet"
+const props = defineProps<{ items: InboxItem[], selected?: string, loading?: boolean }>()
 const filter = defineModel<InboxKind | 'all'>('filter', { default: 'all' })
 const emit = defineEmits<{ open: [id: string] }>()
 
@@ -60,7 +61,8 @@ const unreadOf = (k: InboxKind | 'all') => props.items.filter(i => i.unread && (
           <span v-if="item.unread" class="mt-1.5 size-2 shrink-0 rounded-full bg-marigold" aria-label="Unread" />
         </button>
       </li>
-      <li v-if="!shown.length" class="p-6 text-center text-sm text-ink-muted">Nothing here yet. Messages and visit requests from buyers land here.</li>
+      <li v-if="props.loading"><ListSkeleton variant="row" :rows="4" class="px-4" label="Loading the inbox" /></li>
+      <li v-else-if="!shown.length" class="p-6 text-center text-sm text-ink-muted">Nothing here yet. Messages and visit requests from buyers land here.</li>
     </ul>
   </section>
 </template>

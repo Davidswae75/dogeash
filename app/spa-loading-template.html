@@ -1,0 +1,61 @@
+<!--
+  Shown while a page that renders in the browser only (the admin) starts up: the app loads, the session
+  is read, and staff access and the one-time code are checked. Nuxt removes it once the page is ready
+  (nuxt.config: spaLoadingTemplateLocation 'body'). It matches AppLoader: Dogeash's dog tracing itself in over
+  the wordmark. Self-contained: none of the site's CSS has loaded yet. The admin is always dark; elsewhere it
+  follows the Day/Night choice (data-theme, set by color-mode before this paints) or the device.
+-->
+<div id="dg-boot" role="status" aria-live="polite" aria-label="Opening Dogeash">
+  <style>
+    #dg-boot { --bg: #f2f1ed; --card: #f9f8f5; --ring: #dad9d3; --ink: #141414; --muted: #5c5c5a; --rule: #8a8a86;
+      position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; padding: 24px; background: var(--bg); color: var(--ink);
+      font-family: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif; }
+    :root[data-theme="dark"] #dg-boot, #dg-boot.dg-dark { --bg: #0f0f10; --card: #1a1a1c; --ring: #2f2f33; --ink: #f5f5f3; --muted: #a9a9a6; --rule: #6c6c72; }
+    @media (prefers-color-scheme: dark) { :root:not([data-theme]) #dg-boot { --bg: #0f0f10; --card: #1a1a1c; --ring: #2f2f33; --ink: #f5f5f3; --muted: #a9a9a6; --rule: #6c6c72; } }
+    #dg-boot .dg-col { display: flex; flex-direction: column; align-items: center; text-align: center; animation: dg-boot-rise .5s cubic-bezier(.22,.61,.36,1) both; }
+    #dg-boot .dg-badge { display: grid; place-items: center; width: 112px; height: 112px; border-radius: 999px; background: var(--card);
+      box-shadow: 0 0 0 1px var(--ring), 0 24px 60px -28px rgb(0 0 0 / .45); }
+    #dg-boot svg { width: 72px; height: 72px; overflow: visible; }
+    #dg-boot .dg-stroke { stroke-dasharray: 1; stroke-dashoffset: 1; animation: dg-boot-trace 2.8s cubic-bezier(.22,.61,.36,1) infinite; }
+    #dg-boot .dg-nose { transform-origin: 32px 47.5px; animation: dg-boot-nose 2.8s cubic-bezier(.22,.61,.36,1) infinite; }
+    #dg-boot .dg-word { margin-top: 20px; display: inline-flex; align-items: baseline; gap: 3px; font-family: "Archivo", "Arial Black", Arial, sans-serif;
+      font-size: 26px; line-height: 1; font-weight: 900; letter-spacing: -.03em; font-stretch: 120%; }
+    #dg-boot .dg-word::after { content: ""; width: 9px; height: 9px; border-radius: 2px; background: #ffc21a; }
+    #dg-boot .dg-rule { margin-top: 24px; width: 40px; height: 1px; background: var(--rule); }
+    #dg-boot .dg-title { margin-top: 20px; font-size: 15px; line-height: 24px; font-weight: 600; }
+    @keyframes dg-boot-rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+    @keyframes dg-boot-trace { 0% { stroke-dashoffset: 1; opacity: 1; } 45%, 82% { stroke-dashoffset: 0; opacity: 1; } 100% { stroke-dashoffset: 0; opacity: 0; } }
+    @keyframes dg-boot-nose { 0%, 38% { transform: scale(0); opacity: 0; } 50% { transform: scale(1.15); opacity: 1; } 58%, 82% { transform: scale(1); opacity: 1; } 100% { transform: scale(1); opacity: 0; } }
+    @media (prefers-reduced-motion: reduce) {
+      #dg-boot .dg-col, #dg-boot .dg-stroke, #dg-boot .dg-nose { animation: none; }
+      #dg-boot .dg-stroke { stroke-dashoffset: 0; }
+    }
+  </style>
+  <div class="dg-col">
+    <span class="dg-badge">
+      <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path class="dg-stroke" pathLength="1" style="animation-delay:0ms" d="M14 30 L10.5 6.5 Q10.3 5 11.6 5.8 L25 17 Q32 14.5 39 17 L52.4 5.8 Q53.7 5 53.5 6.5 L50 30 Q53 38 46 44 Q41.5 46.5 40 50 L39 54 Q32 59.5 25 54 L24 50 Q22.5 46.5 18 44 Q11 38 14 30 Z" />
+        <path class="dg-stroke" pathLength="1" style="animation-delay:90ms" d="M15.6 25 L13.6 11.5 L22.6 19.2" />
+        <path class="dg-stroke" pathLength="1" style="animation-delay:180ms" d="M48.4 25 L50.4 11.5 L41.4 19.2" />
+        <path class="dg-stroke" pathLength="1" style="animation-delay:270ms" d="M20.5 26.2 Q24.5 24.8 28 27.4" />
+        <path class="dg-stroke" pathLength="1" style="animation-delay:360ms" d="M43.5 26.2 Q39.5 24.8 36 27.4" />
+        <path class="dg-stroke" pathLength="1" style="animation-delay:450ms" d="M32 22.5 L32 28.5" />
+        <path class="dg-stroke" pathLength="1" style="animation-delay:540ms" d="M21 31.6 Q24.2 28.6 27.4 31.6 Q24.2 33.4 21 31.6 Z" />
+        <path class="dg-stroke" pathLength="1" style="animation-delay:630ms" d="M43 31.6 Q39.8 28.6 36.6 31.6 Q39.8 33.4 43 31.6 Z" />
+        <path class="dg-stroke" pathLength="1" style="animation-delay:720ms" d="M32 50.6 L32 52.6 M28 53 Q30.2 54.8 32 52.6 Q33.8 54.8 36 53" />
+        <path class="dg-nose" d="M28 46 Q32 44.2 36 46 Q35.6 49.5 32 50.6 Q28.4 49.5 28 46 Z" fill="#ffc21a" stroke="#ffc21a" stroke-width="1.2" />
+      </svg>
+    </span>
+    <span class="dg-word">dogeash</span>
+    <span class="dg-rule" aria-hidden="true"></span>
+    <strong class="dg-title" id="dg-boot-title">Opening Dogeash…</strong>
+  </div>
+  <script>
+    // The admin is dark-only, and says where it's going
+    (function () {
+      if (location.pathname.indexOf('/admin') !== 0) return
+      document.getElementById('dg-boot').classList.add('dg-dark')
+      document.getElementById('dg-boot-title').textContent = 'Opening the admin console…'
+    })()
+  </script>
+</div>

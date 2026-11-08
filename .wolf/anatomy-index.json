@@ -1,13 +1,13 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-11-07T04:46:19.832Z",
-    "fileCount": 769,
+    "lastScanned": "2026-11-08T01:31:59.850Z",
+    "fileCount": 772,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "c4344519dffed0c830d004660441468db462671e5f905c5956699eeb93f750c9",
-    "storeUpdatedAt": "2026-11-07T04:46:19.864Z",
-    "rootHash": "b155cdb15e6209ea"
+    "renderedHash": "361c6c537ba1653c051f884c0198cdd51e05cdf7a8b428dfd62fb91a3a99655e",
+    "storeUpdatedAt": "2026-11-08T01:31:59.873Z",
+    "rootHash": "0426de77245524af"
   },
   "files": {
     ".gitignore": {
@@ -9529,6 +9529,70 @@
       "size": 7156,
       "mtimeMs": 1794026779590.0364,
       "updatedAt": "2026-11-07T04:46:19.825Z",
+      "source": "hook"
+    },
+    "server/utils/email.ts": {
+      "description": "Short lines of plain text; the button and footer are added",
+      "tokens": 1077,
+      "hash": "16d653ebc1c7742e",
+      "size": 3770,
+      "mtimeMs": 1794064607819.2297,
+      "updatedAt": "2026-11-07T15:16:48.243Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "EmailMessage",
+          "kind": "section",
+          "startLine": 10,
+          "endLine": 19,
+          "tokens": 71
+        },
+        {
+          "name": "sendEmail",
+          "kind": "fn",
+          "startLine": 20,
+          "endLine": 41,
+          "tokens": 270
+        },
+        {
+          "name": "escape",
+          "kind": "fn",
+          "startLine": 42,
+          "endLine": 44,
+          "tokens": 67
+        },
+        {
+          "name": "emailHtml",
+          "kind": "fn",
+          "startLine": 45,
+          "endLine": 61,
+          "tokens": 457
+        },
+        {
+          "name": "emailText",
+          "kind": "fn",
+          "startLine": 62,
+          "endLine": 65,
+          "tokens": 46
+        }
+      ]
+    },
+    "app/spa-loading-template.html": {
+      "description": "",
+      "tokens": 1438,
+      "hash": "0113c6660d4cc6d1",
+      "size": 5394,
+      "mtimeMs": 1794066368320.663,
+      "updatedAt": "2026-11-07T15:46:08.871Z",
+      "source": "hook"
+    },
+    "app/components/ListSkeleton.vue": {
+      "description": "Vue: setup",
+      "tokens": 727,
+      "hash": "74bd13c41cf9f35f",
+      "size": 2725,
+      "mtimeMs": 1794101519667.465,
+      "updatedAt": "2026-11-08T01:31:59.848Z",
       "source": "hook"
     }
   },

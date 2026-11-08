@@ -26,7 +26,7 @@ const busy = ref(false)
 onMounted(visits.loadMine)
 
 const care = useCareBookings()
-const { upcoming: careUpcoming, past: carePast } = care
+const { upcoming: careUpcoming, past: carePast, loaded: careLoaded } = care
 onMounted(care.loadMine)
 const cancellingCare = ref<CareBooking>()
 async function cancelCare() {
@@ -99,6 +99,7 @@ async function cancel() {
 
     <section class="flex flex-col gap-3" aria-labelledby="care-bookings">
       <h2 id="care-bookings" class="m-0 font-mono text-[11px] leading-4 font-semibold tracking-[.12em] text-ink-muted uppercase">Care appointments · {{ careUpcoming.length }}</h2>
+      <ListSkeleton v-if="!careLoaded" :rows="1" label="Loading care appointments" />
       <CareBookingCard
         v-for="b in careUpcoming"
         :key="b.id"
@@ -118,7 +119,7 @@ async function cancel() {
       >
         <Button v-if="b.status === 'done' && b.ownedDogId" variant="outline" size="sm" as-child><NuxtLink :to="`/account/dogs/${b.ownedDogId}`">See {{ b.dogName }}'s record</NuxtLink></Button>
       </CareBookingCard>
-      <div v-if="!careUpcoming.length && !carePast.length" class="flex flex-wrap items-center gap-3 rounded-xl border-[1.5px] border-dashed border-line-strong p-4">
+      <div v-if="careLoaded && !careUpcoming.length && !carePast.length" class="flex flex-wrap items-center gap-3 rounded-xl border-[1.5px] border-dashed border-line-strong p-4">
         <Stethoscope class="size-5 text-ink-muted" aria-hidden="true" />
         <span class="min-w-0 flex-1 text-sm text-ink-muted">Vets, trainers and groomers you book show here. Let them add the visit to your dog's record as they go.</span>
         <Button variant="outline" size="sm" as-child><NuxtLink to="/care">Find care</NuxtLink></Button>

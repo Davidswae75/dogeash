@@ -11,7 +11,7 @@ import { adminTime, storeActionEffect, storeActions, storeStatusMeta } from '~/u
 // Every store with its status, and the actions that move it on (approve, decline, suspend, restore …).
 // Each action is confirmed in a dialog that says what will happen; declining and suspending need a reason,
 // which the store reads in its bell and on its dashboard. Changes are logged in the audit log.
-const { stores, setStoreStatus } = useAdmin()
+const { stores, storesLoaded, setStoreStatus } = useAdmin()
 
 const filter = ref<StoreStatus | 'all'>('all')
 const filterModel = computed({ get: () => filter.value, set: (v: string) => { if (v) filter.value = v as StoreStatus | 'all' } })
@@ -123,6 +123,7 @@ async function run(note: string) {
           </tr>
         </tbody>
       </table>
+      <ListSkeleton v-else-if="!storesLoaded" variant="table" :rows="5" label="Loading stores" />
       <p v-else class="m-0 border-t border-line px-5 py-4 text-[13px] text-ink-muted">{{ stores.length ? 'No stores match.' : 'No stores yet.' }}</p>
     </div>
 

@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-11-07T04:46:19.832Z
-> Files: 769 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-11-08T01:31:59.850Z
+> Files: 772 tracked | Anatomy hits: 0 | Misses: 0
 
 > Project structure index. Auto-maintained by OpenWolf hooks and daemon.
 > Run `openwolf scan` to generate, or wait for the first Claude Code session.
@@ -23,6 +23,7 @@
 
 - `app.vue` — Vue component (~90 tok)
 - `error.vue` — Vue: setup (~806 tok)
+- `spa-loading-template.html` (~1438 tok)
 
 ## app/assets/css/
 
@@ -70,6 +71,7 @@
 - `KennelWatch.vue` — Vue: setup (~315 tok)
 - `LegalDocument.vue` — Vue: setup (~664 tok)
 - `ListingStatusChip.vue` — Vue: setup (~154 tok)
+- `ListSkeleton.vue` — Vue: setup (~727 tok)
 - `MarketRow.vue` — Vue: setup (~655 tok)
 - `OwnListingActions.vue` — Vue: setup (~521 tok)
 - `OwnListingBanner.vue` — Vue: setup (~276 tok)
@@ -1061,6 +1063,7 @@
 
 ## server/utils/
 
+- `email.ts` — Short lines of plain text; the button and footer are added (~1077 tok)
 - `payments.ts` — What start_reservation / start_balance_payment return: enough to open Paystack's checkout (~1130 tok)
 - `paystack.ts` — Paystack's API, called only from the server with the secret key (PAYSTACK_SECRET_KEY). (~558 tok)
 

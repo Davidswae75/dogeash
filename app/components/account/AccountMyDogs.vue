@@ -24,6 +24,7 @@ onMounted(ensure)
         </NuxtLink>
       </li>
     </ul>
-    <p v-else class="m-0 p-4 text-sm text-ink-muted">{{ loaded ? 'Add the dogs you own to keep their vaccinations, treatments and training in one place, with reminders.' : 'Loading…' }}</p>
+    <ListSkeleton v-else-if="!loaded" variant="row" :rows="2" class="px-3" label="Loading your dogs" />
+    <p v-else class="m-0 p-4 text-sm text-ink-muted">Add the dogs you own to keep their vaccinations, treatments and training in one place, with reminders.</p>
   </SectionPanel>
 </template>

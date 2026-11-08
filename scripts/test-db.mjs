@@ -781,6 +781,11 @@ check('the provider marks it done', await scalar(`select status::text from publi
 await as('authenticated', vet, `select public.provider_save_profile('${care01}', '{"takingBookings":false}')`)
 check('a paused listing takes no bookings', await book('null, false') === null)
 
+// Invitation emails: the server checks whether an invited email has an account (sign-in link) or not (sign-up link)
+check('the server can tell an invited email has an account', (await as('service_role', null, `select public.account_exists('${emailOf('Tunde Ade').toUpperCase()}') as e`))?.[0]?.e === true)
+check('and when it doesn\'t', (await as('service_role', null, `select public.account_exists('nobody@nowhere.ng') as e`))?.[0]?.e === false)
+check('nobody else can ask (no fishing for accounts)', await as('authenticated', buyer, `select public.account_exists('x@y.ng')`) === null && await as('anon', null, `select public.account_exists('x@y.ng')`) === null)
+
 // Garbled text (UTF-8 read as Mac Roman on the way into the SQL Editor) is repaired, data and code alike
 await db.exec(`update public.stores set tagline = 'Mon‚ÄìSat ¬∑ from ‚Ç¶2m' where public_id = 'STR-002'`)
 await db.exec(`create or replace function public.garbled_sample() returns text language sql as $$ select 'Price ¬∑ ‚Ç¶1' $$`)

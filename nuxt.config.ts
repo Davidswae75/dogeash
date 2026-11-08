@@ -17,6 +17,13 @@ export default defineNuxtConfig({
   },
 
   compatibilityDate: '2025-07-15',
+
+  // Pages that render in the browser only (the admin) show app/spa-loading-template.html while they start up,
+  // and keep it until the page is ready (session read, access checked), so a refresh never shows a blank page
+  spaLoadingTemplate: true,
+  experimental: {
+    spaLoadingTemplateLocation: 'body',
+  },
   devtools: { enabled: true },
 
   modules: ['@nuxtjs/color-mode', 'shadcn-nuxt', '@nuxtjs/supabase'],
@@ -28,8 +35,12 @@ export default defineNuxtConfig({
 
   // Server only, never sent to the browser. Payments (server/api/payments) need PAYSTACK_SECRET_KEY, and
   // SUPABASE_SECRET_KEY to record what Paystack confirmed. Set both in .env.local, and on the host.
+  // Emails the site sends itself (invitations): BREVO_API_KEY for now (RESEND_API_KEY once there's a domain), and EMAIL_FROM.
   runtimeConfig: {
     paystackSecretKey: process.env.PAYSTACK_SECRET_KEY ?? '',
+    brevoApiKey: process.env.BREVO_API_KEY ?? '',
+    resendApiKey: process.env.RESEND_API_KEY ?? '',
+    emailFrom: process.env.EMAIL_FROM ?? '',
   },
 
   // Accounts and data. Needs SUPABASE_URL and SUPABASE_KEY from .env.local, or set on the host before the build.

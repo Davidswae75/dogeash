@@ -10,12 +10,16 @@ export type ProviderDraft = Omit<CareProvider, 'id' | 'rating' | 'reviews'> & { 
 export function useAdminCare() {
   const supabase = useSupabaseClient()
   const providers = useState<CareProvider[]>('admin-care', () => [])
+  const loaded = useState('admin-care-loaded', () => false)
+  // Whether the last invitation's email went out (false when email isn't set up yet)
+  const lastEmailSent = useState('admin-care-email-sent', () => false)
   const managers = useState<{ members: { provider: string, name: string, email: string }[], invites: { id: string, provider: string, email: string, createdAt: string }[] }>('admin-care-managers', () => ({ members: [], invites: [] }))
 
   async function load() {
     const { data } = await supabase.from('care_providers').select(careColumns).order('public_id')
     providers.value = ((data ?? []) as unknown as CareRow[]).map(toCareProvider)
     listedProviders.value = [...providers.value].sort((a, b) => b.rating - a.rating)
+    loaded.value = true
     const { data: m } = await supabase.rpc('admin_provider_managers')
     if (m) managers.value = m as unknown as typeof managers.value
   }
@@ -30,6 +34,9 @@ export function useAdminCare() {
     const { error } = await supabase.rpc('admin_invite_provider', { provider: p.id, invite_email: email })
     if (error) return error.message.includes('look right') ? 'That email doesn\'t look right.' : error.message.includes('already manages') ? 'That person already manages this listing.' : 'That didn\'t work. Try again.'
     await load()
+    // Email them a link to sign up (or sign in) and accept
+    const made = managers.value.invites.find(i => i.provider === p.id && i.email === email.trim().toLowerCase())
+    if (made) lastEmailSent.value = (await $fetch<{ sent: boolean }>('/api/invites/email', { method: 'POST', body: { kind: 'provider', id: made.id } }).catch(() => ({ sent: false }))).sent
     return null
   }
 
@@ -47,5 +54,5 @@ export function useAdminCare() {
     return null
   }
 
-  return { providers, managers, managedBy, load, save, remove, invite }
+  return { providers, loaded, managers, managedBy, lastEmailSent, load, save, remove, invite }
 }

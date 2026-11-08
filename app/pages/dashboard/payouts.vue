@@ -59,7 +59,7 @@ async function confirmCancel() {
     <dl v-if="canSeeMoney" class="m-0 grid grid-cols-1 gap-3 sm:grid-cols-3">
       <div v-for="t in tiles" :key="t.label" class="flex flex-col gap-1 rounded-xl bg-surface p-4 ring-1 ring-line">
         <dt class="font-mono text-[10.5px] font-semibold tracking-[.12em] text-ink-muted uppercase">{{ t.label }}</dt>
-        <dd class="m-0 font-display text-2xl font-extrabold tabular-nums font-stretch-expanded">{{ formatMoney(t.value) }}</dd>
+        <dd class="m-0 font-display text-2xl font-extrabold tabular-nums font-stretch-expanded"><Skeleton v-if="!loaded" class="my-1 h-6 w-28" /><template v-else>{{ formatMoney(t.value) }}</template></dd>
         <dd class="m-0 text-xs text-ink-muted">{{ t.hint }}</dd>
       </div>
     </dl>
@@ -71,8 +71,9 @@ async function confirmCancel() {
           <DashboardStoreReservation v-for="r in inProgress" :key="r.id" :reservation="r">
             <Button variant="ghost" size="sm" class="text-danger" @click="startCancel(r)">Cancel and refund the buyer</Button>
           </DashboardStoreReservation>
-          <p v-if="!inProgress.length" class="m-0 rounded-xl bg-surface px-4 py-6 text-center text-sm text-ink-muted ring-1 ring-line">
-            {{ loaded ? 'No dogs reserved right now. When a buyer pays a deposit, the dog shows here and is held for them.' : 'Loading…' }}
+          <ListSkeleton v-if="!loaded" :rows="2" label="Loading reservations" />
+          <p v-else-if="!inProgress.length" class="m-0 rounded-xl bg-surface px-4 py-6 text-center text-sm text-ink-muted ring-1 ring-line">
+            No dogs reserved right now. When a buyer pays a deposit, the dog shows here and is held for them.
           </p>
         </section>
 
@@ -99,6 +100,7 @@ async function confirmCancel() {
               </span>
             </li>
           </ul>
+          <ListSkeleton v-else-if="!loaded" variant="row" :rows="2" label="Loading payouts" />
           <p v-else class="m-0 text-sm text-ink-muted">Nothing yet. You're paid when a buyer confirms the handover.</p>
         </section>
       </div>

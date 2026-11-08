@@ -43,7 +43,7 @@ const label = 'font-mono text-[10.5px] tracking-[.12em] text-ink-muted uppercase
   <div class="flex flex-col gap-5">
     <NuxtLink to="/admin/people" class="inline-flex w-fit items-center gap-1.5 text-sm text-ink-muted no-underline hover:text-ink"><ArrowLeft class="size-4" aria-hidden="true" />People</NuxtLink>
     <p v-if="detail.error.value" class="m-0 rounded-xl bg-danger/10 px-4 py-3 text-sm text-danger ring-1 ring-danger/30" role="alert">{{ detail.error.value }}</p>
-    <p v-else-if="!d" class="m-0 text-sm text-ink-muted">Loading…</p>
+    <ListSkeleton v-else-if="!d" :rows="3" />
 
     <template v-if="d">
       <header class="flex flex-wrap items-center gap-4">

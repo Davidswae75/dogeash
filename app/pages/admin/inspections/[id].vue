@@ -72,7 +72,7 @@ const confirmText = computed(() => ({
   <div class="flex flex-col gap-5">
     <NuxtLink to="/admin/inspections" class="inline-flex w-fit items-center gap-1.5 text-sm text-ink-muted no-underline hover:text-ink"><ArrowLeft class="size-4" aria-hidden="true" />Inspections</NuxtLink>
     <p v-if="error && !sheet" class="m-0 rounded-xl bg-danger/10 px-4 py-3 text-sm text-danger ring-1 ring-danger/30" role="alert">{{ error }}</p>
-    <p v-else-if="!sheet" class="m-0 text-sm text-ink-muted">Loading…</p>
+    <ListSkeleton v-else-if="!sheet" :rows="3" />
 
     <template v-if="sheet">
       <AdminPage :title="sheet.store_name" :description="`${sheet.store_public_id} · ${sheet.store_city} · ${inspectionWhen(sheet.scheduled_for)} · inspector: ${sheet.inspector ?? '—'}`">

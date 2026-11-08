@@ -14,7 +14,7 @@ import { storesForProvider } from '~/utils/stores'
 definePageMeta({ layout: 'admin', colorMode: 'dark', middleware: 'admin' })
 useSeoMeta({ title: 'Care directory · Dogeash admin', robots: 'noindex' })
 
-const { providers, managedBy, load, save, remove, invite } = useAdminCare()
+const { providers, loaded, managedBy, lastEmailSent, load, save, remove, invite } = useAdminCare()
 onMounted(load)
 
 const query = ref('')
@@ -53,7 +53,9 @@ async function sendInvite() {
   inviteBusy.value = false
   if (inviteError.value) return
   inviteOpen.value = false
-  useNotify().adminDone(`Invitation sent for ${inviting.value!.name}`, 'It waits in their account when they sign in or sign up with that email.')
+  useNotify().adminDone(`Invitation sent for ${inviting.value!.name}`, lastEmailSent.value
+    ? 'We emailed them a link. It also waits in their account when they sign in or sign up with that email.'
+    : 'It waits in their account when they sign in or sign up with that email. (No email sent: email isn\'t set up yet.)')
 }
 
 const removing = ref<CareProvider>()
@@ -126,6 +128,7 @@ async function onRemove() {
             </tr>
           </tbody>
         </table>
+        <ListSkeleton v-else-if="!loaded" variant="table" :rows="5" label="Loading providers" />
         <p v-else class="m-0 px-5 py-4 text-[13px] text-ink-muted">{{ providers.length ? 'No providers match.' : 'No providers yet.' }}</p>
       </div>
     </AdminCard>

@@ -9,6 +9,7 @@ export function useAdmin() {
   const audit = useState<AuditEntry[]>('admin-audit', () => [])
   const error = useState('admin-error', () => '')
   const stores = useState<AdminStore[]>('admin-stores', () => [])
+  const storesLoaded = useState('admin-stores-loaded', () => false)
   // Longer day-by-day history for 90 days or a year (twice the period, to compare with the one before)
   const history = useState<{ days: number, series: SeriesDay[] } | null>('admin-history', () => null)
 
@@ -33,6 +34,7 @@ export function useAdmin() {
   async function loadStores() {
     const { data } = await supabase.rpc('admin_stores')
     stores.value = (data as unknown as AdminStore[] | null) ?? []
+    storesLoaded.value = true
   }
 
   // Change a store's status with a note it reads; then everything reloads. Returns an error, or null.
@@ -43,5 +45,5 @@ export function useAdmin() {
     return null
   }
 
-  return { overview, audit, error, stores, history, loadOverview, loadHistory, loadStores, setStoreStatus }
+  return { overview, audit, error, stores, storesLoaded, history, loadOverview, loadHistory, loadStores, setStoreStatus }
 }

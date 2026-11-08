@@ -90,7 +90,8 @@ const csv: CsvColumn<AdminVisit>[] = [
               </tr>
             </tbody>
           </table>
-          <p v-else class="m-0 px-5 py-4 text-[13px] text-ink-muted">{{ !loaded ? 'Loading…' : tab === 'chase' ? 'Nothing waiting more than two days. Stores are answering.' : 'Nothing here.' }}</p>
+          <ListSkeleton v-else-if="!loaded" variant="table" :rows="5" />
+          <p v-else class="m-0 px-5 py-4 text-[13px] text-ink-muted">{{ tab === 'chase' ? 'Nothing waiting more than two days. Stores are answering.' : 'Nothing here.' }}</p>
         </div>
       </AdminCard>
 

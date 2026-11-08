@@ -8,6 +8,7 @@ import { formatNaira } from '~/utils/dogs'
 // The store's dogs with how each is doing: level, status, enquiries and views, filtered by status
 const storeDogs = useStoreDogs()
 const dogs = storeDogs.dogs
+const loaded = storeDogs.loaded
 onMounted(() => { if (!storeDogs.loaded.value) storeDogs.load() })
 
 const filter = ref<'all' | 'available' | 'reserved'>('all')
@@ -34,8 +35,9 @@ const statsOf = (fileNo: string) => dashboardDogStats[fileNo]
       </ToggleGroup>
     </template>
 
+    <ListSkeleton v-if="!loaded" variant="table" :rows="3" label="Loading your dogs" />
     <!-- relative: keeps the hidden column label inside this scroller, or it widens the whole page on phones -->
-    <div class="relative overflow-x-auto">
+    <div v-else class="relative overflow-x-auto">
       <table class="w-full min-w-[600px] border-collapse text-left text-sm">
         <thead>
           <tr class="font-mono text-[10.5px] tracking-[.12em] text-ink-muted uppercase">

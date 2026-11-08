@@ -58,6 +58,7 @@ const isPast = (b: ProviderBooking) => b.day < new Date().toISOString().slice(0,
   <div class="flex flex-col gap-8">
     <section class="flex flex-col gap-3" aria-labelledby="requests">
       <h2 id="requests" class="m-0 font-mono text-[11px] leading-4 font-semibold tracking-[.12em] text-ink-muted uppercase">To answer · {{ requests.length }}</h2>
+      <ListSkeleton v-if="!loaded" :rows="2" label="Loading your bookings" />
       <CareBookingCard
         v-for="b in requests"
         :key="b.id"
@@ -68,9 +69,9 @@ const isPast = (b: ProviderBooking) => b.day < new Date().toISOString().slice(0,
         <Button variant="marigold" size="sm" :loading="confirming === b.id" @click="confirm(b)">Confirm</Button>
         <Button variant="outline" size="sm" @click="startAnswer(b, 'declined')">Can't make it</Button>
       </CareBookingCard>
-      <div v-if="!requests.length" class="flex flex-col items-center gap-3 rounded-xl bg-surface px-6 py-10 text-center ring-1 ring-line">
+      <div v-if="loaded && !requests.length" class="flex flex-col items-center gap-3 rounded-xl bg-surface px-6 py-10 text-center ring-1 ring-line">
         <span class="grid size-12 place-items-center rounded-full bg-marigold-soft"><CalendarCheck class="size-5" aria-hidden="true" /></span>
-        <p class="m-0 max-w-[30em] text-[15px] leading-6 text-ink-muted">{{ loaded ? 'No requests waiting. Buyers book from your page on Dogeash; you\'ll get a notification for each one.' : 'Loading…' }}</p>
+        <p class="m-0 max-w-[30em] text-[15px] leading-6 text-ink-muted">No requests waiting. Buyers book from your page on Dogeash; you'll get a notification for each one.</p>
       </div>
     </section>
 
