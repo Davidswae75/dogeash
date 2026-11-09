@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { Dog as DogIcon } from '@lucide/vue'
+import { Dog as DogIcon, Pin } from '@lucide/vue'
 import type { StoreDog } from '~/utils/dogs'
 import type { ListingStatus } from '~/utils/k9'
-import { formatNaira } from '~/utils/dogs'
+import { dogeashId, formatNaira } from '~/utils/dogs'
 import { shortTime } from '~/utils/time'
 
 // The store's dogs as a table: photo, name and file number, level, status, price, last change, actions
 const props = defineProps<{ dogs: StoreDog[], verified: boolean, canDelete: boolean }>()
-const emit = defineEmits<{ status: [dog: StoreDog, to: ListingStatus], remove: [dog: StoreDog] }>()
+const emit = defineEmits<{ status: [dog: StoreDog, to: ListingStatus], remove: [dog: StoreDog], pin: [dog: StoreDog] }>()
 </script>
 
 <template>
@@ -31,8 +31,8 @@ const emit = defineEmits<{ status: [dog: StoreDog, to: ListingStatus], remove: [
               <img v-if="dog.photo" :src="dog.photo" alt="" class="size-11 rounded-md object-cover">
               <span v-else class="grid size-11 place-items-center rounded-md bg-surface-sunk text-ink-muted"><DogIcon class="size-5" aria-hidden="true" /></span>
               <span class="min-w-0">
-                <strong class="block leading-5">{{ dog.name }}</strong>
-                <span class="font-mono text-[11px] whitespace-nowrap text-ink-muted">{{ dog.fileNo }} · {{ dog.breed }}</span>
+                <strong class="flex items-center gap-1.5 leading-5">{{ dog.name }}<span v-if="dog.pinnedAt" class="inline-flex items-center gap-1 rounded-full bg-marigold-soft px-1.5 py-0.5 text-[10px] font-bold tracking-[.04em] text-marigold-ink uppercase"><Pin class="size-3" aria-hidden="true" />Pinned</span></strong>
+                <span class="font-mono text-[11px] whitespace-nowrap text-ink-muted">{{ dogeashId(dog.fileNo) }} · {{ dog.breed }}</span>
               </span>
             </NuxtLink>
           </td>
@@ -41,7 +41,7 @@ const emit = defineEmits<{ status: [dog: StoreDog, to: ListingStatus], remove: [
           <td class="px-3 py-2.5 text-right font-mono font-semibold tabular-nums">{{ formatNaira(dog.priceNaira) }}</td>
           <td class="px-3 py-2.5 text-right font-mono text-[12px] text-ink-muted">{{ shortTime(dog.updatedAt) }}</td>
           <td class="pr-3 text-right">
-            <DashboardDogActions :dog="dog" :verified="props.verified" :can-delete="props.canDelete" @status="to => emit('status', dog, to)" @remove="emit('remove', dog)" />
+            <DashboardDogActions :dog="dog" :verified="props.verified" :can-delete="props.canDelete" @status="to => emit('status', dog, to)" @remove="emit('remove', dog)" @pin="emit('pin', dog)" />
           </td>
         </tr>
       </tbody>

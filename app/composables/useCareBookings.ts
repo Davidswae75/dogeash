@@ -104,11 +104,17 @@ export function useCareBookings() {
     return null
   }
 
-  return { mine, loaded, upcoming, past, loadMine, request, cancel }
+  // A provider's times that are already full, as "2026-11-12 9:00" (for the booking dialog)
+  async function fullSlots(providerId: string): Promise<string[]> {
+    const { data } = await supabase.rpc('care_full_slots', { provider: providerId })
+    return (data ?? []).map(s => `${s.day} ${s.slot}`)
+  }
+
+  return { mine, loaded, upcoming, past, loadMine, request, cancel, fullSlots }
 }
 
 // The database's refusal of a booking, in words for the buyer (its messages are already written for people)
 function careRefusal(message: string) {
-  const known = ['manage this listing', 'isn\'t taking bookings', 'from tomorrow', 'next two months', 'doesn\'t work on that day', 'provider\'s times', 'doesn\'t visit homes', 'waiting for an answer', 'can\'t make bookings']
+  const known = ['already booked', 'already have a care appointment', 'already have a booking with this provider', 'provider\'s services', 'manage this listing', 'isn\'t taking bookings', 'from tomorrow', 'next two months', 'doesn\'t work on that day', 'provider\'s times', 'doesn\'t visit homes', 'waiting for an answer', 'can\'t make bookings']
   return known.some(k => message.includes(k)) ? message.replace(/^.*?: /, '') : 'That didn\'t send. Try again.'
 }

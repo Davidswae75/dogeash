@@ -3,7 +3,7 @@ import { ChevronRight } from '@lucide/vue'
 import { computed, onMounted, ref } from 'vue'
 import { useStoreDogs } from '~/composables/useStoreDogs'
 import { dashboardDogStats } from '~/utils/dashboard'
-import { formatNaira } from '~/utils/dogs'
+import { dogeashId, formatNaira } from '~/utils/dogs'
 
 // The store's dogs with how each is doing: level, status, enquiries and views, filtered by status
 const storeDogs = useStoreDogs()
@@ -57,7 +57,7 @@ const statsOf = (fileNo: string) => dashboardDogStats[fileNo]
                 <img v-if="dog.photo" :src="dog.photo" alt="" class="size-10 rounded-md object-cover">
                 <span>
                   <strong class="block leading-5">{{ dog.name }}</strong>
-                  <span class="font-mono text-[11px] whitespace-nowrap text-ink-muted">{{ dog.fileNo }}</span>
+                  <span class="font-mono text-[11px] whitespace-nowrap text-ink-muted">{{ dogeashId(dog.fileNo) }}</span>
                 </span>
               </NuxtLink>
             </td>

@@ -20,7 +20,7 @@ const panel = computed(() => override.value ?? invitePanel.value ?? route.meta.a
   <div class="min-h-screen bg-canvas lg:grid lg:grid-cols-2">
     <div class="flex min-h-screen flex-col">
       <header class="flex h-header items-center justify-between px-4 sm:px-8">
-        <AppLogo />
+        <AppLogo variant="lockup" />
         <NuxtLink to="/" class="inline-flex items-center gap-1.5 text-sm font-semibold text-ink-muted no-underline hover:text-ink">
           <ArrowLeft class="size-4" aria-hidden="true" />Back to Dogeash
         </NuxtLink>

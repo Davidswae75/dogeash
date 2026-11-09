@@ -2,6 +2,7 @@
 import { MessageSquare } from '@lucide/vue'
 import type { Dog } from '~/utils/dogs'
 import type { Store } from '~/utils/stores'
+import { dogeashId } from '~/utils/dogs'
 import { computed, ref, watch } from 'vue'
 import { useAccountGate } from '~/composables/useAccountGate'
 import { useConversations } from '~/composables/useConversations'
@@ -53,7 +54,11 @@ watch(message, () => { error.value = '' })
 </script>
 
 <template>
-  <Button :variant="props.variant" :size="props.size" :class="props.triggerClass" @click="guard">
+  <!-- Only a dog that's still available can be asked about: a reserved one is held for another buyer -->
+  <Button v-if="props.dog?.status === 'reserved'" :variant="props.variant" :size="props.size" :class="props.triggerClass" disabled title="Another buyer has paid a deposit on this dog">
+    Reserved: not taking questions
+  </Button>
+  <Button v-else :variant="props.variant" :size="props.size" :class="props.triggerClass" @click="guard">
     <slot>{{ props.label }}</slot>
   </Button>
 
@@ -65,7 +70,7 @@ watch(message, () => { error.value = '' })
         </span>
         <DialogTitle class="font-display text-[22px] leading-7 font-extrabold font-stretch-expanded">{{ props.store.name }}</DialogTitle>
         <DialogDescription class="text-ink-muted">
-          <template v-if="props.dog">About {{ props.dog.name }}, {{ props.dog.breed }} · <span class="font-mono">{{ props.dog.fileNo }}</span></template>
+          <template v-if="props.dog">About {{ props.dog.name }}, {{ props.dog.breed }} · <span class="font-mono">{{ dogeashId(props.dog.fileNo) }}</span></template>
           <template v-else>{{ props.store.area }}, {{ props.store.city }}</template>
         </DialogDescription>
       </DialogHeader>

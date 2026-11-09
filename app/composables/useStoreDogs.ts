@@ -3,7 +3,7 @@ import { useRuntimeConfig, useState, useSupabaseClient } from '#imports'
 import type { DogMedia, DogRow, StoreDog } from '~/utils/dogs'
 import type { ListingStatus } from '~/utils/k9'
 import type { DogFormValues } from '~/utils/dogForm'
-import { dogColumns, listingStatusLabels, toStoreDog } from '~/utils/dogs'
+import { dogColumns, dogeashId, listingStatusLabels, toStoreDog } from '~/utils/dogs'
 import { dogFormToRow } from '~/utils/dogForm'
 import { checkImage, imagePath } from '~/utils/imageUpload'
 import { useNotify } from './useNotify'
@@ -116,9 +116,9 @@ export function useStoreDogs() {
     const notify = useNotify()
     if (error) return notify.failed(error)
     if (to === 'available' && lastStatus.value === 'pending_review') {
-      return notify.dogUpdated(`${dog.name} is with Dogeash for review`, `${dog.fileNo}. Dogeash checks some new listings before buyers see them; you'll hear back in your bell.`, dog.photo)
+      return notify.dogUpdated(`${dog.name} is with Dogeash for review`, `${dogeashId(dog.fileNo)}. Dogeash checks some new listings before buyers see them; you'll hear back in your bell.`, dog.photo)
     }
-    notify.dogUpdated(`${dog.name} ${moved[to] ?? 'is updated'}`, `${dog.fileNo} · ${listingStatusLabels[to].label}. ${to === 'available' ? 'Buyers can see it now.' : to === 'withdrawn' ? 'Hidden from buyers; you can list it again later.' : ''}`.trim(), dog.photo)
+    notify.dogUpdated(`${dog.name} ${moved[to] ?? 'is updated'}`, `${dogeashId(dog.fileNo)} · ${listingStatusLabels[to].label}. ${to === 'available' ? 'Buyers can see it now.' : to === 'withdrawn' ? 'Hidden from buyers; you can list it again later.' : ''}`.trim(), dog.photo)
   }
   async function deleteDraft(dog: StoreDog) {
     const error = await remove(dog)
@@ -127,5 +127,18 @@ export function useStoreDogs() {
     notify.dogUpdated(`${dog.name} deleted`, 'The draft and its photos and videos are gone.')
   }
 
-  return { dogs, loaded, verified, lastStatus, load, find, uploadPhoto, uploadVideo, create, update, setStatus, remove, changeStatus, deleteDraft }
+  // Pin a live dog to the top of the store's page (up to 3), or unpin it; a toast either way
+  const pinned = computed(() => dogs.value.filter(d => d.pinnedAt).sort((a, b) => a.pinnedAt!.localeCompare(b.pinnedAt!)))
+  async function togglePin(dog: StoreDog) {
+    const notify = useNotify()
+    const pin = !dog.pinnedAt
+    if (pin && pinned.value.length >= 3) return notify.failed('You can pin up to 3 dogs. Unpin one first.')
+    const pinnedAt = pin ? new Date().toISOString() : null
+    const { data, error } = await supabase.from('dogs').update({ pinned_at: pinnedAt }).eq('id', dog.id).select('pinned_at').maybeSingle()
+    if (error || !data) return notify.failed(error?.message.includes('pins_full') ? 'You can pin up to 3 dogs. Unpin one first.' : 'That didn\'t save. Try again.')
+    dogs.value = dogs.value.map(d => (d.id === dog.id ? { ...d, pinnedAt: data.pinned_at } : d))
+    notify.dogUpdated(pin ? `${dog.name} is pinned` : `${dog.name} is unpinned`, pin ? 'It shows first on your store page.' : 'Your store page shows your other dogs first.', dog.photo)
+  }
+
+  return { dogs, loaded, verified, lastStatus, pinned, load, find, uploadPhoto, uploadVideo, create, update, setStatus, remove, changeStatus, deleteDraft, togglePin }
 }

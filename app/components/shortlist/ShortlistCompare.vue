@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { useShortlist } from '~/composables/useShortlist'
 import { useShortlistRoutes } from '~/composables/useShortlistRoutes'
 import { bestOn, compareRows } from '~/utils/compare'
+import { dogeashId } from '~/utils/dogs'
 
 // Two or three shortlisted dogs side by side. Used on /shortlist/compare and in the account area.
 const { compareDogs, toggleCompare } = useShortlist()
@@ -25,7 +26,7 @@ const columns = computed(() => `minmax(140px,180px) repeat(${compareDogs.value.l
               <div class="flex items-start justify-between gap-2">
                 <div>
                   <NuxtLink :to="`/dogs/${dog.fileNo.toLowerCase()}`" class="font-display text-xl leading-6 font-extrabold text-ink no-underline font-stretch-expanded hover:underline">{{ dog.name }}</NuxtLink>
-                  <span class="block font-mono text-xs text-ink-muted">{{ dog.fileNo }}</span>
+                  <span class="block font-mono text-xs text-ink-muted">{{ dogeashId(dog.fileNo) }}</span>
                 </div>
                 <button type="button" class="cursor-pointer border-0 bg-transparent p-0 text-xs font-semibold text-ink-muted underline hover:text-ink" @click="toggleCompare(dog.fileNo)">Remove</button>
               </div>

@@ -2,12 +2,13 @@
 import type { Dog } from '~/utils/dogs'
 import { computed } from 'vue'
 import { useSession } from '~/composables/useSession'
-import { formatNaira } from '~/utils/dogs'
+import { formatNaira, getStore } from '~/utils/dogs'
 
-// A listing presented as a K9 file: file tab, photo with stamp, protection scale, facts, price.
+// A dog in a list: the store and its status on the tab, photo with stamp, protection scale, facts, price.
 // The save button sits beside the link, not inside it: a button can't live inside a link.
 const props = defineProps<{ dog: Dog }>()
 const reserved = computed(() => props.dog.status === 'reserved')
+const storeName = computed(() => getStore(props.dog.storeId)?.name ?? props.dog.city)
 // Dogs from a store you work at: a "Your store" tag instead of the save heart
 const { memberOf } = useSession()
 const isOwn = computed(() => !!memberOf(props.dog.storeId))
@@ -19,7 +20,7 @@ const isOwn = computed(() => !!memberOf(props.dog.storeId))
       :to="`/dogs/${props.dog.fileNo.toLowerCase()}`"
       class="flex flex-1 flex-col overflow-hidden rounded-lg border border-line bg-surface text-inherit no-underline transition-shadow duration-200 group-hover:shadow-[0_14px_30px_-18px_rgba(17,24,39,.45)]"
     >
-      <K9FileTab :file-no="props.dog.fileNo" :reserved="reserved" />
+      <K9FileTab :label="storeName" :reserved="reserved" />
 
       <div class="relative grid aspect-4/3 max-w-full place-items-center overflow-hidden bg-surface-sunk">
         <img
@@ -35,7 +36,7 @@ const isOwn = computed(() => !!memberOf(props.dog.storeId))
         <span
           aria-hidden="true"
           class="absolute inset-x-0 bottom-0 z-[1] translate-y-full bg-marigold px-[18px] py-3.5 font-display text-base leading-none font-extrabold text-on-marigold font-stretch-expanded transition-transform duration-250 ease-calm group-hover:translate-y-0 group-has-[a:focus-visible]:translate-y-0"
-        >Open K9 file&nbsp; →</span>
+        >See the dog&nbsp; →</span>
       </div>
 
       <div class="flex flex-col gap-3 px-[18px] pt-4 pb-[18px]">
@@ -56,7 +57,7 @@ const isOwn = computed(() => !!memberOf(props.dog.storeId))
 
         <div class="flex items-center justify-between">
           <span class="font-display text-[19px] leading-none font-extrabold [font-stretch:110%]">{{ formatNaira(props.dog.priceNaira) }}</span>
-          <span class="inline-flex items-center gap-1.5 text-sm font-bold text-action">View file <AppIcon name="arrow-right" :size="16" /></span>
+          <span class="inline-flex items-center gap-1.5 text-sm font-bold text-action">View dog <AppIcon name="arrow-right" :size="16" /></span>
         </div>
       </div>
     </NuxtLink>

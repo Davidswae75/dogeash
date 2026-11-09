@@ -1687,3 +1687,63 @@ New **`DetailDialog.vue`**:
 - The logo checked in Day and Night, in the header and on sign-in.
 - The icons and share image looked at after generating.
 - Typecheck shows no new errors.
+
+## 47. Fourteen fixes and features in one batch (9 Nov)
+**Migration:** `supabase/migrations/20261209000000_nov9_batch.sql`. Run it in the SQL Editor. Until it runs, the site can't read the new columns and shows sample data.
+
+1. **Logo.** The dog mark replaces the "o" in "dogeash" in the header and dashboard (`AppLogo` / `AppLogoMark`, `variant="inline"`). The mark stands beside the word on sign-in and sign-up (`lockup`). The loader shows just the word. `npm run render:icons` also writes `public/logo.svg`, `logo.png`, `logo-on-dark.svg` and `logo-on-dark.png`.
+2. **"Ready to reserve" steps now open their pages.** `AccountReadiness` used `<component :is="'NuxtLink'">`, which never resolved. Each step is now a real link, rendered by `AccountReadinessStep`.
+3. **Dates.**
+   - A booster or next date can't be before the done date, and a done date can't be in the future (`owned_dog_records`).
+   - A dog can't join you before it was born (`owned_dogs`).
+   - Checked in the forms (`AccountDogRecordDialog`, `AccountDogForm`, with min/max on the inputs) and in the database. Providers adding records get the same messages (`recordError`).
+4. **Care.**
+   - The new intro on `/care`.
+   - Providers choose the services they offer (up to 12, from any kind of care) and how many clients one time takes. Both are set in **Your listing** (`provider_save_services`).
+   - Cards show the services and the schedule (`scheduleLine`).
+   - The booking dialog offers only the provider's services and crosses out full times (`care_full_slots`).
+   - The database refuses:
+     - a service the provider doesn't offer
+     - a full time
+     - a buyer booked with two providers at the same time
+     - the same provider again for the same dog while a booking is waiting or confirmed (item 11)
+5. **Shortlist.**
+   - The item is redesigned (bigger photo, facts on separate lines, the Dogeash ID).
+   - A reserved dog shows "Another buyer has put a deposit… Keep it here?" with Remove.
+   - Reserved dogs can't be asked about or visited.
+   - A dog marked **sold** leaves every shortlist (trigger `dogs_zz_sold_leaves_shortlists`), and the catalogue already hides sold dogs.
+6. **Kennel visit times.**
+   - A requested or confirmed visit takes its time, so other buyers see it crossed out (`store_full_slots`). If the store declines it or anyone cancels it, the time is free again.
+   - Stores can raise **Visitors per time** in Settings (`stores.visit_capacity`, 1 by default).
+   - A buyer can't have two visits at the same time.
+7. **Dog page details** (`components/dog/DogFacts.vue`). A grid with dividing lines, and an ⓘ on every property that explains it (a popover, so a tap works on phones).
+8. **Dogeash ID instead of "K9 file".**
+   - The top tab of dog cards and pages shows the **store name** and Available/Reserved.
+   - The ID (`DOGEASH-2026-003`, from `dogeashId()`) is the first property on the page. It's also used in the dashboard, the inbox, reserve, contact, compare and the toasts.
+   - The "K9 file" wording is gone from the site. URLs still use the old number.
+9. **Dark is the default** (`colorMode.preference: 'dark'`). The loader and theme-color match. Day watch is still in the toggle.
+10. **Pinned dogs.**
+    - Stores pin up to 3 live dogs from a dog's ⋯ menu in Dashboard › Dogs (`dogs.pinned_at`). The database refuses a 4th, and sold or withdrawn dogs lose their pin.
+    - The store page shows the 3 pinned dogs (or the first available ones), then a **"n more dogs · Show more"** card.
+    - New page `/stores/[slug]/dogs` lists every dog, with filters (availability, level, sex, breed) and an order. The store page moved to `pages/stores/[slug]/index.vue`.
+11. *(See 4.)*
+12. **Providers' photos and contact.**
+    - A profile photo and up to 8 workplace photos, in the new public `care-media` bucket under the provider's own folder.
+    - The workplace address, "working with dogs since", and up to 8 history milestones.
+    - Phone, WhatsApp and email go in `care_provider_contacts`, which only signed-in people can read. Everything is edited in **Your listing** (`ProviderDetailsForm`) and saved by `provider_save_details`.
+    - Shared uploaders: `PhotoPicker` and `PhotoGrid`. The dog photo fields now use them too.
+13. **Provider page** (`/care/[slug]`).
+    - The photo, "n years with dogs", a Workplace photo grid, a History timeline, and the schedule in the booking box.
+    - A **Contact** card: the address for everyone; phone, WhatsApp (wa.me link) and email when signed in, otherwise "Sign in to see…".
+    - Directory cards show the photo.
+14. **Phone reminders (paid plan).** The options are in PLAN.md, Phase 7. Termii first; then Africa's Talking, Sendchamp, Twilio, Infobip and the WhatsApp Cloud API. Sending would run from a server route, scheduled with `pg_cron` + `pg_net`, with each send logged for billing.
+
+**Checked:**
+- `npm run db:test`: all rules hold. New checks cover dates, care services, full times and clashes, visit capacity and freeing, sold dogs leaving shortlists, pins (3 max, dropped on withdraw, members only), provider details (own folder, contacts for signed-in people only) and care-media uploads.
+- Typecheck: no new errors.
+- In the browser, dark by default: the dog page details and info popover (desktop and 375px), store page (3 dogs + Show more), the store dogs page filters, and the provider page contact card.
+
+## 48. Dog page actions in a bottom bar on phones (9 Nov)
+- On phones and tablets (below `lg`), a dog's page puts the actions in a bar fixed to the bottom of the screen: **Reserve with a ₦… deposit** across the full width, with **Contact store** and **Book a visit** side by side under it. The price box keeps the price and drops those buttons. Desktop is unchanged.
+- The bar isn't shown to the store's own people, who still see their listing actions. The page has extra bottom padding so the bar doesn't cover the end of the page.
+- Checked at 375px: the bar shows; Contact and Book a visit open their dialogs (the account prompt when signed out); no sideways scroll.

@@ -4,7 +4,7 @@ import { computed, ref, watch } from 'vue'
 import { useSeoMeta } from '#imports' // nuxt
 import { useNotify } from '~/composables/useNotify'
 import { useProviderDashboard } from '~/composables/useProviderDashboard'
-import { careTypes } from '~/utils/care'
+import { careServiceGroups, careTypes, providerServices } from '~/utils/care'
 
 // Provider dashboard › Your listing: what buyers read on the provider's page, and the days and times they
 // can book. The name, type, city, credential and the "checked" badge are Dogeash's, shown but not editable.
@@ -22,6 +22,8 @@ const homeVisits = ref(false)
 const takingBookings = ref(true)
 const weekdays = ref<string[]>([])
 const slots = ref<string[]>([])
+const services = ref<string[]>([])
+const capacity = ref('1')
 watch(listing, (l) => {
   if (!l) return
   person.value = l.person ?? ''
@@ -33,6 +35,8 @@ watch(listing, (l) => {
   takingBookings.value = l.takingBookings !== false
   weekdays.value = (l.weekdays ?? [1, 2, 3, 4, 5, 6]).map(String)
   slots.value = l.slots ?? []
+  services.value = providerServices(l)
+  capacity.value = String(l.slotCapacity ?? 1)
 }, { immediate: true })
 
 const dayOptions = [1, 2, 3, 4, 5, 6, 0].map(d => ({ value: String(d), label: new Date(2026, 10, 1 + d).toLocaleDateString('en-NG', { weekday: 'short' }) }))
@@ -47,6 +51,8 @@ async function save() {
   if (!weekdays.value.length) return (error.value = 'Choose at least one day.')
   if (!slots.value.length) return (error.value = 'Choose at least one time.')
   if (slots.value.length > 12) return (error.value = 'Up to 12 times.')
+  if (!services.value.length) return (error.value = 'Choose at least one service.')
+  if (services.value.length > 12) return (error.value = 'Up to 12 services.')
   busy.value = true
   error.value = (await dash.saveProfile({
     person: person.value,
@@ -58,15 +64,19 @@ async function save() {
     takingBookings: takingBookings.value,
     weekdays: weekdays.value.map(Number),
     slots: slots.value,
+    services: services.value,
+    slotCapacity: Math.min(20, Math.max(1, Number(capacity.value) || 1)),
   })) ?? ''
   busy.value = false
   if (!error.value) useNotify().success({ kicker: 'Your listing', meta: 'Saved', title: 'Listing updated', text: 'Buyers see the changes on your page now.' })
 }
+const capacityOptions = [1, 2, 3, 4, 5, 6, 8, 10].map(n => ({ value: String(n), label: n === 1 ? '1 client at a time' : `${n} clients at a time` }))
 const field = 'h-11 border-line-strong bg-surface'
 </script>
 
 <template>
   <div v-if="listing" class="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+    <div class="flex flex-col gap-10">
     <form class="flex flex-col gap-6" novalidate @submit.prevent="save">
       <section class="flex flex-col gap-5 rounded-xl bg-surface p-4 ring-1 ring-line sm:p-5">
         <h2 class="m-0 font-display text-lg font-extrabold font-stretch-expanded">What buyers read</h2>
@@ -106,11 +116,28 @@ const field = 'h-11 border-line-strong bg-surface'
             <ToggleGroupItem v-for="t in timeOptions" :key="t" :value="t" class="rounded-full! font-mono">{{ t }}</ToggleGroupItem>
           </ToggleGroup>
         </FieldShell>
+        <FieldShell label="Clients per time" for="pl-capacity" hint="How many bookings one time can take. Once it's full, buyers see that time as booked.">
+          <SelectMenu id="pl-capacity" v-model="capacity" :options="capacityOptions" class="h-11! sm:w-[220px]" />
+        </FieldShell>
+      </section>
+
+      <section class="flex flex-col gap-5 rounded-xl bg-surface p-4 ring-1 ring-line sm:p-5">
+        <div class="flex flex-col gap-1">
+          <h2 class="m-0 font-display text-lg font-extrabold font-stretch-expanded">What you offer</h2>
+          <p class="m-0 text-[13px] leading-5 text-ink-muted">Choose every service you provide, from any kind of care (up to 12). Buyers choose one when they book, and find you by them.</p>
+        </div>
+        <FieldShell v-for="g in careServiceGroups" :key="g.type" :label="g.label">
+          <ToggleGroup v-model="services" type="multiple" variant="chip" :aria-label="g.label" class="flex w-auto flex-wrap justify-start gap-2">
+            <ToggleGroupItem v-for="sv in g.services" :key="sv" :value="sv" class="rounded-full!">{{ sv }}</ToggleGroupItem>
+          </ToggleGroup>
+        </FieldShell>
       </section>
 
       <p v-if="error" class="m-0 font-semibold text-danger" role="alert">{{ error }}</p>
       <div><Button type="submit" variant="marigold" class="h-11" :loading="busy">Save changes</Button></div>
     </form>
+    <ProviderDetailsForm />
+    </div>
 
     <aside class="flex flex-col gap-3 self-start rounded-xl bg-surface p-4 ring-1 ring-line sm:p-5">
       <h2 class="m-0 font-display text-lg font-extrabold font-stretch-expanded">Kept by Dogeash</h2>

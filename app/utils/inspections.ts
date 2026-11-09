@@ -16,7 +16,7 @@ export const standardChecks: { key: string, label: string, hint: string }[] = [
   { key: 'runs', label: 'Clean, shaded kennel runs', hint: 'Dry floors, shade at midday, room to move' },
   { key: 'water', label: 'Clean water for every dog', hint: 'Fresh, within reach, shaded' },
   { key: 'vet', label: 'Vet records for every dog', hint: 'Vaccinations up to date, signed by a vet' },
-  { key: 'chips', label: 'Microchips scanned and matched', hint: 'Every chip reads and matches its K9 file' },
+  { key: 'chips', label: 'Microchips scanned and matched', hint: 'Every chip reads and matches the dog\'s record' },
   { key: 'levels', label: 'Protection levels tested on site', hint: 'Each dog shown working at its listed level' },
   { key: 'listings', label: 'Dogs match their listings', hint: 'Photos, age, sex and breed are right' },
   { key: 'owner', label: 'Owner\'s ID matches', hint: 'The person on the ID runs the kennel' },

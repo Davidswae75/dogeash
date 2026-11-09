@@ -3,7 +3,7 @@ import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
 import { computed, ref } from 'vue'
 import type { VisitSettings } from '~/utils/stores'
-import { sortSlots, visitSettingsSchema, visitSlotOptions, weekdayOptions } from '~/utils/storeSettings'
+import { sortSlots, visitCapacityOptions, visitSettingsSchema, visitSlotOptions, weekdayOptions } from '~/utils/storeSettings'
 
 // When the store takes kennel visits: days, times, home visits, and pausing requests with a note.
 // The booking dialog on the store's pages offers exactly these. `save` returns an error or null.
@@ -18,6 +18,8 @@ const [slots] = defineField('slots')
 const [home] = defineField('home')
 const [paused] = defineField('paused')
 const [note] = defineField('note')
+const [capacity] = defineField('capacity')
+const capacityModel = computed({ get: () => String(capacity.value ?? 1), set: (v: string) => { capacity.value = Number(v) } })
 
 // ToggleGroup works in strings; the form keeps numbers for days
 const dayModel = computed({ get: () => (days.value ?? []).map(String), set: (v: string[]) => { days.value = v.map(Number) } })
@@ -53,6 +55,9 @@ const chips = 'flex w-auto flex-wrap justify-start gap-2'
         <ToggleGroup v-model="slotModel" type="multiple" variant="chip" aria-label="Visit times" :class="chips">
           <ToggleGroupItem v-for="t in visitSlotOptions" :key="t" :value="t" class="rounded-full! font-mono text-xs">{{ t }}</ToggleGroupItem>
         </ToggleGroup>
+      </FieldShell>
+      <FieldShell label="Visitors per time" for="visit-capacity" hint="How many buyers can book the same time. Once it's full, other buyers see it as booked. A declined or cancelled visit frees it again.">
+        <SelectMenu id="visit-capacity" v-model="capacityModel" :options="visitCapacityOptions" class="h-11! sm:w-[220px]" />
       </FieldShell>
       <label class="flex items-start gap-3">
         <Switch v-model="home" class="mt-0.5" />

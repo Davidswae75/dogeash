@@ -1,4 +1,5 @@
 import { initialsOf } from './account'
+import type { Dog } from './dogs'
 import type { ProtectionLevel } from './protection'
 import { shallowRef } from 'vue'
 import { listedDogs } from './dogs'
@@ -77,8 +78,8 @@ export interface Store {
 
 // The days (0 = Sunday) and times a store takes kennel visits, whether it also visits buyers at home,
 // and whether visit requests are paused (with a note buyers see)
-export interface VisitSettings { days: number[], slots: string[], home: boolean, paused: boolean, note: string }
-export const defaultVisitSettings: VisitSettings = { days: [1, 2, 3, 4, 5, 6], slots: ['9:00', '10:30', '12:00', '14:00', '15:30'], home: false, paused: false, note: '' }
+export interface VisitSettings { days: number[], slots: string[], home: boolean, paused: boolean, note: string, capacity: number }
+export const defaultVisitSettings: VisitSettings = { days: [1, 2, 3, 4, 5, 6], slots: ['9:00', '10:30', '12:00', '14:00', '15:30'], home: false, paused: false, note: '', capacity: 1 }
 export const visitSettings = (s: Store): VisitSettings => s.visits ?? defaultVisitSettings
 
 // Example stores until the store dashboard and API exist
@@ -390,6 +391,14 @@ export function storeSummary(store: Store) {
   }
 }
 
+// The dogs first on a store's page: the ones it pinned (in the order it pinned them), then available before
+// reserved, up to `count`. The rest are on the store's dogs page.
+export function storeShowcase(dogs: Dog[], count = 3) {
+  const pinned = dogs.filter(d => d.pinnedAt).sort((a, b) => a.pinnedAt!.localeCompare(b.pinnedAt!))
+  const rest = dogs.filter(d => !d.pinnedAt).sort((a, b) => Number(a.status === 'reserved') - Number(b.status === 'reserved'))
+  return [...pinned, ...rest].slice(0, count)
+}
+
 // What a buyer can ask for when booking a kennel visit
 export const kennelVisitServices = ['Meet the dogs', 'Meet the dogs and see protection work']
 
@@ -416,11 +425,12 @@ export interface StoreRow {
   home_visits: boolean
   visits_paused: boolean
   pause_note: string
+  visit_capacity?: number
   status_note?: string
   status_changed_at?: string | null
 }
 
-export const storeColumns = 'public_id, slug, name, initials, tagline, city, area, state, founded, status, rating, reviews_count, details, banner_path, logo_path, visit_days, visit_slots, home_visits, visits_paused, pause_note, status_note, status_changed_at, store_care_links (relationship, care_providers (public_id))'
+export const storeColumns = 'public_id, slug, name, initials, tagline, city, area, state, founded, status, rating, reviews_count, details, banner_path, logo_path, visit_days, visit_slots, home_visits, visits_paused, pause_note, visit_capacity, status_note, status_changed_at, store_care_links (relationship, care_providers (public_id))'
 
 // A store image's public URL (the store-media bucket)
 export const storeMediaUrl = (path: string | null, storageUrl: string) =>
@@ -460,7 +470,7 @@ export function toStore(row: StoreRow, ownerName = '', storageUrl = ''): Store {
     logo: storeMediaUrl(row.logo_path, storageUrl),
     bannerPath: row.banner_path,
     logoPath: row.logo_path,
-    visits: { days: row.visit_days, slots: row.visit_slots, home: row.home_visits, paused: row.visits_paused, note: row.pause_note },
+    visits: { days: row.visit_days, slots: row.visit_slots, home: row.home_visits, paused: row.visits_paused, note: row.pause_note, capacity: row.visit_capacity ?? 1 },
     care: (row.store_care_links ?? []).flatMap(l => (l.care_providers ? [{ providerId: l.care_providers.public_id, relationship: l.relationship }] : [])),
   }
 }

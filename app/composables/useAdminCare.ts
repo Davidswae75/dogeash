@@ -17,7 +17,7 @@ export function useAdminCare() {
 
   async function load() {
     const { data } = await supabase.from('care_providers').select(careColumns).order('public_id')
-    providers.value = ((data ?? []) as unknown as CareRow[]).map(toCareProvider)
+    providers.value = ((data ?? []) as unknown as CareRow[]).map(r => toCareProvider(r))
     listedProviders.value = providers.value.filter(p => p.listed !== false).sort((a, b) => b.rating - a.rating)
     loaded.value = true
     const { data: m } = await supabase.rpc('admin_provider_managers')

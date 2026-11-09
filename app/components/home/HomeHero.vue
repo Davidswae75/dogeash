@@ -27,7 +27,7 @@ function search(q: string) {
       <span class="text-marigold">Nigerian Home</span>
     </h1>
     <p class="m-0 max-w-[32em] text-base leading-[26px] text-on-night/80">
-      Every kennel inspected in person. Every dog with a K9 file and handover training.
+      Every kennel inspected in person. Every dog with its records and handover training.
     </p>
     <SearchBar v-model="query" class="max-w-[560px] text-ink focus-within:outline-marigold!" @search="search" />
     <nav aria-label="Shop by property" class="flex flex-wrap items-center gap-2">

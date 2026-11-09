@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { Ellipsis, ExternalLink, Pencil, Trash2 } from '@lucide/vue'
+import { Ellipsis, ExternalLink, Pencil, Pin, PinOff, Trash2 } from '@lucide/vue'
 import type { StoreDog } from '~/utils/dogs'
 import type { ListingStatus } from '~/utils/k9'
 import { listingActions } from '~/utils/dogs'
 
-// The ⋯ menu on a dog: edit, see it as buyers do, move it on (live, reserved, sold, withdrawn), delete a draft
+// The ⋯ menu on a dog: edit, see it as buyers do, pin it to the store page (live dogs, up to 3), move it on
+// (live, reserved, sold, withdrawn), delete a draft
 const props = defineProps<{ dog: StoreDog, verified: boolean, canDelete: boolean }>()
-const emit = defineEmits<{ status: [to: ListingStatus], remove: [] }>()
+const emit = defineEmits<{ status: [to: ListingStatus], remove: [], pin: [] }>()
 </script>
 
 <template>
@@ -22,6 +23,9 @@ const emit = defineEmits<{ status: [to: ListingStatus], remove: [] }>()
       </DropdownMenuItem>
       <DropdownMenuItem v-if="props.dog.status === 'available' || props.dog.status === 'reserved'" as-child>
         <NuxtLink :to="`/dogs/${props.dog.fileNo.toLowerCase()}`" target="_blank"><ExternalLink aria-hidden="true" />View listing</NuxtLink>
+      </DropdownMenuItem>
+      <DropdownMenuItem v-if="props.dog.status === 'available' || props.dog.status === 'reserved'" @select="emit('pin')">
+        <component :is="props.dog.pinnedAt ? PinOff : Pin" aria-hidden="true" />{{ props.dog.pinnedAt ? 'Unpin from store page' : 'Pin to store page' }}
       </DropdownMenuItem>
       <template v-if="listingActions(props.dog.status, props.verified).length">
         <DropdownMenuSeparator />

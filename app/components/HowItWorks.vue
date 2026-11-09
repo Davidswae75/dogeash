@@ -6,7 +6,7 @@ export interface HowItWorksStep { title: string, text: string }
 
 const buyerSteps: HowItWorksStep[] = [
   { title: "Tell us what you're protecting", text: 'Home, compound, estate or business, and who lives there. We match the protection level.' },
-  { title: 'Meet verified dogs', text: "Read each dog's K9 file, then visit the store. Every kennel is inspected by us." },
+  { title: 'Meet verified dogs', text: "Read each dog's details and records, then visit the store. Every kennel is inspected by us." },
   { title: 'Handover at your gate', text: 'The trainer delivers the dog and teaches your household the commands on site.' },
 ]
 

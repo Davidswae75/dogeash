@@ -30,7 +30,11 @@ const schema = z.object({
   dueOn: z.string().default(''),
   byWhom: z.string().trim().max(80).default(''),
   note: z.string().trim().max(500).default(''),
-}).refine(v => v.doneOn || v.dueOn, { message: 'Give at least one date', path: ['dueOn'] })
+})
+  .refine(v => v.doneOn || v.dueOn, { message: 'Give at least one date', path: ['dueOn'] })
+  // When it was done can't be in the future; what's next can't come before it (the database checks the same)
+  .refine(v => !v.doneOn || v.doneOn <= new Date().toISOString().slice(0, 10), { message: 'That date is in the future', path: ['doneOn'] })
+  .refine(v => !v.doneOn || !v.dueOn || v.dueOn >= v.doneOn, { message: 'Can\'t be before the date it was done', path: ['dueOn'] })
 type Values = z.infer<typeof schema>
 
 const { handleSubmit, defineField, errors, resetForm } = useForm<Values>({ validationSchema: toTypedSchema(schema) })
@@ -92,11 +96,11 @@ const field = 'h-10 border-line-strong bg-surface'
           </FieldShell>
         </div>
         <div class="grid gap-4 sm:grid-cols-2">
-          <FieldShell :label="doneLabel" for="record-done">
-            <Input id="record-done" v-model="doneOn" type="date" :class="field" />
+          <FieldShell :label="doneLabel" for="record-done" :error="errors.doneOn">
+            <Input id="record-done" v-model="doneOn" type="date" :max="todayIso()" :class="field" />
           </FieldShell>
           <FieldShell :label="dueLabel" for="record-due" :error="errors.dueOn">
-            <Input id="record-due" v-model="dueOn" type="date" :class="field" />
+            <Input id="record-due" v-model="dueOn" type="date" :min="doneOn || undefined" :class="field" />
           </FieldShell>
         </div>
         <FieldShell v-if="!props.hideBy" label="By" for="record-by" optional hint="The vet, trainer or clinic.">

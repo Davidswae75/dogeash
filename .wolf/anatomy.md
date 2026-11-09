@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-11-08T10:59:20.004Z
-> Files: 777 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-11-09T02:40:58.012Z
+> Files: 778 tracked | Anatomy hits: 0 | Misses: 0
 
 > Project structure index. Auto-maintained by OpenWolf hooks and daemon.
 > Run `openwolf scan` to generate, or wait for the first Claude Code session.
@@ -36,7 +36,8 @@
 - `AccountGateDialog.vue` — Vue: setup (~655 tok)
 - `AppIcon.vue` — Vue: setup, TS, 3 props (~2222 tok)
 - `AppLoader.vue` — Vue: setup (~541 tok)
-- `AppLogo.vue` — Vue: setup, TS, 1 props (~160 tok)
+- `AppLogo.vue` — Vue: setup (~291 tok)
+- `AppLogoMark.vue` — Vue: setup (~263 tok)
 - `AppToast.vue` — Vue component (~67 tok)
 - `AuthCodeStep.vue` — Vue: setup (~740 tok)
 - `AuthPanel.vue` — Vue: setup (~379 tok)

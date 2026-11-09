@@ -168,7 +168,7 @@ export const guideDrawbacks: GuidePoint[] = [
     icon: 'child',
     title: 'The wrong dog is a risk to children and visitors',
     body: 'A dog matched to the wrong home can be dangerous: too much drive for a busy family, or a nervous temperament around guests. Most problems come from a poor match, not from the breed.',
-    note: 'Only buy dogs tested with children if you have them. Read the K9 file\'s temperament notes.',
+    note: 'Only buy dogs tested with children if you have them. Read the temperament notes on the dog\'s page.',
   },
   {
     icon: 'poison',
@@ -251,7 +251,7 @@ export const guideReadiness = [
 export const guideFaqs = [
   {
     q: 'Will a guard dog be safe with my children?',
-    a: 'It can be, if it is the right dog. Choose a dog whose K9 file says it was raised with or tested around children, and start at level 2 or 3. Supervise children with any dog, and teach them never to play-fight with it.',
+    a: 'It can be, if it is the right dog. Choose a dog whose details say it was raised with or tested around children, and start at level 2 or 3. Supervise children with any dog, and teach them never to play-fight with it.',
   },
   {
     q: 'Should I buy a puppy or a trained adult?',

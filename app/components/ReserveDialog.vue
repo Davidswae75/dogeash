@@ -6,6 +6,7 @@ import type { Dog } from '~/utils/dogs'
 import { useAccountGate } from '~/composables/useAccountGate'
 import { useReservations } from '~/composables/useReservations'
 import { useSession } from '~/composables/useSession'
+import { dogeashId } from '~/utils/dogs'
 import { depositFor, formatMoney, moneyRules } from '~/utils/reservations'
 
 // "Reserve with a deposit" on a dog's page: what the deposit is, what happens to the money, then
@@ -61,7 +62,7 @@ async function pay() {
   <Dialog v-model:open="open">
     <DialogContent class="max-h-[92dvh] overflow-y-auto border-line bg-surface sm:max-w-[500px]">
       <DialogHeader class="text-left">
-        <span class="font-mono text-[10.5px] font-semibold tracking-[.12em] text-ink-muted uppercase">Reserve · {{ props.dog.fileNo }}</span>
+        <span class="font-mono text-[10.5px] font-semibold tracking-[.12em] text-ink-muted uppercase">Reserve · {{ dogeashId(props.dog.fileNo) }}</span>
         <DialogTitle class="font-display text-[22px] leading-7 font-extrabold font-stretch-expanded">Reserve {{ props.dog.name }}</DialogTitle>
         <DialogDescription class="text-ink-muted">{{ props.dog.breed }} from {{ props.storeName }}. Pay the deposit now and the rest before the handover.</DialogDescription>
       </DialogHeader>

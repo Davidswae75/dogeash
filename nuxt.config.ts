@@ -75,8 +75,8 @@ export default defineNuxtConfig({
 
   // Day watch / Night watch: sets data-theme="light" | "dark" on <html> before paint
   colorMode: {
-    preference: 'system',
-    fallback: 'light',
+    preference: 'dark',
+    fallback: 'dark',
     dataValue: 'theme',
     classSuffix: '',
     storageKey: 'dogeash-watch',
@@ -96,8 +96,8 @@ export default defineNuxtConfig({
       meta: [
         { name: 'description', content: 'Trained guard dogs for homes, compounds and estates, from kennels we inspect in person.' },
         // The browser bar and installed app follow Day or Night (the device setting)
-        { name: 'theme-color', content: '#f2f1ed', media: '(prefers-color-scheme: light)' },
-        { name: 'theme-color', content: '#0f0f10', media: '(prefers-color-scheme: dark)' },
+        // Night watch is the default look
+        { name: 'theme-color', content: '#0f0f10' },
         { name: 'application-name', content: 'Dogeash' },
         { name: 'apple-mobile-web-app-title', content: 'Dogeash' },
         { name: 'mobile-web-app-capable', content: 'yes' },

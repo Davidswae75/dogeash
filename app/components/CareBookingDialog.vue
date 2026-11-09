@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import type { CareProvider } from '~/utils/care'
 import { LayoutDashboard } from '@lucide/vue'
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import type { AccountGate } from '~/composables/useAccountGate'
 import { useCareBookings } from '~/composables/useCareBookings'
 import { useOwnedDogs } from '~/composables/useOwnedDogs'
 import { useSession } from '~/composables/useSession'
-import { careTypes } from '~/utils/care'
+import { careTypes, providerServices } from '~/utils/care'
 import { formatNaira } from '~/utils/dogs'
 
 // Book a care provider: the shared booking dialog, on the provider's own days and times. Buyers pick one of
@@ -27,6 +27,9 @@ onMounted(() => { if (signedIn.value) owned.ensure() })
 const ownedDogs = computed(() => owned.dogs.value.map(d => ({ value: d.id, label: d.name })))
 
 const bookings = useCareBookings()
+// Times others already have: crossed out in the dialog
+const full = ref<string[]>([])
+const loadFull = async () => { full.value = await bookings.fullSlots(props.provider.id) }
 const send = (b: { service: string, day: string, slot: string, place: 'home' | 'premises', ownedDogId: string | null, dogName: string, shareRecord: boolean }) =>
   bookings.request({ providerId: props.provider.id, ...b })
 </script>
@@ -39,7 +42,9 @@ const send = (b: { service: string, day: string, slot: string, place: 'home' | '
     v-else-if="props.provider.takingBookings !== false"
     :title="props.provider.name"
     :description="`${careTypes[props.provider.type].label} · ${props.provider.areas}${props.provider.hours ? ` · ${props.provider.hours}` : ''}`"
-    :services="careTypes[props.provider.type].services"
+    :services="providerServices(props.provider)"
+    :full-slots="full"
+    :load-full-slots="loadFull"
     :home-visits="props.provider.homeVisits"
     :weekdays="props.provider.weekdays"
     :slots="props.provider.slots"

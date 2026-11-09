@@ -29,6 +29,8 @@ const schema = z.object({
   gotOn: z.string().refine(v => !v || v <= todayIso, 'That date is in the future').default(''),
   notes: z.string().trim().max(1000).default(''),
 })
+  // A dog can't have come to you before it was born (the database checks the same)
+  .refine(v => !v.gotOn || !v.bornOn || v.gotOn >= v.bornOn, { message: 'Can\'t be before the dog was born', path: ['gotOn'] })
 type Values = z.infer<typeof schema>
 const d = props.dog
 const { handleSubmit, defineField, errors } = useForm<Values>({
@@ -166,7 +168,7 @@ const field = 'h-11 border-line-strong bg-surface'
           <Input id="dog-from" v-model="cameFrom" maxlength="80" placeholder="K9 Guardian Kennels" :class="field" />
         </FieldShell>
         <FieldShell label="With you since" for="dog-got" optional :error="errors.gotOn">
-          <Input id="dog-got" v-model="gotOn" type="date" :max="todayIso" :class="field" />
+          <Input id="dog-got" v-model="gotOn" type="date" :min="bornOn || undefined" :max="todayIso" :class="field" />
         </FieldShell>
       </div>
       <FieldShell label="Notes" for="dog-notes" optional hint="Anything a vet, trainer or sitter should know: allergies, temperament, commands.">

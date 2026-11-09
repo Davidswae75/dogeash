@@ -82,7 +82,7 @@ export function useOwnedDogs() {
     return data?.signedUrl
   }
 
-  const dogError = (message: string) => (message.includes('20 dogs') ? 'You can keep up to 20 dogs here.' : 'That didn\'t save. Try again.')
+  const dogError = (message: string) => (message.includes('20 dogs') ? 'You can keep up to 20 dogs here.' : message.includes('got_after_born') ? 'The date the dog came to you can\'t be before it was born.' : 'That didn\'t save. Try again.')
 
   // Add a dog, or change one; returns { id } or { error }
   async function save(draft: DogDraft, id?: string): Promise<{ id?: string, error?: string }> {
@@ -116,7 +116,7 @@ export function useOwnedDogs() {
     const { data, error } = id
       ? await supabase.from('owned_dog_records').update(row).eq('id', id).select('*').single()
       : await supabase.from('owned_dog_records').insert({ ...row, owned_dog_id: dogId }).select('*').single()
-    if (error) return error.message.includes('full') ? 'This dog\'s record is full.' : 'That didn\'t save. Try again.'
+    if (error) return recordError(error.message)
     const saved = fromRecord(data)
     patch(dogId, list => (id ? list.map(r => (r.id === id ? saved : r)) : [...list, saved]))
     return null
@@ -134,4 +134,12 @@ export function useOwnedDogs() {
     saveRecord(dogId, { ...r, doneOn: new Date().toISOString().slice(0, 10), dueOn: null }, r.id)
 
   return { dogs, loaded, load, ensure, find, uploadPhoto, previewOf, save, remove, saveRecord, removeRecord, markDone }
+}
+
+// The database's refusal of a record line, in words for the owner (the dates are checked there too)
+export function recordError(message: string) {
+  if (message.includes('full')) return 'This dog\'s record is full.'
+  if (message.includes('due_after_done')) return 'The next date can\'t be before the date it was done.'
+  if (message.includes('done_not_future')) return 'The date it was done can\'t be in the future.'
+  return 'That didn\'t save. Try again.'
 }

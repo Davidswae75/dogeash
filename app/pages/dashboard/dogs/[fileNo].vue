@@ -3,6 +3,7 @@ import { ArrowLeft } from '@lucide/vue'
 import { computed, onMounted } from 'vue'
 import { definePageMeta, useRoute, useSeoMeta } from '#imports' // nuxt
 import type { DogMedia } from '~/utils/dogs'
+import { dogeashId } from '~/utils/dogs'
 import type { DogFormValues } from '~/utils/dogForm'
 import { useNotify } from '~/composables/useNotify'
 import { useStoreDogs } from '~/composables/useStoreDogs'
@@ -28,7 +29,7 @@ async function save(values: DogFormValues, media: DogMedia, publish: boolean) {
     if (failed) return failed
   }
   const held = publish && storeDogs.lastStatus.value === 'pending_review'
-  notify.dogUpdated(held ? `${values.name} is with Dogeash for review` : publish ? `${values.name} is live` : 'Changes saved', `${d.fileNo}. ${held ? 'Dogeash checks some new listings before buyers see them.' : publish || d.status === 'available' || d.status === 'reserved' ? 'Buyers see the update now.' : 'Still a draft.'}`, d.photo)
+  notify.dogUpdated(held ? `${values.name} is with Dogeash for review` : publish ? `${values.name} is live` : 'Changes saved', `${dogeashId(d.fileNo)}. ${held ? 'Dogeash checks some new listings before buyers see them.' : publish || d.status === 'available' || d.status === 'reserved' ? 'Buyers see the update now.' : 'Still a draft.'}`, d.photo)
   return null
 }
 </script>
@@ -42,7 +43,7 @@ async function save(values: DogFormValues, media: DogMedia, publish: boolean) {
       <header class="flex flex-wrap items-center gap-3">
         <h1 class="m-0 mega text-[clamp(26px,3vw,36px)] leading-none">{{ dog.name }}</h1>
         <ListingStatusChip :status="dog.status" />
-        <span class="font-mono text-xs text-ink-muted">{{ dog.fileNo }}</span>
+        <span class="font-mono text-xs text-ink-muted">{{ dogeashId(dog.fileNo) }}</span>
         <span class="flex-1" />
         <DashboardDogActions :dog="dog" :verified="verified" :can-delete="false" @status="to => storeDogs.changeStatus(dog!, to)" />
       </header>

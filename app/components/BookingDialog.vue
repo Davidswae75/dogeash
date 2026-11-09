@@ -26,6 +26,10 @@ const props = withDefaults(defineProps<{
   /** Extra lines for the confirmation, e.g. which dogs */
   summary?: BookingSummaryRow[]
   askDogName?: boolean
+  /** Times already taken, as "2026-11-12 9:00": shown as booked and can't be chosen */
+  fullSlots?: string[]
+  /** Loads `fullSlots` fresh when the dialog opens */
+  loadFullSlots?: () => void
   /** The buyer's own dogs (My dogs), offered instead of typing a name */
   ownedDogs?: { value: string, label: string }[]
   triggerLabel?: string
@@ -45,6 +49,7 @@ const props = withDefaults(defineProps<{
   triggerVariant: 'outline',
   summary: () => [],
   ownedDogs: () => [],
+  fullSlots: () => [],
 })
 
 const open = ref(false)
@@ -65,6 +70,10 @@ const chosenDog = computed(() => props.ownedDogs.find(d => d.value === ownedDog.
 const error = ref('')
 
 const times = computed(() => props.slots ?? ['9:00', '10:30', '12:00', '14:00', '15:30'])
+// A time someone else already has on the chosen day can't be picked
+const isFull = (slot: string) => !!day.value && props.fullSlots.includes(`${day.value} ${slot}`)
+watch(day, () => { if (time.value && isFull(time.value)) time.value = '' })
+watch(open, (o) => { if (o) props.loadFullSlots?.() })
 
 // The next six days they work, looking up to four weeks ahead
 const days = computed(() => {
@@ -158,8 +167,9 @@ const chips = 'flex w-auto flex-wrap justify-start gap-2'
           <fieldset class="m-0 border-0 p-0">
             <legend :class="legend">Time</legend>
             <ToggleGroup v-model="time" type="single" variant="chip" :class="chips">
-              <ToggleGroupItem v-for="t in times" :key="t" :value="t" class="rounded-full! font-mono">{{ t }}</ToggleGroupItem>
+              <ToggleGroupItem v-for="t in times" :key="t" :value="t" :disabled="isFull(t)" :class="['rounded-full! font-mono', isFull(t) && 'line-through opacity-50']" :title="isFull(t) ? 'Already booked' : undefined">{{ t }}</ToggleGroupItem>
             </ToggleGroup>
+            <p v-if="day && times.some(isFull)" class="m-0 mt-2 text-xs text-ink-muted">Crossed-out times are already booked.</p>
           </fieldset>
 
           <fieldset v-if="props.homeVisits" class="m-0 border-0 p-0">

@@ -1,7 +1,7 @@
 import type { CareType } from '~/utils/care'
 import { computed, ref } from 'vue'
 import { useRoute } from '#imports' // nuxt
-import { careTypes, listedProviders } from '~/utils/care'
+import { careTypes, listedProviders, providerServices } from '~/utils/care'
 
 // Search, filters and sort for the care directory. Reads ?type= and ?city= so links can land on a filtered view.
 export function useCareDirectory() {
@@ -30,11 +30,12 @@ export function useCareDirectory() {
   const providers = computed(() => {
     const q = query.value.trim().toLowerCase()
     const list = listedProviders.value.filter(p =>
-      (!type.value || p.type === type.value)
+      // Their own kind of care, or any of its services (a vet who also grooms shows under grooming)
+      (!type.value || p.type === type.value || providerServices(p).some(s => careTypes[type.value as CareType].services.includes(s)))
       && (!cities.value.length || cities.value.includes(p.city))
       && (!options.value.includes('verified') || p.verified)
       && (!options.value.includes('home') || p.homeVisits)
-      && (!q || [p.name, p.person, p.city, p.areas, careTypes[p.type].label, ...careTypes[p.type].services].some(v => v?.toLowerCase().includes(q))),
+      && (!q || [p.name, p.person, p.city, p.areas, careTypes[p.type].label, ...providerServices(p)].some(v => v?.toLowerCase().includes(q))),
     )
     const by = {
       rating: (a: typeof list[number], b: typeof list[number]) => b.rating - a.rating,

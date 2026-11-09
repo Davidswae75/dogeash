@@ -61,6 +61,7 @@ export interface Database {
           home_visits: boolean
           visits_paused: boolean
           pause_note: string
+          visit_capacity: number
           status_note: string
           status_changed_at: string | null
           created_by: string | null
@@ -77,7 +78,7 @@ export interface Database {
           founded?: number | null
           details?: Json
         }
-        Update: { name?: string, initials?: string, tagline?: string, city?: string, area?: string, state?: string, founded?: number | null, details?: Json, banner_path?: string | null, logo_path?: string | null, visit_days?: number[], visit_slots?: string[], home_visits?: boolean, visits_paused?: boolean, pause_note?: string }
+        Update: { name?: string, initials?: string, tagline?: string, city?: string, area?: string, state?: string, founded?: number | null, details?: Json, banner_path?: string | null, logo_path?: string | null, visit_days?: number[], visit_slots?: string[], home_visits?: boolean, visits_paused?: boolean, pause_note?: string, visit_capacity?: number }
         Relationships: []
       }
       store_members: {
@@ -110,6 +111,7 @@ export interface Database {
           property: Database['public']['Enums']['property_type'][]
           safe_with_children: boolean
           file: Json | null
+          pinned_at: string | null
         } & Timestamps
         Insert: {
           file_no?: string // assigned by the database
@@ -131,7 +133,7 @@ export interface Database {
           safe_with_children?: boolean
           file?: Json | null
         }
-        Update: Partial<Omit<Database['public']['Tables']['dogs']['Insert'], 'file_no' | 'store_id'>>
+        Update: Partial<Omit<Database['public']['Tables']['dogs']['Insert'], 'file_no' | 'store_id'>> & { pinned_at?: string | null }
         Relationships: [
           { foreignKeyName: 'dogs_store_id_fkey', columns: ['store_id'], isOneToOne: false, referencedRelation: 'stores', referencedColumns: ['id'] },
         ]
@@ -200,7 +202,7 @@ export interface Database {
         Relationships: []
       }
       care_providers: {
-        Row: { id: string, public_id: string, slug: string, name: string, person: string | null, type: Database['public']['Enums']['care_type'], city: string, areas: string, home_visits: boolean, verified: boolean, credential: string, rating: number, reviews_count: number, price_from: number, about: string, hours: string, weekdays: number[], slots: string[], taking_bookings: boolean, listed: boolean } & Timestamps
+        Row: { id: string, public_id: string, slug: string, name: string, person: string | null, type: Database['public']['Enums']['care_type'], city: string, areas: string, home_visits: boolean, verified: boolean, credential: string, rating: number, reviews_count: number, price_from: number, about: string, hours: string, weekdays: number[], slots: string[], taking_bookings: boolean, listed: boolean, services: string[], slot_capacity: number, photo_path: string | null, gallery_paths: string[], address: string, started_year: number | null, history: Json } & Timestamps
         Insert: never
         Update: never
         Relationships: []
@@ -308,6 +310,12 @@ export interface Database {
         Update: { bank_code?: string, bank_name?: string, account_name?: string, account_last4?: string, recipient_code?: string, updated_by?: string | null, updated_at?: string }
         Relationships: []
       }
+      care_provider_contacts: {
+        Row: { provider_id: string, phone: string, whatsapp: string, email: string, updated_at: string }
+        Insert: never
+        Update: never
+        Relationships: []
+      }
       care_provider_members: {
         Row: { provider_id: string, user_id: string, created_at: string }
         Insert: { [_ in never]: never }
@@ -366,6 +374,10 @@ export interface Database {
       provider_add_record: { Args: { booking: string, rec_kind: Database['public']['Enums']['owned_dog_record_kind'], rec_title: string, rec_done: string | null, rec_due: string | null, rec_note?: string }, Returns: undefined }
       provider_booking_records: { Args: { booking: string }, Returns: Json }
       invite_preview: { Args: { kind: string, invite: string }, Returns: Json }
+      provider_save_services: { Args: { provider: string, list: string[], capacity?: number }, Returns: undefined }
+      care_full_slots: { Args: { provider: string }, Returns: { day: string, slot: string }[] }
+      store_full_slots: { Args: { store: string }, Returns: { day: string, slot: string }[] }
+      provider_save_details: { Args: { provider: string, d: Json }, Returns: undefined }
       account_exists: { Args: { check_email: string }, Returns: boolean }
       has_store_role: { Args: { target_store: string, roles: Database['public']['Enums']['store_role'][] }, Returns: boolean }
       mark_conversation_read: { Args: { target: string }, Returns: undefined }

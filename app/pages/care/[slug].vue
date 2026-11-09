@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import { Check, MapPin, Star } from '@lucide/vue'
+import { CalendarClock, Check, MapPin, Star } from '@lucide/vue'
 import { computed } from 'vue'
 import { createError, useRoute, useSeoMeta } from '#imports' // nuxt
 import { useSession } from '~/composables/useSession'
-import { careTypes, findCareProviderBySlug, listedProviders } from '~/utils/care'
+import { careTypes, findCareProviderBySlug, listedProviders, providerServices, scheduleLine, yearsActive } from '~/utils/care'
 import { formatNaira } from '~/utils/dogs'
 import { storesForProvider } from '~/utils/stores'
 
-// One provider: credentials, services, the stores they work with, and booking
+// One provider: who they are (photo, credential, years), about, their workplace in photos, history,
+// services, the stores they work with, contact, and booking
 const route = useRoute()
 const provider = findCareProviderBySlug(String(route.params.slug))
 if (!provider) throw createError({ statusCode: 404, statusMessage: 'No provider with that name' })
@@ -22,6 +23,9 @@ useSeoMeta({
 })
 
 const stores = storesForProvider(provider.id)
+const years = yearsActive(provider)
+const history = provider.history ?? []
+const gallery = provider.gallery ?? []
 const similar = listedProviders.value
   .filter(p => p.id !== provider.id && (p.type === provider.type || p.city === provider.city))
   .sort((a, b) => Number(b.type === provider.type) - Number(a.type === provider.type) || b.rating - a.rating)
@@ -31,6 +35,7 @@ const facts = [
   { label: 'Areas covered', value: provider.areas },
   { label: 'Where', value: provider.homeVisits ? 'Home visits or at their premises' : 'At their premises' },
   { label: 'Price from', value: formatNaira(provider.priceFrom) },
+  { label: 'When', value: scheduleLine(provider) },
   ...(provider.hours ? [{ label: 'Hours', value: provider.hours }] : []),
 ]
 const eyebrow = 'text-xs leading-4 font-bold tracking-[.08em] uppercase'
@@ -57,13 +62,15 @@ const eyebrow = 'text-xs leading-4 font-bold tracking-[.08em] uppercase'
     <div class="grid items-start gap-10 lg:grid-cols-[1fr_340px]">
       <div class="flex min-w-0 flex-col gap-10 lg:col-start-1">
         <header class="flex animate-rise flex-col gap-4">
-          <CareProviderIcon :type="provider.type" />
+          <img v-if="provider.photo" :src="provider.photo" :alt="provider.person || provider.name" class="size-24 rounded-full object-cover ring-2 ring-line">
+          <CareProviderIcon v-else :type="provider.type" />
           <span :class="[eyebrow, 'text-marigold-ink']">{{ typeLabel }}</span>
           <h1 class="m-0 mega text-[clamp(34px,4vw,54px)] leading-none">{{ provider.name }}</h1>
           <p v-if="provider.person" class="m-0 text-[17px] leading-[27px] text-ink-muted">{{ provider.person }}</p>
           <div class="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
             <span class="inline-flex items-center gap-1.5 font-semibold"><Star class="size-4 fill-marigold text-marigold" aria-hidden="true" />{{ provider.rating }} · {{ provider.reviews }} reviews</span>
             <span class="inline-flex items-center gap-1.5 text-ink-muted"><MapPin class="size-4" aria-hidden="true" />{{ provider.city }}</span>
+            <span v-if="years" class="inline-flex items-center gap-1.5 text-ink-muted"><CalendarClock class="size-4" aria-hidden="true" />{{ years }} {{ years === 1 ? 'year' : 'years' }} with dogs</span>
           </div>
           <p class="m-0 flex items-start gap-2 text-[15px] leading-6 font-semibold" :class="provider.verified ? 'text-verified' : 'text-ink-muted'">
             <AppIcon v-if="provider.verified" name="shield" :size="20" class="shrink-0" />
@@ -76,10 +83,39 @@ const eyebrow = 'text-xs leading-4 font-bold tracking-[.08em] uppercase'
           <p class="m-0 max-w-[44em] text-[16px] leading-[26px] whitespace-pre-line">{{ provider.about }}</p>
         </section>
 
+        <!-- The workplace and their work, in photos -->
+        <section v-if="gallery.length" class="flex flex-col gap-4" aria-labelledby="work-title">
+          <h2 id="work-title" class="m-0 mega text-[clamp(26px,3vw,36px)] leading-none">Workplace</h2>
+          <ul class="m-0 grid list-none grid-cols-2 gap-2.5 p-0 sm:grid-cols-3">
+            <li v-for="(src, i) in gallery" :key="src" :class="i === 0 && gallery.length > 2 ? 'col-span-2 row-span-2' : ''">
+              <a :href="src" target="_blank" rel="noopener" class="block size-full overflow-hidden rounded-lg ring-1 ring-line">
+                <img :src="src" :alt="`${provider.name}, photo ${i + 1}`" loading="lazy" class="aspect-4/3 size-full object-cover transition-transform duration-300 hover:scale-[1.03]">
+              </a>
+            </li>
+          </ul>
+        </section>
+
+        <!-- History: when they started, then their milestones -->
+        <section v-if="history.length || provider.startedYear" class="flex flex-col gap-4" aria-labelledby="history-title">
+          <h2 id="history-title" class="m-0 mega text-[clamp(26px,3vw,36px)] leading-none">History</h2>
+          <ol class="m-0 flex list-none flex-col p-0">
+            <li v-if="provider.startedYear" class="relative flex gap-4 pb-5 pl-6 before:absolute before:top-2 before:bottom-0 before:left-[5px] before:w-px before:bg-line last:pb-0 last:before:hidden">
+              <span class="absolute top-1.5 left-0 size-[11px] rounded-full bg-marigold" aria-hidden="true" />
+              <span class="w-14 shrink-0 font-mono text-sm font-semibold">{{ provider.startedYear }}</span>
+              <span class="text-[15px] leading-6">Started working with dogs</span>
+            </li>
+            <li v-for="(h, i) in history" :key="i" class="relative flex gap-4 pb-5 pl-6 before:absolute before:top-2 before:bottom-0 before:left-[5px] before:w-px before:bg-line last:pb-0 last:before:hidden">
+              <span class="absolute top-1.5 left-0 size-[11px] rounded-full bg-surface ring-2 ring-ink" aria-hidden="true" />
+              <span class="w-14 shrink-0 font-mono text-sm font-semibold">{{ h.year }}</span>
+              <span class="text-[15px] leading-6">{{ h.text }}</span>
+            </li>
+          </ol>
+        </section>
+
         <section class="flex flex-col gap-4" aria-labelledby="services-title">
           <h2 id="services-title" class="m-0 mega text-[clamp(26px,3vw,36px)] leading-none">Services</h2>
           <ul class="m-0 grid list-none gap-2.5 p-0 sm:grid-cols-2">
-            <li v-for="service in careTypes[provider.type].services" :key="service" class="flex items-center gap-3 rounded-lg bg-surface p-4 text-[15px] font-semibold ring-1 ring-line">
+            <li v-for="service in providerServices(provider)" :key="service" class="flex items-center gap-3 rounded-lg bg-surface p-4 text-[15px] font-semibold ring-1 ring-line">
               <Check class="size-4 shrink-0 text-marigold-ink" :stroke-width="3" aria-hidden="true" />{{ service }}
             </li>
           </ul>
@@ -110,6 +146,7 @@ const eyebrow = 'text-xs leading-4 font-bold tracking-[.08em] uppercase'
         </dl>
         <CareBookingDialog :provider="provider" variant="marigold" trigger-class="w-full" />
         <p class="m-0 text-[13px] leading-5">You pay the provider directly for now.</p>
+        <CareProviderContact :provider="provider" class="text-ink" />
       </aside>
 
       <section v-if="similar.length" class="flex min-w-0 flex-col gap-4 lg:col-start-1" aria-labelledby="similar-title">

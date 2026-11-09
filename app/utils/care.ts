@@ -36,7 +36,22 @@ export interface CareProvider {
   takingBookings?: boolean
   /** Shown to buyers; Dogeash can keep a listing hidden while it's set up */
   listed?: boolean
+  /** What they offer (more than one, from any kind of care); empty means their kind's usual services */
+  services?: string[]
+  /** How many bookings one time can take */
+  slotCapacity?: number
+  // Photos (URLs, and the storage paths behind them), the workplace, when they started and milestones
+  photo?: string
+  photoPath?: string | null
+  gallery?: string[]
+  galleryPaths?: string[]
+  address?: string
+  startedYear?: number | null
+  history?: CareMilestone[]
 }
+export interface CareMilestone { year: string, text: string }
+// The phone, WhatsApp and email: only for signed-in people (care_provider_contacts)
+export interface CareContacts { phone: string, whatsapp: string, email: string }
 
 // Example providers: the fallback when the database can't be reached, and what `npm run db:seed` writes
 export const sampleCareProviders: CareProvider[] = [
@@ -75,10 +90,21 @@ export interface CareRow {
   slots: string[]
   taking_bookings: boolean
   listed: boolean
+  services: string[]
+  slot_capacity: number
+  photo_path?: string | null
+  gallery_paths?: string[]
+  address?: string
+  started_year?: number | null
+  history?: CareMilestone[]
 }
-export const careColumns = 'public_id, name, person, type, city, areas, home_visits, verified, credential, rating, reviews_count, price_from, about, hours, weekdays, slots, taking_bookings, listed'
+export const careColumns = 'public_id, name, person, type, city, areas, home_visits, verified, credential, rating, reviews_count, price_from, about, hours, weekdays, slots, taking_bookings, listed, services, slot_capacity, photo_path, gallery_paths, address, started_year, history'
 
-export const toCareProvider = (r: CareRow): CareProvider => ({
+// Providers' photos live in the public care-media bucket, one folder per provider
+export const careMediaUrl = (path: string | null | undefined, storageUrl: string) =>
+  (path && storageUrl ? `${storageUrl}/storage/v1/object/public/care-media/${path}` : undefined)
+
+export const toCareProvider = (r: CareRow, storageUrl = ''): CareProvider => ({
   id: r.public_id,
   name: r.name,
   person: r.person ?? undefined,
@@ -97,7 +123,36 @@ export const toCareProvider = (r: CareRow): CareProvider => ({
   slots: r.slots ?? undefined,
   takingBookings: r.taking_bookings ?? true,
   listed: r.listed ?? true,
+  services: r.services ?? [],
+  slotCapacity: r.slot_capacity ?? 1,
+  photoPath: r.photo_path ?? null,
+  photo: careMediaUrl(r.photo_path, storageUrl),
+  galleryPaths: r.gallery_paths ?? [],
+  gallery: (r.gallery_paths ?? []).map(p => careMediaUrl(p, storageUrl)).filter((u): u is string => !!u),
+  address: r.address ?? '',
+  startedYear: r.started_year ?? null,
+  history: Array.isArray(r.history) ? r.history : [],
 })
+
+// "12 years" since they started, or nothing
+export const yearsActive = (p: CareProvider) => (p.startedYear ? Math.max(0, new Date().getFullYear() - p.startedYear) : null)
+
+// What a provider offers: their own list, or their kind's usual services until they set one
+export const providerServices = (p: CareProvider) => (p.services?.length ? p.services : careTypes[p.type].services)
+
+// Every service providers can choose from, grouped by kind of care (the provider's listing page)
+export const careServiceGroups = (Object.keys(careTypes) as CareType[]).map(k => ({ type: k, label: careTypes[k].label, services: careTypes[k].services }))
+
+// "Mon to Sat · 9:00 to 17:00": when they take bookings, in one line
+const dayShort = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+export function scheduleLine(p: CareProvider) {
+  const days = [...(p.weekdays ?? [1, 2, 3, 4, 5, 6])].sort((a, b) => ((a + 6) % 7) - ((b + 6) % 7))
+  const run = days.length > 2 && days.every((d, i) => i === 0 || (days[i - 1]! + 1) % 7 === d)
+  const dayText = run ? `${dayShort[days[0]!]} to ${dayShort[days[days.length - 1]!]}` : days.map(d => dayShort[d]).join(', ')
+  const slots = [...(p.slots ?? ['9:00', '17:00'])].sort((a, b) => Number(a.replace(':', '.')) - Number(b.replace(':', '.')))
+  const timeText = slots.length > 1 ? `${slots[0]} to ${slots[slots.length - 1]}` : slots[0] ?? ''
+  return [dayText, timeText].filter(Boolean).join(' · ')
+}
 
 export function findCareProvider(id: string) {
   return listedProviders.value.find(p => p.id === id)

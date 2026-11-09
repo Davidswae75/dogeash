@@ -7,7 +7,7 @@ import { cn } from '~/lib/utils'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useConversations } from '~/composables/useConversations'
 import { useStoreContext } from '~/composables/useStoreContext'
-import { findDog } from '~/utils/dogs'
+import { dogeashId, findDog } from '~/utils/dogs'
 import { inboxKinds, quickReplies } from '~/utils/inbox'
 import { shortTime } from '~/utils/time'
 
@@ -65,7 +65,7 @@ onBeforeUnmount(() => clearInterval(timer))
         <img v-if="dog.photo" :src="dog.photo" alt="" class="size-9 rounded-md object-cover">
         <span class="flex flex-col">
           <strong class="text-[13px] leading-4">{{ dog.name }}</strong>
-          <span class="font-mono text-[10px] text-ink-muted">{{ dog.fileNo }}</span>
+          <span class="font-mono text-[10px] text-ink-muted">{{ dogeashId(dog.fileNo) }}</span>
         </span>
       </NuxtLink>
     </header>

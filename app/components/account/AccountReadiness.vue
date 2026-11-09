@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Check, ChevronRight } from '@lucide/vue'
+import { ChevronRight } from '@lucide/vue'
 import { computed } from 'vue'
 import { cn } from '~/lib/utils'
 import { useSession } from '~/composables/useSession'
@@ -22,20 +22,14 @@ const done = computed(() => items.value.filter(i => i.done).length)
       </div>
       <ul class="m-0 flex list-none flex-col gap-1 p-0">
         <li v-for="item in items" :key="item.label">
-          <component
-            :is="!item.done && item.to ? 'NuxtLink' : 'div'"
-            v-bind="!item.done && item.to ? { to: item.to } : {}"
-            :class="cn('-mx-2 flex gap-3 rounded-lg px-2 py-1.5 text-ink no-underline', !item.done && item.to && 'hover:bg-surface-sunk')"
-          >
-            <span :class="cn('mt-px grid size-5 shrink-0 place-items-center rounded-full', item.done ? 'bg-ink text-canvas' : 'ring-[1.5px] ring-line-strong ring-inset')">
-              <Check v-if="item.done" class="size-3" aria-hidden="true" />
-            </span>
-            <span class="flex flex-1 flex-col gap-0.5">
-              <span :class="cn('text-sm leading-5', item.done ? 'text-ink-muted' : 'font-semibold')">{{ item.label }}</span>
-              <span v-if="!item.done && item.text" class="text-[13px] leading-[18px] text-ink-muted">{{ item.text }}</span>
-            </span>
-            <ChevronRight v-if="!item.done && item.to" class="mt-0.5 size-4 shrink-0 text-ink-muted" aria-hidden="true" />
-          </component>
+          <!-- A step still to do is a link to where it's done; a done one is plain -->
+          <NuxtLink v-if="!item.done && item.to" :to="item.to" class="-mx-2 flex gap-3 rounded-lg px-2 py-1.5 text-ink no-underline hover:bg-surface-sunk">
+            <AccountReadinessStep :item="item" />
+            <ChevronRight class="mt-0.5 size-4 shrink-0 text-ink-muted" aria-hidden="true" />
+          </NuxtLink>
+          <div v-else class="-mx-2 flex gap-3 rounded-lg px-2 py-1.5 text-ink">
+            <AccountReadinessStep :item="item" />
+          </div>
         </li>
       </ul>
     </div>

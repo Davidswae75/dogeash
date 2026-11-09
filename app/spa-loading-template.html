@@ -3,7 +3,7 @@
   is read, and staff access and the one-time code are checked. Nuxt removes it once the page is ready
   (nuxt.config: spaLoadingTemplateLocation 'body'). It matches AppLoader: Dogeash's dog tracing itself in over
   the wordmark. Self-contained: none of the site's CSS has loaded yet. The admin is always dark; elsewhere it
-  follows the Day/Night choice (data-theme, set by color-mode before this paints) or the device.
+  follows the Day/Night choice (data-theme, set by color-mode before this paints), dark by default.
 -->
 <div id="dg-boot" role="status" aria-live="polite" aria-label="Opening Dogeash">
   <style>
@@ -11,7 +11,8 @@
       position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; padding: 24px; background: var(--bg); color: var(--ink);
       font-family: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif; }
     :root[data-theme="dark"] #dg-boot, #dg-boot.dg-dark { --bg: #0f0f10; --card: #1a1a1c; --ring: #2f2f33; --ink: #f5f5f3; --muted: #a9a9a6; --rule: #6c6c72; }
-    @media (prefers-color-scheme: dark) { :root:not([data-theme]) #dg-boot { --bg: #0f0f10; --card: #1a1a1c; --ring: #2f2f33; --ink: #f5f5f3; --muted: #a9a9a6; --rule: #6c6c72; } }
+    /* Dark is the default: only an explicit Day watch choice shows light */
+    :root:not([data-theme="light"]) #dg-boot { --bg: #0f0f10; --card: #1a1a1c; --ring: #2f2f33; --ink: #f5f5f3; --muted: #a9a9a6; --rule: #6c6c72; }
     #dg-boot .dg-col { display: flex; flex-direction: column; align-items: center; text-align: center; animation: dg-boot-rise .5s cubic-bezier(.22,.61,.36,1) both; }
     #dg-boot .dg-badge { display: grid; place-items: center; width: 112px; height: 112px; border-radius: 999px; background: var(--card);
       box-shadow: 0 0 0 1px var(--ring), 0 24px 60px -28px rgb(0 0 0 / .45); }

@@ -40,7 +40,9 @@ export interface Dog {
   property: PropertyType[]
   safeWithChildren: boolean
   storeId: string
-  // Full K9 file, shown on the profile page
+  // When the store pinned it to the top of its page (up to 3), or null
+  pinnedAt?: string | null
+  // The dog's full details, shown on its page
   file?: {
     summary: string
     born: string
@@ -636,6 +638,10 @@ export function formatNaira(value: number) {
   return `₦${value.toLocaleString('en-NG')}`
 }
 
+// The dog's Dogeash ID, as people see it: "DOGEASH-2026-003". The file number (KD-2026-003) stays the
+// internal key and the address of the dog's page; only how it reads changes.
+export const dogeashId = (fileNo: string) => fileNo.replace(/^[A-Z]+-/i, 'DOGEASH-').toUpperCase()
+
 export function findDog(fileNo: string) {
   return listedDogs.value.find(dog => dog.fileNo.toLowerCase() === fileNo.toLowerCase())
 }
@@ -656,7 +662,7 @@ export const DOG_VIDEOS_MAX = 4
 // `adminNote`: why Dogeash last took it down or sent it back (empty otherwise)
 export type StoreDog = Omit<Dog, 'status'> & { id: string, status: ListingStatus, photoPath: string | null, media: DogMedia, adminNote: string, updatedAt: string }
 
-export const dogColumns = 'id, file_no, name, breed, sex, city, age, weight_kg, hips, level, price_naira, status, photo_path, gallery_paths, videos, admin_note, property, safe_with_children, file, updated_at, stores!inner (public_id, status)'
+export const dogColumns = 'id, file_no, name, breed, sex, city, age, weight_kg, hips, level, price_naira, status, photo_path, gallery_paths, videos, admin_note, property, safe_with_children, file, updated_at, pinned_at, stores!inner (public_id, status)'
 
 export interface DogRow {
   id: string
@@ -679,6 +685,7 @@ export interface DogRow {
   safe_with_children: boolean
   file: Partial<NonNullable<Dog['file']>> | null
   updated_at: string
+  pinned_at?: string | null
   stores: { public_id: string }
 }
 
@@ -717,6 +724,7 @@ export function toStoreDog(r: DogRow, storageUrl: string): StoreDog {
     property: r.property,
     safeWithChildren: r.safe_with_children,
     storeId: r.stores.public_id,
+    pinnedAt: r.pinned_at ?? null,
     updatedAt: r.updated_at,
     file: {
       summary: f.summary ?? '',

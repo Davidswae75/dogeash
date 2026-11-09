@@ -172,7 +172,7 @@
   paint-order: stroke;
 }
 
-/* Security-tape stripes: under the Home header (14px) and under K9 file tabs (4px) */
+/* Security-tape stripes: under the Home header (14px) and under dog card tabs (4px) */
 @utility hazard {
   background: repeating-linear-gradient(-45deg, var(--marigold) 0 14px, var(--night) 14px 28px);
 }

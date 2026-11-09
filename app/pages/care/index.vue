@@ -20,7 +20,7 @@ const eyebrow = 'text-xs leading-4 font-bold tracking-[.08em] uppercase'
       <div class="flex animate-rise flex-col gap-4">
         <span :class="[eyebrow, 'text-ink-muted']">{{ providerCount }} providers</span>
         <h1 class="m-0 mega text-[clamp(38px,4.6vw,64px)] leading-[.95]">Care for your <span class="text-outline">guard dog</span></h1>
-        <p class="m-0 max-w-[30em] text-[17px] leading-[27px] text-ink-muted">Find a vet, trainer, groomer or kennel builder near you and book an appointment, whether or not you bought your dog here.</p>
+        <p class="m-0 max-w-[32em] text-[17px] leading-[27px] text-ink-muted">We have professionals to look after your dog and meet its needs: vets, trainers, groomers, kennel builders and more. See what each one offers and when, then book a time, whether or not you bought your dog here.</p>
       </div>
       <label for="care-search" class="flex animate-rise items-center gap-3 rounded-full border-2 border-ink bg-surface px-5 py-3 [animation-delay:80ms] focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-focus">
         <Search class="size-5 shrink-0 text-ink-muted" aria-hidden="true" />

@@ -13,7 +13,7 @@ export const openStoreFacts = [
 export const openStoreReasons: { icon: IconName, title: string, text: string }[] = [
   { icon: 'watchful-eye', title: 'Buyers who are ready', text: 'They shortlist, compare and book a kennel visit before they call you. Fewer time-wasters at the gate.' },
   { icon: 'shield-paw', title: 'The Verified stamp', text: 'Your inspection record sits on every listing. Good kennels stop competing with backyard breeders on price alone.' },
-  { icon: 'heart-paw', title: 'A K9 file for every dog', text: 'Health, hips, training and temperament in one format buyers trust, so you answer the same questions once.' },
+  { icon: 'heart-paw', title: 'A full record for every dog', text: 'Health, hips, training and temperament in one format buyers trust, so you answer the same questions once.' },
   { icon: 'family', title: 'Your vets and trainers, credited', text: 'Link the care team you work with. Buyers book them after handover, and your store gets the credit.' },
 ]
 

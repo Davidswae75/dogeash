@@ -24,7 +24,7 @@ const section = homeSection
           <span class="w-fit rounded-[4px] bg-marigold px-2.5 py-1.5 text-xs leading-4 font-bold tracking-[.08em] text-on-marigold uppercase">For kennels and trainers</span>
           <h1 class="m-0 mega text-[clamp(34px,4.2vw,58px)] leading-[.95]">Open your store where buyers <span class="text-outline">check.</span></h1>
           <p class="m-0 max-w-[34em] text-[17px] leading-7 opacity-80">
-            Dogeash is a marketplace of inspected kennels. Buyers read the K9 file, compare dogs and book a visit before they call. Open your store, pass one inspection, and let your kennel's record speak for it.
+            Dogeash is a marketplace of inspected kennels. Buyers read each dog's details, compare dogs and book a visit before they call. Open your store, pass one inspection, and let your kennel's record speak for it.
           </p>
           <div class="flex flex-wrap gap-2.5">
             <Button as-child variant="marigold"><NuxtLink to="/sign-up?as=store">Apply to open a store <ArrowRight aria-hidden="true" /></NuxtLink></Button>

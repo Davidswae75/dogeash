@@ -35,7 +35,7 @@ export function useCatalog() {
     if (!rows.value) return
     listedStores.value = rows.value.stores.map(r => toStore(r, '', storageUrl))
     listedDogs.value = rows.value.dogs.map(r => toDog(r, storageUrl))
-    listedProviders.value = rows.value.providers.map(toCareProvider)
+    listedProviders.value = rows.value.providers.map(r => toCareProvider(r, storageUrl))
   }
 
   return { load }

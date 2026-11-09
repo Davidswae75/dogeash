@@ -250,6 +250,14 @@ A normal cart and checkout, but only for equipment, never for dogs.
 - [ ] Seller reviews after handover
 - [~] Disputes: reports from users (listings, stores, reviews, conversations) with an admin queue; refund disputes wait for payments
 - [ ] Notifications by email and SMS (reservation, visit, handover)
+- [ ] Phone reminders (paid plan): SMS and WhatsApp for vaccination and booster due dates, care appointments and kennel visits. Options, Nigeria first:
+  - **Termii** (Nigerian; SMS, WhatsApp, voice and OTP; DND-route sender IDs; REST API, no SDK needed from a Nuxt server route). Recommended first
+  - **Africa's Talking** (SMS, USSD, voice, airtime; Node SDK `africastalking`)
+  - **Sendchamp** (Nigerian; SMS, WhatsApp, voice, email; REST)
+  - **Twilio** (`twilio` Node SDK; SMS and WhatsApp worldwide; dearer to Nigerian numbers) and **Infobip** (`@infobip-api/sdk`; strong in Africa)
+  - **WhatsApp Cloud API** from Meta directly (template messages per conversation; needs a verified Business account and approved templates)
+  - Sending: a server route under `server/api` with the key in runtimeConfig (never in the browser). Scheduling: Supabase `pg_cron` picks due records daily and calls the route through `pg_net`, or a hosted cron. Track each send (who, what, provider id, cost) in a table so plans can cap and bill it
+  - Nigerian sender IDs need registering with the provider (and NCC/DND rules), which takes days: start it before launch
 
 ## Phase 8 · Legal and compliance
 

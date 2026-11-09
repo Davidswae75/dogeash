@@ -88,4 +88,38 @@ const og = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" vi
 </svg>`
 writeFileSync(out('og-image.png'), new Resvg(og, { font: { fontFiles: fonts, loadSystemFonts: false, defaultFontFamily: 'Arial' } }).render().asPng())
 
+// The logo as images, for emails, documents and social profiles: "d", the dog as the "o", "geash", the lamp.
+// In ink on light and chalk on dark, at 1200 pixels wide (PNG) and as SVG (its text falls back to Arial Black
+// where Archivo isn't installed).
+function logoSvg(ink, bg) {
+  const F = 200
+  // The head's outline as heavy as the letters' stems; the face's details lighter so they stay open
+  const strokesG = dogMarkStrokes.map((d, i) => `<path d="${d}" stroke-width="${i === 0 ? 5 : 3.2}"/>`).join('')
+  const markX = 0.7 * F
+  const geashX = markX + 1.04 * F
+  const lampX = geashX + 3.2 * F
+  const width = lampX + 0.45 * F
+  const height = 1.5 * F
+  const base = 1.12 * F
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+  ${bg ? `<rect width="${width}" height="${height}" fill="${bg}"/>` : ''}
+  <g font-family="'Arial Black', Archivo, sans-serif" font-size="${F}" fill="${ink}" letter-spacing="${-0.03 * F}">
+    <text x="${0.04 * F}" y="${base}">d</text>
+    <text x="${geashX}" y="${base}">geash</text>
+  </g>
+  <g transform="translate(${markX} ${base - 0.93 * F}) scale(${F / 64})">
+    <g fill="none" stroke="${ink}" stroke-linecap="round" stroke-linejoin="round">${strokesG}</g>
+    <path d="${dogMarkNose}" fill="${MARIGOLD}" stroke="${MARIGOLD}" stroke-width="1.2" stroke-linejoin="round"/>
+  </g>
+  <rect x="${lampX}" y="${base - 0.37 * F}" width="${0.37 * F}" height="${0.37 * F}" rx="${0.08 * F}" fill="${MARIGOLD}"/>
+</svg>`
+}
+const logoFont = { font: { fontFiles: fonts, loadSystemFonts: false, defaultFontFamily: 'Arial Black' } }
+for (const [name, ink, bg] of [['logo', NIGHT, null], ['logo-on-dark', CHALK, null]]) {
+  const svg = logoSvg(ink, bg)
+  writeFileSync(out(`${name}.svg`), svg)
+  writeFileSync(out(`${name}.png`), new Resvg(svg, { ...logoFont, fitTo: { mode: 'width', value: 1200 } }).render().asPng())
+}
+
+console.log('Wrote public/logo.svg, logo.png, logo-on-dark.svg, logo-on-dark.png')
 console.log('Wrote public/favicon.svg, favicon.ico, apple-touch-icon.png, icon-192.png, icon-512.png, icon-maskable-512.png, og-image.png')

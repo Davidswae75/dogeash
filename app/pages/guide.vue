@@ -214,7 +214,7 @@ const lead = 'm-0 max-w-[40em] text-[17px] leading-[28px] text-ink-muted'
           <div class="grid gap-4 md:grid-cols-2">
             <GuideImageSlot :image="guideImages.vet" />
             <HelpPanel title="Ask the store before you pay">
-              What the dog eats and how much, when its next vaccines are due, which vet it sees now, and whether the price includes handover training. Every Dogeash K9 file lists vaccinations and the last inspection date.
+              What the dog eats and how much, when its next vaccines are due, which vet it sees now, and whether the price includes handover training. Every dog on Dogeash lists its vaccinations and the last inspection date.
             </HelpPanel>
           </div>
         </section>
@@ -275,7 +275,7 @@ const lead = 'm-0 max-w-[40em] text-[17px] leading-[28px] text-ink-muted'
         <section class="flex flex-col gap-6 rounded-lg bg-night p-8 text-on-night sm:rounded-xl sm:p-12">
           <span :class="[eyebrow, 'text-marigold']">Next step</span>
           <h2 class="m-0 mega text-[clamp(28px,3vw,40px)] leading-none">Find a dog that fits <span class="text-outline [-webkit-text-stroke-color:var(--on-night)]">your home</span></h2>
-          <p class="m-0 max-w-[36em] text-[17px] leading-[28px]">Every dog on Dogeash comes from a kennel we inspect in person, with a K9 file, a protection level and handover training at your gate.</p>
+          <p class="m-0 max-w-[36em] text-[17px] leading-[28px]">Every dog on Dogeash comes from a kennel we inspect in person, with a full record, a protection level and handover training at your gate.</p>
           <div class="flex flex-wrap gap-3">
             <Button as-child variant="marigold">
               <NuxtLink to="/dogs">Find a guard dog</NuxtLink>

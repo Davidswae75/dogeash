@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { definePageMeta, navigateTo, useSeoMeta } from '#imports' // nuxt
 import type { DogMedia } from '~/utils/dogs'
+import { dogeashId } from '~/utils/dogs'
 import type { DogFormValues } from '~/utils/dogForm'
 import { useNotify } from '~/composables/useNotify'
 import { useStoreContext } from '~/composables/useStoreContext'
@@ -18,7 +19,7 @@ async function save(values: DogFormValues, media: DogMedia, publish: boolean) {
   const { fileNo, error } = await storeDogs.create(values, media, publish)
   if (!fileNo) return error ?? null
   const held = publish && !error && storeDogs.lastStatus.value === 'pending_review'
-  notify.dogUpdated(`${values.name} ${held ? 'is with Dogeash for review' : publish && !error ? 'is live' : 'saved as a draft'}`, `File number ${fileNo}.${error ? ` ${error}` : held ? ' Dogeash checks some new listings before buyers see them.' : ''}`)
+  notify.dogUpdated(`${values.name} ${held ? 'is with Dogeash for review' : publish && !error ? 'is live' : 'saved as a draft'}`, `Dogeash ID ${dogeashId(fileNo)}.${error ? ` ${error}` : held ? ' Dogeash checks some new listings before buyers see them.' : ''}`)
   await navigateTo('/dashboard/dogs')
   return null
 }

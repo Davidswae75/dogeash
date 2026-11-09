@@ -5,7 +5,7 @@ import type { Dog, DogMedia } from './dogs'
 import { hipGrades, sexes } from './k9'
 
 // The dashboard's add / edit dog form: what a store fills in, checked the same way the database
-// checks it (lengths, weight, price). It covers what buyers see on a dog's card and K9 file page.
+// checks it (lengths, weight, price). It covers what buyers see on a dog's card and its page.
 // The file number and the "inspected" line are Dogeash's, so they aren't here.
 
 const optional = (max: number) => z.string().trim().max(max, `Keep it under ${max} characters`).default('')

@@ -8,7 +8,8 @@ import { dogMarkNose, dogMarkStrokes } from '~/utils/dogMarkPaths.mjs'
 // Colours come from the text colour (`currentColor`); the nose is the marigold of the wordmark's square.
 // Reduced motion always gets the still mark.
 // `weight` is the stroke width on the 64-unit grid: heavier for small sizes (the logo), 2 for the loader
-const props = withDefaults(defineProps<{ animated?: boolean, weight?: number, class?: HTMLAttributes['class'] }>(), { weight: 2 })
+// `detail` (optional) is a lighter width for the face inside the outline, so it stays open at heavy weights
+const props = withDefaults(defineProps<{ animated?: boolean, weight?: number, detail?: number, class?: HTMLAttributes['class'] }>(), { weight: 2 })
 
 const strokes = dogMarkStrokes
 </script>
@@ -28,6 +29,7 @@ const strokes = dogMarkStrokes
       v-for="(d, i) in strokes"
       :key="i"
       :d="d"
+      :stroke-width="i > 0 && props.detail ? props.detail : undefined"
       pathLength="1"
       :class="props.animated && 'animate-dog-trace [stroke-dasharray:1] [stroke-dashoffset:1] motion-reduce:animate-none motion-reduce:[stroke-dashoffset:0]'"
       :style="props.animated ? { animationDelay: `${i * 90}ms` } : undefined"

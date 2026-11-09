@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { CalendarDays, Clock, MapPin, MessageSquare, PenLine, Star, Truck } from '@lucide/vue'
-import type { ProtectionLevel } from '~/utils/protection'
+import { ArrowRight, CalendarDays, Clock, LayoutGrid, MapPin, MessageSquare, PenLine, Star, Truck } from '@lucide/vue'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { createError, useRoute, useSeoMeta } from '#imports' // nuxt
 import { useSectionSpy } from '~/composables/useSectionSpy'
@@ -10,7 +9,7 @@ import { careProviderSlug, findCareProvider } from '~/utils/care'
 import { formatNaira } from '~/utils/dogs'
 import { centerInRow } from '~/utils/scroll'
 import { sampleReview } from '~/utils/reviews'
-import { findStore, storeServices, storeSummary } from '~/utils/stores'
+import { findStore, storeServices, storeShowcase, storeSummary } from '~/utils/stores'
 
 // A store: its dogs for sale, who runs it, its history, inspection record, care team and reviews
 const route = useRoute()
@@ -40,13 +39,10 @@ useSeoMeta({
   description: `${store.tagline}. ${summary.dogs.length} dogs listed. ${store.verified ? `Inspected by Dogeash in ${store.inspection.date}.` : 'Dogeash inspection booked.'}`,
 })
 
-const levelFilter = ref<ProtectionLevel[]>([])
-const availableOnly = ref<string[]>([])
-const levelOptions = summary.levels.map(n => ({ value: n, label: `Level ${n}` }))
-const dogs = computed(() => summary.dogs.filter(d =>
-  (!levelFilter.value.length || levelFilter.value.includes(d.level))
-  && (!availableOnly.value.length || d.status === 'available'),
-))
+// Up to 3 dogs here (the store's pinned ones first); all of them, with filters, on the store's dogs page
+const showcase = storeShowcase(summary.dogs)
+const moreCount = summary.dogs.length - showcase.length
+const allDogsPath = `/stores/${store.slug}/dogs`
 
 // Skip titles like "Col." and "(rtd)"
 const ownerInitials = store.owner.name.split(' ').filter(w => /^[A-Z][a-z]/.test(w) && !w.endsWith('.')).slice(0, 2).map(w => w[0]).join('')
@@ -162,29 +158,27 @@ const h2 = 'm-0 mega text-[clamp(26px,2.6vw,34px)] leading-none'
               <span :class="[eyebrow, 'text-ink-muted']">{{ summary.dogs.length }} listed · {{ summary.available }} available</span>
               <h2 :class="h2">Dogs for <span class="text-outline">sale</span></h2>
             </div>
-            <div v-if="summary.dogs.length" class="flex flex-wrap gap-2">
-              <FilterChips v-model="levelFilter" :options="levelOptions" label="Protection level" />
-              <FilterChips v-model="availableOnly" :options="[{ value: 'yes', label: 'Available only' }]" label="Availability" />
-            </div>
+            <Button v-if="moreCount > 0" as-child variant="outline" size="sm"><NuxtLink :to="allDogsPath">See all {{ summary.dogs.length }} dogs</NuxtLink></Button>
           </div>
-          <TransitionGroup
-            v-if="dogs.length"
-            tag="div"
-            class="grid grid-cols-1 gap-5 sm:grid-cols-2"
-            move-class="transition-transform duration-500 ease-calm"
-            enter-active-class="transition duration-400 ease-calm"
-            enter-from-class="translate-y-3 opacity-0"
-            leave-active-class="hidden"
-          >
-            <K9Card v-for="dog in dogs" :key="dog.fileNo" :dog="dog" />
-          </TransitionGroup>
-          <HelpPanel v-else-if="!summary.dogs.length" title="No dogs listed yet">
+          <div v-if="showcase.length" class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <K9Card v-for="dog in showcase" :key="dog.fileNo" :dog="dog" />
+            <!-- After the 3: the rest of the store's dogs, on their own page with filters -->
+            <NuxtLink
+              v-if="moreCount > 0"
+              :to="allDogsPath"
+              class="group flex min-h-[260px] animate-rise flex-col items-center justify-center gap-4 rounded-lg border-2 border-dashed border-line-strong bg-surface p-8 text-center text-ink no-underline transition-colors hover:border-ink hover:bg-surface-sunk"
+            >
+              <span class="grid size-14 place-items-center rounded-full bg-marigold text-on-marigold transition-transform group-hover:scale-105"><LayoutGrid class="size-6" aria-hidden="true" /></span>
+              <span class="flex flex-col gap-1">
+                <span class="font-display text-xl leading-6 font-extrabold font-stretch-expanded">{{ moreCount }} more {{ moreCount === 1 ? 'dog' : 'dogs' }}</span>
+                <span class="text-sm text-ink-muted">See all {{ summary.dogs.length }} from {{ store.name }}, with filters</span>
+              </span>
+              <span class="inline-flex items-center gap-1.5 text-sm font-bold text-action">Show more <ArrowRight class="size-4" aria-hidden="true" /></span>
+            </NuxtLink>
+          </div>
+          <HelpPanel v-else title="No dogs listed yet">
             {{ store.name }}'s dogs will appear here once the Dogeash inspection in {{ store.inspection.date }} has passed.
           </HelpPanel>
-          <p v-else class="m-0 text-[15px] text-ink-muted">
-            No dogs match those filters.
-            <button type="button" class="cursor-pointer border-0 bg-transparent p-0 font-bold text-ink underline" @click="levelFilter = []; availableOnly = []">Show all dogs</button>
-          </p>
         </section>
 
         <!-- About -->

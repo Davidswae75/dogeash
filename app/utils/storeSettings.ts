@@ -8,12 +8,16 @@ import type { VisitSettings } from './stores'
 export const visitSlotOptions = Array.from({ length: 23 }, (_, i) => `${7 + Math.floor(i / 2)}:${i % 2 ? '30' : '00'}`)
 export const weekdayOptions = [1, 2, 3, 4, 5, 6, 0].map(d => ({ value: d, label: new Date(2026, 10, 1 + d).toLocaleDateString('en-NG', { weekday: 'short' }) }))
 
+// How many buyers one visit time takes (1 by default: a time, once booked, is gone)
+export const visitCapacityOptions = [1, 2, 3, 4, 5, 6, 8, 10].map(n => ({ value: String(n), label: n === 1 ? '1 visitor at a time' : `${n} visitors at a time` }))
+
 export const visitSettingsSchema = z.object({
   days: z.array(z.number().int().min(0).max(6)).min(1, 'Choose at least one day'),
   slots: z.array(z.string()).min(1, 'Choose at least one time').max(12, 'Up to 12 times'),
   home: z.boolean(),
   paused: z.boolean(),
   note: z.string().trim().max(200, 'Keep the note under 200 characters'),
+  capacity: z.number().int().min(1).max(20),
 })
 
 // Times sorted by the clock, not alphabetically ("9:00" before "10:30")
@@ -26,4 +30,5 @@ export const visitSettingsToRow = (v: VisitSettings) => ({
   home_visits: v.home,
   visits_paused: v.paused,
   pause_note: v.paused ? v.note.trim() : '',
+  visit_capacity: v.capacity,
 })

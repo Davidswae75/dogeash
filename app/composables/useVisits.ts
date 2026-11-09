@@ -109,7 +109,13 @@ export function useVisits() {
     return null
   }
 
-  return { mine, upcoming, past, loadMine, loadForStore, request, setStatus }
+  // The store's times that are already full ("2026-11-12 9:00"), so the dialog can cross them out
+  async function fullSlots(storeId: string): Promise<string[]> {
+    const { data } = await supabase.rpc('store_full_slots', { store: storeId })
+    return (data ?? []).map(s => `${s.day} ${s.slot}`)
+  }
+
+  return { mine, upcoming, past, loadMine, loadForStore, request, setStatus, fullSlots }
 }
 
 // What the database's refusal of a visit request means, in words for the buyer
@@ -119,6 +125,8 @@ function visitRefusal(message: string) {
   if (message.includes('on that day')) return 'The store doesn\'t take visits that day. Choose another.'
   if (message.includes('visit times')) return 'Choose one of the store\'s visit times.'
   if (message.includes('only takes visits at the kennel')) return 'This store only takes visits at the kennel.'
+  if (message.includes('already booked')) return 'That time is already booked. Choose another.'
+  if (message.includes('already have a visit at that time')) return 'You already have a visit at that time. Choose another.'
   return 'The request didn\'t send. Try again.'
 }
 

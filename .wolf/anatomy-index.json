@@ -1,13 +1,13 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-11-08T10:59:20.004Z",
-    "fileCount": 777,
+    "lastScanned": "2026-11-09T02:40:58.012Z",
+    "fileCount": 778,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "5dfd12265e0c1a7ab3fb40d02e9c0646391dc0d7e2dedf8d41ce96e8bf6161ba",
-    "storeUpdatedAt": "2026-11-08T10:59:20.083Z",
-    "rootHash": "55d555c8767dd2e0"
+    "renderedHash": "3aa4153ca5bb5c71554be4e5a1c8f1000d1dcd2172cb18e685f1d8af7b5c8b7f",
+    "storeUpdatedAt": "2026-11-09T02:40:58.147Z",
+    "rootHash": "a8c75f4558b90b50"
   },
   "files": {
     ".gitignore": {
@@ -60,14 +60,13 @@
       "importance": 0.4429
     },
     "app/components/AppLogo.vue": {
-      "description": "Vue: setup, TS, 1 props",
-      "tokens": 160,
-      "hash": "3ba559a5223d93b2",
-      "size": 600,
-      "mtimeMs": 1792779088280.9473,
-      "updatedAt": "2026-10-26T02:55:55.561Z",
-      "source": "scan",
-      "importance": 0.4429
+      "description": "Vue: setup",
+      "tokens": 291,
+      "hash": "d4d96aa7b4c4a747",
+      "size": 1089,
+      "mtimeMs": 1794192056013.9458,
+      "updatedAt": "2026-11-09T02:40:56.570Z",
+      "source": "hook"
     },
     "app/components/AppToast.vue": {
       "description": "Vue component",
@@ -9692,6 +9691,15 @@
           "tokens": 919
         }
       ]
+    },
+    "app/components/AppLogoMark.vue": {
+      "description": "Vue: setup",
+      "tokens": 263,
+      "hash": "9ca0674bd2d3ec46",
+      "size": 985,
+      "mtimeMs": 1794192057493.6895,
+      "updatedAt": "2026-11-09T02:40:58.010Z",
+      "source": "hook"
     }
   },
   "preamble": [

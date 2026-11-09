@@ -769,7 +769,8 @@ check('the owner sees it in the record', (await as('authenticated', buyer, `sele
 check('the provider sees what they added, not the rest', (await as('authenticated', vet, `select public.provider_booking_records('${cb?.id}') as r`))?.[0]?.r?.length === 1
   && (await as('authenticated', vet, `select id from public.owned_dog_records`))?.length === 0)
 check('the owner can\'t pass a line off as the provider\'s', await as('authenticated', buyer, `update public.owned_dog_records set provider_id = null where care_booking_id = '${cb?.id}'`) === null)
-const noShare = (await book(`'${bruno}', false`))?.[0]
+// Another booking with this provider: a different time, for a dog not in My dogs (so nothing is shared)
+const noShare = (await as('authenticated', buyer, `insert into public.care_bookings (provider_id, service, day, slot, dog_name) values ('${care01}', 'Health check', '${workday}', '14:00', 'Rex') returning id`))?.[0]
 await as('authenticated', vet, `select public.set_care_booking_status('${noShare?.id}', 'confirmed')`)
 check('without the owner\'s permission, nothing is added', await as('authenticated', vet, `select public.provider_add_record('${noShare?.id}', 'vet', 'Check-up', current_date, null)`) === null)
 check('owners still can\'t write records for someone else\'s dog', await as('authenticated', other, `insert into public.owned_dog_records (owned_dog_id, kind, title, done_on) values ('${bruno}', 'vet', 'Fake', current_date)`) === null)
@@ -805,6 +806,68 @@ check('a buyer still can', (await as('authenticated', buyer, `insert into public
 const hiddenUuid = await scalar(`select id from public.care_providers where public_id = '${hiddenId}'`)
 await adm(`select public.admin_save_provider('{"id":"${hiddenId}","name":"Ikoyi Canine Physio","type":"vet","city":"Lagos","listed":false}')`)
 check('a hidden listing can\'t be booked', await as('authenticated', buyer, `insert into public.care_bookings (provider_id, service, day, slot) values ('${hiddenUuid}', 'Health check', '${ownDay}', '9:00')`) === null)
+
+// 9 Nov: dates in a dog's record, and care bookings that don't clash or repeat
+const dateDog = (await as('authenticated', buyer, `insert into public.owned_dogs (name, born_on) values ('Dates', current_date - 400) returning id`))?.[0]?.id
+check('a booster can\'t be due before the vaccination was given', await as('authenticated', buyer, `insert into public.owned_dog_records (owned_dog_id, kind, title, done_on, due_on) values ('${dateDog}', 'vaccination', 'Rabies', current_date - 10, current_date - 20)`) === null)
+check('a done date can\'t be in the future', await as('authenticated', buyer, `insert into public.owned_dog_records (owned_dog_id, kind, title, done_on) values ('${dateDog}', 'vet', 'Check', current_date + 3)`) === null)
+check('a due date on or after the done date is fine', (await as('authenticated', buyer, `insert into public.owned_dog_records (owned_dog_id, kind, title, done_on, due_on) values ('${dateDog}', 'vaccination', 'Rabies', current_date - 10, current_date + 355) returning id`))?.length === 1)
+check('a dog can\'t join you before it was born', await as('authenticated', buyer, `update public.owned_dogs set got_on = current_date - 500 where id = '${dateDog}'`) === null)
+
+const care02 = await scalar(`select id from public.care_providers where public_id = 'CARE-02'`)
+const day2 = await scalar(`select d::date::text from generate_series(current_date + 1, current_date + 14, '1 day') d where extract(dow from d) between 1 and 5 offset 2 limit 1`)
+const bookAs = (uid, prov, svc, slot, dogName) => as('authenticated', uid, `insert into public.care_bookings (provider_id, service, day, slot, dog_name) values ('${prov}', '${svc}', '${day2}', '${slot}', '${dogName}') returning id`)
+check('a service the provider doesn\'t offer is refused', await bookAs(payer, care02, 'Bath and groom', '9:00', 'Max') === null)
+check('a provider\'s own service is fine', (await bookAs(payer, care02, 'Handover session', '9:00', 'Max'))?.length === 1)
+check('a full time is refused for the next buyer', await bookAs(other, care02, 'Handover session', '9:00', 'Duke') === null)
+check('the full time shows as taken (no names)', (await as('anon', null, `select * from public.care_full_slots('CARE-02')`))?.some(r => r.slot === '9:00'))
+check('a buyer can\'t be booked with two providers at the same time', await bookAs(payer, care01, 'Health check', '9:00', 'Max2') === null)
+check('nor book the same provider again for the same dog while one is waiting', await bookAs(payer, care02, 'Refresher training', '11:00', 'Max') === null)
+check('a different dog with the same provider is fine', (await bookAs(payer, care02, 'Refresher training', '11:00', 'Bella'))?.length === 1)
+
+// Kennel visits: a booked time is taken (up to the store's visitors per time) until it's declined or cancelled
+const vday = 'current_date + 20'
+const visitAt = (uid, slot) => as('authenticated', uid, `insert into public.visits (store_id, service, day, slot) values ('${k9}', 'Meet the dogs', ${vday}, '${slot}') returning id`)
+const firstVisit = (await visitAt(buyer, '10:30'))?.[0]?.id
+check('a store visit time once booked is refused for the next buyer', await visitAt(other, '10:30') === null)
+check('the taken time shows as full (no names)', (await as('anon', null, `select * from public.store_full_slots('STR-001')`))?.some(r => r.slot === '10:30'))
+check('a buyer can\'t have two visits at the same time', await as('authenticated', buyer, `insert into public.visits (store_id, service, day, slot) values ('${k9}', 'See the kennel', ${vday}, '10:30')`) === null)
+await as('authenticated', buyer, `update public.visits set status = 'cancelled' where id = '${firstVisit}'`)
+check('a cancelled visit frees the time', (await visitAt(other, '10:30'))?.length === 1)
+check('a manager can let more visitors book one time', (await as('authenticated', manager, `update public.stores set visit_capacity = 2 where id = '${k9}' returning visit_capacity`))?.[0]?.visit_capacity === 2)
+check('then a second buyer can book it too', (await visitAt(buyer, '10:30'))?.length === 1)
+await db.exec(`update public.stores set visit_capacity = 1 where id = '${k9}'`)
+
+// A dog sold outright leaves everyone's shortlist (and the market)
+const toSell = await scalar(`select id from public.dogs where status = 'available' order by file_no desc limit 1`)
+await as('authenticated', other, `insert into public.shortlist_items (user_id, dog_id) values ('${other}', '${toSell}') on conflict do nothing`)
+check('the dog was on the shortlist', (await as('authenticated', other, `select * from public.shortlist_items where dog_id = '${toSell}'`)).length === 1)
+await db.exec(`update public.dogs set status = 'sold' where id = '${toSell}'`)
+check('a sold dog leaves shortlists', (await as('authenticated', other, `select * from public.shortlist_items where dog_id = '${toSell}'`)).length === 0)
+
+// Pinned dogs: a store puts up to 3 first on its page; a withdrawn dog drops its pin
+const k9Live = (await db.query(`select id from public.dogs where store_id = '${k9}' and status in ('available', 'reserved') order by file_no`)).rows.map(r => r.id)
+while (k9Live.length < 4) k9Live.push((await db.query(`insert into public.dogs (store_id, name, breed, sex, city, age, weight_kg, level, price_naira, status) values ('${k9}', 'Pin ${k9Live.length}', 'Boerboel', 'Male', 'Abuja', '2 years', 60, 3, 1500000, 'available') returning id`)).rows[0].id)
+const pinDog = id => as('authenticated', manager, `update public.dogs set pinned_at = now() where id = '${id}' returning pinned_at`)
+let pinsOk = true
+for (const id of k9Live.slice(0, 3)) pinsOk = pinsOk && (await pinDog(id))?.[0]?.pinned_at != null
+check('a store can pin 3 dogs', pinsOk)
+check('but not a 4th', await pinDog(k9Live[3]) === null)
+await as('authenticated', manager, `update public.dogs set status = 'withdrawn' where id = '${k9Live[0]}'`)
+check('a withdrawn dog drops its pin', await scalar(`select pinned_at from public.dogs where id = '${k9Live[0]}'`) === null)
+check('which frees a pin for another dog', (await pinDog(k9Live[3]))?.length === 1)
+check('outsiders can\'t pin a store\'s dogs', (await as('authenticated', payer, `update public.dogs set pinned_at = now() where id = '${k9Live[1]}' returning id`))?.length === 0)
+
+// Providers' photos, workplace, history and contact: saved by the provider; numbers only for signed-in people
+const details = (folder, extra = {}) => JSON.stringify({ photo: `${folder}/me.jpg`, gallery: [`${folder}/clinic.jpg`], address: 'Plot 12, Kubwa', startedYear: 2012, history: [{ year: '2015', text: 'Opened the clinic' }], phone: '0803 000 0000', whatsapp: '0803 000 0000', email: 'Clinic@Test.ng', ...extra }).replace(/'/g, "''")
+check('a provider saves photos, history and contact', (await as('authenticated', vet, `select public.provider_save_details('${care01}', '${details(care01)}'::jsonb)`))?.length === 1)
+check('the page shows the address, year and history', (await as('anon', null, `select address, started_year, history from public.care_providers where public_id = 'CARE-01'`))?.[0]?.started_year === 2012)
+check('visitors can\'t read the phone', await as('anon', null, `select phone from public.care_provider_contacts`) === null)
+check('signed-in people can', (await as('authenticated', payer, `select phone, email from public.care_provider_contacts where provider_id = '${care01}'`))?.[0]?.email === 'clinic@test.ng')
+check('photos must be in the provider\'s own folder', await as('authenticated', vet, `select public.provider_save_details('${care01}', '${details(care02)}'::jsonb)`) === null)
+check('someone else can\'t save a provider\'s details', await as('authenticated', payer, `select public.provider_save_details('${care01}', '${details(care01)}'::jsonb)`) === null)
+check('a provider can upload into their own folder only', (await as('authenticated', vet, `insert into storage.objects (bucket_id, name) values ('care-media', '${care01}/a.jpg') returning id`))?.length === 1
+  && await as('authenticated', vet, `insert into storage.objects (bucket_id, name) values ('care-media', '${care02}/a.jpg')`) === null)
 
 // Invitation links: sign-up and sign-in read what's being accepted from the link's id
 const storeInviteId = (await as('authenticated', owner, `insert into public.store_invites (store_id, email, role) values ('${k9}', 'newhand@test.ng', 'handler') returning id`))?.[0]?.id
