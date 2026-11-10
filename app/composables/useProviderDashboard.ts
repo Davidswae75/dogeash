@@ -2,8 +2,8 @@ import { computed } from 'vue'
 import { useRuntimeConfig, useState, useSupabaseClient } from '#imports' // nuxt, @nuxtjs/supabase
 import type { CareBookingStatus } from './useCareBookings'
 import type { Database } from '~/types/database.types'
-import type { CareContacts, CareMilestone, CareProvider, CareRow } from '~/utils/care'
-import { careColumns, toCareProvider } from '~/utils/care'
+import type { CareContacts, CareMilestone, CareProvider, CareRow, CareTeamPerson } from '~/utils/care'
+import { careColumns, listedProviders, toCareProvider } from '~/utils/care'
 import { checkImage, imagePath } from '~/utils/imageUpload'
 import { todayIso } from '~/utils/time'
 import { recordError } from './useOwnedDogs'
@@ -57,10 +57,14 @@ export function useProviderDashboard() {
       supabase.from('care_provider_contacts').select('phone, whatsapp, email').eq('provider_id', m.uuid).maybeSingle(),
     ])
     listing.value = row ? toCareProvider(row as unknown as CareRow, storageUrl) : null
+    // The public pages read the catalogue: keep this listing current there too, so "Public page" shows what was just saved
+    const fresh = listing.value
+    if (fresh) listedProviders.value = listedProviders.value.map(p => (p.id === fresh.id ? fresh : p))
     contacts.value = { phone: c?.phone ?? '', whatsapp: c?.whatsapp ?? '', email: c?.email ?? '' }
     bookings.value = ((data ?? []) as any[]).map(b => ({
       id: b.id,
-      service: b.service,
+      // Everything the buyer asked for in this appointment
+      service: b.services?.length ? b.services.join(', ') : b.service,
       day: b.day,
       slot: b.slot,
       place: b.place,
@@ -79,7 +83,7 @@ export function useProviderDashboard() {
 
   async function setStatus(id: string, status: 'confirmed' | 'declined' | 'done', note = ''): Promise<string | null> {
     const { error } = await supabase.rpc('set_care_booking_status', { booking: id, to_status: status, answer_note: note })
-    if (error) return error.message.includes('already been answered') ? 'This booking has already been answered.' : error.message.includes('Confirm the booking first') ? 'Confirm the booking first.' : 'That didn\'t save. Try again.'
+    if (error) return error.message.includes('already been answered') ? 'This booking has already been answered.' : error.message.includes('Confirm the booking first') ? 'Confirm the booking first.' : error.message.includes('on the day of') ? 'You can mark it done on the day of the appointment.' : 'That didn\'t save. Try again.'
     await load()
     return null
   }
@@ -132,7 +136,27 @@ export function useProviderDashboard() {
     await load()
     return null
   }
+  // Photos save as soon as they're chosen (the rest of the details as they were last saved)
+  async function savePhotos(photo: string | null, gallery: string[]): Promise<string | null> {
+    const l = listing.value
+    if (!l) return 'Your listing isn\'t loaded. Refresh the page.'
+    return saveDetails({ photo, gallery, address: l.address ?? '', startedYear: l.startedYear ?? null, history: l.history ?? [], ...contacts.value })
+  }
+
+  // The people who work there, in order; blank names are dropped
+  async function saveTeam(members: CareTeamPerson[]): Promise<string | null> {
+    const m = membership.value
+    if (!m) return 'You don\'t manage a listing.'
+    const before = (listing.value?.team ?? []).map(t => t.photoPath).filter((p): p is string => !!p)
+    const { error } = await supabase.rpc('provider_save_team', { provider: m.uuid, members: members.map(t => ({ name: t.name, role: t.role, photo: t.photoPath })) as never })
+    if (error) return error.message.includes('own uploads') ? 'Upload the photos again and save.' : error.message.includes('12') ? 'Up to 12 people.' : 'The team didn\'t save. Try again.'
+    const unused = before.filter(p => !members.some(t => t.photoPath === p))
+    if (unused.length) await supabase.storage.from('care-media').remove(unused)
+    await load()
+    return null
+  }
+
   const mediaUrl = (path: string | null | undefined) => (path ? `${storageUrl}/storage/v1/object/public/care-media/${path}` : undefined)
 
-  return { membership, listing, bookings, contacts, loaded, requests, comingUp, earlier, load, setStatus, addRecord, recordsFor, saveProfile, uploadPhoto, saveDetails, mediaUrl }
+  return { membership, listing, bookings, contacts, loaded, requests, comingUp, earlier, load, setStatus, addRecord, recordsFor, saveProfile, uploadPhoto, saveDetails, savePhotos, saveTeam, mediaUrl }
 }

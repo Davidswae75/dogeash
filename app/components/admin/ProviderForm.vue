@@ -92,7 +92,7 @@ const input = (name: keyof Values, label: string, placeholder: string, extra: Pa
 const fields = {
   who: [input('name', 'Name', 'Kuje Veterinary Clinic'), input('person', 'Person', 'Dr. Halima Sani', { hint: 'Who buyers will deal with.', optional: true })],
   where: [input('city', 'City', 'Abuja'), input('areas', 'Areas covered', 'Abuja and environs', { optional: true })],
-  more: [input('credential', 'Credential', 'VCN registered veterinary surgeon', { optional: true }), input('priceFrom', 'Price from', '15000', { prefix: '₦', attrs: { inputmode: 'numeric' } })],
+  more: [input('credential', 'Credential', 'VCN registered veterinary surgeon', { optional: true }), input('priceFrom', 'Price from', '15,000', { prefix: '₦', money: true, attrs: { inputmode: 'numeric' } })],
 }
 
 const busy = ref(false)

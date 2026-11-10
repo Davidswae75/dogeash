@@ -202,7 +202,7 @@ export interface Database {
         Relationships: []
       }
       care_providers: {
-        Row: { id: string, public_id: string, slug: string, name: string, person: string | null, type: Database['public']['Enums']['care_type'], city: string, areas: string, home_visits: boolean, verified: boolean, credential: string, rating: number, reviews_count: number, price_from: number, about: string, hours: string, weekdays: number[], slots: string[], taking_bookings: boolean, listed: boolean, services: string[], slot_capacity: number, photo_path: string | null, gallery_paths: string[], address: string, started_year: number | null, history: Json } & Timestamps
+        Row: { id: string, public_id: string, slug: string, name: string, person: string | null, type: Database['public']['Enums']['care_type'], city: string, areas: string, home_visits: boolean, verified: boolean, credential: string, rating: number, reviews_count: number, price_from: number, about: string, hours: string, weekdays: number[], slots: string[], taking_bookings: boolean, listed: boolean, services: string[], slot_capacity: number, photo_path: string | null, gallery_paths: string[], address: string, started_year: number | null, history: Json, team: Json } & Timestamps
         Insert: never
         Update: never
         Relationships: []
@@ -310,6 +310,14 @@ export interface Database {
         Update: { bank_code?: string, bank_name?: string, account_name?: string, account_last4?: string, recipient_code?: string, updated_by?: string | null, updated_at?: string }
         Relationships: []
       }
+      owned_dog_providers: {
+        Row: { owned_dog_id: string, provider_id: string, owner_id: string, share_record: boolean, created_at: string }
+        Insert: { owned_dog_id: string, provider_id: string, share_record?: boolean }
+        Update: { share_record?: boolean }
+        Relationships: [
+          { foreignKeyName: 'owned_dog_providers_provider_id_fkey', columns: ['provider_id'], isOneToOne: false, referencedRelation: 'care_providers', referencedColumns: ['id'] },
+        ]
+      }
       care_provider_contacts: {
         Row: { provider_id: string, phone: string, whatsapp: string, email: string, updated_at: string }
         Insert: never
@@ -329,8 +337,8 @@ export interface Database {
         Relationships: []
       }
       care_bookings: {
-        Row: { id: string, provider_id: string, buyer_id: string, service: string, day: string, slot: string, place: 'premises' | 'home', note: string, owned_dog_id: string | null, dog_name: string, share_record: boolean, status: Database['public']['Enums']['care_booking_status'], provider_note: string, buyer_name: string, buyer_phone: string | null, created_at: string, updated_at: string }
-        Insert: { provider_id: string, service: string, day: string, slot: string, place?: 'premises' | 'home', note?: string, owned_dog_id?: string | null, dog_name?: string, share_record?: boolean }
+        Row: { id: string, provider_id: string, buyer_id: string, service: string, services: string[], day: string, slot: string, place: 'premises' | 'home', note: string, owned_dog_id: string | null, dog_name: string, share_record: boolean, status: Database['public']['Enums']['care_booking_status'], provider_note: string, buyer_name: string, buyer_phone: string | null, created_at: string, updated_at: string }
+        Insert: { provider_id: string, service: string, services?: string[], day: string, slot: string, place?: 'premises' | 'home', note?: string, owned_dog_id?: string | null, dog_name?: string, share_record?: boolean }
         Update: { [_ in never]: never }
         Relationships: [
           { foreignKeyName: 'care_bookings_provider_id_fkey', columns: ['provider_id'], isOneToOne: false, referencedRelation: 'care_providers', referencedColumns: ['id'] },
@@ -371,12 +379,15 @@ export interface Database {
       provider_save_profile: { Args: { provider: string, p: Json }, Returns: undefined }
       set_care_booking_status: { Args: { booking: string, to_status: Database['public']['Enums']['care_booking_status'], answer_note?: string }, Returns: undefined }
       provider_bookings: { Args: { provider: string }, Returns: Json }
+      join_care_waitlist: { Args: { provider: string }, Returns: undefined }
+      edit_care_booking: { Args: { booking: string, new_services: string[], new_day: string, new_slot: string, new_place?: string, new_note?: string | null }, Returns: undefined }
       provider_add_record: { Args: { booking: string, rec_kind: Database['public']['Enums']['owned_dog_record_kind'], rec_title: string, rec_done: string | null, rec_due: string | null, rec_note?: string }, Returns: undefined }
       provider_booking_records: { Args: { booking: string }, Returns: Json }
       invite_preview: { Args: { kind: string, invite: string }, Returns: Json }
       provider_save_services: { Args: { provider: string, list: string[], capacity?: number }, Returns: undefined }
       care_full_slots: { Args: { provider: string }, Returns: { day: string, slot: string }[] }
       store_full_slots: { Args: { store: string }, Returns: { day: string, slot: string }[] }
+      provider_save_team: { Args: { provider: string, members: Json }, Returns: undefined }
       provider_save_details: { Args: { provider: string, d: Json }, Returns: undefined }
       account_exists: { Args: { check_email: string }, Returns: boolean }
       has_store_role: { Args: { target_store: string, roles: Database['public']['Enums']['store_role'][] }, Returns: boolean }

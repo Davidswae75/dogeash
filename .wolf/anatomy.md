@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-11-09T02:40:58.012Z
-> Files: 778 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-11-10T00:42:28.589Z
+> Files: 781 tracked | Anatomy hits: 0 | Misses: 0
 
 > Project structure index. Auto-maintained by OpenWolf hooks and daemon.
 > Run `openwolf scan` to generate, or wait for the first Claude Code session.
@@ -42,7 +42,7 @@
 - `AuthCodeStep.vue` — Vue: setup (~740 tok)
 - `AuthPanel.vue` — Vue: setup (~379 tok)
 - `BigStats.vue` — Vue: setup, TS (~184 tok)
-- `BookingDialog.vue` — Offer "At my home" as well as the other party's premises (~1786 tok)
+- `BookingDialog.vue` — Offer "At my home" as well as the other party's premises (~4383 tok)
 - `BrandCover.vue` — Vue component (~322 tok)
 - `CareBookingDialog.vue` — Vue: setup (~672 tok)
 - `CareProviderCard.vue` — Vue: setup (~504 tok)
@@ -1102,3 +1102,6 @@
 - `20261203000000_care_provider_dashboard.sql` — Care providers get their own side of Dogeash: vets, trainers, groomers and the rest manage their lis (~6178 tok)
 - `20261205000000_care_listing.sql` — Care listings: Dogeash adds a provider's business, invites the people who'll manage it, and lists it (~819 tok)
 - `20261206000000_invite_links.sql` — Invitation links: the email's link carries the invitation's id, so sign-up and sign-in can say what  (~394 tok)
+- `20261210000000_care_booking_changes.sql` — Care bookings, 10 Nov: several services in one appointment, days up to three months ahead, and chang (~2412 tok)
+- `20261211000000_care_three_weeks_waitlist.sql` — Care bookings, 10 Nov (second part): runs after 20261210000000_care_booking_changes.sql. (~2302 tok)
+- `20261212000000_dog_care_team.sql` — A dog's care team, 10 Nov: the owner picks Dogeash care providers for one of their dogs (its vet, tr (~824 tok)

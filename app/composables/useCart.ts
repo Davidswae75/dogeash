@@ -32,9 +32,9 @@ export const useCart = createGlobalState(() => {
   const delivery = computed(() => (subtotal.value >= GEAR_FREE_DELIVERY_FROM ? 0 : GEAR_DELIVERY_FEE))
   const total = computed(() => subtotal.value + delivery.value)
 
-  function add(id: string, size?: string) {
+  function add(id: string, size?: string, quantity = 1) {
     const key = `${id}~${size ?? ''}`
-    save(new Map(quantities.value).set(key, Math.min((quantities.value.get(key) ?? 0) + 1, GEAR_MAX_QUANTITY)))
+    save(new Map(quantities.value).set(key, Math.min((quantities.value.get(key) ?? 0) + Math.max(1, quantity), GEAR_MAX_QUANTITY)))
   }
 
   function setQuantity(key: string, quantity: number) {

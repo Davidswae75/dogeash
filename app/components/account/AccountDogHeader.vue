@@ -15,7 +15,6 @@ const facts = computed(() => [
   { label: 'Microchip', value: props.dog.microchip || '—', mono: !!props.dog.microchip },
   { label: 'With you since', value: dayLabel(props.dog.gotOn) },
 ])
-const careServices = ['Vet check', 'Vaccination', 'Deworming and tick treatment', 'Training refresher', 'Grooming']
 </script>
 
 <template>
@@ -37,16 +36,7 @@ const careServices = ['Vet check', 'Vaccination', 'Deworming and tick treatment'
       </dl>
       <p v-if="props.dog.notes" class="m-0 rounded-lg bg-surface-sunk px-3.5 py-3 text-[13.5px] leading-5 whitespace-pre-line">{{ props.dog.notes }}</p>
       <div class="flex flex-wrap gap-2.5">
-        <BookingDialog
-          :title="`Book care for ${props.dog.name}`"
-          description="Vets, trainers and groomers from the care network. Choose what you need and when."
-          :services="careServices"
-          home-visits
-          premises-label="At the provider"
-          :summary="[{ label: 'Dog', value: [props.dog.name, props.dog.breed].filter(Boolean).join(' · ') }]"
-          trigger-label="Book care"
-          trigger-variant="marigold"
-        />
+        <AccountDogBookCare :dog="props.dog" />
         <Button as-child variant="outline"><NuxtLink :to="`/account/dogs/${props.dog.id}/edit`"><Pencil aria-hidden="true" />Edit details</NuxtLink></Button>
         <Button variant="ghost" class="text-ink-muted hover:text-danger" @click="emit('remove')"><Trash2 aria-hidden="true" />Remove</Button>
       </div>

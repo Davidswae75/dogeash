@@ -22,7 +22,7 @@ const searchMatches = computed(() => (search.value ? marketRows.savedSearch(sear
 const tiles = computed(() => [
   { label: 'Shortlist', value: String(count.value), text: count.value ? 'Dogs saved to compare and visit' : 'Tap the heart on any dog', to: '/account/shortlist', tone: 'surface' },
   { label: 'Comparing', value: `${compareDogs.value.length}/${COMPARE_MAX}`, text: compareDogs.value.length > 1 ? 'Ready to compare side by side' : 'Tick 2 or 3 dogs on your shortlist', to: compareDogs.value.length > 1 ? '/account/shortlist/compare' : '/account/shortlist', tone: 'surface' },
-  ...(next.value ? [{ label: 'Next visit', value: visitDay(next.value.day).label, text: `${next.value.slot} · ${next.value.storeName}`, to: '/account/bookings', tone: 'marigold' }] : []),
+  ...(next.value ? [{ label: 'Next visit', value: visitDay(next.value.day).label, text: `${next.value.slot} · ${next.value.storeName}`, to: '/account/visits', tone: 'marigold' }] : []),
   search.value
     ? { label: 'Saved search', value: String(searchMatches.value), text: `Dogs matching ${search.value.label}`, to: `/dogs?${new URLSearchParams(filtersToQuery(search.value.filters))}`, tone: 'night' }
     : { label: 'Saved searches', value: '0', text: 'Save a search on Find a guard dog', to: '/dogs', tone: 'night' },

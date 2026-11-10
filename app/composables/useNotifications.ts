@@ -19,7 +19,7 @@ export function useNotifications() {
   async function load() {
     if (!user.value) return (items.value = [])
     const { data } = await supabase.from('notifications').select('id, kind, title, body, link, read_at, created_at').order('created_at', { ascending: false }).limit(30)
-    items.value = (data ?? []).map(r => ({ id: r.id, kind: r.kind, title: r.title, text: r.body, to: r.link, at: r.created_at, unread: !r.read_at }))
+    items.value = (data ?? []).map(r => ({ id: r.id, kind: r.kind, title: r.title, text: r.body, to: r.kind === 'care' && r.link === '/account/bookings' ? '/account/care' : r.link, at: r.created_at, unread: !r.read_at }))
   }
 
   // Marks read here at once; the database catches up behind it

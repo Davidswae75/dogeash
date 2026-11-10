@@ -124,6 +124,6 @@ export const dogFormFields = {
   ],
   listing: [
     input('bestSuited', 'Best suited to', 'Gated estates with an experienced handler', { optional: true }),
-    input('priceNaira', 'Price', '3200000', { prefix: '₦', attrs: { inputmode: 'numeric' }, hint: 'Whole naira, no commas.' }),
+    input('priceNaira', 'Price', '3,200,000', { prefix: '₦', money: true, attrs: { inputmode: 'numeric' }, hint: 'Whole naira.' }),
   ],
 }

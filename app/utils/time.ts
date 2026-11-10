@@ -22,4 +22,6 @@ export function visitDay(day: string) {
   }
 }
 
-export const todayIso = () => new Date().toISOString().slice(0, 10)
+// Today as "2026-11-10" on the person's own clock (Lagos), not UTC: just after midnight, UTC is still on yesterday
+export const isoDate = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+export const todayIso = () => isoDate(new Date())

@@ -3,6 +3,7 @@ import type { HTMLAttributes, InputHTMLAttributes } from 'vue'
 import { useField } from 'vee-validate'
 import { cn } from '~/lib/utils'
 import { computed, toRef } from 'vue'
+import { formatAmountInput, groupAmount } from '~/utils/amountInput'
 
 // One validated text input, bound to the surrounding vee-validate form by `name`.
 // Its error slides in under the field with a small shake. Rendered by <Fields>.
@@ -11,6 +12,8 @@ export interface FieldInputProps {
   attrs?: InputHTMLAttributes
   inputClass?: HTMLAttributes['class']
   prefix?: string
+  /** A money amount: shown with commas as you type (3,200,000); the form keeps the plain number */
+  money?: boolean
   defaultValue?: string | number
 }
 
@@ -26,10 +29,12 @@ const id = computed(() => props.attrs?.id ?? `field-${props.name.replace(/\./g, 
 const errorId = computed(() => `${id.value}-error`)
 
 function onInput(e: Event) {
-  const v = (e.target as HTMLInputElement).value
-  handleChange(e)
+  const el = e.target as HTMLInputElement
+  const v = props.money ? formatAmountInput(el, e) : el.value
+  handleChange(v)
   emit('update:modelValue', v)
 }
+const shown = computed(() => (props.money ? groupAmount(value.value) : value.value))
 </script>
 
 <template>
@@ -43,7 +48,7 @@ function onInput(e: Event) {
         v-bind="props.attrs"
         :id="id"
         :name="props.name"
-        :value="value"
+        :value="shown"
         :aria-invalid="!!errorMessage"
         :aria-describedby="errorMessage ? errorId : undefined"
         :class="cn(

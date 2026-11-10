@@ -176,6 +176,9 @@ const field = 'h-11 border-line-strong bg-surface'
       </FieldShell>
     </section>
 
+    <!-- Extra sections from the page (adding a dog: its care team) -->
+    <slot name="extra" />
+
     <p v-if="error" class="m-0 font-semibold text-danger" role="alert">{{ error }}</p>
     <div class="flex flex-wrap gap-3">
       <Button type="submit" variant="marigold" class="h-11" :loading="busy" :disabled="photoBusy">{{ props.submitLabel }}</Button>

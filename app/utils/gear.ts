@@ -57,7 +57,24 @@ export const sampleGear: GearProduct[] = [
   { id: 'GR-601', name: 'Tick and flea treatment, 3 months', category: 'health', description: 'Monthly spot-on treatment. Ask your vet about the right dose.', priceNaira: 18_500, supplierId: 'CARE-06', image: gearFleaTreatment, sizes: harnessSizes },
 ]
 
-export const findGear = (id: string) => sampleGear.find(p => p.id === id)
+export const findGear = (id: string) => sampleGear.find(p => p.id.toLowerCase() === id.toLowerCase())
+export const gearPath = (p: GearProduct) => `/gear/${p.id.toLowerCase()}`
+
+// Everything else a buyer reads on a product's own page: what makes it good, the specifications, and what
+// comes in the box. Example details until suppliers can list their own.
+export interface GearInfo { features: string[], specs: { label: string, value: string }[], inBox: string[], care?: string }
+export const gearInfo: Record<string, GearInfo> = {
+  'GR-101': { features: ['Padded, shaped chest plate spreads the pull', 'Grab handle on top for control at the gate', 'Quick-release buckles, two adjustment points', 'D-ring at the back for a lead'], specs: [{ label: 'Material', value: 'Nylon webbing, neoprene padding' }, { label: 'Hardware', value: 'Steel D-ring, ITW buckles' }, { label: 'Colour', value: 'Black' }], inBox: ['Harness', 'Sizing card'], care: 'Hand wash, dry in the shade.' },
+  'GR-102': { features: ['Reflective strips on both sides', 'Light padding for long night shifts', 'Top handle and back D-ring'], specs: [{ label: 'Material', value: 'Nylon with 3M reflective tape' }, { label: 'Colour', value: 'Black and silver' }], inBox: ['Harness'], care: "Hand wash; don't iron the reflective tape." },
+  'GR-201': { features: ['Thick stitched leather that softens with wear', 'Solid steel buckle and D-ring', 'Room for an ID tag'], specs: [{ label: 'Material', value: 'Full-grain leather' }, { label: 'Width', value: '5 cm' }], inBox: ['Collar'], care: 'Wipe clean; oil now and then.' },
+  'GR-202': { features: ['Short length for close control', 'Padded handle', 'Swivel steel clip'], specs: [{ label: 'Length', value: '1.5 m' }, { label: 'Material', value: 'Braided nylon' }], inBox: ['Lead'] },
+  'GR-301': { features: ["Galvanised welded mesh that won't rust", 'Shade roof against sun and rain', 'Lockable gate', 'Bolts together, no welding'], specs: [{ label: 'Size', value: '2 × 3 m, 1.8 m high' }, { label: 'Frame', value: 'Galvanised steel' }, { label: 'Roof', value: 'Corrugated sheet' }, { label: 'Weight', value: 'About 140 kg' }], inBox: ['Mesh panels and gate', 'Roof sheets', 'Bolts and fixings', 'Assembly guide'], care: 'Installation by the supplier can be arranged; ask after ordering.' },
+  'GR-302': { features: ['Raised off hot or wet floors', 'Breathable mesh bed', 'Hose down to clean'], specs: [{ label: 'Size', value: '110 × 80 cm' }, { label: 'Frame', value: 'Powder-coated steel' }, { label: 'Takes', value: 'Up to 70 kg' }], inBox: ['Frame', 'Mesh bed', 'Fittings'] },
+  'GR-401': { features: ['Heavy stainless steel bowls', "Stand that doesn't tip or slide", 'Bowls lift out to wash'], specs: [{ label: 'Bowls', value: '2 × 2.8 litres' }, { label: 'Material', value: 'Stainless steel' }], inBox: ['Stand', 'Two bowls'] },
+  'GR-501': { features: ['High protein for large, active breeds', 'Added joint support', 'Resealable bag'], specs: [{ label: 'Weight', value: '15 kg' }, { label: 'Protein', value: '28%' }, { label: 'For', value: 'Adult dogs over 25 kg' }], inBox: ['One 15 kg bag'], care: 'Store in a cool, dry place. Change food over 7 days.' },
+  'GR-601': { features: ['Kills ticks and fleas for a month', 'Three monthly doses', "Dose by the dog's weight"], specs: [{ label: 'Doses', value: '3 pipettes' }, { label: 'Use', value: 'On the skin, between the shoulders' }], inBox: ['3 pipettes', 'Leaflet'], care: 'Ask your vet about the right dose; keep away from children.' },
+}
+export const infoFor = (p: GearProduct): GearInfo => gearInfo[p.id] ?? { features: [], specs: [], inBox: [] }
 
 // Example delivery rule
 export const GEAR_FREE_DELIVERY_FROM = 100_000

@@ -7,8 +7,9 @@ import { careTypes, findCareProviderBySlug, listedProviders, providerServices, s
 import { formatNaira } from '~/utils/dogs'
 import { storesForProvider } from '~/utils/stores'
 
-// One provider: who they are (photo, credential, years), about, their workplace in photos, history,
-// services, the stores they work with, contact, and booking
+// One provider: who they are (photo, credential, years), about, their workplace in photos, their team,
+// history, services, the stores they work with, contact, and booking. Everything the provider fills in on
+// Your listing shows here; a section they haven't filled in yet says so (with a link to add it, for them).
 const route = useRoute()
 const provider = findCareProviderBySlug(String(route.params.slug))
 if (!provider) throw createError({ statusCode: 404, statusMessage: 'No provider with that name' })
@@ -26,6 +27,7 @@ const stores = storesForProvider(provider.id)
 const years = yearsActive(provider)
 const history = provider.history ?? []
 const gallery = provider.gallery ?? []
+const team = provider.team ?? []
 const similar = listedProviders.value
   .filter(p => p.id !== provider.id && (p.type === provider.type || p.city === provider.city))
   .sort((a, b) => Number(b.type === provider.type) - Number(a.type === provider.type) || b.rating - a.rating)
@@ -78,27 +80,45 @@ const eyebrow = 'text-xs leading-4 font-bold tracking-[.08em] uppercase'
           </p>
         </header>
 
-        <section v-if="provider.about" class="flex flex-col gap-3" aria-labelledby="about-title">
+        <section class="flex flex-col gap-3" aria-labelledby="about-title">
           <h2 id="about-title" class="m-0 mega text-[clamp(26px,3vw,36px)] leading-none">About</h2>
-          <p class="m-0 max-w-[44em] text-[16px] leading-[26px] whitespace-pre-line">{{ provider.about }}</p>
+          <p v-if="provider.about" class="m-0 max-w-[44em] text-[16px] leading-[26px] whitespace-pre-line">{{ provider.about }}</p>
+          <CareEmptyNote v-else :text="`${provider.name} hasn't written about their practice yet.`" :own="managesIt" />
         </section>
 
         <!-- The workplace and their work, in photos -->
-        <section v-if="gallery.length" class="flex flex-col gap-4" aria-labelledby="work-title">
+        <section class="flex flex-col gap-4" aria-labelledby="work-title">
           <h2 id="work-title" class="m-0 mega text-[clamp(26px,3vw,36px)] leading-none">Workplace</h2>
-          <ul class="m-0 grid list-none grid-cols-2 gap-2.5 p-0 sm:grid-cols-3">
+          <ul v-if="gallery.length" class="m-0 grid list-none grid-cols-2 gap-2.5 p-0 sm:grid-cols-3">
             <li v-for="(src, i) in gallery" :key="src" :class="i === 0 && gallery.length > 2 ? 'col-span-2 row-span-2' : ''">
               <a :href="src" target="_blank" rel="noopener" class="block size-full overflow-hidden rounded-lg ring-1 ring-line">
                 <img :src="src" :alt="`${provider.name}, photo ${i + 1}`" loading="lazy" class="aspect-4/3 size-full object-cover transition-transform duration-300 hover:scale-[1.03]">
               </a>
             </li>
           </ul>
+          <CareEmptyNote v-else text="No photos of the workplace yet." :own="managesIt" add="Add photos in Your listing" />
+        </section>
+
+        <!-- The people who work there -->
+        <section class="flex flex-col gap-4" aria-labelledby="team-title">
+          <h2 id="team-title" class="m-0 mega text-[clamp(26px,3vw,36px)] leading-none">Our team</h2>
+          <ul v-if="team.length" class="m-0 grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-3 xl:grid-cols-4">
+            <li v-for="(t, i) in team" :key="i" class="flex flex-col items-center gap-2.5 rounded-xl bg-surface px-3 py-5 text-center ring-1 ring-line">
+              <img v-if="t.photo" :src="t.photo" :alt="t.name" loading="lazy" class="size-20 rounded-full object-cover ring-2 ring-line">
+              <span v-else class="grid size-20 place-items-center rounded-full bg-surface-sunk font-display text-xl font-extrabold text-ink-muted" aria-hidden="true">{{ t.name.split(' ').filter(w => /^[A-Z]/.test(w) && !w.endsWith('.')).slice(0, 2).map(w => w[0]).join('') || t.name[0] }}</span>
+              <span class="flex flex-col gap-0.5">
+                <strong class="text-[15px] leading-5">{{ t.name }}</strong>
+                <span v-if="t.role" class="text-[13px] text-ink-muted">{{ t.role }}</span>
+              </span>
+            </li>
+          </ul>
+          <CareEmptyNote v-else :text="provider.person ? `${provider.person} runs ${provider.name}.` : 'The team hasn\'t been added yet.'" :own="managesIt" add="Add your team in Your listing" />
         </section>
 
         <!-- History: when they started, then their milestones -->
-        <section v-if="history.length || provider.startedYear" class="flex flex-col gap-4" aria-labelledby="history-title">
+        <section class="flex flex-col gap-4" aria-labelledby="history-title">
           <h2 id="history-title" class="m-0 mega text-[clamp(26px,3vw,36px)] leading-none">History</h2>
-          <ol class="m-0 flex list-none flex-col p-0">
+          <ol v-if="history.length || provider.startedYear" class="m-0 flex list-none flex-col p-0">
             <li v-if="provider.startedYear" class="relative flex gap-4 pb-5 pl-6 before:absolute before:top-2 before:bottom-0 before:left-[5px] before:w-px before:bg-line last:pb-0 last:before:hidden">
               <span class="absolute top-1.5 left-0 size-[11px] rounded-full bg-marigold" aria-hidden="true" />
               <span class="w-14 shrink-0 font-mono text-sm font-semibold">{{ provider.startedYear }}</span>
@@ -110,6 +130,7 @@ const eyebrow = 'text-xs leading-4 font-bold tracking-[.08em] uppercase'
               <span class="text-[15px] leading-6">{{ h.text }}</span>
             </li>
           </ol>
+          <CareEmptyNote v-else :text="`${provider.name} hasn't added their history yet.`" :own="managesIt" />
         </section>
 
         <section class="flex flex-col gap-4" aria-labelledby="services-title">

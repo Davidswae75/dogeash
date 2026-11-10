@@ -15,6 +15,8 @@ export interface CareBooking {
   providerName: string
   providerSlug: string
   service: string
+  // Everything asked for in this appointment (service is the first)
+  services: string[]
   day: string
   slot: string
   place: 'premises' | 'home'
@@ -29,6 +31,7 @@ export interface CareBooking {
 export interface CareBookingRequest {
   providerId: string
   service: string
+  services?: string[]
   day: string
   slot: string
   place: 'premises' | 'home'
@@ -45,7 +48,7 @@ export const careBookingStatus: Record<CareBookingStatus, { label: string, tone:
   done: { label: 'Done', tone: 'bg-ash-soft text-ink' },
 }
 
-const columns = 'id, service, day, slot, place, dog_name, owned_dog_id, share_record, status, provider_note, created_at, care_providers (public_id, name, slug)'
+const columns = 'id, service, services, day, slot, place, dog_name, owned_dog_id, share_record, status, provider_note, created_at, care_providers (public_id, name, slug)'
 
 export function useCareBookings() {
   const supabase = useSupabaseClient()
@@ -66,6 +69,7 @@ export function useCareBookings() {
       providerName: r.care_providers?.name ?? 'A care provider',
       providerSlug: r.care_providers?.slug ?? '',
       service: r.service,
+      services: r.services?.length ? r.services : [r.service],
       day: r.day,
       slot: r.slot,
       place: r.place,
@@ -85,6 +89,7 @@ export function useCareBookings() {
     const { error } = await supabase.from('care_bookings').insert({
       provider_id: provider.id,
       service: b.service,
+      services: b.services?.length ? b.services : [b.service],
       day: b.day,
       slot: b.slot,
       place: b.place,
@@ -92,6 +97,14 @@ export function useCareBookings() {
       dog_name: b.dogName?.trim() ?? '',
       share_record: !!(b.ownedDogId && b.shareRecord),
     })
+    if (error) return careRefusal(error.message)
+    await loadMine()
+    return null
+  }
+
+  // Change a booking the provider hasn't answered yet (services, day, time, place)
+  async function edit(id: string, b: { services: string[], day: string, slot: string, place: 'premises' | 'home' }): Promise<string | null> {
+    const { error } = await supabase.rpc('edit_care_booking', { booking: id, new_services: b.services, new_day: b.day, new_slot: b.slot, new_place: b.place })
     if (error) return careRefusal(error.message)
     await loadMine()
     return null
@@ -110,11 +123,17 @@ export function useCareBookings() {
     return (data ?? []).map(s => `${s.day} ${s.slot}`)
   }
 
-  return { mine, loaded, upcoming, past, loadMine, request, cancel, fullSlots }
+  // Fully booked: ask to be told (in the bell) when a time in the next three weeks frees up
+  async function joinWaitlist(providerId: string): Promise<string | null> {
+    const { error } = await supabase.rpc('join_care_waitlist', { provider: providerId })
+    return error ? careRefusal(error.message) : null
+  }
+
+  return { mine, loaded, upcoming, past, loadMine, request, edit, cancel, fullSlots, joinWaitlist }
 }
 
 // The database's refusal of a booking, in words for the buyer (its messages are already written for people)
 function careRefusal(message: string) {
-  const known = ['already booked', 'already have a care appointment', 'already have a booking with this provider', 'provider\'s services', 'manage this listing', 'isn\'t taking bookings', 'from tomorrow', 'next two months', 'doesn\'t work on that day', 'provider\'s times', 'doesn\'t visit homes', 'waiting for an answer', 'can\'t make bookings']
+  const known = ['already booked', 'already have a care appointment', 'already have a booking with this provider', 'provider\'s services', 'at least one', 'up to 5', 'already answered', 'next three weeks', 'manage this listing', 'isn\'t taking bookings', 'from tomorrow', 'next two months', 'doesn\'t work on that day', 'provider\'s times', 'doesn\'t visit homes', 'waiting for an answer', 'can\'t make bookings']
   return known.some(k => message.includes(k)) ? message.replace(/^.*?: /, '') : 'That didn\'t send. Try again.'
 }

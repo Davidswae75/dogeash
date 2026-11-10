@@ -9,7 +9,7 @@ const { upcoming } = useVisits()
   <SectionPanel title="Coming up" :meta="`${upcoming.length} booked`">
     <ul v-if="upcoming.length" class="m-0 flex list-none flex-col p-0">
       <li v-for="v in upcoming.slice(0, 3)" :key="v.id">
-        <NuxtLink to="/account/bookings" class="flex items-center gap-4 rounded-lg p-3 text-ink no-underline hover:bg-surface-sunk">
+        <NuxtLink to="/account/visits" class="flex items-center gap-4 rounded-lg p-3 text-ink no-underline hover:bg-surface-sunk">
           <VisitDateBlock :day="v.day" />
           <span class="flex min-w-0 flex-1 flex-col gap-0.5">
             <span class="flex flex-wrap items-center gap-x-2 gap-y-1">

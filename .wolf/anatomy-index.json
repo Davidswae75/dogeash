@@ -1,13 +1,13 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-11-09T02:40:58.012Z",
-    "fileCount": 778,
+    "lastScanned": "2026-11-10T00:42:28.589Z",
+    "fileCount": 781,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "3aa4153ca5bb5c71554be4e5a1c8f1000d1dcd2172cb18e685f1d8af7b5c8b7f",
-    "storeUpdatedAt": "2026-11-09T02:40:58.147Z",
-    "rootHash": "a8c75f4558b90b50"
+    "renderedHash": "0bae801684485772b2cafe790d9066fb697bfc6a33a20921e7f5b2e089841f8d",
+    "storeUpdatedAt": "2026-11-10T00:42:28.654Z",
+    "rootHash": "c978aacd19db9251"
   },
   "files": {
     ".gitignore": {
@@ -6732,11 +6732,11 @@
     },
     "app/components/BookingDialog.vue": {
       "description": "Offer \"At my home\" as well as the other party's premises",
-      "tokens": 1786,
-      "hash": "af51c771f1c4577e",
-      "size": 6694,
-      "mtimeMs": 1793027128423.9133,
-      "updatedAt": "2026-10-26T15:05:28.672Z",
+      "tokens": 4383,
+      "hash": "94bdb711b1d61775",
+      "size": 16436,
+      "mtimeMs": 1794268274649.6917,
+      "updatedAt": "2026-11-09T23:51:14.975Z",
       "source": "hook"
     },
     "app/components/ShortlistButton.vue": {
@@ -9699,6 +9699,33 @@
       "size": 985,
       "mtimeMs": 1794192057493.6895,
       "updatedAt": "2026-11-09T02:40:58.010Z",
+      "source": "hook"
+    },
+    "supabase/migrations/20261210000000_care_booking_changes.sql": {
+      "description": "Care bookings, 10 Nov: several services in one appointment, days up to three months ahead, and chang",
+      "tokens": 2412,
+      "hash": "f8f82e332fcd9cf1",
+      "size": 9042,
+      "mtimeMs": 1794268039063.612,
+      "updatedAt": "2026-11-09T23:47:20.045Z",
+      "source": "hook"
+    },
+    "supabase/migrations/20261211000000_care_three_weeks_waitlist.sql": {
+      "description": "Care bookings, 10 Nov (second part): runs after 20261210000000_care_booking_changes.sql.",
+      "tokens": 2302,
+      "hash": "c1a994e858aa54de",
+      "size": 8630,
+      "mtimeMs": 1794269416947.4617,
+      "updatedAt": "2026-11-10T00:10:21.542Z",
+      "source": "hook"
+    },
+    "supabase/migrations/20261212000000_dog_care_team.sql": {
+      "description": "A dog's care team, 10 Nov: the owner picks Dogeash care providers for one of their dogs (its vet, tr",
+      "tokens": 824,
+      "hash": "55888c7e7f23d2c7",
+      "size": 3088,
+      "mtimeMs": 1794271348236.8462,
+      "updatedAt": "2026-11-10T00:42:28.587Z",
       "source": "hook"
     }
   },

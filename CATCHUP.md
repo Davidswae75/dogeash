@@ -1747,3 +1747,121 @@ New **`DetailDialog.vue`**:
 - On phones and tablets (below `lg`), a dog's page puts the actions in a bar fixed to the bottom of the screen: **Reserve with a ₦… deposit** across the full width, with **Contact store** and **Book a visit** side by side under it. The price box keeps the price and drops those buttons. Desktop is unchanged.
 - The bar isn't shown to the store's own people, who still see their listing actions. The page has extra bottom padding so the bar doesn't cover the end of the page.
 - Checked at 375px: the bar shows; Contact and Book a visit open their dialogs (the account prompt when signed out); no sideways scroll.
+
+## 49. Care bookings: several services, dates up to three months, change until answered (10 Nov)
+**Migration:** `supabase/migrations/20261210000000_care_booking_changes.sql`. Run it **after** `20261209000000_nov9_batch.sql`.
+
+- **Several services in one appointment.** The care booking dialog lets the buyer choose one or more of the provider's services (up to 5). They're saved in `care_bookings.services`, with `service` kept as the first, so older screens still work. The provider's notification and booking list show them all. The database refuses any service the provider doesn't offer.
+- **Dates further out.** Under the next six working days, "Another date, up to 3 months ahead" opens a calendar (shadcn `Calendar`, the same one Daily Chow uses). It runs from tomorrow to 90 days ahead, and days the provider doesn't work are greyed out. A picked date joins the day chips, already chosen. The database allows up to 92 days, replacing "next two months". Kennel visits get the same calendar.
+- **Changing a booking.** In Account › Visits and bookings, a care booking that's still **Awaiting reply** has **Change**: the same dialog, filled in with the booking (services, day, time, place), with "Save the change". `edit_care_booking` checks it by the same rules as a new booking (not clashing with itself) and tells the provider. Once the provider confirms or declines, it can't be changed; confirmed bookings say so, and Cancel is still there.
+- One set of rules for new and changed bookings: `check_care_booking()`. Also `clean_services()` (trims and removes repeats).
+- `BookingDialog` gained `multipleServices`, `maxDays`, `initial`, `submitLabel`, `triggerSize` and `plainTrigger`, and sends `services`. New `care/CareBookingChange.vue`.
+
+**Checked:**
+- db:test: all rules hold. New checks cover several services, a service the provider doesn't offer, about 80 days ahead OK, 95 refused, changing while waiting, a change keeping the same rules, others can't change it, and no changes after it's confirmed.
+- Typecheck: no new errors.
+- In the browser, on a temporary preview page (since removed): choosing two services, opening the calendar, going to January, picking 14 Jan (it joined the chips), choosing a time, and the summary showing "Services: Health check, Microchip scan". Change mode opened with the booking's services, day and time filled in. The real signed-in flow wasn't clicked through: it needs an account and the migration run.
+
+## 50. Three weeks ahead, Done only from the day, "tell me when a time frees up" (10 Nov)
+**Migration:** `supabase/migrations/20261211000000_care_three_weeks_waitlist.sql`. Run it **after** `20261210000000_care_booking_changes.sql`.
+
+- **Past dates:** checked. The calendar starts tomorrow; today and earlier are greyed out, and you can't page back to an earlier month. The dialog also refuses a day that isn't after today. When you change a booking whose day has already passed, the day isn't kept, and **Change** only shows on bookings still ahead. The database counts "today" on Lagos time. `todayIso()` now uses the device's own date, not UTC, which used to say "yesterday" just after midnight in Lagos.
+- **Three weeks** instead of three months: in the calendar (`maxDays: 21`, "Another date, up to 3 weeks ahead") and in the database ("Choose a day in the next three weeks").
+- **Fully booked days** are crossed out in the day chips and greyed out in the calendar. When every working day in the next three weeks is full, the dialog says "Fully booked for the next 3 weeks", hides the day, time and Request button, and offers **Tell me when a time frees up** (`join_care_waitlist`, table `care_waitlist`). When a booking in the next three weeks is cancelled, declined or moved, everyone waiting for that provider gets a bell notification ("A time opened up with …", linking to the provider), once, and leaves the list.
+- **Mark done only on the appointment day or after.** Coming-up bookings say "You can mark it done on the day." until then, and the database refuses an earlier Done. Past days are still allowed, so a provider can close an appointment they forgot to mark; otherwise it stays confirmed and blocks the buyer from booking that provider again for the dog.
+- Not done: same-day booking. Times are fixed start times, so finishing early frees a start time that has already passed. Times free up for others through cancellations, declines and moves.
+
+**Checked:**
+- db:test: all rules hold. New checks: three weeks OK and further refused; a future appointment can't be marked done but can on its day; joining the waiting list (twice is fine, and others can't see it); a cancellation telling the waiting buyer and taking them off the list. The older "marks it done" test now moves its booking to today first.
+- Typecheck: no new errors.
+- In the browser, on a temporary preview page (since removed): with one day full, today and earlier, weekends and the full day were greyed and the back arrow was disabled; with every day full, the "fully booked" box appeared and "Tell me when a time frees up" switched to "We'll let you know".
+
+## 51. Kennel visits and care appointments on separate pages (10 Nov)
+- **`/account/visits`: Kennel visits.** Coming up (cancel, view store) and Earlier (review the store after a done visit).
+- **`/account/care`: Care appointments.** Coming up (Change while awaiting reply, Cancel, "confirmed, so it can't be changed"), Earlier (link to the dog's record when done), and an empty state with **Find care**.
+- **Account nav** has two entries instead of "Visits and bookings", each with its own count of what's coming up.
+- **`/account/bookings`** (the old address, in older notifications and links) now forwards to `/account/visits`. Care notifications that still point there open `/account/care` instead (mapped in `useNotifications`), so older notifications land on the right page without a migration.
+- After booking, the dialog's button goes to the matching page: "See my visits" or "See my appointments". The home "next visit" chip, the overview and the reviews page link to `/account/visits`.
+
+**Checked:** typecheck (no new errors); both pages compile in the dev server; `/account/bookings` forwards to `/account/visits`. The pages weren't viewed signed in.
+
+## 52. A dog's care team, and booking care from the dog's page (10 Nov)
+**Migration:** `supabase/migrations/20261212000000_dog_care_team.sql`. Run it **after** `20261211000000_care_three_weeks_waitlist.sql`.
+
+- **Care team** (`owned_dog_providers`): an owner picks Dogeash care providers for one of their dogs, up to 8, with each one's consent to add visits to the dog's record (`share_record`, on by default). Only the owner sees or changes it. Providers can't add their own listing, and it's listed providers only.
+- **Adding a dog** (`/account/dogs/new`): an optional **Care team** section. Choose providers (search by name, service or city, filter by kind) and tick whether they may add to the record; they're saved with the dog.
+- **Dog's page:**
+  - A **Care team** panel: each provider with its services and schedule, a **Book** button already set to this dog with the saved consent, a switch "May add visits to …'s record", and a way to take them off. **Add** opens the picker.
+  - **Book care** (it used to be a preview that sent nothing) opens "Book care for Rex": the care team first, then every care provider on Dogeash with what they offer and when, with search and kind filters. **Book** opens that provider's real booking with the dog already chosen; **Add to team** puts them on the team.
+- **New shared pieces:** `useCareTeam` (loaded on its own, so My dogs still works before the migration), `useProviderSearch`, `care/CareProviderRow.vue`, `AccountCareTeamPicker`, `AccountDogCareTeam`, `AccountDogBookCare`. `BookingDialog` and `CareBookingDialog` gained a preset dog and its share setting (`presetDog`/`presetShare`, `dogId`/`share`).
+
+**Checked:**
+- db:test: all rules hold. New checks: the owner adds a provider; twice refused; not to someone else's dog; others can't see it; a provider can't add their own listing; the owner switches sharing off and removes a provider.
+- Typecheck: no new errors.
+- In the browser, on a temporary preview page (since removed): the Book care list with every provider's services and schedule; searching "groom" left one provider; Book opened that provider's booking (the sign-in prompt when signed out). Not tried signed in.
+
+## 53. Shortlist: actions under the text (10 Nov)
+- **Store header** (`ShortlistStoreGroup`): the store's name, place and reply time first; **Book a kennel visit** (first) and **Ask a question** on their own row underneath, lined up with the text, instead of squeezed beside it on wide screens.
+- **Each dog** (`ShortlistItem`): the photo on the left; on the right the name and status, breed · sex · age, the Dogeash ID and the level, then a divider and a row underneath with the price on the left and **Compare** and **Remove** on the right. The remove button now says "Remove" rather than being a bare ×.
+- **Checked** in the browser at 1440px and 375px with four dogs from two stores; no sideways scroll on phones. Typecheck: no new errors.
+
+## 54. Money fields show commas as you type (10 Nov)
+- **Every naira field** shows the amount grouped as you type: **3,200,000**, with ₦ still beside it. The form keeps the plain whole number (3200000), so validation and saving are unchanged. The caret stays after the same digit. Backspace or Delete on a comma removes the digit beside it, so it never needs two presses.
+- **Shared:** `utils/amountInput.ts` (`groupAmount`, `formatAmountInput`). `FieldInput` gained `money`, and field builders pass `money: true`.
+- **Used in:** the dog form's Price (store dashboard), Price from in the admin's provider form, and Price from on the provider's Your listing. Placeholders now read "3,200,000" and "15,000", and the dog form's hint no longer says "no commas".
+- **Checked** on a temporary page (since removed) for both kinds of field: typing 3200000 showed 3,200,000 with the form value 3200000; Backspace at the comma in 15,000 gave 1,000; typing 9 there gave 19,000; deleting from the end of 2,500,000 gave 25,000. Typecheck: no new errors.
+
+## 55. Provider dashboard has its own look, and providers switch between provider and buyer (10 Nov)
+- **Own layout** (`layouts/provider.vue`): no site header or footer. Like the store dashboard, it has a fixed sidebar (a sheet on phones) and a slim top bar, in the provider's colours.
+  - **Sidebar** (`provider/ProviderNav.vue`): the logo with a marigold **Care** tag; the listing (photo or icon, kind, taking bookings or paused); **Your practice**: Bookings (with the waiting count) and Your listing; and Public page. At the foot: who's signed in, **Switch to buyer account**, Sign out, and the theme.
+  - **Top bar**: the listing name above the page title (Bookings, Your listing), **Edit your listing**, and the provider's own avatar menu.
+  - `pages/provider.vue` is now just the route parent (the tabs and heading moved into the layout); the child pages set `title`.
+- **Provider or buyer** (`useAccountMode`, remembered on the device in the `dogeash-mode` cookie; providers start as providers and opening the dashboard sets provider mode):
+  - **In the dashboard**, the avatar menu (`provider/ProviderMenu.vue`) lists only Bookings, Your listing and Public page, then **Switch to buyer account**, then Sign out. None of the buyer pages.
+  - **On the site in provider mode**, the header's avatar menu shows **Switch to provider dashboard** (with the waiting requests) and **Switch to buyer account**, without the buyer pages.
+  - **In buyer mode**, the header menu shows the normal buyer pages (My Dogeash, My dogs, Shortlist…) plus **Switch to provider dashboard**. Switching to buyer opens `/account`; switching back opens `/provider`.
+  - The switch is one card, `provider/ProviderSwitchCard.vue`, with a `compact` form for the sidebar.
+- **Checked:** typecheck (no new errors); the layout, sidebar and both switch cards on a temporary page (since removed). Not seen signed in as a provider: that needs a provider account.
+
+## 56. Provider bookings: this month by default, filters, list or table, details, CSV (10 Nov)
+- **Period**: This month by default; also Next month, Last month, Last 3 months and Everything. The heading names it ("November 2026"), with four counts for it: bookings, to answer, confirmed, done. Requests waiting outside the period show as a marigold nudge ("1 more request to answer outside November 2026 · Show"), which switches to everything that's waiting.
+- **Filters and order**: a search (buyer, dog, service, phone), status chips (To answer, Confirmed, Done, Declined or cancelled), and an order (date earliest or latest first, to answer first, buyer A to Z).
+- **List or table**: a List | Table switch, remembered on the device (`dogeash-provider-view` cookie).
+  - The list keeps the booking cards with their actions and a **Details** button.
+  - In the table (`provider/ProviderBookingsTable.vue`), the whole row opens the details (keyboard too).
+- **Details dialog** (`provider/ProviderBookingDetail.vue`, on the shared `DetailDialog`): the appointment, the buyer (with phone), the dog (whether its record is shared, lines added) and both notes, with the actions along the bottom.
+- **Download CSV**: the bookings shown, with date, time, services, status, buyer, phone, dog, where, both notes, record lines and requested date (`bookingCsv`, using `utils/csv.ts`).
+- **Shared**: `utils/providerBookings.ts` (periods, filter and sort, CSV columns, `canMarkDone`/`canAddToRecord`) and `provider/ProviderBookingActions.vue`. The actions are the same in the card and the dialog.
+- **Limit**: `provider_bookings` returns appointments from 90 days ago onwards, so "Everything" reaches back 3 months. Say if older history is needed.
+- **Checked**: typecheck (no new errors). On a temporary page (since removed) with six sample bookings in the provider layout: this month's counts; the outside-the-month nudge; the table; a row opening the details with Mark done and Add to record; status filters and search. The real page signed in as a provider wasn't tried.
+
+## 57. Provider bookings: one status at a time, and a cleaner panel (10 Nov)
+- **Status**: tabs (All, To answer, Confirmed, Done, Declined or cancelled), so only one can be chosen. Each has its count for the period; the To answer count is marigold when there's any. A marigold underline marks the chosen tab. `filterBookings` takes a single `status`; `inPeriod`/`inStatus` give the counts.
+- **One panel** instead of a loose header, stats and toolbar:
+  - the period name with the period select and **CSV** on the top row
+  - the status tabs across the middle (they scroll sideways on phones)
+  - search, order and List | Table on a shaded row underneath
+  - The separate count tiles are gone, since the tabs carry the numbers. The "requests outside this month" nudge sits just under the panel.
+- **Checked** on a temporary page (since removed) with sample bookings: only one tab is ever on; Done showed its one booking; at 375px there's no sideways page scroll. Typecheck: no new errors.
+
+## 58. Provider page shows everything from Your listing, photos save at once, and "Our team" (10 Nov)
+**Migration:** `supabase/migrations/20261213000000_provider_team.sql`. Run it **after** `20261212000000_dog_care_team.sql`. The catalogue now reads `care_providers.team`; until every migration up to this one has run, the site shows sample data.
+
+- **Why the uploaded photo didn't show:** leaving the provider dashboard didn't re-read the catalogue the public pages use (only the store dashboard and admin did), so the provider's page kept what it had when the site first loaded. Now:
+  - `/provider` counts as a back office in `catalog-fresh`.
+  - Every load of the provider dashboard also updates that listing in the catalogue.
+  - Photos save the moment they're added or removed ("Saved. Buyers see it on your page now."), so forgetting to press Save can't lose them (`savePhotos`).
+- **Our team** (`care_providers.team`, `provider_save_team`): up to 12 people, each with a name, role and photo (own folder only). Edited in a new **Your team** section on Your listing (`provider/ProviderTeamForm.vue`). Shown on the provider's page as cards with a round photo (or initials), name and role.
+- **Every section on the provider's page**: About, Workplace, Our team and History always show. When empty, a dashed note says so ("No photos of the workplace yet."). The provider looking at their own page also gets a link to add it in Your listing (`care/EmptyNote.vue`). With no team, it says who runs the practice, from "Person in charge".
+- **Checked:** db:test (new: saving a team, own-folder photos only, others can't, 12 max); typecheck (no new errors); the provider page in the browser with the empty-section notes. Not tried signed in as a provider.
+
+## 59. Gear: slim cards, and a page for each product (10 Nov)
+- **Cards** (`gear/GearCard.vue`) show only what's needed to choose: the photo, kind, name, price, sizes on offer and the supplier. The whole card opens the product's page. The description, size picker and Add to cart moved to that page.
+- **Product page** `/gear/[id]` (e.g. `/gear/gr-101`):
+  - The photo (sticky on wide screens), kind and product code, name, description and price.
+  - **Size** as cards showing who each fits ("L · 30–45 kg"), and a **Quantity** stepper (up to 10).
+  - **Add to cart** with the total, then **Go to cart**.
+  - Delivery to your gate (₦5,000, free from ₦100,000), swapping a wrong size within 7 days (opened food and health products excepted), and who supplies it (link to their page).
+  - Underneath: **Why it works**, **Specifications**, **In the box** (with care tips), and **You may also need**. On phones, the price and Add to cart stay in a bar at the bottom.
+- **Data:** `gearInfo` in `utils/gear.ts` (features, specifications, box contents, care for each sample product) with `infoFor()` and `gearPath()`. `findGear` ignores case. `useCart().add` takes a quantity. The returns and delivery wording is example copy until suppliers and payments are live.
+- **Checked** in the browser: the slimmer cards, opening a product, choosing size L, adding 2 at once (the cart showed 2 × Patrol harness, ₦76,000; the test items were removed afterwards), and the details sections. Typecheck: no new errors.

@@ -3,6 +3,7 @@ import { LogOut } from '@lucide/vue'
 import { computed, onMounted } from 'vue'
 import { cn } from '~/lib/utils'
 import { useRoute } from '#imports' // nuxt
+import { useCareBookings } from '~/composables/useCareBookings'
 import { useConversations } from '~/composables/useConversations'
 import { useOwnedDogs } from '~/composables/useOwnedDogs'
 import { useSession } from '~/composables/useSession'
@@ -19,14 +20,16 @@ const isActive = (to: string) => to === '/account' ? route.path === to : route.p
 // Phones: the built sections only, so the row of tabs stays short
 const items = accountNav.flatMap(g => g.items).filter(i => !i.soon)
 
-// Counts beside sections that need a look: unread replies, visits coming up, dog care overdue or due soon
+// Counts beside sections that need a look: unread replies, visits and care appointments coming up, dog care overdue or due soon
 const { unread } = useConversations()
 const { upcoming } = useVisits()
+const { upcoming: careUpcoming } = useCareBookings()
 const owned = useOwnedDogs()
 onMounted(owned.ensure)
 const counts = computed<Record<string, number>>(() => ({
   '/account/messages': unread.value,
-  '/account/bookings': upcoming.value.length,
+  '/account/visits': upcoming.value.length,
+  '/account/care': careUpcoming.value.length,
   '/account/dogs': owned.dogs.value.reduce((n, d) => n + needsAttention(d), 0),
 }))
 </script>

@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { BadgeCheck } from '@lucide/vue'
 import { computed, ref, watch } from 'vue'
-import { useSeoMeta } from '#imports' // nuxt
+import { definePageMeta, useSeoMeta } from '#imports' // nuxt
 import { useNotify } from '~/composables/useNotify'
 import { useProviderDashboard } from '~/composables/useProviderDashboard'
+import { formatAmountInput, groupAmount } from '~/utils/amountInput'
 import { careServiceGroups, careTypes, providerServices } from '~/utils/care'
 
 // Provider dashboard › Your listing: what buyers read on the provider's page, and the days and times they
 // can book. The name, type, city, credential and the "checked" badge are Dogeash's, shown but not editable.
+definePageMeta({ title: 'Your listing' })
 useSeoMeta({ title: 'Your listing · Provider dashboard · Dogeash', robots: 'noindex' })
 
 const dash = useProviderDashboard()
@@ -87,7 +89,7 @@ const field = 'h-11 border-line-strong bg-surface'
           <FieldShell label="Price from" for="pl-price" hint="Your lowest price, in naira.">
             <InputGroup class="h-11 border-line-strong bg-surface">
               <InputGroupAddon>₦</InputGroupAddon>
-              <InputGroupInput id="pl-price" v-model="price" inputmode="numeric" placeholder="15000" />
+              <InputGroupInput id="pl-price" :model-value="groupAmount(price)" inputmode="numeric" placeholder="15,000" @input="(e: Event) => (price = formatAmountInput(e.target as HTMLInputElement, e))" />
             </InputGroup>
           </FieldShell>
           <FieldShell label="Areas you cover" for="pl-areas" optional>
@@ -137,6 +139,7 @@ const field = 'h-11 border-line-strong bg-surface'
       <div><Button type="submit" variant="marigold" class="h-11" :loading="busy">Save changes</Button></div>
     </form>
     <ProviderDetailsForm />
+    <ProviderTeamForm />
     </div>
 
     <aside class="flex flex-col gap-3 self-start rounded-xl bg-surface p-4 ring-1 ring-line sm:p-5">

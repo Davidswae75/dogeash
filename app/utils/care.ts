@@ -48,8 +48,11 @@ export interface CareProvider {
   address?: string
   startedYear?: number | null
   history?: CareMilestone[]
+  // The people who work there, shown as "Our team"
+  team?: CareTeamPerson[]
 }
 export interface CareMilestone { year: string, text: string }
+export interface CareTeamPerson { name: string, role: string, photoPath: string | null, photo?: string }
 // The phone, WhatsApp and email: only for signed-in people (care_provider_contacts)
 export interface CareContacts { phone: string, whatsapp: string, email: string }
 
@@ -97,8 +100,9 @@ export interface CareRow {
   address?: string
   started_year?: number | null
   history?: CareMilestone[]
+  team?: { name: string, role: string, photo: string | null }[]
 }
-export const careColumns = 'public_id, name, person, type, city, areas, home_visits, verified, credential, rating, reviews_count, price_from, about, hours, weekdays, slots, taking_bookings, listed, services, slot_capacity, photo_path, gallery_paths, address, started_year, history'
+export const careColumns = 'public_id, name, person, type, city, areas, home_visits, verified, credential, rating, reviews_count, price_from, about, hours, weekdays, slots, taking_bookings, listed, services, slot_capacity, photo_path, gallery_paths, address, started_year, history, team'
 
 // Providers' photos live in the public care-media bucket, one folder per provider
 export const careMediaUrl = (path: string | null | undefined, storageUrl: string) =>
@@ -132,6 +136,7 @@ export const toCareProvider = (r: CareRow, storageUrl = ''): CareProvider => ({
   address: r.address ?? '',
   startedYear: r.started_year ?? null,
   history: Array.isArray(r.history) ? r.history : [],
+  team: (Array.isArray(r.team) ? r.team : []).map(t => ({ name: t.name, role: t.role ?? '', photoPath: t.photo ?? null, photo: careMediaUrl(t.photo, storageUrl) })),
 })
 
 // "12 years" since they started, or nothing

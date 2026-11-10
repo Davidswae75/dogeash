@@ -1,5 +1,5 @@
 import type { Component } from 'vue'
-import { BellRing, CalendarCheck, Dog as DogIcon, Heart, House, LayoutGrid, MessageSquare, Package, Settings, ShieldCheck, Star } from '@lucide/vue'
+import { BellRing, CalendarCheck, Dog as DogIcon, Heart, House, LayoutGrid, MessageSquare, Package, Settings, ShieldCheck, Star, Stethoscope } from '@lucide/vue'
 import type { Dog } from './dogs'
 import type { PropertyType } from './protection'
 import type { CareType } from './care'
@@ -49,7 +49,8 @@ export const accountNav: { group: string, items: AccountNavItem[] }[] = [
       { label: 'Overview', to: '/account', icon: LayoutGrid, inMenu: true },
       { label: 'My dogs', to: '/account/dogs', icon: DogIcon, inMenu: true },
       { label: 'Shortlist', to: '/account/shortlist', icon: Heart, inMenu: true },
-      { label: 'Visits and bookings', to: '/account/bookings', icon: CalendarCheck, inMenu: true },
+      { label: 'Kennel visits', to: '/account/visits', icon: CalendarCheck, inMenu: true },
+      { label: 'Care appointments', to: '/account/care', icon: Stethoscope, inMenu: true },
       { label: 'Reservations', to: '/account/reservations', icon: ShieldCheck, inMenu: true },
       { label: 'Messages', to: '/account/messages', icon: MessageSquare, inMenu: true },
       { label: 'Saved searches', to: '/account/alerts', icon: BellRing },

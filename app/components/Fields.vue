@@ -63,6 +63,7 @@ const inputId = (f: FieldConfig) => f.attrs?.id ?? `field-${f.name.replace(/\./g
         :attrs="f.attrs"
         :input-class="f.inputClass"
         :prefix="f.prefix"
+        :money="f.money"
         :default-value="props.form ? getNestedValue<string | number>(props.form, f.name) : f.defaultValue"
         @update:model-value="(v) => props.form && setNestedValue(props.form, f.name, v)"
       >

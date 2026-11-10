@@ -30,6 +30,17 @@ watch([listing, contacts], ([l, c]) => {
   email.value = c.email
 }, { immediate: true })
 
+// Photos save the moment they're chosen or removed, so they're never lost by forgetting to press Save
+const photoNote = ref('')
+async function savePhotos(next: { photo?: string | null, gallery?: string[] }) {
+  if (next.photo !== undefined) photo.value = next.photo
+  if (next.gallery) gallery.value = next.gallery
+  photoNote.value = 'Saving…'
+  const error = await dash.savePhotos(photo.value, gallery.value)
+  photoNote.value = error ?? 'Saved. Buyers see it on your page now.'
+  if (error) useNotify().failed(error)
+}
+
 const thisYear = new Date().getFullYear()
 const yearOptions = Array.from({ length: 50 }, (_, i) => String(thisYear - i)).map(y => ({ value: y, label: y }))
 const addMilestone = () => { if (history.value.length < 8) history.value = [...history.value, { year: '', text: '' }] }
@@ -65,10 +76,11 @@ const heading = 'm-0 font-display text-lg font-extrabold font-stretch-expanded'
     <section :class="section">
       <div class="flex flex-col gap-1">
         <h2 :class="heading">Photos</h2>
-        <p class="m-0 text-[13px] leading-5 text-ink-muted">Professional photos build trust: you at work, your clinic, yard or workshop. Clear, well lit, no filters. JPG, PNG or WebP, up to 5 MB each.</p>
+        <p class="m-0 text-[13px] leading-5 text-ink-muted">Professional photos build trust: you at work, your clinic, yard or workshop. Clear, well lit, no filters. JPG, PNG or WebP, up to 5 MB each. Photos save as soon as you add or remove them.</p>
       </div>
-      <PhotoPicker v-model:path="photo" :upload="dash.uploadPhoto" :preview="listing.photo" label="Profile photo" optional removable shape="round" note="You, or your logo. Shown beside your name." />
-      <PhotoGrid v-model:paths="gallery" :upload="dash.uploadPhoto" :url-of="dash.mediaUrl" label="Your workplace and work" optional hint="The premises, equipment, kennels you've built, dogs you've trained. You can pick several at once." />
+      <PhotoPicker :path="photo" :upload="dash.uploadPhoto" :preview="listing.photo" label="Profile photo" optional removable shape="round" note="You, or your logo. Shown beside your name." @update:path="p => savePhotos({ photo: p })" />
+      <PhotoGrid :paths="gallery" :upload="dash.uploadPhoto" :url-of="dash.mediaUrl" label="Your workplace and work" optional hint="The premises, equipment, kennels you've built, dogs you've trained. You can pick several at once." @update:paths="g => savePhotos({ gallery: g })" />
+      <p v-if="photoNote" class="m-0 text-[13px] font-semibold" :class="photoNote.startsWith('Saved') ? 'text-verified' : photoNote === 'Saving…' ? 'text-ink-muted' : 'text-danger'" role="status">{{ photoNote }}</p>
     </section>
 
     <section :class="section">

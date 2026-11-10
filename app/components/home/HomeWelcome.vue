@@ -41,7 +41,7 @@ function search(q: string) {
         </ClientOnly>
       </NuxtLink>
       <ClientOnly>
-        <NuxtLink v-if="next" to="/account/bookings" :class="homeHeroChip">
+        <NuxtLink v-if="next" to="/account/visits" :class="homeHeroChip">
           <CalendarDays class="size-4" aria-hidden="true" />Next visit {{ visitDay(next.day).label }}, {{ next.slot }}
         </NuxtLink>
       </ClientOnly>

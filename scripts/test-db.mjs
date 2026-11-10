@@ -777,6 +777,8 @@ check('owners still can\'t write records for someone else\'s dog', await as('aut
 await as('authenticated', buyer, `select public.set_care_booking_status('${noShare?.id}', 'cancelled')`)
 check('the buyer cancels a booking; the provider is told', await scalar(`select status::text from public.care_bookings where id = '${noShare?.id}'`) === 'cancelled'
   && await scalar(`select count(*)::int from public.notifications where user_id = '${vet}' and topic = 'care-booking:${noShare?.id}'`) === 1)
+// (Done only on the appointment's day: the test moves it to today first)
+await db.exec(`update public.care_bookings set day = current_date where id = '${cb?.id}'`)
 await as('authenticated', vet, `select public.set_care_booking_status('${cb?.id}', 'done', 'Next booster in a year')`)
 check('the provider marks it done', await scalar(`select status::text from public.care_bookings where id = '${cb?.id}'`) === 'done')
 await as('authenticated', vet, `select public.provider_save_profile('${care01}', '{"takingBookings":false}')`)
@@ -868,6 +870,58 @@ check('photos must be in the provider\'s own folder', await as('authenticated', 
 check('someone else can\'t save a provider\'s details', await as('authenticated', payer, `select public.provider_save_details('${care01}', '${details(care01)}'::jsonb)`) === null)
 check('a provider can upload into their own folder only', (await as('authenticated', vet, `insert into storage.objects (bucket_id, name) values ('care-media', '${care01}/a.jpg') returning id`))?.length === 1
   && await as('authenticated', vet, `insert into storage.objects (bucket_id, name) values ('care-media', '${care02}/a.jpg')`) === null)
+
+// 10 Nov: several services in one booking, up to three weeks ahead, and changing it until the provider answers
+const workDay = n => `(select d::date from generate_series(current_date + ${n}, current_date + ${n} + 10, '1 day') d where extract(dow from d) between 1 and 5 limit 1)`
+const multi = (await as('authenticated', payer, `insert into public.care_bookings (provider_id, service, services, day, slot, dog_name) values ('${care02}', 'Handover session', '{Handover session,Refresher training}', ${workDay(16)}, '9:00', 'Tiger') returning id, services, service`))?.[0]
+check('one booking can ask for several of the provider\'s services', multi?.services?.length === 2 && multi.service === 'Handover session')
+check('but only services the provider offers', await as('authenticated', payer, `insert into public.care_bookings (provider_id, service, services, day, slot, dog_name) values ('${care02}', 'Handover session', '{Handover session,Bath and groom}', ${workDay(17)}, '9:00', 'Simba')`) === null)
+check('a day up to three weeks ahead is fine', (await as('authenticated', payer, `insert into public.care_bookings (provider_id, service, day, slot, dog_name) values ('${care02}', 'Handover session', ${workDay(19)}, '9:00', 'Simba') returning id`))?.length === 1)
+check('but not further than three weeks', await as('authenticated', payer, `insert into public.care_bookings (provider_id, service, day, slot, dog_name) values ('${care02}', 'Handover session', ${workDay(23)}, '9:00', 'Leo')`) === null)
+const editTo = (uid, day, services = '{Refresher training}') => as('authenticated', uid, `select public.edit_care_booking('${multi?.id}', '${services}', ${day}, '11:00')`)
+check('the buyer can change a booking that\'s still waiting', (await editTo(payer, workDay(12)))?.length === 1
+  && (await as('authenticated', payer, `select service, slot from public.care_bookings where id = '${multi?.id}'`))?.[0]?.slot === '11:00')
+check('the change follows the same rules', await editTo(payer, workDay(12), '{Bath and groom}') === null)
+check('nobody else can change it', await editTo(other, workDay(13)) === null)
+const trainer = (await db.query(`select user_id from public.care_provider_members where provider_id = '${care02}' limit 1`)).rows[0]?.user_id
+if (trainer) await as('authenticated', trainer, `select public.set_care_booking_status('${multi?.id}', 'confirmed')`)
+else await db.exec(`update public.care_bookings set status = 'confirmed' where id = '${multi?.id}'`)
+check('once the provider confirms it, it can\'t be changed', await editTo(payer, workDay(13)) === null)
+
+// A provider marks an appointment done on its day or after, not before
+const later = (await as('authenticated', payer, `insert into public.care_bookings (provider_id, service, day, slot, dog_name) values ('${care01}', 'Health check', ${workDay(9)}, '9:00', 'Rex2') returning id`))?.[0]?.id
+await as('authenticated', vet, `select public.set_care_booking_status('${later}', 'confirmed')`)
+check('a confirmed appointment in the future can\'t be marked done', await as('authenticated', vet, `select public.set_care_booking_status('${later}', 'done')`) === null)
+await db.exec(`update public.care_bookings set day = current_date where id = '${later}'`)
+check('on its day it can', (await as('authenticated', vet, `select public.set_care_booking_status('${later}', 'done')`))?.length === 1)
+
+// Waiting list: told once when a time in the next three weeks frees up
+const waiter = await user('Ada Wait')
+check('a buyer can ask to be told when a time frees up', (await as('authenticated', waiter, `select public.join_care_waitlist('CARE-02')`))?.length === 1
+  && (await as('authenticated', waiter, `select public.join_care_waitlist('CARE-02')`))?.length === 1)
+check('nobody else sees who is waiting', (await as('authenticated', payer, `select * from public.care_waitlist`)).length === 0)
+const freeing = (await as('authenticated', payer, `insert into public.care_bookings (provider_id, service, day, slot, dog_name) values ('${care02}', 'Handover session', ${workDay(10)}, '11:00', 'Bolt') returning id`))?.[0]?.id
+await as('authenticated', payer, `select public.set_care_booking_status('${freeing}', 'cancelled')`)
+check('a cancelled time tells the waiting buyer', (await as('authenticated', waiter, `select title from public.notifications where title like 'A time opened up%'`))?.length === 1)
+check('and takes them off the list', (await as('authenticated', waiter, `select * from public.care_waitlist`)).length === 0)
+
+// A dog's care team: the owner picks Dogeash providers for their dog; only they see or change it
+const teamAdd = (uid, dog, prov, share = true) => as('authenticated', uid, `insert into public.owned_dog_providers (owned_dog_id, provider_id, share_record) values ('${dog}', '${prov}', ${share}) returning owner_id`)
+check('an owner adds a provider to their dog\'s care team', (await teamAdd(buyer, bruno, care02))?.[0]?.owner_id === buyer)
+check('the same provider twice is refused', await teamAdd(buyer, bruno, care02) === null)
+check('nobody adds to someone else\'s dog', await teamAdd(payer, bruno, care01) === null)
+check('nobody else sees the team', (await as('authenticated', payer, `select * from public.owned_dog_providers`)).length === 0)
+check('a provider can\'t add their own listing', await as('authenticated', vet, `insert into public.owned_dog_providers (owned_dog_id, provider_id) values ('${bruno}', '${care01}')`) === null)
+check('the owner can stop sharing the record with one', (await as('authenticated', buyer, `update public.owned_dog_providers set share_record = false where owned_dog_id = '${bruno}' and provider_id = '${care02}' returning share_record`))?.[0]?.share_record === false)
+check('and remove them', (await as('authenticated', buyer, `delete from public.owned_dog_providers where owned_dog_id = '${bruno}' and provider_id = '${care02}' returning provider_id`))?.length === 1)
+
+// A provider's team on their page: name, role, own-folder photo; up to 12
+const team = (folder, extra = []) => JSON.stringify([{ name: 'Dr. Halima Sani', role: 'Lead vet', photo: `${folder}/halima.jpg` }, { name: '  ', role: 'blank names are dropped' }, ...extra]).replace(/'/g, "''")
+check('a provider saves their team', (await as('authenticated', vet, `select public.provider_save_team('${care01}', '${team(care01)}'::jsonb)`))?.length === 1
+  && (await as('anon', null, `select team from public.care_providers where public_id = 'CARE-01'`))?.[0]?.team?.length === 1)
+check('team photos must be their own uploads', await as('authenticated', vet, `select public.provider_save_team('${care01}', '${team(care02)}'::jsonb)`) === null)
+check('nobody else saves their team', await as('authenticated', payer, `select public.provider_save_team('${care01}', '${team(care01)}'::jsonb)`) === null)
+check('up to 12 people', await as('authenticated', vet, `select public.provider_save_team('${care01}', '${JSON.stringify(Array.from({ length: 13 }, (_, i) => ({ name: 'P' + i })))}'::jsonb)`) === null)
 
 // Invitation links: sign-up and sign-in read what's being accepted from the link's id
 const storeInviteId = (await as('authenticated', owner, `insert into public.store_invites (store_id, email, role) values ('${k9}', 'newhand@test.ng', 'handler') returning id`))?.[0]?.id

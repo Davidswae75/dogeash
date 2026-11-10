@@ -65,6 +65,7 @@ async function removeDog() {
         </div>
         <div class="flex min-w-0 flex-col gap-4 sm:gap-5">
           <AccountDogCare :dog="dog" @add="add" @open="open" @done="done" />
+          <AccountDogCareTeam :dog="dog" />
         </div>
       </div>
       <AccountDogRecordDialog v-model:open="dialogOpen" :dog-name="dog.name" :record="editing" :kind="startKind" :save="saveRecord" :remove="removeRecord" />

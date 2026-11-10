@@ -505,3 +505,7 @@ description: chronological action log per session, consolidated weekly
 | 03:40 | Created app/components/AppLogo.vue | — | ~530 |
 | 03:40 | Created app/components/AppLogo.vue | — | ~291 |
 | 03:40 | Created app/components/AppLogoMark.vue | — | ~263 |
+| 00:47 | Created supabase/migrations/20261210000000_care_booking_changes.sql | — | ~2412 |
+| 00:51 | Edited app/components/BookingDialog.vue | 3→2 lines | ~48 |
+| 01:10 | Created supabase/migrations/20261211000000_care_three_weeks_waitlist.sql | — | ~2302 |
+| 01:42 | Created supabase/migrations/20261212000000_dog_care_team.sql | — | ~824 |

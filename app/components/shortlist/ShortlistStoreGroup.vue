@@ -10,9 +10,9 @@ const props = defineProps<{ store: Store, dogs: Dog[] }>()
 
 <template>
   <section class="overflow-hidden rounded-xl bg-surface ring-1 ring-line">
-    <!-- The store, with room to breathe: who and where on the left, the two ways to reach them on the right -->
-    <header class="flex flex-col gap-4 border-b border-line bg-canvas/60 p-4 sm:p-5 lg:flex-row lg:items-center lg:gap-6 lg:px-6">
-      <div class="flex min-w-0 flex-1 items-center gap-3.5">
+    <!-- The store: who and where, then the two ways to reach them underneath, so neither is squeezed -->
+    <header class="flex flex-col gap-3.5 border-b border-line bg-canvas/60 p-4 sm:p-5 lg:px-6">
+      <div class="flex min-w-0 items-center gap-3.5">
         <StoreAvatar :initials="props.store.initials" :src="props.store.logo" class="size-12 shrink-0 rounded-xl" />
         <div class="flex min-w-0 flex-col gap-1">
           <div class="flex flex-wrap items-center gap-2">
@@ -25,14 +25,14 @@ const props = defineProps<{ store: Store, dogs: Dog[] }>()
           </span>
         </div>
       </div>
-      <div class="flex flex-wrap gap-2 lg:shrink-0 lg:justify-end">
-        <ContactStoreDialog :store="props.store" :dog="props.dogs.length === 1 ? props.dogs[0] : undefined" label="Ask a question" variant="ghost" size="sm" />
+      <div class="flex flex-wrap gap-2 sm:pl-[62px]">
         <KennelVisitDialog
           :store="props.store"
           :dogs="props.dogs"
           :label="props.dogs.length === 1 ? 'Book a kennel visit' : `Book one visit for ${props.dogs.length} dogs`"
           variant="default"
         />
+        <ContactStoreDialog :store="props.store" :dog="props.dogs.length === 1 ? props.dogs[0] : undefined" label="Ask a question" variant="outline" size="sm" />
       </div>
     </header>
     <ul class="m-0 flex list-none flex-col divide-y divide-line p-0">

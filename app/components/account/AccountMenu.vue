@@ -1,16 +1,20 @@
 <script setup lang="ts">
-import { LogOut, ShieldCheck, Stethoscope } from '@lucide/vue'
+import { LogOut, ShieldCheck } from '@lucide/vue'
+import { useAccountMode } from '~/composables/useAccountMode'
 import { useSession } from '~/composables/useSession'
 import { useShortlist } from '~/composables/useShortlist'
 import { useStaff } from '~/composables/useStaff'
 import { accountNav } from '~/utils/account'
 
-// The avatar in the header: who is signed in, their account pages and Sign out (and Admin, for Dogeash staff)
-const { user, initials, memberships, hasStore, providers, signOut } = useSession()
+// The avatar in the header: who is signed in, their account pages and Sign out (and Admin, for Dogeash staff).
+// Care providers in provider mode see only the way into their dashboard and the switch to buying; in buyer
+// mode, the buyer pages and the switch back.
+const { user, initials, memberships, hasStore, signOut } = useSession()
 const { count } = useShortlist()
 const { role: staffRole } = useStaff()
 
 const groups = accountNav.map(g => g.items.filter(i => i.inMenu)).filter(g => g.length)
+const { mode, isProvider, switchTo } = useAccountMode()
 </script>
 
 <template>
@@ -31,7 +35,7 @@ const groups = accountNav.map(g => g.items.filter(i => i.inMenu)).filter(g => g.
         <div class="flex min-w-0 flex-col">
           <strong class="truncate font-display text-[15px] leading-5 font-extrabold font-stretch-expanded">{{ user.name }}</strong>
           <span class="truncate text-[13px] text-ink-muted">{{ user.email }}</span>
-          <span class="mt-1 font-mono text-[10.5px] font-semibold tracking-[.12em] text-ink-muted uppercase">{{ ['Buyer', user.city, user.ref].filter(Boolean).join(' · ') }}</span>
+          <span class="mt-1 font-mono text-[10.5px] font-semibold tracking-[.12em] text-ink-muted uppercase">{{ [mode === 'provider' ? 'Care provider' : 'Buyer', user.city, user.ref].filter(Boolean).join(' · ') }}</span>
         </div>
       </div>
 
@@ -40,7 +44,13 @@ const groups = accountNav.map(g => g.items.filter(i => i.inMenu)).filter(g => g.
         <AccountStoreCard :store="m.store" :role="m.role" />
       </div>
 
-      <template v-for="(group, g) in groups" :key="g">
+      <!-- Provider mode: straight back to the dashboard, or over to buying -->
+      <div v-if="isProvider && mode === 'provider'" class="flex flex-col gap-1.5 px-1 pb-1.5">
+        <ProviderSwitchCard to="provider" @switch="switchTo('provider')" />
+        <ProviderSwitchCard to="buyer" @switch="switchTo('buyer')" />
+      </div>
+
+      <template v-for="(group, g) in (isProvider && mode === 'provider' ? [] : groups)" :key="g">
         <DropdownMenuSeparator class="bg-line" />
         <DropdownMenuGroup>
           <DropdownMenuItem v-for="item in group" :key="item.to" as-child class="h-9 cursor-pointer gap-3 px-2.5 font-semibold">
@@ -56,10 +66,11 @@ const groups = accountNav.map(g => g.items.filter(i => i.inMenu)).filter(g => g.
         </DropdownMenuGroup>
       </template>
 
+      <!-- Buyer mode: the way back to the provider dashboard -->
+      <div v-if="isProvider && mode === 'buyer'" class="px-1 pt-1.5 pb-1">
+        <ProviderSwitchCard to="provider" @switch="switchTo('provider')" />
+      </div>
       <DropdownMenuSeparator class="bg-line" />
-      <DropdownMenuItem v-for="p in providers" :key="p.id" as-child class="h-9 cursor-pointer gap-3 px-2.5 font-semibold">
-        <NuxtLink to="/provider" class="text-ink no-underline"><Stethoscope class="size-[17px]" aria-hidden="true" /><span class="truncate">{{ p.name }} dashboard</span></NuxtLink>
-      </DropdownMenuItem>
       <DropdownMenuItem v-if="staffRole" as-child class="h-9 cursor-pointer gap-3 px-2.5 font-semibold">
         <NuxtLink to="/admin" class="text-ink no-underline"><ShieldCheck class="size-[17px]" aria-hidden="true" />Admin</NuxtLink>
       </DropdownMenuItem>

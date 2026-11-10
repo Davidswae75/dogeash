@@ -75,7 +75,7 @@ async function remove() {
         <span class="grid size-14 place-items-center rounded-full bg-marigold-soft"><Star class="size-6" aria-hidden="true" /></span>
         <h2 class="m-0 font-display text-2xl font-extrabold font-stretch-expanded">Nothing to review yet</h2>
         <p class="m-0 max-w-[32em] text-[15px] leading-6 text-ink-muted">Once a store marks your kennel visit as done, it shows here so you can tell other buyers how it went.</p>
-        <Button as-child><NuxtLink to="/account/bookings">Your visits</NuxtLink></Button>
+        <Button as-child><NuxtLink to="/account/visits">Your visits</NuxtLink></Button>
       </div>
     </template>
 
