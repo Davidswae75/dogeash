@@ -16,6 +16,7 @@ const fullFooter = computed(() => route.meta.footer === 'full')
     <SiteAnnouncement />
     <SiteHeader />
     <AccountBlockedBanner />
+    <CatalogUnavailable />
     <main id="main" class="flex-1 pb-12">
       <slot />
     </main>

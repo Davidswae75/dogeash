@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { BadgeCheck, MoreHorizontal, Plus, Search } from '@lucide/vue'
+import { BadgeCheck, MoreHorizontal, Plus } from '@lucide/vue'
 import { computed, onMounted, ref } from 'vue'
 import { definePageMeta, useSeoMeta } from '#imports' // nuxt
 import type { DetailSection } from '~/components/DetailDialog.vue'
+import type { DataColumn } from '~/components/list/ListTable.vue'
+import type { CareType } from '~/utils/care'
 import type { CareProvider } from '~/utils/care'
 import { useAdminCare } from '~/composables/useAdminCare'
 import { useNotify } from '~/composables/useNotify'
@@ -19,9 +21,34 @@ const { providers, loaded, managedBy, load, save, remove, inviteAll } = useAdmin
 onMounted(load)
 
 const query = ref('')
+// Listed or hidden, and the kind of care
+const show = ref<'all' | 'listed' | 'hidden'>('all')
+const kinds = ref<CareType[]>([])
+const kindOptions = (Object.keys(careTypes) as CareType[]).map(k => ({ value: k, label: careTypes[k].label }))
+const tabs = computed(() => [
+  { value: 'all' as const, label: 'All', count: providers.value.length },
+  { value: 'listed' as const, label: 'Listed', count: providers.value.filter(p => p.listed !== false).length },
+  { value: 'hidden' as const, label: 'Hidden', count: providers.value.filter(p => p.listed === false).length },
+])
+function clearFilters() {
+  show.value = 'all'
+  kinds.value = []
+  query.value = ''
+}
+const columns: DataColumn[] = [
+  { key: 'name', label: 'Provider', mobile: 'title' },
+  { key: 'type', label: 'Type', mobile: 'meta' },
+  { key: 'city', label: 'City', mobile: 'row' },
+  { key: 'managers', label: 'Managed by', mobile: 'row' },
+]
+const providerKey = (p: CareProvider) => p.id
+const providerLabel = (p: CareProvider) => `${p.name}, ${careTypes[p.type].label}`
 const shown = computed(() => {
   const q = query.value.trim().toLowerCase()
-  return providers.value.filter(p => !q || `${p.name} ${p.person ?? ''} ${p.city} ${careTypes[p.type].label}`.toLowerCase().includes(q))
+  return providers.value
+    .filter(p => show.value === 'all' || (show.value === 'hidden' ? p.listed === false : p.listed !== false))
+    .filter(p => !kinds.value.length || kinds.value.includes(p.type))
+    .filter(p => !q || `${p.name} ${p.person ?? ''} ${p.city} ${careTypes[p.type].label}`.toLowerCase().includes(q))
 })
 
 const editing = ref<CareProvider>()
@@ -111,63 +138,45 @@ async function onRemove() {
 <template>
   <AdminPage title="Care directory" :count="providers.length" description="Providers buyers can find and book, and stores can add to their care team. Add the business, invite whoever runs it, and list it when it&apos;s ready.">
     <template #actions>
-      <label class="relative">
-        <span class="sr-only">Search providers</span>
-        <Search class="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-ink-muted" aria-hidden="true" />
-        <Input v-model="query" type="search" placeholder="Name, city, type" class="h-9 w-56 pl-8 text-sm" />
-      </label>
       <Button variant="marigold" size="sm" class="h-9" @click="openForm()"><Plus aria-hidden="true" />Add provider</Button>
     </template>
 
-    <AdminCard flush>
-      <div class="relative overflow-x-auto">
-        <table v-if="shown.length" class="w-full min-w-[600px] border-collapse text-left text-[13px]">
-          <thead>
-            <tr class="text-[11.5px] text-ink-muted">
-              <th scope="col" class="px-5 py-2.5 font-medium">Provider</th>
-              <th scope="col" class="px-3 py-2.5 font-medium">Type</th>
-              <th scope="col" class="px-3 py-2.5 font-medium">City</th>
-              <th scope="col" class="px-3 py-2.5 font-medium">Managed by</th>
-              <th scope="col" class="w-12"><span class="sr-only">Actions</span></th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- A row shows the essentials; clicking it opens everything about the provider -->
-            <tr v-for="p in shown" :key="p.id" class="cursor-pointer align-top hover:bg-surface-sunk/60" @click="openProvider(p)">
-              <td class="border-t border-line px-5 py-2.5">
-                <span class="flex flex-col leading-tight">
-                  <button type="button" class="flex w-fit cursor-pointer items-center gap-1.5 border-0 bg-transparent p-0 text-left font-medium text-ink hover:underline" @click.stop="openProvider(p)">
-                    {{ p.name }}<BadgeCheck v-if="p.verified" class="size-3.5 text-marigold" aria-label="Checked by Dogeash" /><span v-if="p.listed === false" class="rounded-full bg-surface-sunk px-1.5 font-mono text-[10px] leading-4 font-semibold text-ink-muted uppercase">hidden</span>
-                  </button>
-                  <span class="font-mono text-[11px] text-ink-muted">{{ p.id }}</span>
-                </span>
-              </td>
-              <td class="border-t border-line px-3 py-2.5">{{ careTypes[p.type].label }}</td>
-              <td class="border-t border-line px-3 py-2.5">{{ p.city }}</td>
-              <td class="border-t border-line px-3 py-2.5">
-                <span v-for="m in managedBy(p.id).members" :key="m.email" class="block leading-tight" :title="m.email">{{ m.name }}</span>
-                <span v-for="i in managedBy(p.id).invites" :key="i.id" class="block font-mono text-[11px] text-ink-muted">invited: {{ i.email }}</span>
-                <span v-if="!managedBy(p.id).members.length && !managedBy(p.id).invites.length" class="text-[12px] text-ink-muted">Dogeash</span>
-              </td>
-              <td class="border-t border-line pr-3 text-right" @click.stop>
-                <DropdownMenu>
-                  <DropdownMenuTrigger as-child>
-                    <Button variant="ghost" size="icon" class="mt-1 size-8" :aria-label="`Actions for ${p.name}`"><MoreHorizontal aria-hidden="true" /></Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" class="w-40 rounded-lg border-line bg-surface p-1 shadow-[0_18px_40px_-20px_rgb(0_0_0/.45)]">
-                    <DropdownMenuItem @select="openForm(p)">Edit</DropdownMenuItem>
-                    <DropdownMenuItem @select="openForm(p)">Invite to manage</DropdownMenuItem>
-                    <DropdownMenuItem class="text-danger" @select="removing = p; confirmOpen = true">Remove</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <ListSkeleton v-else-if="!loaded" variant="table" :rows="5" label="Loading providers" />
-        <p v-else class="m-0 px-5 py-4 text-[13px] text-ink-muted">{{ providers.length ? 'No providers match.' : 'No providers yet.' }}</p>
-      </div>
-    </AdminCard>
+    <div class="flex flex-col gap-4">
+      <ListToolbar v-model:search="query" placeholder="Name, person, city, type" :count="shown.length" :noun="['provider', 'providers']" :filtered="show !== 'all' || !!kinds.length || !!query.trim()" @clear="clearFilters">
+        <template #tabs><ListTabs v-model="show" :tabs="tabs" label="Show providers" /></template>
+        <template #filters><ListFilter v-model="kinds" label="Type" :options="kindOptions" /></template>
+      </ListToolbar>
+
+      <ListSkeleton v-if="!loaded" variant="table" :rows="5" label="Loading providers" />
+      <p v-else-if="!shown.length" class="m-0 rounded-xl bg-surface px-5 py-8 text-center text-sm text-ink-muted ring-1 ring-line">{{ providers.length ? 'No providers match.' : 'No providers yet.' }}</p>
+      <!-- A row shows the essentials; clicking it opens everything about the provider -->
+      <ListTable v-else :rows="shown" :columns="columns" :row-key="providerKey" :row-label="providerLabel" @open="openProvider">
+        <template #cell-name="{ row }">
+          <span class="flex flex-col leading-tight">
+            <span class="flex items-center gap-1.5 font-semibold">{{ row.name }}<BadgeCheck v-if="row.verified" class="size-3.5 text-marigold" aria-label="Checked by Dogeash" /><span v-if="row.listed === false" class="rounded-full bg-surface-sunk px-1.5 font-mono text-[10px] leading-4 font-semibold text-ink-muted uppercase">hidden</span></span>
+            <span class="font-mono text-[11px] text-ink-muted">{{ row.id }}</span>
+          </span>
+        </template>
+        <template #cell-type="{ row }">{{ careTypes[row.type as CareType].label }}</template>
+        <template #cell-managers="{ row }">
+          <span v-for="m in managedBy(row.id).members" :key="m.email" class="block leading-tight" :title="m.email">{{ m.name }}</span>
+          <span v-for="i in managedBy(row.id).invites" :key="i.id" class="block font-mono text-[11px] text-ink-muted">invited: {{ i.email }}</span>
+          <span v-if="!managedBy(row.id).members.length && !managedBy(row.id).invites.length" class="text-[12px] text-ink-muted">Dogeash</span>
+        </template>
+        <template #actions="{ row }">
+          <DropdownMenu>
+            <DropdownMenuTrigger as-child>
+              <Button variant="ghost" size="icon" class="size-8" :aria-label="`Actions for ${row.name}`"><MoreHorizontal aria-hidden="true" /></Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" class="w-40 rounded-lg border-line bg-surface p-1 shadow-[0_18px_40px_-20px_rgb(0_0_0/.45)]">
+              <DropdownMenuItem @select="openForm(row)">Edit</DropdownMenuItem>
+              <DropdownMenuItem @select="openForm(row)">Invite to manage</DropdownMenuItem>
+              <DropdownMenuItem class="text-danger" @select="removing = row; confirmOpen = true">Remove</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </template>
+      </ListTable>
+    </div>
 
     <DetailDialog v-if="viewing" v-model:open="viewOpen" :title="viewing.name" :subtitle="`${careTypes[viewing.type].label} · ${viewing.city}`" :sections="providerSections">
       <template #actions>

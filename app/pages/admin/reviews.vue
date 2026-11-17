@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { Search } from '@lucide/vue'
 import { computed, onMounted, ref } from 'vue'
 import { definePageMeta, useSeoMeta } from '#imports' // nuxt
 import type { AdminReview } from '~/utils/admin'
 import type { DetailSection } from '~/components/DetailDialog.vue'
+import type { DataColumn } from '~/components/list/ListTable.vue'
 import type { CsvColumn } from '~/utils/csv'
 import { useAdminReviews } from '~/composables/useAdminReviews'
 import { useNotify } from '~/composables/useNotify'
@@ -18,7 +18,23 @@ const { reviews, loaded, load, remove } = useAdminReviews()
 onMounted(load)
 
 const stars = ref<'all' | 'low' | 'high'>('all')
-const starsModel = computed({ get: () => stars.value, set: (v: string) => { if (v) stars.value = v as 'all' | 'low' | 'high' } })
+const tabs = computed(() => [
+  { value: 'all' as const, label: 'All', count: reviews.value.length },
+  { value: 'low' as const, label: '1–2 stars', count: reviews.value.filter(r => r.rating <= 2).length, urgent: true },
+  { value: 'high' as const, label: '4–5 stars', count: reviews.value.filter(r => r.rating >= 4).length },
+])
+const columns: DataColumn[] = [
+  { key: 'review', label: 'Review', mobile: 'title' },
+  { key: 'store_name', label: 'Store', mobile: 'meta' },
+  { key: 'author', label: 'By', mobile: 'row' },
+  { key: 'when', label: 'Written', mobile: 'row' },
+]
+const reviewKey = (r: AdminReview) => r.id
+const reviewLabel = (r: AdminReview) => `${r.rating} stars for ${r.store_name}`
+function clearFilters() {
+  stars.value = 'all'
+  query.value = ''
+}
 const query = ref('')
 const shown = computed(() => {
   const q = query.value.trim().toLowerCase()
@@ -82,39 +98,26 @@ async function run(note: string) {
   <AdminPage title="Reviews" :count="reviews.length" description="Every review buyers have written. Remove one only when it breaks the rules; the author is told why.">
     <template #actions>
       <AdminExport name="reviews" :rows="shown" :columns="csv" />
-      <ToggleGroup v-model="starsModel" type="single" variant="outline" size="sm" aria-label="Show reviews" class="max-w-full flex-wrap justify-start">
-        <ToggleGroupItem value="all" class="px-2.5 text-xs">All</ToggleGroupItem>
-        <ToggleGroupItem value="low" class="px-2.5 text-xs">1–2 stars</ToggleGroupItem>
-        <ToggleGroupItem value="high" class="px-2.5 text-xs">4–5 stars</ToggleGroupItem>
-      </ToggleGroup>
-      <label class="relative">
-        <span class="sr-only">Search reviews</span>
-        <Search class="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-ink-muted" aria-hidden="true" />
-        <Input v-model="query" type="search" placeholder="Text, store, author" class="h-9 w-56 pl-8 text-sm" />
-      </label>
     </template>
 
-    <ul v-if="shown.length" class="m-0 grid list-none grid-cols-[minmax(0,1fr)] gap-3 p-0 xl:grid-cols-2">
-      <li v-for="r in shown" :key="r.id">
-        <!-- The essentials; clicking opens the full review, the store's reply and who wrote it -->
-        <AdminCard class="h-full cursor-pointer transition-shadow hover:ring-line-strong" @click="openReview(r)">
-          <div class="flex h-full flex-col gap-2.5 pt-4">
-            <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
-              <ReviewStars :rating="r.rating" />
-              <span class="text-[13.5px] font-semibold">{{ r.store_name }}</span>
-              <span class="ml-auto font-mono text-[11px] text-ink-muted">{{ adminTime(r.created_at) }}</span>
-            </div>
-            <p class="m-0 line-clamp-2 text-[14px] leading-[21px] break-words">{{ r.body }}</p>
-            <div class="mt-auto flex items-center gap-3 border-t border-line pt-3">
-              <span class="text-[12.5px]">{{ r.author_name || 'A buyer' }}<span v-if="r.store_reply" class="text-ink-muted"> · store replied</span></span>
-              <Button variant="outline" size="sm" class="ml-auto" @click.stop="openReview(r)">Details</Button>
-            </div>
-          </div>
-        </AdminCard>
-      </li>
-    </ul>
-    <ListSkeleton v-else-if="!loaded" variant="card" :rows="3" />
-    <p v-else class="m-0 text-sm text-ink-muted">{{ reviews.length ? 'No reviews match.' : 'No reviews yet.' }}</p>
+    <div class="flex flex-col gap-4">
+      <ListToolbar v-model:search="query" placeholder="Text, store or author" :count="shown.length" :noun="['review', 'reviews']" :filtered="stars !== 'all' || !!query.trim()" @clear="clearFilters">
+        <template #tabs><ListTabs v-model="stars" :tabs="tabs" label="Show reviews" /></template>
+      </ListToolbar>
+      <ListSkeleton v-if="!loaded" variant="table" :rows="5" />
+      <p v-else-if="!shown.length" class="m-0 rounded-xl bg-surface px-5 py-8 text-center text-sm text-ink-muted ring-1 ring-line">{{ reviews.length ? 'No reviews match.' : 'No reviews yet.' }}</p>
+      <!-- The stars and the start of the review; a row opens the full review, the store's reply and who wrote it -->
+      <ListTable v-else :rows="shown" :columns="columns" :row-key="reviewKey" :row-label="reviewLabel" min-width="760px" @open="openReview">
+        <template #cell-review="{ row }">
+          <span class="flex max-w-[420px] flex-col gap-1">
+            <ReviewStars :rating="row.rating" />
+            <span class="line-clamp-2 text-[13.5px] leading-5 font-normal break-words">{{ row.body }}</span>
+          </span>
+        </template>
+        <template #cell-author="{ row }"><span class="flex flex-col leading-tight"><span>{{ row.author_name || 'A buyer' }}</span><span v-if="row.store_reply" class="text-xs text-ink-muted">Store replied</span></span></template>
+        <template #cell-when="{ row }"><span class="font-mono text-[11.5px] whitespace-nowrap text-ink-muted">{{ adminTime(row.created_at) }}</span></template>
+      </ListTable>
+    </div>
 
     <DetailDialog v-if="viewing" v-model:open="viewOpen" :title="`${viewing.rating}/5 for ${viewing.store_name}`" :subtitle="`By ${viewing.author_name || 'a buyer'}`" :sections="reviewSections">
       <template #actions>

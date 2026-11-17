@@ -3,6 +3,7 @@ import { RotateCcw } from '@lucide/vue'
 import { computed, onMounted, ref } from 'vue'
 import { definePageMeta, useSeoMeta } from '#imports' // nuxt
 import type { DetailSection } from '~/components/DetailDialog.vue'
+import type { DataColumn } from '~/components/list/ListTable.vue'
 import type { AdminPayout, AdminRefund, AdminReservation, MoneyMoveStatus } from '~/composables/useAdminMoney'
 import type { CsvColumn } from '~/utils/csv'
 import { useAdminMoney } from '~/composables/useAdminMoney'
@@ -22,17 +23,40 @@ onMounted(money.load)
 
 type Tab = 'waiting' | 'progress' | 'all' | 'refunds' | 'payouts'
 const tab = ref<Tab>('waiting')
-const tabModel = computed({ get: () => tab.value, set: (v: string) => { if (v) tab.value = v as Tab } })
 const waiting = computed(() => reservations.value.filter(r => r.money_decision === 'waiting'))
 const progress = computed(() => reservations.value.filter(r => r.status === 'held' || r.status === 'paid'))
 const tabs = computed(() => [
-  { value: 'waiting' as const, label: 'Needs a decision', n: waiting.value.length },
-  { value: 'progress' as const, label: 'In progress', n: progress.value.length },
-  { value: 'all' as const, label: 'All', n: reservations.value.length },
-  { value: 'refunds' as const, label: 'Refunds', n: refunds.value.length },
-  { value: 'payouts' as const, label: 'Payouts', n: payouts.value.length },
+  { value: 'waiting' as const, label: 'Needs a decision', count: waiting.value.length, urgent: true },
+  { value: 'progress' as const, label: 'In progress', count: progress.value.length },
+  { value: 'all' as const, label: 'All', count: reservations.value.length },
+  { value: 'refunds' as const, label: 'Refunds', count: refunds.value.length, urgent: refunds.value.some(f => f.status === 'failed') },
+  { value: 'payouts' as const, label: 'Payouts', count: payouts.value.length, urgent: payouts.value.some(o => o.status === 'failed') },
 ])
-const rows = computed(() => (tab.value === 'waiting' ? waiting.value : tab.value === 'progress' ? progress.value : reservations.value))
+// A search over the dog, the reference and the store, in whichever tab is open
+const query = ref('')
+const match = (...parts: (string | undefined)[]) => {
+  const q = query.value.trim().toLowerCase()
+  return !q || parts.join(' ').toLowerCase().includes(q)
+}
+const rows = computed(() => (tab.value === 'waiting' ? waiting.value : tab.value === 'progress' ? progress.value : reservations.value).filter(r => match(r.dog_name, r.ref, r.store_name)))
+const refundRows = computed(() => refunds.value.filter(f => match(f.dog_name, f.ref)))
+const payoutRows = computed(() => payouts.value.filter(o => match(o.dog_name, o.ref, o.store_name)))
+const shownCount = computed(() => (tab.value === 'refunds' ? refundRows.value.length : tab.value === 'payouts' ? payoutRows.value.length : rows.value.length))
+const resColumns: DataColumn[] = [
+  { key: 'dog', label: 'Reservation', mobile: 'title' },
+  { key: 'store_name', label: 'Store', mobile: 'meta' },
+  { key: 'paid', label: 'Paid', align: 'right', mono: true, mobile: 'end' },
+  { key: 'state', label: 'Status', mobile: 'row' },
+]
+const moveColumns: DataColumn[] = [
+  { key: 'dog', label: 'For', mobile: 'title' },
+  { key: 'store', label: 'Store', mobile: 'meta' },
+  { key: 'amount', label: 'Amount', align: 'right', mono: true, mobile: 'end' },
+  { key: 'state', label: 'Status', mobile: 'row' },
+]
+const resKey = (r: AdminReservation) => r.id
+const moveKey = (m: AdminRefund | AdminPayout) => m.id
+const asPayout = (m: AdminRefund | AdminPayout) => m as AdminPayout
 
 const tiles = computed(() => totals.value
   ? [
@@ -161,9 +185,6 @@ const csv: CsvColumn<AdminReservation>[] = [
   <AdminPage title="Payments" :count="waiting.length" description="Deposits, balances, refunds and payouts. Dogeash holds buyers' money until the handover, and decides on deposits when a sale falls through.">
     <template #actions>
       <AdminExport name="reservations" :rows="rows" :columns="csv" />
-      <ToggleGroup v-model="tabModel" type="single" variant="outline" size="sm" aria-label="Show" class="flex-wrap">
-        <ToggleGroupItem v-for="t in tabs" :key="t.value" :value="t.value" class="px-2.5 text-xs">{{ t.label }} <span class="ml-1 font-mono text-ink-muted">{{ t.n }}</span></ToggleGroupItem>
-      </ToggleGroup>
     </template>
 
     <dl v-if="tiles.length" class="m-0 grid grid-cols-2 gap-3 xl:grid-cols-4">
@@ -174,92 +195,38 @@ const csv: CsvColumn<AdminReservation>[] = [
       </div>
     </dl>
 
-    <AdminCard flush>
-      <div class="relative overflow-x-auto">
-        <!-- Reservations -->
-        <table v-if="tab !== 'refunds' && tab !== 'payouts' && rows.length" class="w-full min-w-[560px] border-collapse text-left text-[13px]">
-          <thead>
-            <tr class="text-[11.5px] text-ink-muted">
-              <th scope="col" class="px-5 py-2.5 font-medium">Reservation</th>
-              <th scope="col" class="px-3 py-2.5 text-right font-medium">Paid</th>
-              <th scope="col" class="px-3 py-2.5 font-medium">Status</th>
-              <th scope="col" class="w-48"><span class="sr-only">Actions</span></th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- A row shows the essentials; clicking it opens everything about the reservation -->
-            <tr v-for="r in rows" :key="r.id" class="cursor-pointer align-top hover:bg-surface-sunk/60" @click="openReservation(r)">
-              <td class="border-t border-line px-5 py-2.5">
-                <button type="button" class="block cursor-pointer border-0 bg-transparent p-0 text-left text-ink hover:underline" @click.stop="openReservation(r)">{{ r.dog_name }}</button>
-                <span class="font-mono text-[11px] text-ink-muted">{{ r.ref }} · {{ r.store_name }}</span>
-              </td>
-              <td class="border-t border-line px-3 py-2.5 text-right font-mono whitespace-nowrap tabular-nums">{{ formatMoney(r.paid_naira) }}</td>
-              <td class="border-t border-line px-3 py-2.5">
-                <span class="text-xs font-semibold">{{ r.money_decision === 'waiting' ? 'Needs a decision' : reservationStatus[r.status].label }}</span>
-              </td>
-              <td class="border-t border-line pr-4 text-right" @click.stop>
-                <div v-if="r.money_decision === 'waiting'" class="mt-1 flex justify-end gap-1.5">
-                  <Button variant="outline" size="sm" class="h-8" @click="startDecision(r, 'refund')">Refund</Button>
-                  <Button variant="outline" size="sm" class="h-8" @click="startDecision(r, 'release')">Release</Button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+    <ListToolbar v-model:search="query" placeholder="Dog, reference or store" :count="shownCount" :noun="['item', 'items']" :filtered="!!query.trim()" @clear="query = ''">
+      <template #tabs><ListTabs v-model="tab" :tabs="tabs" label="Show" /></template>
+    </ListToolbar>
 
-        <!-- Refunds and payouts -->
-        <table v-else-if="tab === 'refunds' && refunds.length" class="w-full min-w-[680px] border-collapse text-left text-[13px]">
-          <thead>
-            <tr class="text-[11.5px] text-ink-muted">
-              <th scope="col" class="px-5 py-2.5 font-medium">For</th>
-              <th scope="col" class="px-3 py-2.5 text-right font-medium">Amount</th>
-              <th scope="col" class="px-3 py-2.5 font-medium">Status</th>
-              <th scope="col" class="w-28"><span class="sr-only">Actions</span></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="f in refunds" :key="f.id" class="cursor-pointer align-top hover:bg-surface-sunk/60" @click="openMove('refund', f)">
-              <td class="border-t border-line px-5 py-2.5">
-                <button type="button" class="block cursor-pointer border-0 bg-transparent p-0 text-left text-ink hover:underline" @click.stop="openMove('refund', f)">{{ f.dog_name }}</button>
-                <span class="font-mono text-[11px] text-ink-muted">{{ f.ref }} · {{ shortTime(f.created_at) }}</span>
-              </td>
-              <td class="border-t border-line px-3 py-2.5 text-right font-mono tabular-nums">{{ formatMoney(f.amount_naira) }}</td>
-              <td :class="['border-t border-line px-3 py-2.5 text-xs', moveState[f.status].tone]">{{ moveState[f.status].label }}</td>
-              <td class="border-t border-line pr-4 text-right" @click.stop>
-                <Button v-if="f.status === 'failed' || f.status === 'due'" variant="outline" size="sm" class="mt-1 h-8" :loading="retrying === f.id" @click="retry('refund', f.id)"><RotateCcw aria-hidden="true" />Retry</Button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <table v-else-if="tab === 'payouts' && payouts.length" class="w-full min-w-[680px] border-collapse text-left text-[13px]">
-          <thead>
-            <tr class="text-[11.5px] text-ink-muted">
-              <th scope="col" class="px-5 py-2.5 font-medium">For</th>
-              <th scope="col" class="px-3 py-2.5 font-medium">Store</th>
-              <th scope="col" class="px-3 py-2.5 text-right font-medium">Amount</th>
-              <th scope="col" class="px-3 py-2.5 font-medium">Status</th>
-              <th scope="col" class="w-28"><span class="sr-only">Actions</span></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="o in payouts" :key="o.id" class="cursor-pointer align-top hover:bg-surface-sunk/60" @click="openMove('payout', o)">
-              <td class="border-t border-line px-5 py-2.5">
-                <button type="button" class="block cursor-pointer border-0 bg-transparent p-0 text-left text-ink hover:underline" @click.stop="openMove('payout', o)">{{ o.dog_name }}</button>
-                <span class="font-mono text-[11px] text-ink-muted">{{ o.ref }} · {{ shortTime(o.created_at) }}</span>
-              </td>
-              <td class="border-t border-line px-3 py-2.5">{{ o.store_name }}<span v-if="!o.has_account && o.status !== 'done'" class="block text-[11.5px] text-ink-muted">No bank account yet</span></td>
-              <td class="border-t border-line px-3 py-2.5 text-right font-mono tabular-nums">{{ formatMoney(o.amount_naira) }}</td>
-              <td :class="['border-t border-line px-3 py-2.5 text-xs', moveState[o.status].tone]">{{ moveState[o.status].label }}</td>
-              <td class="border-t border-line pr-4 text-right" @click.stop>
-                <Button v-if="o.has_account && (o.status === 'failed' || o.status === 'due')" variant="outline" size="sm" class="mt-1 h-8" :loading="retrying === o.id" @click="retry('payout', o.id)"><RotateCcw aria-hidden="true" />Retry</Button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <ListSkeleton v-else-if="!loaded" variant="table" :rows="5" />
-        <p v-else class="m-0 px-5 py-4 text-[13px] text-ink-muted">{{ tab === 'waiting' ? 'No deposits waiting for a decision.' : 'Nothing here yet.' }}</p>
-      </div>
-    </AdminCard>
+    <ListSkeleton v-if="!loaded" variant="table" :rows="5" />
+    <p v-else-if="!shownCount" class="m-0 rounded-xl bg-surface px-5 py-8 text-center text-sm text-ink-muted ring-1 ring-line">{{ query ? 'Nothing matches.' : tab === 'waiting' ? 'No deposits waiting for a decision.' : 'Nothing here yet.' }}</p>
+
+    <!-- Reservations: a row opens everything about it -->
+    <ListTable v-else-if="tab !== 'refunds' && tab !== 'payouts'" :rows="rows" :columns="resColumns" :row-key="resKey" min-width="620px" @open="openReservation">
+      <template #cell-dog="{ row }"><span class="flex flex-col leading-tight"><strong class="font-semibold">{{ row.dog_name }}</strong><span class="font-mono text-[11px] text-ink-muted">{{ row.ref }}</span></span></template>
+      <template #cell-paid="{ row }">{{ formatMoney(row.paid_naira) }}</template>
+      <template #cell-state="{ row }">
+        <span :class="['rounded-full px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap', row.money_decision === 'waiting' ? 'bg-marigold-soft text-ink' : 'bg-surface-sunk text-ink-muted']">{{ row.money_decision === 'waiting' ? 'Needs a decision' : reservationStatus[row.status as AdminReservation['status']].label }}</span>
+      </template>
+      <template #actions="{ row }">
+        <span v-if="row.money_decision === 'waiting'" class="flex justify-end gap-1.5">
+          <Button variant="outline" size="sm" class="h-8" @click="startDecision(row, 'refund')">Refund</Button>
+          <Button variant="outline" size="sm" class="h-8" @click="startDecision(row, 'release')">Release</Button>
+        </span>
+      </template>
+    </ListTable>
+
+    <!-- Refunds and payouts -->
+    <ListTable v-else :rows="tab === 'refunds' ? refundRows : payoutRows" :columns="tab === 'refunds' ? moveColumns.filter(c => c.key !== 'store') : moveColumns" :row-key="moveKey" min-width="620px" @open="m => openMove(tab === 'refunds' ? 'refund' : 'payout', m as never)">
+      <template #cell-dog="{ row }"><span class="flex flex-col leading-tight"><strong class="font-semibold">{{ row.dog_name }}</strong><span class="font-mono text-[11px] text-ink-muted">{{ row.ref }} · {{ shortTime(row.created_at) }}</span></span></template>
+      <template #cell-store="{ row }">{{ asPayout(row).store_name }}<span v-if="!asPayout(row).has_account && row.status !== 'done'" class="block text-[11.5px] text-ink-muted">No bank account yet</span></template>
+      <template #cell-amount="{ row }">{{ formatMoney(row.amount_naira) }}</template>
+      <template #cell-state="{ row }"><span :class="['text-xs capitalize', moveState[row.status as MoneyMoveStatus].tone]">{{ moveState[row.status as MoneyMoveStatus].label }}</span></template>
+      <template #actions="{ row }">
+        <Button v-if="(row.status === 'failed' || row.status === 'due') && (tab === 'refunds' || asPayout(row).has_account)" variant="outline" size="sm" class="h-8" :loading="retrying === row.id" @click="retry(tab === 'refunds' ? 'refund' : 'payout', row.id)"><RotateCcw aria-hidden="true" />Retry</Button>
+      </template>
+    </ListTable>
 
     <DetailDialog v-if="viewingRes" v-model:open="resOpen" :title="`${viewingRes.dog_name} · ${viewingRes.ref}`" :subtitle="`${viewingRes.store_name} · ${viewingRes.buyer_name}`" :sections="resSections">
       <template v-if="viewingRes.money_decision === 'waiting'" #actions>

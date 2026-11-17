@@ -37,9 +37,8 @@ const waitingElsewhere = computed(() => {
 // Each status with how many of the period's bookings it has
 const tabs = computed(() => {
   const list = inPeriod(bookings.value, period.value)
-  return bookingStatusFilters.map(f => ({ ...f, count: list.filter(b => inStatus(b, f.value)).length }))
+  return bookingStatusFilters.map(f => ({ ...f, count: list.filter(b => inStatus(b, f.value)).length, urgent: f.value === 'requested' }))
 })
-const statusModel = computed({ get: () => status.value, set: (v) => { if (v) status.value = v } })
 const filtered = computed(() => status.value !== 'all' || query.value.trim() !== '')
 function clearFilters() {
   status.value = 'all'
@@ -118,17 +117,9 @@ const field = 'h-10! border-line-strong bg-surface'
       </div>
 
       <!-- Statuses: tabs, so only one is ever chosen -->
-      <ToggleGroup v-model="statusModel" type="single" aria-label="Status" class="flex w-full justify-start gap-0 overflow-x-auto border-y border-line px-2 [scrollbar-width:none] sm:px-3">
-        <ToggleGroupItem
-          v-for="t in tabs"
-          :key="t.value"
-          :value="t.value"
-          class="relative h-11 shrink-0 gap-2 rounded-none border-0 bg-transparent! px-3 text-sm font-semibold whitespace-nowrap text-ink-muted shadow-none hover:text-ink data-[state=on]:text-ink data-[state=on]:after:absolute data-[state=on]:after:inset-x-3 data-[state=on]:after:bottom-0 data-[state=on]:after:h-[3px] data-[state=on]:after:rounded-t-full data-[state=on]:after:bg-marigold"
-        >
-          {{ t.label }}
-          <span :class="['grid h-5 min-w-5 place-items-center rounded-full px-1.5 font-mono text-[10.5px] font-bold', t.value === 'requested' && t.count ? 'bg-marigold text-on-marigold' : 'bg-surface-sunk text-ink-muted']">{{ t.count }}</span>
-        </ToggleGroupItem>
-      </ToggleGroup>
+      <div class="border-y border-line">
+        <ListTabs v-model="status" :tabs="tabs" label="Status" />
+      </div>
 
       <div class="flex flex-wrap items-center gap-2 bg-canvas/40 p-3 sm:px-5">
         <InputGroup class="h-10 min-w-[200px] flex-[1_1_240px] border-line-strong bg-surface">

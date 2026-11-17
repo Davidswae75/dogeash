@@ -15,10 +15,9 @@ export const storeRoles: Record<StoreRole, { label: string, hint: string, can: S
 
 export const roleCan = (role: StoreRole, permission: StorePermission) => storeRoles[role].can.includes(permission)
 
-// What's waiting at each store, shown to its members while they browse (example figures)
-export const storeActivity: Record<string, { enquiries: number, visitsToday: number }> = {
-  'STR-001': { enquiries: 3, visitsToday: 1 },
-}
+// What's waiting at each store, shown to its members while they browse. Not wired to real counts yet: empty, so
+// nothing made-up is shown (the dashboard's inbox has the real numbers)
+export const storeActivity: Record<string, { enquiries: number, visitsToday: number }> = {}
 
 export function storeActivityLine(storeId: string) {
   const a = storeActivity[storeId]

@@ -67,34 +67,48 @@ const h2 = 'm-0 font-display text-xl leading-7 font-extrabold font-stretch-expan
           <span :class="eyebrow">{{ category }} · <span class="font-mono">{{ product.id }}</span></span>
           <h1 class="m-0 mega text-[clamp(30px,3.6vw,46px)] leading-none">{{ product.name }}</h1>
           <p class="m-0 text-[16px] leading-[26px] text-ink-muted">{{ product.description }}</p>
-          <strong class="mt-1 font-display text-3xl leading-none font-extrabold tabular-nums font-stretch-expanded">{{ formatNaira(product.priceNaira) }}</strong>
+          <strong class="mt-1 font-display text-3xl leading-none font-extrabold tabular-nums font-stretch-expanded">{{ formatNaira(product.priceNaira) }}<span v-if="product.sizes" class="ml-2 align-middle font-sans text-sm font-semibold text-ink-muted">each</span></strong>
         </header>
 
-        <fieldset v-if="product.sizes" class="m-0 flex flex-col gap-2 border-0 p-0">
-          <legend class="mb-2 text-sm font-bold">Size <span class="font-normal text-ink-muted">· fits dogs {{ fits }}</span></legend>
-          <ToggleGroup v-model="sizeModel" type="single" variant="chip" :aria-label="`Size of ${product.name}`" class="flex w-auto flex-wrap justify-start gap-2">
-            <ToggleGroupItem v-for="s in product.sizes" :key="s.value" :value="s.value" class="h-auto min-w-16 flex-col gap-0 rounded-lg! px-3 py-2">
-              <span class="text-sm font-bold">{{ s.value }}</span>
-              <span class="font-mono text-[10.5px] opacity-70">{{ s.fits }}</span>
-            </ToggleGroupItem>
-          </ToggleGroup>
-        </fieldset>
+        <!-- Buying: size, how many, and Add to cart together in one panel -->
+        <div class="flex flex-col gap-5 rounded-xl bg-surface p-4 ring-1 ring-line sm:p-5">
+          <fieldset v-if="product.sizes" class="m-0 flex flex-col gap-2.5 border-0 p-0">
+            <legend class="mb-2.5 flex w-full items-baseline justify-between gap-3 text-sm font-bold">
+              Size <span class="text-[13px] font-normal text-ink-muted">Fits dogs {{ fits }}</span>
+            </legend>
+            <ToggleGroup v-model="sizeModel" type="single" variant="chip" :aria-label="`Size of ${product.name}`" class="grid w-full grid-cols-3 gap-2">
+              <ToggleGroupItem v-for="s in product.sizes" :key="s.value" :value="s.value" class="h-auto w-full flex-col gap-0.5 rounded-lg! px-2 py-2.5">
+                <span class="text-[15px] font-bold">{{ s.value }}</span>
+                <span class="font-mono text-[10.5px] opacity-70">{{ s.fits }}</span>
+              </ToggleGroupItem>
+            </ToggleGroup>
+          </fieldset>
 
-        <div class="flex flex-col gap-2">
-          <span class="text-sm font-bold">Quantity</span>
-          <div class="flex flex-wrap items-center gap-4">
-            <div class="flex h-11 items-center rounded-full ring-1 ring-line-strong">
-              <Button variant="ghost" size="icon" class="size-11 rounded-full" :disabled="quantity <= 1" aria-label="One fewer" @click="quantity--"><Minus aria-hidden="true" /></Button>
-              <span class="w-8 text-center font-mono font-semibold tabular-nums" aria-live="polite">{{ quantity }}</span>
-              <Button variant="ghost" size="icon" class="size-11 rounded-full" :disabled="quantity >= GEAR_MAX_QUANTITY" aria-label="One more" @click="quantity++"><Plus aria-hidden="true" /></Button>
+          <div class="flex flex-col gap-2.5">
+            <span class="text-sm font-bold">Quantity</span>
+            <div class="flex items-stretch gap-2.5">
+              <div class="flex h-12 shrink-0 items-center rounded-lg bg-canvas ring-1 ring-line-strong">
+                <button type="button" class="grid h-full w-11 cursor-pointer place-items-center rounded-l-lg border-0 bg-transparent text-ink hover:bg-surface-sunk disabled:cursor-not-allowed disabled:opacity-35" :disabled="quantity <= 1" aria-label="One fewer" @click="quantity--"><Minus class="size-4" aria-hidden="true" /></button>
+                <span class="w-9 text-center font-mono text-base font-semibold tabular-nums" aria-live="polite">{{ quantity }}</span>
+                <button type="button" class="grid h-full w-11 cursor-pointer place-items-center rounded-r-lg border-0 bg-transparent text-ink hover:bg-surface-sunk disabled:cursor-not-allowed disabled:opacity-35" :disabled="quantity >= GEAR_MAX_QUANTITY" aria-label="One more" @click="quantity++"><Plus class="size-4" aria-hidden="true" /></button>
+              </div>
+              <Button variant="marigold" class="h-12 min-w-0 flex-1 text-[15px]" @click="addToCart">
+                <ShoppingCart aria-hidden="true" /><span class="truncate">Add to cart</span>
+              </Button>
             </div>
-            <span v-if="quantity > 1" class="text-sm text-ink-muted">{{ formatNaira(total) }} in all</span>
           </div>
-        </div>
 
-        <div class="flex flex-col gap-2.5 sm:flex-row">
-          <Button variant="marigold" class="h-12 flex-1 text-base" @click="addToCart"><ShoppingCart aria-hidden="true" />Add to cart · {{ formatNaira(total) }}</Button>
-          <Button v-if="added" as-child variant="outline" class="h-12"><NuxtLink to="/cart">Go to cart</NuxtLink></Button>
+          <!-- The total, and once added, the way to the cart -->
+          <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-line pt-4">
+            <span class="flex flex-col">
+              <span class="text-xs text-ink-muted">{{ quantity > 1 ? `${quantity} × ${formatNaira(product.priceNaira)}` : 'Total' }}<template v-if="size"> · Size {{ size }}</template></span>
+              <strong class="font-display text-xl leading-7 font-extrabold tabular-nums">{{ formatNaira(total) }}</strong>
+            </span>
+            <span v-if="added" class="flex items-center gap-3 text-sm">
+              <span class="flex items-center gap-1.5 font-semibold text-verified"><Check class="size-4" :stroke-width="3" aria-hidden="true" />In your cart</span>
+              <NuxtLink to="/cart" class="font-bold text-ink underline decoration-marigold decoration-2 underline-offset-4">View cart</NuxtLink>
+            </span>
+          </div>
         </div>
 
         <!-- Before paying: delivery, returns, who it's from -->

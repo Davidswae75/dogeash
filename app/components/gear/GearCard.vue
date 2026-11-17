@@ -5,7 +5,7 @@ import { findCareProvider } from '~/utils/care'
 import { formatNaira } from '~/utils/dogs'
 import { gearCategories, gearPath } from '~/utils/gear'
 
-// A product in the gear shop: just enough to choose (photo, kind, name, price, sizes on offer). The whole
+// A product in the gear shop: just enough to choose (photo, kind, name, price, how many sizes, supplier). The whole
 // card opens the product's page, where the buyer picks a size and quantity and adds it to the cart.
 const props = defineProps<{ product: GearProduct }>()
 const supplier = computed(() => findCareProvider(props.product.supplierId))
@@ -16,14 +16,12 @@ const supplier = computed(() => findCareProvider(props.product.supplierId))
     <div class="overflow-hidden">
       <GearIcon :category="props.product.category" :image="props.product.image" class="aspect-[4/3] transition-transform duration-300 group-hover:scale-[1.03]" />
     </div>
-    <div class="flex flex-1 flex-col gap-1.5 p-3 sm:p-4">
-      <span class="text-[11px] font-bold tracking-[.08em] text-ink-muted uppercase">{{ gearCategories[props.product.category] }}</span>
-      <h3 class="m-0 font-display text-[15px] leading-5 font-extrabold font-stretch-expanded sm:text-[17px] sm:leading-6">{{ props.product.name }}</h3>
-      <div class="mt-auto flex items-end justify-between gap-2 pt-1.5">
-        <strong class="font-display text-base leading-6 font-extrabold tabular-nums font-stretch-expanded sm:text-lg">{{ formatNaira(props.product.priceNaira) }}</strong>
-        <span v-if="props.product.sizes" class="font-mono text-[11px] text-ink-muted">{{ props.product.sizes.map(s => s.value).join(' · ') }}</span>
-      </div>
-      <span v-if="supplier" class="truncate text-xs text-ink-muted">{{ supplier.name }}</span>
+    <!-- Small, even text: the kind on one line, the name on up to two, then the price; sizes and supplier quiet -->
+    <div class="flex flex-1 flex-col gap-1 p-3 sm:p-4">
+      <span class="truncate text-[10px] font-bold tracking-[.08em] text-ink-muted uppercase sm:text-[11px]">{{ gearCategories[props.product.category] }}</span>
+      <h3 class="m-0 line-clamp-2 min-h-[2lh] font-display text-sm leading-[18px] font-extrabold font-stretch-expanded sm:text-base sm:leading-5">{{ props.product.name }}</h3>
+      <strong class="mt-auto pt-1.5 font-display text-[15px] leading-5 font-extrabold tabular-nums font-stretch-expanded sm:text-lg sm:leading-6">{{ formatNaira(props.product.priceNaira) }}</strong>
+      <span class="truncate text-[11px] leading-4 text-ink-muted sm:text-xs">{{ [props.product.sizes ? `${props.product.sizes.length} sizes` : '', supplier?.name].filter(Boolean).join(' · ') }}</span>
     </div>
   </NuxtLink>
 </template>

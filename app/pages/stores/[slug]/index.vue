@@ -8,7 +8,6 @@ import { useStoreReviews } from '~/composables/useStoreReviews'
 import { careProviderSlug, findCareProvider } from '~/utils/care'
 import { formatNaira } from '~/utils/dogs'
 import { centerInRow } from '~/utils/scroll'
-import { sampleReview } from '~/utils/reviews'
 import { findStore, storeServices, storeShowcase, storeSummary } from '~/utils/stores'
 
 // A store: its dogs for sale, who runs it, its history, inspection record, care team and reviews
@@ -24,7 +23,8 @@ const isOwn = computed(() => !!memberOf(store.id))
 // here can write one (or edit theirs); the store's own people can't review it.
 const reviews = useStoreReviews()
 const realReviews = reviews.reviewsOf(store.id)
-const shownReviews = computed(() => realReviews.value.length ? realReviews.value : store.reviewSamples.map(r => sampleReview(r, store.id)))
+// Real reviews only (stores start with none)
+const shownReviews = computed(() => realReviews.value)
 const myReview = reviews.mineFor(store.id)
 const canReview = reviews.canReview(store.id)
 const reviewing = ref(false)

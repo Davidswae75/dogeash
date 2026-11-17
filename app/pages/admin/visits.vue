@@ -2,13 +2,14 @@
 import { BellRing } from '@lucide/vue'
 import { computed, onMounted, ref } from 'vue'
 import { definePageMeta, useSeoMeta } from '#imports' // nuxt
+import type { DataColumn } from '~/components/list/ListTable.vue'
 import type { AdminVisit } from '~/composables/useAdminVisits'
 import type { DetailSection } from '~/components/DetailDialog.vue'
 import type { CsvColumn } from '~/utils/csv'
 import { useAdminVisits } from '~/composables/useAdminVisits'
 import { useNotify } from '~/composables/useNotify'
 import { adminTime } from '~/utils/admin'
-import { shortTime, visitDay } from '~/utils/time'
+import { todayIso, visitDay } from '~/utils/time'
 
 // Admin › Visits: kennel visit requests across all stores. Chase the ones stores haven't answered in two days
 // (nudge sends the store a reminder), see the ones that were missed, and which stores are slow to answer.
@@ -20,20 +21,29 @@ onMounted(load)
 
 type Tab = 'chase' | 'missed' | 'upcoming' | 'all'
 const tab = ref<Tab>('chase')
-const tabModel = computed({ get: () => tab.value, set: (v: string) => { if (v) tab.value = v as Tab } })
-const today = new Date().toISOString().slice(0, 10)
+const today = todayIso()
 const groups = computed<Record<Tab, AdminVisit[]>>(() => ({
   chase: visits.value.filter(v => v.needs_chasing),
   missed: visits.value.filter(v => v.missed),
   upcoming: visits.value.filter(v => v.day >= today && (v.status === 'requested' || v.status === 'confirmed')).sort((a, b) => `${a.day}${a.slot}`.localeCompare(`${b.day}${b.slot}`)),
   all: visits.value,
 }))
-const tabs: { value: Tab, label: string }[] = [
-  { value: 'chase', label: 'Needs chasing' },
-  { value: 'missed', label: 'Missed' },
-  { value: 'upcoming', label: 'Coming up' },
-  { value: 'all', label: 'All (60 days)' },
+const tabs = computed(() => ([['chase', 'Needs chasing'], ['missed', 'Missed'], ['upcoming', 'Coming up'], ['all', 'All (60 days)']] as const)
+  .map(([value, label]) => ({ value, label, count: groups.value[value].length, urgent: value === 'chase' || value === 'missed' })))
+// A search over the store, the buyer and the service
+const query = ref('')
+const shown = computed(() => {
+  const q = query.value.trim().toLowerCase()
+  return groups.value[tab.value].filter(v => !q || `${v.store_name} ${v.buyer_name} ${v.buyer_email} ${v.service}`.toLowerCase().includes(q))
+})
+const columns: DataColumn[] = [
+  { key: 'when', label: 'When', mobile: 'title' },
+  { key: 'store_name', label: 'Store', mobile: 'meta' },
+  { key: 'buyer_name', label: 'Buyer', mobile: 'row' },
+  { key: 'state', label: 'Status', mobile: 'end' },
 ]
+const visitKey = (v: AdminVisit) => v.id
+const visitLabel = (v: AdminVisit) => `${v.store_name}, ${visitDay(v.day).label} at ${v.slot}`
 const nudged = ref<Set<string>>(new Set())
 async function onNudge(v: AdminVisit) {
   const error = await nudge(v)
@@ -80,46 +90,30 @@ const csv: CsvColumn<AdminVisit>[] = [
 <template>
   <AdminPage title="Visits" :count="groups.chase.length" description="Kennel visit requests across every store. Buyers who wait days for an answer go elsewhere: chase stores that are slow.">
     <template #actions>
-      <AdminExport name="visits" :rows="groups[tab]" :columns="csv" />
-      <ToggleGroup v-model="tabModel" type="single" variant="outline" size="sm" aria-label="Show visits" class="flex-wrap">
-        <ToggleGroupItem v-for="t in tabs" :key="t.value" :value="t.value" class="px-2.5 text-xs">{{ t.label }} <span class="ml-1 font-mono text-ink-muted">{{ groups[t.value].length }}</span></ToggleGroupItem>
-      </ToggleGroup>
+      <AdminExport name="visits" :rows="shown" :columns="csv" />
     </template>
 
     <div class="grid grid-cols-[minmax(0,1fr)] gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
-      <AdminCard flush>
-        <div class="relative overflow-x-auto">
-          <table v-if="groups[tab].length" class="w-full min-w-[520px] border-collapse text-left text-[13px]">
-            <thead>
-              <tr class="text-[11.5px] text-ink-muted">
-                <th scope="col" class="px-5 py-2.5 font-medium">When</th>
-                <th scope="col" class="px-3 py-2.5 font-medium">Store</th>
-                <th scope="col" class="px-3 py-2.5 font-medium">Status</th>
-                <th scope="col" class="w-24"><span class="sr-only">Actions</span></th>
-              </tr>
-            </thead>
-            <tbody>
-              <!-- A row shows the essentials; clicking it opens everything about the visit -->
-              <tr v-for="v in groups[tab]" :key="v.id" class="cursor-pointer align-top hover:bg-surface-sunk/60" @click="openVisit(v)">
-                <td class="border-t border-line px-5 py-2.5 font-mono text-[12px] whitespace-nowrap">
-                  <button type="button" class="cursor-pointer border-0 bg-transparent p-0 text-left font-mono text-[12px] text-ink" @click.stop="openVisit(v)">{{ visitDay(v.day).label }} · {{ v.slot }}</button>
-                </td>
-                <td class="border-t border-line px-3 py-2.5">{{ v.store_name }}</td>
-                <td class="border-t border-line px-3 py-2.5">
-                  <span :class="['text-xs font-semibold', v.missed ? 'text-danger' : v.needs_chasing ? 'text-ink' : 'text-ink-muted']">{{ v.missed ? 'missed' : v.needs_chasing ? 'waiting 2+ days' : v.status }}</span>
-                </td>
-                <td class="border-t border-line pr-4 text-right">
-                  <Button v-if="v.status === 'requested' && !v.missed" variant="outline" size="sm" class="mt-1 h-8" :disabled="nudged.has(v.id)" @click.stop="onNudge(v)">
-                    <BellRing aria-hidden="true" />{{ nudged.has(v.id) ? 'Nudged' : 'Nudge' }}
-                  </Button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <ListSkeleton v-else-if="!loaded" variant="table" :rows="5" />
-          <p v-else class="m-0 px-5 py-4 text-[13px] text-ink-muted">{{ tab === 'chase' ? 'Nothing waiting more than two days. Stores are answering.' : 'Nothing here.' }}</p>
-        </div>
-      </AdminCard>
+      <div class="flex min-w-0 flex-col gap-4">
+        <ListToolbar v-model:search="query" placeholder="Store, buyer or service" :count="shown.length" :noun="['visit', 'visits']" :filtered="!!query.trim()" @clear="query = ''">
+          <template #tabs><ListTabs v-model="tab" :tabs="tabs" label="Show visits" /></template>
+        </ListToolbar>
+        <ListSkeleton v-if="!loaded" variant="table" :rows="5" />
+        <p v-else-if="!shown.length" class="m-0 rounded-xl bg-surface px-5 py-8 text-center text-sm text-ink-muted ring-1 ring-line">{{ tab === 'chase' && !query ? 'Nothing waiting more than two days. Stores are answering.' : 'Nothing here.' }}</p>
+        <!-- A row shows the essentials; clicking it opens everything about the visit -->
+        <ListTable v-else :rows="shown" :columns="columns" :row-key="visitKey" :row-label="visitLabel" min-width="560px" @open="openVisit">
+          <template #cell-when="{ row }"><span class="font-mono text-[12.5px] font-semibold whitespace-nowrap">{{ visitDay(row.day).label }} · {{ row.slot }}</span></template>
+          <template #cell-buyer_name="{ row }"><span class="text-ink-muted">{{ row.buyer_name || 'A buyer' }}</span></template>
+          <template #cell-state="{ row }">
+            <span :class="['rounded-full px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap', row.missed ? 'bg-danger/12 text-danger' : row.needs_chasing ? 'bg-marigold-soft text-ink' : 'bg-surface-sunk text-ink-muted']">{{ row.missed ? 'Missed' : row.needs_chasing ? 'Waiting 2+ days' : row.status }}</span>
+          </template>
+          <template #actions="{ row }">
+            <Button v-if="row.status === 'requested' && !row.missed" variant="outline" size="sm" class="h-8" :disabled="nudged.has(row.id)" @click="onNudge(row)">
+              <BellRing aria-hidden="true" />{{ nudged.has(row.id) ? 'Nudged' : 'Nudge' }}
+            </Button>
+          </template>
+        </ListTable>
+      </div>
 
       <AdminCard title="How stores answer" description="Last 90 days · median time from request to the store's decision" flush>
         <table v-if="stores.length" class="w-full border-collapse text-left text-[13px]">

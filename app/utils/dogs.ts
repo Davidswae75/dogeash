@@ -627,7 +627,8 @@ export const sampleDogs: Dog[] = [
 
 // What buyers can browse: listed dogs of verified stores, loaded from Supabase by plugins/catalog.ts.
 // Starts as the sample dogs, which stay if the database can't be reached.
-export const listedDogs = shallowRef<Dog[]>(sampleDogs)
+// Starts empty: the site shows only real dogs from the database (sampleDogs stays for tests and demos)
+export const listedDogs = shallowRef<Dog[]>([])
 
 export function getStore(storeId: string) {
   return listedStores.value.find(s => s.id === storeId)

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Pin, Plus } from '@lucide/vue'
 import { computed, onMounted, ref } from 'vue'
-import { definePageMeta, useSeoMeta } from '#imports' // nuxt
+import { definePageMeta, useCookie, useSeoMeta } from '#imports' // nuxt
 import type { StoreDog } from '~/utils/dogs'
 import type { ListingStatus } from '~/utils/k9'
 import { useStoreContext } from '~/composables/useStoreContext'
@@ -23,9 +23,36 @@ const groups: { value: string, label: string, statuses: ListingStatus[] }[] = [
   { value: 'done', label: 'Sold and withdrawn', statuses: ['sold', 'withdrawn'] },
 ]
 const filter = ref('all')
-const filterModel = computed({ get: () => filter.value, set: (v) => { if (v) filter.value = v } })
 const inGroup = (d: StoreDog, g: typeof groups[number]) => !g.statuses.length || g.statuses.includes(d.status)
-const shown = computed(() => dogs.value.filter(d => inGroup(d, groups.find(g => g.value === filter.value)!)))
+const tabs = computed(() => groups.map(g => ({ value: g.value, label: g.label, count: dogs.value.filter(d => inGroup(d, g)).length })))
+
+// Search, order, and table (managing) or grid (photos), remembered on this device
+const query = ref('')
+type DogSort = 'changed' | 'name' | 'price-low' | 'price-high'
+const sort = ref<DogSort>('changed')
+const sortOptions = [
+  { value: 'changed', label: 'Recently changed' },
+  { value: 'name', label: 'Name: A to Z' },
+  { value: 'price-low', label: 'Price: low to high' },
+  { value: 'price-high', label: 'Price: high to low' },
+] as const
+const view = useCookie<'grid' | 'table'>('dogeash-store-dogs-view', { default: () => 'table', maxAge: 60 * 60 * 24 * 365 })
+const shown = computed(() => {
+  const q = query.value.trim().toLowerCase()
+  const list = dogs.value.filter(d => inGroup(d, groups.find(g => g.value === filter.value)!)
+    && (!q || [d.name, d.breed, d.fileNo].some(t => t.toLowerCase().includes(q))))
+  const by: Record<DogSort, (a: StoreDog, b: StoreDog) => number> = {
+    'changed': (a, b) => b.updatedAt.localeCompare(a.updatedAt),
+    'name': (a, b) => a.name.localeCompare(b.name),
+    'price-low': (a, b) => a.priceNaira - b.priceNaira,
+    'price-high': (a, b) => b.priceNaira - a.priceNaira,
+  }
+  return [...list].sort(by[sort.value])
+})
+function clearFilters() {
+  filter.value = 'all'
+  query.value = ''
+}
 
 const deleting = ref<StoreDog>()
 const busy = ref(false)
@@ -51,14 +78,19 @@ async function confirmDelete() {
       <span>Pin up to 3 live dogs from a dog's ⋯ menu to show them first on your store page. <strong class="font-semibold text-ink">{{ pinned.length }} of 3 pinned.</strong><template v-if="!pinned.length"> Until you pin any, your page shows the first available ones.</template></span>
     </p>
 
-    <ToggleGroup v-if="dogs.length" v-model="filterModel" type="single" variant="chip" aria-label="Show dogs" class="flex w-auto flex-wrap justify-start gap-2">
-      <ToggleGroupItem v-for="g in groups" :key="g.value" :value="g.value" class="rounded-full!">
-        {{ g.label }} <span class="font-mono opacity-70">{{ dogs.filter(d => inGroup(d, g)).length }}</span>
-      </ToggleGroupItem>
-    </ToggleGroup>
+    <ListToolbar v-if="dogs.length" v-model:search="query" placeholder="Name, breed or ID" :count="shown.length" :noun="['dog', 'dogs']" :filtered="filter !== 'all' || !!query.trim()" @clear="clearFilters">
+      <template #tabs><ListTabs v-model="filter" :tabs="tabs" label="Show dogs" /></template>
+      <template #end>
+        <SelectMenu v-model="sort" :options="sortOptions" aria-label="Order" class="h-10! w-[176px] border-line-strong bg-surface" />
+        <ListViewSwitch v-model="view" />
+      </template>
+    </ListToolbar>
 
     <ListSkeleton v-if="!loaded" variant="table" :rows="4" class="overflow-hidden rounded-xl bg-surface ring-1 ring-line" label="Loading your dogs" />
-    <DashboardDogTable v-else-if="shown.length" :dogs="shown" :verified="verified" :can-delete="role !== 'handler'" @status="storeDogs.changeStatus" @remove="d => (deleting = d)" @pin="storeDogs.togglePin" />
+    <template v-else-if="shown.length">
+      <DashboardDogTable v-if="view === 'table'" :dogs="shown" :verified="verified" :can-delete="role !== 'handler'" @status="storeDogs.changeStatus" @remove="d => (deleting = d)" @pin="storeDogs.togglePin" />
+      <DashboardDogGrid v-else :dogs="shown" :verified="verified" :can-delete="role !== 'handler'" @status="storeDogs.changeStatus" @remove="d => (deleting = d)" @pin="storeDogs.togglePin" />
+    </template>
     <p v-else-if="dogs.length" class="m-0 rounded-xl bg-surface p-8 text-center text-sm text-ink-muted ring-1 ring-line">No dogs here.</p>
     <div v-else-if="loaded" class="flex flex-col items-center gap-4 rounded-xl bg-surface px-6 py-14 text-center ring-1 ring-line">
       <h2 class="m-0 font-display text-2xl font-extrabold font-stretch-expanded">No dogs yet</h2>

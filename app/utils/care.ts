@@ -71,7 +71,8 @@ export const sampleCareProviders: CareProvider[] = [
 
 // The care directory the site shows: read from Supabase on each page load (plugins/00.catalog.ts),
 // or the samples if it can't be reached
-export const listedProviders = shallowRef<CareProvider[]>(sampleCareProviders)
+// Starts empty: the site shows only real providers from the database (sampleCareProviders stays for tests and demos)
+export const listedProviders = shallowRef<CareProvider[]>([])
 
 // A provider as it comes from Supabase (public.care_providers)
 export interface CareRow {

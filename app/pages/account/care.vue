@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Stethoscope } from '@lucide/vue'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useSeoMeta } from '#imports' // nuxt
 import type { CareBooking } from '~/composables/useCareBookings'
 import { useCareBookings } from '~/composables/useCareBookings'
@@ -28,14 +28,21 @@ async function cancelCare() {
   if (error) notify.failed(error)
   else notify.visitUpdated('Appointment cancelled', `${b.providerName} · ${visitDay(b.day).label}, ${b.slot}. We've let them know.`)
 }
+// Coming up or earlier, one at a time (tabs), so the page stays short
+const show = ref<'now' | 'earlier'>('now')
+const showTabs = computed(() => [
+  { value: 'now' as const, label: 'Coming up', count: careUpcoming.value.length },
+  { value: 'earlier' as const, label: 'Earlier', count: carePast.value.length },
+])
 </script>
 
 <template>
   <div class="flex flex-col gap-8">
     <AccountHeading kicker="Care appointments" title="Your" outline="care" text="Appointments with vets, trainers and groomers. The provider confirms the time with you; until they do, you can change it." />
 
-    <section class="flex flex-col gap-3" aria-labelledby="care-upcoming">
-      <h2 id="care-upcoming" class="m-0 font-mono text-[11px] leading-4 font-semibold tracking-[.12em] text-ink-muted uppercase">Coming up · {{ careUpcoming.length }}</h2>
+    <div class="overflow-hidden rounded-xl bg-surface ring-1 ring-line"><ListTabs v-model="show" :tabs="showTabs" label="Show" /></div>
+
+    <section v-if="show === 'now'" class="flex flex-col gap-3" aria-label="Coming up">
       <ListSkeleton v-if="!careLoaded" :rows="1" label="Loading care appointments" />
       <CareBookingCard
         v-for="b in careUpcoming"
@@ -57,8 +64,8 @@ async function cancelCare() {
       </div>
     </section>
 
-    <section v-if="carePast.length" class="flex flex-col gap-3" aria-labelledby="care-earlier">
-      <h2 id="care-earlier" class="m-0 font-mono text-[11px] leading-4 font-semibold tracking-[.12em] text-ink-muted uppercase">Earlier · {{ carePast.length }}</h2>
+    <section v-else class="flex flex-col gap-3" aria-label="Earlier">
+      <p v-if="!carePast.length" class="m-0 rounded-xl bg-surface px-5 py-8 text-center text-sm text-ink-muted ring-1 ring-line">Nothing earlier yet.</p>
       <CareBookingCard
         v-for="b in carePast"
         :key="b.id"

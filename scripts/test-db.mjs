@@ -923,6 +923,10 @@ check('team photos must be their own uploads', await as('authenticated', vet, `s
 check('nobody else saves their team', await as('authenticated', payer, `select public.provider_save_team('${care01}', '${team(care01)}'::jsonb)`) === null)
 check('up to 12 people', await as('authenticated', vet, `select public.provider_save_team('${care01}', '${JSON.stringify(Array.from({ length: 13 }, (_, i) => ({ name: 'P' + i })))}'::jsonb)`) === null)
 
+// The provider's bookings reach back two years (not 90 days)
+await db.exec(`update public.care_bookings set day = current_date - 300 where id = '${later}'`)
+check('a provider sees bookings from months ago', ((await as('authenticated', vet, `select public.provider_bookings('${care01}') as b`))?.[0]?.b ?? []).some(b => b.id === later))
+
 // Invitation links: sign-up and sign-in read what's being accepted from the link's id
 const storeInviteId = (await as('authenticated', owner, `insert into public.store_invites (store_id, email, role) values ('${k9}', 'newhand@test.ng', 'handler') returning id`))?.[0]?.id
 const sp = (await as('anon', null, `select public.invite_preview('store', '${storeInviteId}') as p`))?.[0]?.p
@@ -946,6 +950,25 @@ check('garbled store text is repaired', await scalar(`select tagline from public
 check('garbled function code is repaired', await scalar(`select public.garbled_sample()`) === 'Price · ₦1')
 check('ordinary text is left alone', await scalar(`select public.fix_garbled_text('Kuje, Abuja – 2014 · ₦2m')`) === 'Kuje, Abuja – 2014 · ₦2m')
 check('visitors can\'t call the repair function', await as('anon', null, `select public.fix_garbled_text('x')`) === null)
+
+// Deleting a provider or store clears the link on buyers' dog records (it used to be refused as "Not your dog"),
+// while nobody but the owner can still change those records
+check('a buyer\'s dog record still points at the provider who added it', (await scalar(`select count(*)::int from public.owned_dog_records where provider_id = '${care01}'`)) > 0)
+check('someone else still can\'t edit that record', (await as('authenticated', payer, `update public.owned_dog_records set title = 'x' where provider_id = '${care01}' returning id`))?.length === 0)
+const linkedRecords = await scalar(`select count(*)::int from public.owned_dog_records where provider_id = '${care01}'`)
+const recordsBefore = await scalar(`select count(*)::int from public.owned_dog_records`)
+check('an admin can remove a provider that has added to dogs\' records', (await adm(`select public.admin_delete_provider('CARE-01')`))?.length === 1)
+check('the records stay, without the link', linkedRecords > 0 && await scalar(`select count(*)::int from public.owned_dog_records`) === recordsBefore
+  && await scalar(`select count(*)::int from public.owned_dog_records where provider_id = '${care01}'`) === 0)
+
+// Clearing the demo data (supabase/clear-demo-data.sql, run by hand on a live project): removes the seeded stores,
+// dogs and providers with everything attached, leaves anything else
+const otherStores = await scalar(`select count(*)::int from public.stores where public_id not between 'STR-001' and 'STR-006'`)
+await db.exec(readFileSync(join(root, 'supabase/clear-demo-data.sql'), 'utf8'))
+check('clearing demo data removes the demo stores, dogs and providers', await scalar(`select count(*)::int from public.stores where public_id between 'STR-001' and 'STR-006'`) === 0
+  && await scalar(`select count(*)::int from public.care_providers where public_id between 'CARE-01' and 'CARE-09'`) === 0
+  && await scalar(`select count(*)::int from public.dogs d join public.stores s on s.id = d.store_id where s.public_id between 'STR-001' and 'STR-006'`) === 0)
+check('and leaves every other store', await scalar(`select count(*)::int from public.stores`) === otherStores)
 
 await db.close()
 console.log(failed ? `\n${failed} failed` : '\nAll access rules hold')

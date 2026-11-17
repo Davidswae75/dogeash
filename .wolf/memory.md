@@ -509,3 +509,19 @@ description: chronological action log per session, consolidated weekly
 | 00:51 | Edited app/components/BookingDialog.vue | 3→2 lines | ~48 |
 | 01:10 | Created supabase/migrations/20261211000000_care_three_weeks_waitlist.sql | — | ~2302 |
 | 01:42 | Created supabase/migrations/20261212000000_dog_care_team.sql | — | ~824 |
+
+## Session: 2026-11-12 17:15
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 19:54 | Created supabase/migrations/20261215000000_cascade_links_on_owned_dogs.sql | — | ~983 |
+
+## Session: 2026-11-15 17:58
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-11-15 17:58
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|

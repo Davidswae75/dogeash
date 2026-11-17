@@ -1865,3 +1865,166 @@ New **`DetailDialog.vue`**:
   - Underneath: **Why it works**, **Specifications**, **In the box** (with care tips), and **You may also need**. On phones, the price and Add to cart stay in a bar at the bottom.
 - **Data:** `gearInfo` in `utils/gear.ts` (features, specifications, box contents, care for each sample product) with `infoFor()` and `gearPath()`. `findGear` ignores case. `useCart().add` takes a quantity. The returns and delivery wording is example copy until suppliers and payments are live.
 - **Checked** in the browser: the slimmer cards, opening a product, choosing size L, adding 2 at once (the cart showed 2 × Patrol harness, ₦76,000; the test items were removed afterwards), and the details sections. Typecheck: no new errors.
+
+## 60. Status tabs centre when tapped; even gear cards (12 Nov)
+- **Provider bookings:** the status tabs use the site's `v-center-tab`, like the other tab rows, so the tapped tab slides to the middle of the row on phones. Checked: Confirmed ended exactly centred.
+- **Gear cards** (`gear/GearCard.vue`): smaller, even text.
+  - The kind on one line (truncated).
+  - The name on up to two lines, always taking two lines' height.
+  - The price on its own line.
+  - Then one quiet line with "3 sizes · supplier", instead of "M · L · XL" squeezed beside the price.
+  - Every card is now the same height (264px on a 375px phone).
+- Typecheck: no new errors.
+
+## 61. Gear product page: one buying panel (12 Nov)
+- **Size, Quantity and Add to cart** sit together in one panel under the price ("₦38,000 each"):
+  - **Size:** three equal cards (size and who it fits), with "Fits dogs 20–30 kg" on the right of the heading.
+  - **Quantity and Add to cart** share one row at the same height: a −/+ stepper and a marigold button filling the rest.
+  - **Total line:** below a divider, "2 × ₦38,000 · Size M" with the total. Once added, it shows "✓ In your cart · View cart" there, instead of a separate "Go to cart" button appearing beside Add to cart.
+- The phone's bottom bar (price and Add to cart) stays for when the panel is scrolled away.
+- **Checked** in the browser on desktop and at 375px: adding 2 gave ₦76,000 and "In your cart"; the cart badge showed 2 (test items removed afterwards). Typecheck: no new errors.
+
+## 62. Home search fills in the filters (12 Nov)
+- **The bug:** the search box on Home (and the signed-in welcome) sent the words as `?q=…`, but Find a guard dog never read `q`, so it opened with no filters.
+- **Now** `/dogs` reads `q` and turns the words into its filters with `parseSearch()` (`utils/searchFilters.ts`):
+  - **Breeds:** the full name, or a distinctive word of it ("malinois", "shepherd").
+  - **Cities:** "Port Harcourt" works too.
+  - **Levels:** "level 4", "levels 3 to 5", "l4", a lone 1–5, or a level's name ("family protection").
+  - **Property:** home/house, compound, estate, business/office/shop/warehouse.
+  - **Children:** kids/children.
+  - The address then shows real filters (`?level=5&city=Abuja&breed=Belgian+Malinois`), so the search can be shared or saved.
+- **Words that aren't a filter** (a dog's name, a store) stay as a text search over the name, breed, city and store, shown as a removable **Matching "rambo"** chip. Clear filters removes it too.
+- **Checked:** the parser on nine sample searches. In the browser, typing "malinois level 5 abuja" on Home opened /dogs with Level 5, Abuja and Belgian Malinois on (2 dogs); `/dogs?q=Rambo` showed the Matching chip and only Rambo. Typecheck: no new errors.
+
+## 63. Find a guard dog shows what it's filtered by (12 Nov)
+- A **Filtered by** bar lists every filter that's on, in words: Property Compound, Level 5 · Estate and executive, City Abuja, Breed Belgian Malinois, Household Safe with children, and any typed words as Matching "rambo". Each has its own ✕, and **Clear all** appears when there's more than one. Removing one also unticks it in the filter list and updates the address.
+- **Placement:**
+  - On phones it sits right under the heading, above the long filter list, so it's seen first.
+  - On wide screens it lines up exactly with the results column.
+  - The separate Matching chip from section 62 is now part of this bar.
+- **Checked** in the browser: four chips from "malinois level 5 abuja rambo"; removing Matching and City left two chips, unticked Abuja and showed 2 dogs; the bar sits above the filters at 375px and aligns with the results at 1280px. Typecheck: no new errors.
+
+## 64. One list design: filter bar, tabs, table and grid (12 Nov), first pass
+**Shared pieces** (`components/list/`):
+- `ListToolbar`: the bar above a list. Optional status tabs on top, then a search, compact filters and, on the right, the order and view. Under it, the count and Clear filters.
+- `ListTabs`: status tabs, one at a time, with counts. An "urgent" count shows in marigold. The chosen tab is underlined in marigold and centres on phones.
+- `ListFilter`: one compact filter as a dropdown checklist. The button reads "Level: 4, 5" when set, and has a Clear.
+- `ListViewSwitch`: Grid | Table icon buttons.
+- `ListTable`: the one table design. Mono headers, a whole-row click (or Enter) opens the item, and an actions column. On phones each row becomes a stacked card; columns choose title / meta / row / end / hide, so nothing scrolls sideways.
+- `SelectMenu` now shows the chosen option straight away, instead of "Choose" before the page finishes loading. This fixes every dropdown on the site.
+
+**Pages done:**
+- **Find a guard dog**:
+  - The long sidebar is replaced by the bar: search, then Property, Level, City, Breed and Household dropdowns, a **working** sort (Recommended, price either way, highest level; the old "Sort: Newest" button did nothing), and Grid | Table (remembered).
+  - The table shows photo and name, breed, level with its name, age, city, store, status and price; a row opens the dog.
+  - The Filtered-by chips sit under the bar.
+- **Store dashboard › Dogs**:
+  - Tabs (All / Live / Drafts / Sold and withdrawn), search, sort (recently changed, name, price), and Table | Grid.
+  - The table (`DashboardDogTable` on `ListTable`) keeps the ⋯ menu and the pinned mark.
+  - The new grid (`DashboardDogGrid`) shows photo cards with status, level, price and the ⋯ menu.
+- **Admin › Listings**:
+  - Status tabs with counts (Pending review in marigold), search, Table | Grid, and CSV.
+  - The table is on `ListTable` with the actions menu; the grid shows photo cards that open the details.
+- **Provider bookings**: its table now uses `ListTable`, and its status tabs are `ListTabs`.
+
+**Still to do in the next pass** (same pieces, table only or cards as agreed):
+- admin Stores, People, Payments, Visits, Care directory, Reviews, Reports, Applications, Inspections and Audit
+- store Bookings and Payouts
+- the filter bar on the account pages that need one
+
+**Checked:**
+- Typecheck: no new errors.
+- In the browser: /dogs at 1280px (bar on one line, the table) and 375px (stacked cards); the store Dogs table and grid on a temporary page with sample dogs; admin Listings with sample data in the admin layout (temporary pages removed).
+- Not checked signed in.
+
+## 65. Find a guard dog: the sidebar filters are back (12 Nov)
+- **Restored at your request:** the sidebar of filter chips (Property, Protection level with the level names under it, City, Household, Breed, and "Not sure which level?"), sticky on wide screens. The compact dropdown filter bar is no longer used on this page; it stays available for the dashboards.
+- **Kept:**
+  - the "Filtered by" chips (over the results; above the filters on phones)
+  - the working sort and the Grid | Table switch, now small controls beside Save this search in the header
+- **The table in the results column:** dog (photo, sex, a Reserved tag), breed, level, age, store and city together, and price. It fits the column without sideways scrolling.
+- `ListTable` cells are slightly tighter (12px side padding), which also helps the other tables.
+- **Checked** at 1280px (the table fits exactly) and at 375px (no sideways scroll; Filtered by above the filters). Typecheck: no new errors.
+
+## 66. Find a guard dog: richer filters, a phone sheet, and a cleaner "Filtered by" (12 Nov)
+- **Filters** are now one component, `dog/DogFilters.vue`, used in the desktop sidebar and the phone sheet:
+  - **Property** as small cards with an icon (house, fence, castle, building), the level it usually needs, and how many dogs.
+  - **Protection level** as one 1–5 scale, each with its count. Tap one level, or two to pick the range between them (3 then 5 gives 3–5); tapping a single chosen level again turns it off. Under it: "3–5 · Property guard to Estate and executive".
+  - **City and Breed** show their top 5 by dogs (chosen ones always shown), then "+N more" / "Show fewer".
+  - **Every option shows how many dogs it would leave**, counted with the other filters as they are. Options that would leave none are dimmed and can't be picked.
+  - **Each group has its own Clear.**
+- **Phones:** the sidebar is replaced by a **Filters** button (with how many are on). It opens the same filters in a sheet from the bottom, with **Clear all** and **Show N dogs**.
+- **"Filtered by"** moved into the results column, so it lines up with the dogs and has proper padding:
+  - "9 dogs for", then marigold pills with the kind in small capitals and the value (LEVEL 3–5, CITY Abuja, HOUSEHOLD Safe with children), each with ✕, and Clear all on the right.
+  - A range of levels is one pill.
+  - On phones the count and Clear all sit on top, with the pills full width underneath.
+- **Checked** in the browser at 1280px and 375px: counts and dimmed options; the 3→5 range; the sheet's Filters 1 / Show 17 dogs; the new Filtered by bar on both sizes with no sideways scroll. Typecheck: no new errors.
+
+## 67. Filter sidebar padding (12 Nov)
+- **The problem:** the sidebar scrolls itself (to stay in view), which clipped anything touching its edges, so the outlines of the property cards and the level scale looked cut off and overflowing.
+- **The fix:** the sidebar is now a padded card (16px inside, rounded, on the surface colour), with a stable scrollbar gap. The column is 280px, so the 2-column property cards and the 1–5 scale fit inside the padding.
+- **Checked** at 1280px with every list expanded ("+N more" opened): no option comes within 8px of the card's edge and nothing scrolls sideways. Typecheck not needed (classes only).
+- **Update:** the sidebar is transparent again, as it was before. It keeps 6px of inner padding, which is enough to stop the edges being cut off, in a 264px column. Checked: transparent background, nothing within 4px of the edge, no sideways scroll, with every list expanded.
+
+## 68. The list design, everywhere else (12 Nov)
+**Migration:** `supabase/migrations/20261214000000_provider_bookings_history.sql` (after `20261213…`). Provider bookings now reach back two years instead of 90 days, so "Last 3 months" and "Everything" on the provider dashboard are complete.
+
+**Admin** (every page uses `ListToolbar` + `ListTabs`, with the search moved into the bar):
+- **Stores** (`admin/Stores.vue`, also on the overview under a "Stores" heading):
+  - Tabs by status with counts (In review in marigold), search over name, ID, city and owner, and CSV in the bar.
+  - A `ListTable` where the row opens the store's admin page and the ⋯ menu changes its status.
+- **People:** tabs All / Buyers / Store people / Staff / Blocked; the row opens the person; the ⋯ menu blocks or unblocks.
+- **Care directory:** tabs All / Listed / Hidden, a **Type** filter, and the ⋯ menu (Edit, Invite, Remove).
+- **Visits:** tabs Needs chasing / Missed / Coming up / All, search, status pills, and Nudge in the row. "How stores answer" stays beside it.
+- **Payments:**
+  - Tabs Needs a decision / In progress / All / Refunds / Payouts. Refunds and Payouts turn marigold when one has failed.
+  - Search over dog, reference and store.
+  - Refund / Release and Retry in the row. The money tiles stay above.
+- **Reviews:** now a table (stars and the start of the review, store, by, written), with tabs All / 1–2 stars / 4–5 stars and search.
+- **Reports:** a table (kind, what, "n open on this", reason, from, when) with tabs Open / Closed, a **Kind** filter, search, and Resolve / Dismiss in the row.
+- **Inspections:** a table (when, store with dogs and checks, inspector, status) with tabs Booked / Done and search.
+- **Applications** and **Audit log:** the shared tabs and search, keeping their cards and feed. An application card is where the decision is made (documents, inspection days, owner), and the log reads best as a timeline (it's shared with the store and person pages).
+
+**Store dashboard:**
+- **Bookings:**
+  - Tabs Waiting for you / Coming up / Earlier (opens on Coming up when nothing is waiting), and search over buyer, visit, dog and phone.
+  - Waiting and Coming up keep their answer cards. Earlier is a table whose rows open the visit.
+- **Payouts:** "Earlier" reservations are a table (dog with photo and ref, buyer, outcome, paid) whose rows open the full reservation.
+
+**Account** (cards kept; you act on them there): **Kennel visits** and **Care appointments** have Coming up / Earlier tabs, and **Reservations** has In progress / Earlier tabs, instead of two long sections.
+
+**Checked:**
+- db:test: all rules hold, plus a new check that a provider sees a booking from 300 days ago.
+- Typecheck: no new errors.
+- In the browser: admin Stores with sample stores (tabs, counts, table) on a temporary page (removed).
+- The other converted pages weren't viewed signed in; they're on the same shared pieces checked earlier.
+
+## 69. Real data only, a demo clean-up script, and a delete bug (12 Nov)
+**Migration:** `supabase/migrations/20261215000000_cascade_links_on_owned_dogs.sql` (after `20261214…`).
+
+**The site no longer fills itself with sample data:**
+- **Catalogue:** the stores, dogs and care providers start empty and come only from the database. `sampleStores`, `sampleDogs` and `sampleCareProviders` stay in the code (tests, demos, `npm run db:seed`) but never reach the site.
+- **If the database can't be read**, the catalogue keeps what it already had this visit and a bar across the site says "We can't load the dogs and stores right now…" with **Try again** (`CatalogUnavailable.vue`). The error is logged as `[catalog] could not read the catalogue: …`.
+- **Removed made-up figures:**
+  - the sample reviews on store pages (only real reviews show)
+  - the example enquiry and visit counts on store members' cards and header pill
+  - the example Views and Enquiries columns on the dashboard's dog table (`dashboardDogStats` and `storeActivity` are now empty)
+- **Gear** is unchanged: it still shows the example products, since suppliers can't list their own yet.
+
+**The live database still holds the demo rows** from `supabase/seed.sql` (stores STR-001 to 006 such as K9 Guardian Kennels and Naija Guard Dogs, their 18 dogs, and providers CARE-01 to 09). The site shows them because they're in the database.
+- **New script `supabase/clear-demo-data.sql`**, run by hand in the SQL Editor, not a migration:
+  - Step 1 counts what would go: stores, dogs, team members, reservations, visits, providers, bookings and provider managers.
+  - Step 2, between BEGIN and COMMIT, deletes in the order the database requires: test payouts, refunds, payments and reservations on demo stores, then demo dogs, demo stores (with everything attached) and demo providers.
+  - Real stores, dogs and providers aren't touched.
+- If your own account is on a demo store's team or manages a demo provider, it loses that membership, so create your real store or provider first.
+
+**Bug found and fixed:** deleting a store, listing, provider or booking makes the database clear the link on buyers' own dogs and dog records ("on delete set null"). The owner-only checks on those rows refused that change ("Not your dog"), so:
+- Admin › Care directory › Remove failed for any provider who had added to a dog's record
+- the demo clean-up failed
+
+The checks now let through a change that only clears those links; every other change still has to come from the dog's owner.
+
+**Checked:**
+- db:test: all rules hold. New: a record still points at its provider; others still can't edit it; an admin can remove that provider and the records stay without the link; the clean-up script removes every demo store, dog and provider and leaves every other store.
+- Typecheck: no new errors.
+- The pages load (200).

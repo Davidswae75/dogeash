@@ -1,50 +1,48 @@
 <script setup lang="ts">
 import { Dog as DogIcon, Pin } from '@lucide/vue'
+import { useRouter } from '#imports' // nuxt
+import type { DataColumn } from '~/components/list/ListTable.vue'
 import type { StoreDog } from '~/utils/dogs'
 import type { ListingStatus } from '~/utils/k9'
 import { dogeashId, formatNaira } from '~/utils/dogs'
 import { shortTime } from '~/utils/time'
 
-// The store's dogs as a table: photo, name and file number, level, status, price, last change, actions
+// The store's dogs as a table (the shared list design): photo, name and Dogeash ID, level, status, price, last
+// change, and the ⋯ menu. A row opens the dog's edit page; on phones rows stack as cards.
 const props = defineProps<{ dogs: StoreDog[], verified: boolean, canDelete: boolean }>()
 const emit = defineEmits<{ status: [dog: StoreDog, to: ListingStatus], remove: [dog: StoreDog], pin: [dog: StoreDog] }>()
+const router = useRouter()
+const columns: DataColumn[] = [
+  { key: 'name', label: 'Dog', mobile: 'title' },
+  { key: 'breed', label: 'Breed', mobile: 'meta' },
+  { key: 'level', label: 'Level', mobile: 'row', width: 'w-20' },
+  { key: 'status', label: 'Status', mobile: 'row' },
+  { key: 'updatedAt', label: 'Changed', mono: true, mobile: 'row' },
+  { key: 'price', label: 'Price', align: 'right', mono: true, mobile: 'end' },
+]
+const key = (d: StoreDog) => d.id
+const label = (d: StoreDog) => `${d.name}, ${d.breed}`
+const open = (d: StoreDog) => router.push(`/dashboard/dogs/${d.fileNo.toLowerCase()}`)
 </script>
 
 <template>
-  <!-- relative: keeps the hidden column label inside this scroller, or it widens the whole page on phones -->
-  <div class="relative overflow-x-auto rounded-xl bg-surface ring-1 ring-line">
-    <table class="w-full min-w-[640px] border-collapse text-left text-sm">
-      <thead>
-        <tr class="font-mono text-[10.5px] tracking-[.12em] text-ink-muted uppercase">
-          <th scope="col" class="px-4 py-3 font-semibold">Dog</th>
-          <th scope="col" class="px-3 py-3 font-semibold">Level</th>
-          <th scope="col" class="px-3 py-3 font-semibold">Status</th>
-          <th scope="col" class="px-3 py-3 text-right font-semibold">Price</th>
-          <th scope="col" class="px-3 py-3 text-right font-semibold">Changed</th>
-          <th scope="col" class="w-12"><span class="sr-only">Actions</span></th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="dog in props.dogs" :key="dog.id" class="border-t border-line hover:bg-surface-sunk">
-          <td class="px-4 py-2.5">
-            <NuxtLink :to="`/dashboard/dogs/${dog.fileNo.toLowerCase()}`" class="flex items-center gap-3 text-ink no-underline">
-              <img v-if="dog.photo" :src="dog.photo" alt="" class="size-11 rounded-md object-cover">
-              <span v-else class="grid size-11 place-items-center rounded-md bg-surface-sunk text-ink-muted"><DogIcon class="size-5" aria-hidden="true" /></span>
-              <span class="min-w-0">
-                <strong class="flex items-center gap-1.5 leading-5">{{ dog.name }}<span v-if="dog.pinnedAt" class="inline-flex items-center gap-1 rounded-full bg-marigold-soft px-1.5 py-0.5 text-[10px] font-bold tracking-[.04em] text-marigold-ink uppercase"><Pin class="size-3" aria-hidden="true" />Pinned</span></strong>
-                <span class="font-mono text-[11px] whitespace-nowrap text-ink-muted">{{ dogeashId(dog.fileNo) }} · {{ dog.breed }}</span>
-              </span>
-            </NuxtLink>
-          </td>
-          <td class="px-3 py-2.5 font-semibold">{{ dog.level }}</td>
-          <td class="px-3 py-2.5"><ListingStatusChip :status="dog.status" /></td>
-          <td class="px-3 py-2.5 text-right font-mono font-semibold tabular-nums">{{ formatNaira(dog.priceNaira) }}</td>
-          <td class="px-3 py-2.5 text-right font-mono text-[12px] text-ink-muted">{{ shortTime(dog.updatedAt) }}</td>
-          <td class="pr-3 text-right">
-            <DashboardDogActions :dog="dog" :verified="props.verified" :can-delete="props.canDelete" @status="to => emit('status', dog, to)" @remove="emit('remove', dog)" @pin="emit('pin', dog)" />
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+  <ListTable :rows="props.dogs" :columns="columns" :row-key="key" :row-label="label" @open="open">
+    <template #cell-name="{ row }">
+      <span class="flex items-center gap-3">
+        <img v-if="row.photo" :src="row.photo" alt="" class="size-11 shrink-0 rounded-lg object-cover">
+        <span v-else class="grid size-11 shrink-0 place-items-center rounded-lg bg-surface-sunk text-ink-muted"><DogIcon class="size-5" aria-hidden="true" /></span>
+        <span class="flex min-w-0 flex-col">
+          <strong class="flex items-center gap-1.5 font-semibold">{{ row.name }}<Pin v-if="row.pinnedAt" class="size-3.5 text-marigold-ink" aria-label="Pinned" /></strong>
+          <span class="font-mono text-[11px] whitespace-nowrap text-ink-muted">{{ dogeashId(row.fileNo) }}</span>
+        </span>
+      </span>
+    </template>
+    <template #cell-level="{ row }"><span class="grid size-6 place-items-center rounded-md bg-marigold font-mono text-xs font-bold text-on-marigold">{{ row.level }}</span></template>
+    <template #cell-status="{ row }"><ListingStatusChip :status="row.status" /></template>
+    <template #cell-updatedAt="{ row }"><span class="text-xs text-ink-muted">{{ shortTime(row.updatedAt) }}</span></template>
+    <template #cell-price="{ row }"><strong class="font-semibold">{{ formatNaira(row.priceNaira) }}</strong></template>
+    <template #actions="{ row }">
+      <DashboardDogActions :dog="row" :verified="props.verified" :can-delete="props.canDelete" @status="to => emit('status', row, to)" @remove="emit('remove', row)" @pin="emit('pin', row)" />
+    </template>
+  </ListTable>
 </template>

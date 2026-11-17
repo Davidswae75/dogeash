@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-11-10T00:42:28.589Z
-> Files: 781 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-11-12T18:54:12.112Z
+> Files: 782 tracked | Anatomy hits: 0 | Misses: 0
 
 > Project structure index. Auto-maintained by OpenWolf hooks and daemon.
 > Run `openwolf scan` to generate, or wait for the first Claude Code session.
@@ -1105,3 +1105,4 @@
 - `20261210000000_care_booking_changes.sql` — Care bookings, 10 Nov: several services in one appointment, days up to three months ahead, and chang (~2412 tok)
 - `20261211000000_care_three_weeks_waitlist.sql` — Care bookings, 10 Nov (second part): runs after 20261210000000_care_booking_changes.sql. (~2302 tok)
 - `20261212000000_dog_care_team.sql` — A dog's care team, 10 Nov: the owner picks Dogeash care providers for one of their dogs (its vet, tr (~824 tok)
+- `20261215000000_cascade_links_on_owned_dogs.sql` — Deleting a store, a listed dog, a care provider or a care booking, 12 Nov: buyers' own dogs and thei (~983 tok)

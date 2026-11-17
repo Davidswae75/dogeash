@@ -67,12 +67,8 @@ export function attentionItems(unread: InboxItem[], waiting: Visit[], drafts: St
   return items
 }
 
-// Views and enquiries per dog, last 30 days
-export const dashboardDogStats: Record<string, { views: number, enquiries: number }> = {
-  'KD-2026-003': { views: 412, enquiries: 6 },
-  'KD-2026-014': { views: 388, enquiries: 7 },
-  'KD-2026-036': { views: 201, enquiries: 3 },
-}
+// Views and enquiries per dog. Not tracked yet: empty, so nothing made-up is shown
+export const dashboardDogStats: Record<string, { views: number, enquiries: number }> = {}
 
 // What's filled in on the store profile, for the overview's Store health card
 export const profileChecklist = (s: Store) => [

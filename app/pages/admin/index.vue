@@ -104,7 +104,13 @@ const today = new Date().toLocaleDateString('en-NG', { weekday: 'long', day: 'nu
         <AdminWaiting :o="overview" />
       </div>
 
-      <AdminStores />
+      <section class="flex flex-col gap-3" aria-labelledby="overview-stores">
+        <div class="flex items-baseline justify-between gap-3">
+          <h2 id="overview-stores" class="m-0 text-base font-semibold">Stores</h2>
+          <NuxtLink to="/admin/stores" class="text-[13px] font-semibold text-ink-muted hover:text-ink">Open Stores</NuxtLink>
+        </div>
+        <AdminStores />
+      </section>
 
       <div class="grid grid-cols-[minmax(0,1fr)] gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)]">
         <AdminPipeline :o="overview" />

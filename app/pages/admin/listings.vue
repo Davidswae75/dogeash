@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { Dog as DogIcon, MoreHorizontal, Search } from '@lucide/vue'
+import { Dog as DogIcon, MoreHorizontal } from '@lucide/vue'
 import { computed, onMounted, ref } from 'vue'
-import { definePageMeta, useRuntimeConfig, useSeoMeta } from '#imports' // nuxt
+import { definePageMeta, useCookie, useRuntimeConfig, useSeoMeta } from '#imports' // nuxt
+import type { DataColumn } from '~/components/list/ListTable.vue'
 import type { AdminDog, DogStatus } from '~/utils/admin'
 import type { DetailSection } from '~/components/DetailDialog.vue'
 import type { CsvColumn } from '~/utils/csv'
@@ -20,7 +21,6 @@ const storageUrl = useRuntimeConfig().public.supabase.url as string
 onMounted(load)
 
 const filter = ref<DogStatus | 'all'>('all')
-const filterModel = computed({ get: () => filter.value, set: (v: string) => { if (v) filter.value = v as DogStatus | 'all' } })
 const query = ref('')
 const statuses = Object.keys(dogStatusMeta) as DogStatus[]
 const countOf = (s: DogStatus) => dogs.value.filter(d => d.status === s).length
@@ -30,6 +30,22 @@ const csv: CsvColumn<AdminDog>[] = [
   { label: 'Status', value: d => dogStatusMeta[d.status].label }, { label: 'Store ID', value: d => d.store_id }, { label: 'Store', value: d => d.store_name },
   { label: 'Created', value: d => d.created_at }, { label: 'Updated', value: d => d.updated_at }, { label: 'Dogeash note', value: d => d.admin_note },
 ]
+const tabs = computed(() => [{ value: 'all' as const, label: 'All', count: dogs.value.length }, ...statuses.map(s => ({ value: s, label: dogStatusMeta[s].label, count: countOf(s), urgent: s === 'pending_review' }))])
+const view = useCookie<'grid' | 'table'>('dogeash-admin-listings-view', { default: () => 'table', maxAge: 60 * 60 * 24 * 365 })
+const columns: DataColumn[] = [
+  { key: 'name', label: 'Dog', mobile: 'title' },
+  { key: 'store_name', label: 'Store', mobile: 'meta' },
+  { key: 'city', label: 'City', mobile: 'row' },
+  { key: 'status', label: 'Status', mobile: 'row' },
+  { key: 'updated_at', label: 'Changed', mobile: 'row' },
+  { key: 'price_naira', label: 'Price', align: 'right', mono: true, mobile: 'end' },
+]
+const dogKey = (d: AdminDog) => d.id
+const dogLabel = (d: AdminDog) => `${d.name}, ${d.store_name}`
+function clearFilters() {
+  filter.value = 'all'
+  query.value = ''
+}
 const shown = computed(() => {
   const q = query.value.trim().toLowerCase()
   return dogs.value
@@ -90,70 +106,68 @@ async function run(note: string) {
   <AdminPage title="Listings" :count="dogs.length" description="Every dog on Dogeash in any status. Taking one down hides it at once and tells the store why.">
     <template #actions>
       <AdminExport name="listings" :rows="shown" :columns="csv" />
-      <label class="relative">
-        <span class="sr-only">Search listings</span>
-        <Search class="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-ink-muted" aria-hidden="true" />
-        <Input v-model="query" type="search" placeholder="Name, file number, store" class="h-9 w-64 pl-8 text-sm" />
-      </label>
     </template>
 
-    <AdminCard flush>
-      <div class="flex flex-wrap gap-2 px-5 py-3">
-        <ToggleGroup v-model="filterModel" type="single" variant="outline" size="sm" aria-label="Show listings" class="flex-wrap justify-start">
-          <ToggleGroupItem value="all" class="px-2.5 text-xs">All <span class="ml-1 font-mono text-ink-muted">{{ dogs.length }}</span></ToggleGroupItem>
-          <ToggleGroupItem v-for="s in statuses" :key="s" :value="s" class="px-2.5 text-xs">
-            <span class="mr-1 size-2 rounded-full" :style="{ background: dogStatusMeta[s].color }" aria-hidden="true" />{{ dogStatusMeta[s].label }} <span class="ml-1 font-mono text-ink-muted">{{ countOf(s) }}</span>
-          </ToggleGroupItem>
-        </ToggleGroup>
-      </div>
-      <div class="relative overflow-x-auto">
-        <table v-if="shown.length" class="w-full min-w-[560px] border-collapse text-left text-[13px]">
-          <thead>
-            <tr class="text-[11.5px] text-ink-muted">
-              <th scope="col" class="border-t border-line px-5 py-2 font-medium">Dog</th>
-              <th scope="col" class="border-t border-line px-3 py-2 font-medium">Status</th>
-              <th scope="col" class="border-t border-line px-3 py-2 text-right font-medium">Price</th>
-              <th scope="col" class="w-12 border-t border-line"><span class="sr-only">Actions</span></th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- A row shows the essentials; clicking it opens everything about the listing -->
-            <tr v-for="d in shown" :key="d.id" class="cursor-pointer align-top hover:bg-surface-sunk/60" @click="openDog(d)">
-              <td class="border-t border-line px-5 py-2.5">
-                <span class="flex items-center gap-3">
-                  <img v-if="d.photo_path" :src="dogPhotoUrl(d.photo_path, storageUrl)" alt="" class="size-10 shrink-0 rounded-md object-cover">
-                  <span v-else class="grid size-10 shrink-0 place-items-center rounded-md bg-surface-sunk text-ink-muted"><DogIcon class="size-4" aria-hidden="true" /></span>
-                  <span class="flex min-w-0 flex-col leading-tight">
-                    <button type="button" class="w-fit cursor-pointer border-0 bg-transparent p-0 text-left font-medium text-ink hover:underline" @click.stop="openDog(d)">{{ d.name }}</button>
-                    <span class="font-mono text-[11px] text-ink-muted">{{ d.file_no }} · {{ d.store_name }}</span>
-                  </span>
-                </span>
-              </td>
-              <td class="border-t border-line px-3 py-2.5">
-                <span class="inline-flex items-center gap-1.5 rounded-full bg-surface-sunk px-2 py-0.5 text-xs font-medium whitespace-nowrap">
-                  <span class="size-2 rounded-full" :style="{ background: dogStatusMeta[d.status].color }" aria-hidden="true" />{{ dogStatusMeta[d.status].label }}
-                </span>
-              </td>
-              <td class="border-t border-line px-3 py-2.5 text-right font-mono whitespace-nowrap tabular-nums">{{ formatNaira(d.price_naira) }}</td>
-              <td class="border-t border-line pr-3 text-right" @click.stop>
-                <DropdownMenu v-if="dogActions[d.status].length">
-                  <DropdownMenuTrigger as-child>
-                    <Button variant="ghost" size="icon" class="mt-1 size-8" :aria-label="`Actions for ${d.name}`"><MoreHorizontal aria-hidden="true" /></Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" class="w-52 rounded-lg border-line bg-surface p-1 shadow-[0_18px_40px_-20px_rgb(0_0_0/.45)]">
-                    <DropdownMenuItem v-for="a in dogActions[d.status]" :key="a.to" @select="ask(d, a)">
-                      <span class="size-2 rounded-full" :style="{ background: dogStatusMeta[a.to].color }" aria-hidden="true" />{{ a.label }}
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <ListSkeleton v-else-if="!loaded" variant="table" :rows="5" />
-        <p v-else class="m-0 border-t border-line px-5 py-4 text-[13px] text-ink-muted">{{ dogs.length ? 'No listings match.' : 'No dogs yet.' }}</p>
-      </div>
-    </AdminCard>
+    <div class="flex flex-col gap-4">
+      <ListToolbar v-model:search="query" placeholder="Name, file number, breed, store" :count="shown.length" :noun="['listing', 'listings']" :filtered="filter !== 'all' || !!query.trim()" @clear="clearFilters">
+        <template #tabs><ListTabs v-model="filter" :tabs="tabs" label="Show listings" /></template>
+        <template #end><ListViewSwitch v-model="view" /></template>
+      </ListToolbar>
+
+      <ListSkeleton v-if="!loaded" variant="table" :rows="5" />
+      <p v-else-if="!shown.length" class="m-0 rounded-xl bg-surface px-5 py-8 text-center text-sm text-ink-muted ring-1 ring-line">{{ dogs.length ? 'No listings match.' : 'No dogs yet.' }}</p>
+
+      <!-- Table: a row shows the essentials; clicking it opens everything about the listing -->
+      <ListTable v-else-if="view === 'table'" :rows="shown" :columns="columns" :row-key="dogKey" :row-label="dogLabel" @open="openDog">
+        <template #cell-name="{ row }">
+          <span class="flex items-center gap-3">
+            <img v-if="row.photo_path" :src="dogPhotoUrl(row.photo_path, storageUrl)" alt="" class="size-10 shrink-0 rounded-lg object-cover">
+            <span v-else class="grid size-10 shrink-0 place-items-center rounded-lg bg-surface-sunk text-ink-muted"><DogIcon class="size-4" aria-hidden="true" /></span>
+            <span class="flex min-w-0 flex-col leading-tight">
+              <strong class="font-semibold">{{ row.name }}</strong>
+              <span class="font-mono text-[11px] text-ink-muted">{{ row.file_no }} · {{ row.breed }}</span>
+            </span>
+          </span>
+        </template>
+        <template #cell-status="{ row }">
+          <span class="inline-flex items-center gap-1.5 rounded-full bg-surface-sunk px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap">
+            <span class="size-2 rounded-full" :style="{ background: dogStatusMeta[row.status as DogStatus].color }" aria-hidden="true" />{{ dogStatusMeta[row.status as DogStatus].label }}
+          </span>
+        </template>
+        <template #cell-updated_at="{ row }"><span class="text-xs text-ink-muted">{{ adminTime(row.updated_at) }}</span></template>
+        <template #cell-price_naira="{ row }"><strong class="font-semibold">{{ formatNaira(row.price_naira) }}</strong></template>
+        <template #actions="{ row }">
+          <DropdownMenu v-if="dogActions[row.status as DogStatus].length">
+            <DropdownMenuTrigger as-child>
+              <Button variant="ghost" size="icon" class="size-8" :aria-label="`Actions for ${row.name}`"><MoreHorizontal aria-hidden="true" /></Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" class="w-52 rounded-lg border-line bg-surface p-1 shadow-[0_18px_40px_-20px_rgb(0_0_0/.45)]">
+              <DropdownMenuItem v-for="a in dogActions[row.status as DogStatus]" :key="a.to" @select="ask(row, a)">
+                <span class="size-2 rounded-full" :style="{ background: dogStatusMeta[a.to].color }" aria-hidden="true" />{{ a.label }}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </template>
+      </ListTable>
+
+      <!-- Grid: the photos, for checking what buyers see -->
+      <ul v-else class="m-0 grid list-none grid-cols-2 gap-3 p-0 md:grid-cols-3 xl:grid-cols-4">
+        <li v-for="d in shown" :key="d.id">
+          <button type="button" class="flex h-full w-full cursor-pointer flex-col overflow-hidden rounded-xl border-0 bg-surface p-0 text-left text-ink ring-1 ring-line hover:ring-ink" @click="openDog(d)">
+            <span class="relative block aspect-[4/3] bg-surface-sunk">
+              <img v-if="d.photo_path" :src="dogPhotoUrl(d.photo_path, storageUrl)" alt="" class="size-full object-cover">
+              <span v-else class="grid size-full place-items-center text-ink-muted"><DogIcon class="size-7" aria-hidden="true" /></span>
+              <span class="absolute top-2 left-2 inline-flex items-center gap-1.5 rounded-full bg-surface/90 px-2 py-0.5 text-[11px] font-semibold backdrop-blur"><span class="size-2 rounded-full" :style="{ background: dogStatusMeta[d.status].color }" aria-hidden="true" />{{ dogStatusMeta[d.status].label }}</span>
+            </span>
+            <span class="flex flex-1 flex-col gap-1 p-3">
+              <strong class="truncate text-[15px] font-semibold">{{ d.name }}</strong>
+              <span class="truncate text-xs text-ink-muted">{{ d.store_name }} · {{ d.city }}</span>
+              <span class="mt-auto pt-1 font-mono text-[13px] font-semibold tabular-nums">{{ formatNaira(d.price_naira) }}</span>
+            </span>
+          </button>
+        </li>
+      </ul>
+    </div>
 
     <DetailDialog v-if="viewing" v-model:open="viewOpen" :title="viewing.name" :subtitle="`${viewing.breed} · ${viewing.store_name}`" :sections="dogSections">
       <template #top>

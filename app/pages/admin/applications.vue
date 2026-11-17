@@ -36,8 +36,17 @@ async function onBook(day: string, time: string, inspector: string, note: string
 }
 
 const tab = ref<'in_review' | 'draft'>('in_review')
-const tabModel = computed({ get: () => tab.value, set: (v: string) => { if (v) tab.value = v as 'in_review' | 'draft' } })
-const shown = computed(() => applications.value.filter(a => a.status === tab.value))
+const tabs = computed(() => [
+  { value: 'in_review' as const, label: 'Waiting', count: countOf('in_review'), urgent: true },
+  { value: 'draft' as const, label: 'Sent back', count: countOf('draft') },
+])
+// A search over the store, its place and the owner
+const query = ref('')
+const shown = computed(() => {
+  const q = query.value.trim().toLowerCase()
+  return applications.value.filter(a => a.status === tab.value
+    && (!q || `${a.name} ${a.public_id} ${a.city} ${a.area ?? ''} ${a.owner?.name ?? ''} ${a.owner?.email ?? ''}`.toLowerCase().includes(q)))
+})
 const countOf = (s: 'in_review' | 'draft') => applications.value.filter(a => a.status === s).length
 const csv: CsvColumn<AdminApplication>[] = [
   { label: 'Store ID', value: a => a.public_id }, { label: 'Store', value: a => a.name }, { label: 'City', value: a => a.city }, { label: 'Status', value: a => a.status },
@@ -71,11 +80,12 @@ async function run(note: string) {
   <AdminPage title="Applications" :count="countOf('in_review')" description="Stores asking to go live. Check the documents, book the inspection (passing it approves the store), or send it back.">
     <template #actions>
       <AdminExport name="applications" :rows="shown" :columns="csv" />
-      <ToggleGroup v-model="tabModel" type="single" variant="outline" size="sm" aria-label="Show applications" class="max-w-full flex-wrap justify-start">
-        <ToggleGroupItem value="in_review" class="px-2.5 text-xs">Waiting <span class="ml-1 font-mono text-ink-muted">{{ countOf('in_review') }}</span></ToggleGroupItem>
-        <ToggleGroupItem value="draft" class="px-2.5 text-xs">Sent back <span class="ml-1 font-mono text-ink-muted">{{ countOf('draft') }}</span></ToggleGroupItem>
-      </ToggleGroup>
     </template>
+
+    <!-- Each application stays a full card (documents, inspection days, owner): it's where the decision is made -->
+    <ListToolbar v-model:search="query" placeholder="Store, place or owner" :count="shown.length" :noun="['application', 'applications']" :filtered="!!query.trim()" @clear="query = ''">
+      <template #tabs><ListTabs v-model="tab" :tabs="tabs" label="Show applications" /></template>
+    </ListToolbar>
 
     <div v-if="shown.length" class="flex flex-col gap-4">
       <AdminCard v-for="a in shown" :key="a.public_id" :title="a.name" :description="`${a.public_id} · ${[...new Set([a.area, a.city, a.state].filter(Boolean))].join(', ')} · ${a.submitted_at ? `sent ${adminTime(a.submitted_at)}` : 'no form'}`">

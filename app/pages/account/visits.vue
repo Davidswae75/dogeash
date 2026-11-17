@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { CalendarCheck, PenLine } from '@lucide/vue'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useSeoMeta } from '#imports' // nuxt
 import type { Visit } from '~/composables/useVisits'
 import type { Review } from '~/utils/reviews'
@@ -44,14 +44,21 @@ async function cancel() {
   if (error) notify.failed(error)
   else notify.visitUpdated('Visit cancelled', `${v.storeName} · ${visitDay(v.day).label}, ${v.slot}. We've let the store know.`)
 }
+// Coming up or earlier, one at a time (tabs), so the page stays short
+const show = ref<'now' | 'earlier'>('now')
+const showTabs = computed(() => [
+  { value: 'now' as const, label: 'Coming up', count: upcoming.value.length },
+  { value: 'earlier' as const, label: 'Earlier', count: past.value.length },
+])
 </script>
 
 <template>
   <div class="flex flex-col gap-8">
     <AccountHeading kicker="Kennel visits" title="Your" outline="visits" text="Visits to stores to meet their dogs. The store confirms the time with you." />
 
-    <section class="flex flex-col gap-3" aria-labelledby="upcoming-visits">
-      <h2 id="upcoming-visits" class="m-0 font-mono text-[11px] leading-4 font-semibold tracking-[.12em] text-ink-muted uppercase">Coming up · {{ upcoming.length }}</h2>
+    <div class="overflow-hidden rounded-xl bg-surface ring-1 ring-line"><ListTabs v-model="show" :tabs="showTabs" label="Show" /></div>
+
+    <section v-if="show === 'now'" class="flex flex-col gap-3" aria-label="Coming up">
       <VisitCard v-for="v in upcoming" :key="v.id" :visit="v" side="buyer">
         <Button variant="outline" size="sm" @click="cancelling = v">Cancel visit</Button>
         <Button variant="ghost" size="sm" as-child><NuxtLink :to="`/stores/${v.storeSlug}`">View store</NuxtLink></Button>
@@ -64,8 +71,8 @@ async function cancel() {
       </div>
     </section>
 
-    <section v-if="past.length" class="flex flex-col gap-3" aria-labelledby="past-visits">
-      <h2 id="past-visits" class="m-0 font-mono text-[11px] leading-4 font-semibold tracking-[.12em] text-ink-muted uppercase">Earlier · {{ past.length }}</h2>
+    <section v-else class="flex flex-col gap-3" aria-label="Earlier">
+      <p v-if="!past.length" class="m-0 rounded-xl bg-surface px-5 py-8 text-center text-sm text-ink-muted ring-1 ring-line">Nothing earlier yet.</p>
       <VisitCard v-for="v in past" :key="v.id" :visit="v" side="buyer" muted>
         <Button v-if="v.status === 'done'" variant="outline" size="sm" @click="openReview(v)"><PenLine aria-hidden="true" />Review {{ v.storeName }}</Button>
       </VisitCard>

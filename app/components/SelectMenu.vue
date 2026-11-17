@@ -22,7 +22,8 @@ const value = computed({ get: () => model.value || undefined, set: (v?: T | '') 
 <template>
   <Select v-model="value" :disabled="props.disabled">
     <SelectTrigger :id="props.id" :aria-label="props.ariaLabel" :class="cn('w-full min-w-0 border-line-strong bg-surface text-ink', props.class)">
-      <SelectValue :placeholder="props.placeholder ?? 'Choose'" />
+      <!-- Until the list has loaded in the browser, the Select can't name the choice: show it as the placeholder -->
+      <SelectValue :placeholder="props.options.find(o => o.value === model)?.label ?? props.placeholder ?? 'Choose'" />
     </SelectTrigger>
     <SelectContent class="border-line bg-surface text-ink">
       <SelectItem v-for="o in props.options" :key="o.value" :value="o.value" :disabled="o.disabled">{{ o.label }}</SelectItem>

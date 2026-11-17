@@ -358,7 +358,8 @@ export const sampleStores: Store[] = [
 ]
 
 // Stores buyers can browse (verified), loaded with the dogs by plugins/catalog.ts; samples until then
-export const listedStores = shallowRef<Store[]>(sampleStores)
+// Starts empty: the site shows only real stores from the database (sampleStores stays for tests and demos)
+export const listedStores = shallowRef<Store[]>([])
 
 export function findStore(slugOrId: string) {
   const key = slugOrId.toLowerCase()

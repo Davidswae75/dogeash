@@ -1,13 +1,13 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-11-10T00:42:28.589Z",
-    "fileCount": 781,
+    "lastScanned": "2026-11-12T18:54:12.112Z",
+    "fileCount": 782,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "0bae801684485772b2cafe790d9066fb697bfc6a33a20921e7f5b2e089841f8d",
-    "storeUpdatedAt": "2026-11-10T00:42:28.654Z",
-    "rootHash": "c978aacd19db9251"
+    "renderedHash": "1dfb9d241f7209d31fecc19a61f69f505d4da0c25bbb99ead21e9029bac0b924",
+    "storeUpdatedAt": "2026-11-12T18:54:12.155Z",
+    "rootHash": "361cd6d171a93d5d"
   },
   "files": {
     ".gitignore": {
@@ -9726,6 +9726,15 @@
       "size": 3088,
       "mtimeMs": 1794271348236.8462,
       "updatedAt": "2026-11-10T00:42:28.587Z",
+      "source": "hook"
+    },
+    "supabase/migrations/20261215000000_cascade_links_on_owned_dogs.sql": {
+      "description": "Deleting a store, a listed dog, a care provider or a care booking, 12 Nov: buyers' own dogs and thei",
+      "tokens": 983,
+      "hash": "7c4524af621f1f67",
+      "size": 3687,
+      "mtimeMs": 1794509651884.2195,
+      "updatedAt": "2026-11-12T18:54:12.110Z",
       "source": "hook"
     }
   },

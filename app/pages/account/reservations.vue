@@ -80,6 +80,12 @@ const cancelling = ref<Reservation>()
 const cancelOpen = ref(false)
 const confirming = ref<Reservation>()
 const confirmOpen = ref(false)
+// Coming up or earlier, one at a time (tabs), so the page stays short
+const show = ref<'now' | 'earlier'>('now')
+const showTabs = computed(() => [
+  { value: 'now' as const, label: 'In progress', count: active.value.length },
+  { value: 'earlier' as const, label: 'Earlier', count: pastShown.value.length },
+])
 </script>
 
 <template>
@@ -104,8 +110,9 @@ const confirmOpen = ref(false)
       </div>
     </div>
 
-    <section class="flex flex-col gap-3" aria-labelledby="active-reservations">
-      <h2 id="active-reservations" class="m-0 font-mono text-[11px] leading-4 font-semibold tracking-[.12em] text-ink-muted uppercase">In progress · {{ active.length }}</h2>
+    <div class="overflow-hidden rounded-xl bg-surface ring-1 ring-line"><ListTabs v-model="show" :tabs="showTabs" label="Show" /></div>
+
+    <section v-if="show === 'now'" class="flex flex-col gap-3" aria-label="In progress">
       <ListSkeleton v-if="!loaded && !checking" :rows="2" label="Loading your reservations" />
       <AccountReservationCard v-for="r in active" :key="r.id" :reservation="r">
         <template v-if="r.status === 'held'">
@@ -134,8 +141,8 @@ const confirmOpen = ref(false)
       </div>
     </section>
 
-    <section v-if="pastShown.length" class="flex flex-col gap-3" aria-labelledby="earlier-reservations">
-      <h2 id="earlier-reservations" class="m-0 font-mono text-[11px] leading-4 font-semibold tracking-[.12em] text-ink-muted uppercase">Earlier · {{ pastShown.length }}</h2>
+    <section v-else class="flex flex-col gap-3" aria-label="Earlier">
+      <p v-if="!pastShown.length" class="m-0 rounded-xl bg-surface px-5 py-8 text-center text-sm text-ink-muted ring-1 ring-line">Nothing earlier yet.</p>
       <!-- One line each; the full card opens in a dialog -->
       <SummaryRow
         v-for="r in pastShown"

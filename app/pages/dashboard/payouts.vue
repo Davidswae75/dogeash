@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { definePageMeta, useSeoMeta } from '#imports' // nuxt
+import type { DataColumn } from '~/components/list/ListTable.vue'
 import type { StoreReservation, StorePayout } from '~/composables/useStoreMoney'
 import { useStoreContext } from '~/composables/useStoreContext'
 import { useStoreMoney } from '~/composables/useStoreMoney'
@@ -29,6 +30,14 @@ const payoutState: Record<StorePayout['status'], { label: string, tone: string }
   done: { label: 'Paid', tone: 'text-ink-muted' },
   failed: { label: 'Not sent yet', tone: 'text-danger' },
 }
+// Earlier reservations as a table
+const pastColumns: DataColumn[] = [
+  { key: 'dogName', label: 'Dog', mobile: 'title' },
+  { key: 'buyerName', label: 'Buyer', mobile: 'meta' },
+  { key: 'outcome', label: 'Outcome', mobile: 'row' },
+  { key: 'paid', label: 'Paid', align: 'right', mono: true, mobile: 'end' },
+]
+const pastKey = (r: StoreReservation) => r.id
 const when = (iso: string) => new Date(iso).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })
 
 // Cancelling: the buyer gets everything back, so the store says why
@@ -81,17 +90,17 @@ async function confirmCancel() {
 
         <section v-if="finished.length" class="flex flex-col gap-3" aria-labelledby="finished">
           <h2 id="finished" class="m-0 font-mono text-[11px] leading-4 font-semibold tracking-[.12em] text-ink-muted uppercase">Earlier · {{ finished.length }}</h2>
-          <!-- One line each; the full card opens in a dialog -->
-          <SummaryRow
-            v-for="r in finished"
-            :key="r.id"
-            :title="r.dogName"
-            :subtitle="`${r.buyerName} · ${r.status === 'completed' ? 'Sold' : r.status === 'cancelled' ? 'Cancelled' : 'Hold ended'}`"
-            :meta="formatMoney(r.paidNaira)"
-            :name="r.dogName"
-            :photo="r.photo"
-            @click="pastOpen = r"
-          />
+          <!-- A table; a row opens the full reservation -->
+          <ListTable :rows="finished" :columns="pastColumns" :row-key="pastKey" min-width="520px" @open="r => (pastOpen = r)">
+            <template #cell-dogName="{ row }">
+              <span class="flex items-center gap-3">
+                <img v-if="row.photo" :src="row.photo" alt="" class="size-9 shrink-0 rounded-lg object-cover">
+                <span class="flex flex-col leading-tight"><strong class="font-semibold">{{ row.dogName }}</strong><span class="font-mono text-[11px] font-normal text-ink-muted">{{ row.ref }}</span></span>
+              </span>
+            </template>
+            <template #cell-outcome="{ row }"><span class="rounded-full bg-surface-sunk px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap">{{ row.status === 'completed' ? 'Sold' : row.status === 'cancelled' ? 'Cancelled' : 'Hold ended' }}</span></template>
+            <template #cell-paid="{ row }">{{ formatMoney(row.paidNaira) }}</template>
+          </ListTable>
         </section>
       </div>
 

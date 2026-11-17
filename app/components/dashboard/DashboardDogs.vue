@@ -2,7 +2,6 @@
 import { ChevronRight } from '@lucide/vue'
 import { computed, onMounted, ref } from 'vue'
 import { useStoreDogs } from '~/composables/useStoreDogs'
-import { dashboardDogStats } from '~/utils/dashboard'
 import { dogeashId, formatNaira } from '~/utils/dogs'
 
 // The store's dogs with how each is doing: level, status, enquiries and views, filtered by status
@@ -22,7 +21,6 @@ const filters = computed(() => [
   { value: 'reserved', label: 'Reserved', count: dogs.value.filter(d => d.status === 'reserved').length },
 ] as const)
 const shown = computed(() => filter.value === 'all' ? dogs.value : dogs.value.filter(d => d.status === filter.value))
-const statsOf = (fileNo: string) => dashboardDogStats[fileNo]
 </script>
 
 <template>
@@ -38,14 +36,12 @@ const statsOf = (fileNo: string) => dashboardDogStats[fileNo]
     <ListSkeleton v-if="!loaded" variant="table" :rows="3" label="Loading your dogs" />
     <!-- relative: keeps the hidden column label inside this scroller, or it widens the whole page on phones -->
     <div v-else class="relative overflow-x-auto">
-      <table class="w-full min-w-[600px] border-collapse text-left text-sm">
+      <table class="w-full min-w-[480px] border-collapse text-left text-sm">
         <thead>
           <tr class="font-mono text-[10.5px] tracking-[.12em] text-ink-muted uppercase">
             <th scope="col" class="px-3 py-2 font-semibold">Dog</th>
             <th scope="col" class="px-3 py-2 font-semibold">Level</th>
             <th scope="col" class="px-3 py-2 font-semibold">Status</th>
-            <th scope="col" class="px-3 py-2 text-right font-semibold">Enquiries</th>
-            <th scope="col" class="px-3 py-2 text-right font-semibold">Views</th>
             <th scope="col" class="px-3 py-2 text-right font-semibold">Price</th>
             <th scope="col" class="w-8"><span class="sr-only">Open</span></th>
           </tr>
@@ -70,11 +66,6 @@ const statsOf = (fileNo: string) => dashboardDogStats[fileNo]
               </span>
             </td>
             <td class="px-3 py-2.5"><ListingStatusChip :status="dog.status" /></td>
-            <td class="px-3 py-2.5 text-right font-mono tabular-nums">
-              <span v-if="statsOf(dog.fileNo)?.enquiries" class="font-semibold">{{ statsOf(dog.fileNo)!.enquiries }}</span>
-              <span v-else class="text-ink-muted">—</span>
-            </td>
-            <td class="px-3 py-2.5 text-right font-mono text-ink-muted tabular-nums">{{ statsOf(dog.fileNo)?.views ?? '—' }}</td>
             <td class="px-3 py-2.5 text-right font-mono font-semibold tabular-nums">{{ formatNaira(dog.priceNaira) }}</td>
             <td class="pr-3">
               <NuxtLink :to="`/dashboard/dogs/${dog.fileNo.toLowerCase()}`" class="grid size-7 place-items-center rounded-full text-ink-muted group-hover:text-ink" :aria-label="`Open ${dog.name}`">

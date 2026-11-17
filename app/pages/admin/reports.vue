@@ -4,6 +4,7 @@ import { computed, onMounted, ref } from 'vue'
 import { definePageMeta, useSeoMeta } from '#imports' // nuxt
 import type { AdminReport } from '~/composables/useAdminReports'
 import type { DetailSection } from '~/components/DetailDialog.vue'
+import type { DataColumn } from '~/components/list/ListTable.vue'
 import type { CsvColumn } from '~/utils/csv'
 import { useAdminReports } from '~/composables/useAdminReports'
 import { useNotify } from '~/composables/useNotify'
@@ -20,8 +21,34 @@ const { reports, openCount, loaded, load, messages, close } = useAdminReports()
 onMounted(load)
 
 const tab = ref<'open' | 'closed'>('open')
-const tabModel = computed({ get: () => tab.value, set: (v: string) => { if (v) tab.value = v as 'open' | 'closed' } })
-const shown = computed(() => reports.value.filter(r => (tab.value === 'open' ? r.status === 'open' : r.status !== 'open')))
+const tabs = computed(() => [
+  { value: 'open' as const, label: 'Open', count: openCount.value, urgent: true },
+  { value: 'closed' as const, label: 'Closed', count: reports.value.filter(r => r.status !== 'open').length },
+])
+// What was reported (listing, store, review…), and a search over it, the reason and who reported
+type ReportKind = keyof typeof reportKinds
+const kinds = ref<ReportKind[]>([])
+const kindOptions = (Object.keys(reportKinds) as ReportKind[]).map(k => ({ value: k, label: reportKinds[k] }))
+const query = ref('')
+const shown = computed(() => {
+  const q = query.value.trim().toLowerCase()
+  return reports.value
+    .filter(r => (tab.value === 'open' ? r.status === 'open' : r.status !== 'open'))
+    .filter(r => !kinds.value.length || kinds.value.includes(r.kind as ReportKind))
+    .filter(r => !q || `${r.target.label} ${r.details ?? ''} ${r.reporter} ${reasonLabel(r.reason)}`.toLowerCase().includes(q))
+})
+function clearFilters() {
+  kinds.value = []
+  query.value = ''
+}
+const columns: DataColumn[] = [
+  { key: 'what', label: 'Reported', mobile: 'title' },
+  { key: 'reason', label: 'Reason', mobile: 'row' },
+  { key: 'who', label: 'From', mobile: 'row' },
+  { key: 'when', label: 'When', mobile: 'meta' },
+]
+const reportKey = (r: AdminReport) => r.id
+const reportLabel = (r: AdminReport) => `${reportKinds[r.kind as ReportKind]} report: ${r.target.label}`
 
 // Reading a reported conversation (on request, and logged)
 const thread = ref<Record<string, { from: 'buyer' | 'store', body: string, at: string }[]>>({})
@@ -85,37 +112,38 @@ async function run(note: string) {
   <AdminPage title="Reports" :count="openCount" description="What buyers and stores flagged. Act on the thing itself in its section (take down, remove, suspend, block), then resolve here.">
     <template #actions>
       <AdminExport name="reports" :rows="shown" :columns="csv" />
-      <ToggleGroup v-model="tabModel" type="single" variant="outline" size="sm" aria-label="Show reports" class="max-w-full flex-wrap justify-start">
-        <ToggleGroupItem value="open" class="px-2.5 text-xs">Open <span class="ml-1 font-mono text-ink-muted">{{ openCount }}</span></ToggleGroupItem>
-        <ToggleGroupItem value="closed" class="px-2.5 text-xs">Closed</ToggleGroupItem>
-      </ToggleGroup>
     </template>
 
-    <div v-if="shown.length" class="flex flex-col gap-3">
-      <!-- The essentials; clicking opens the whole report, the conversation and what to do -->
-      <AdminCard v-for="r in shown" :key="r.id" class="cursor-pointer transition-shadow hover:ring-line-strong" @click="openReport(r)">
-        <div class="flex flex-col gap-2.5 pt-4">
-          <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
-            <span class="rounded-full bg-surface-sunk px-2 py-0.5 font-mono text-[11px] font-semibold uppercase">{{ reportKinds[r.kind] }}</span>
-            <span class="rounded-full bg-danger/10 px-2 py-0.5 text-xs font-semibold text-danger">{{ reasonLabel(r.reason) }}</span>
-            <span v-if="r.open_on_target > 1" class="text-xs font-semibold">{{ r.open_on_target }} open reports on this</span>
-            <span class="ml-auto font-mono text-[11px] text-ink-muted">{{ adminTime(r.created_at) }}</span>
-          </div>
-          <strong class="text-[14.5px] font-semibold">{{ r.target.label }}</strong>
-          <p v-if="r.details" class="m-0 line-clamp-2 text-[13.5px] leading-5 text-ink-muted">"{{ r.details }}"</p>
-          <div class="flex flex-wrap items-center gap-2 border-t border-line pt-3">
-            <span class="text-[12.5px] text-ink-muted">{{ r.status === 'open' ? `From ${r.reporter}` : `${r.status === 'resolved' ? 'Resolved' : 'Dismissed'}${r.resolved_at ? ` ${adminTime(r.resolved_at)}` : ''}` }}</span>
-            <Button variant="outline" size="sm" class="ml-auto" @click.stop="openReport(r)">Details</Button>
-            <template v-if="r.status === 'open'">
-              <Button variant="marigold" size="sm" @click.stop="ask(r, 'resolved')">Resolve</Button>
-              <Button variant="ghost" size="sm" @click.stop="ask(r, 'dismissed')">Dismiss</Button>
-            </template>
-          </div>
-        </div>
-      </AdminCard>
+    <div class="flex flex-col gap-4">
+      <ListToolbar v-model:search="query" placeholder="What, details, reporter or reason" :count="shown.length" :noun="['report', 'reports']" :filtered="!!kinds.length || !!query.trim()" @clear="clearFilters">
+        <template #tabs><ListTabs v-model="tab" :tabs="tabs" label="Show reports" /></template>
+        <template #filters><ListFilter v-model="kinds" label="Kind" :options="kindOptions" /></template>
+      </ListToolbar>
+      <ListSkeleton v-if="!loaded" variant="table" :rows="4" />
+      <p v-else-if="!shown.length" class="m-0 rounded-xl bg-surface px-5 py-8 text-center text-sm text-ink-muted ring-1 ring-line">{{ query || kinds.length ? 'No reports match.' : tab === 'open' ? 'No open reports.' : 'No closed reports yet.' }}</p>
+      <!-- A row opens the whole report, the conversation and what to do -->
+      <ListTable v-else :rows="shown" :columns="columns" :row-key="reportKey" :row-label="reportLabel" min-width="820px" @open="openReport">
+        <template #cell-what="{ row }">
+          <span class="flex max-w-[360px] flex-col gap-1">
+            <span class="flex flex-wrap items-center gap-2">
+              <span class="rounded-full bg-surface-sunk px-2 py-0.5 font-mono text-[10.5px] font-semibold uppercase">{{ reportKinds[row.kind as ReportKind] }}</span>
+              <span v-if="row.open_on_target > 1" class="text-xs font-semibold text-danger">{{ row.open_on_target }} open on this</span>
+            </span>
+            <strong class="font-semibold">{{ row.target.label }}</strong>
+            <span v-if="row.details" class="line-clamp-1 text-[12.5px] font-normal text-ink-muted">"{{ row.details }}"</span>
+          </span>
+        </template>
+        <template #cell-reason="{ row }"><span class="rounded-full bg-danger/10 px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap text-danger">{{ reasonLabel(row.reason) }}</span></template>
+        <template #cell-who="{ row }"><span class="text-ink-muted">{{ row.status === 'open' ? row.reporter : `${row.status === 'resolved' ? 'Resolved' : 'Dismissed'}${row.resolved_at ? ` ${adminTime(row.resolved_at)}` : ''}` }}</span></template>
+        <template #cell-when="{ row }"><span class="font-mono text-[11.5px] whitespace-nowrap text-ink-muted">{{ adminTime(row.created_at) }}</span></template>
+        <template #actions="{ row }">
+          <span v-if="row.status === 'open'" class="flex justify-end gap-1.5">
+            <Button variant="marigold" size="sm" class="h-8" @click="ask(row, 'resolved')">Resolve</Button>
+            <Button variant="ghost" size="sm" class="h-8" @click="ask(row, 'dismissed')">Dismiss</Button>
+          </span>
+        </template>
+      </ListTable>
     </div>
-    <ListSkeleton v-else-if="!loaded" variant="card" :rows="3" />
-    <p v-else class="m-0 text-sm text-ink-muted">{{ tab === 'open' ? 'No open reports.' : 'No closed reports yet.' }}</p>
 
     <DetailDialog v-if="viewing" v-model:open="viewOpen" :title="`${reportKinds[viewing.kind]} report: ${reasonLabel(viewing.reason)}`" :subtitle="viewing.target.label" :sections="reportSections">
       <!-- A reported conversation, read on request (logged) -->

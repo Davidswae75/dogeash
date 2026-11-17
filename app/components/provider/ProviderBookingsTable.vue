@@ -1,55 +1,36 @@
 <script setup lang="ts">
-import { ChevronRight } from '@lucide/vue'
+import type { DataColumn } from '~/components/list/ListTable.vue'
 import type { ProviderBooking } from '~/composables/useProviderDashboard'
 import { careBookingStatus } from '~/composables/useCareBookings'
 import { visitDay } from '~/utils/time'
 
-// The provider's bookings as a table: one row each, the whole row opens the details
+// The provider's bookings as a table (the shared list design): when, services, buyer, dog, where, status.
+// A row opens the details; on phones rows stack as cards.
 const props = defineProps<{ bookings: ProviderBooking[] }>()
 const emit = defineEmits<{ open: [booking: ProviderBooking] }>()
-const th = 'px-3 py-3 font-semibold'
+const columns: DataColumn[] = [
+  { key: 'service', label: 'Services', mobile: 'title' },
+  { key: 'when', label: 'When', mobile: 'meta' },
+  { key: 'buyerName', label: 'Buyer', mobile: 'row' },
+  { key: 'dogName', label: 'Dog', mobile: 'row' },
+  { key: 'place', label: 'Where', mobile: 'row' },
+  { key: 'status', label: 'Status', mobile: 'end' },
+]
+const key = (b: ProviderBooking) => b.id
+const label = (b: ProviderBooking) => `${b.service}, ${b.buyerName}, ${visitDay(b.day).label} at ${b.slot}`
 </script>
 
 <template>
-  <!-- relative: keeps the hidden column label inside this scroller on phones -->
-  <div class="relative overflow-x-auto rounded-xl bg-surface ring-1 ring-line">
-    <table class="w-full min-w-[760px] border-collapse text-left text-sm">
-      <thead>
-        <tr class="font-mono text-[10.5px] tracking-[.12em] text-ink-muted uppercase">
-          <th scope="col" :class="[th, 'pl-4']">When</th>
-          <th scope="col" :class="th">Services</th>
-          <th scope="col" :class="th">Buyer</th>
-          <th scope="col" :class="th">Dog</th>
-          <th scope="col" :class="th">Where</th>
-          <th scope="col" :class="th">Status</th>
-          <th scope="col" class="w-10"><span class="sr-only">Open</span></th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          v-for="b in props.bookings"
-          :key="b.id"
-          tabindex="0"
-          class="cursor-pointer border-t border-line outline-none hover:bg-surface-sunk focus-visible:bg-surface-sunk"
-          :aria-label="`${b.service}, ${b.buyerName}, ${visitDay(b.day).label} at ${b.slot}. Open details`"
-          @click="emit('open', b)"
-          @keydown.enter.prevent="emit('open', b)"
-        >
-          <td class="py-3 pr-3 pl-4 whitespace-nowrap">
-            <strong class="block leading-5">{{ visitDay(b.day).label }}</strong>
-            <span class="font-mono text-xs text-ink-muted">{{ b.slot }}</span>
-          </td>
-          <td class="max-w-[220px] px-3 py-3"><span class="line-clamp-2 font-semibold">{{ b.service }}</span></td>
-          <td class="px-3 py-3">
-            <span class="block leading-5">{{ b.buyerName }}</span>
-            <span v-if="b.buyerPhone" class="font-mono text-xs text-ink-muted">{{ b.buyerPhone }}</span>
-          </td>
-          <td class="px-3 py-3">{{ b.dogName || '—' }}</td>
-          <td class="px-3 py-3 whitespace-nowrap text-ink-muted">{{ b.place === 'home' ? 'Their home' : 'Your premises' }}</td>
-          <td class="px-3 py-3"><span :class="['rounded-full px-2.5 py-0.5 text-xs font-bold whitespace-nowrap', careBookingStatus[b.status].tone]">{{ careBookingStatus[b.status].label }}</span></td>
-          <td class="pr-3 text-right"><ChevronRight class="size-4 text-ink-muted" aria-hidden="true" /></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+  <ListTable :rows="props.bookings" :columns="columns" :row-key="key" :row-label="label" @open="b => emit('open', b)">
+    <template #cell-service="{ row }"><span class="line-clamp-2 max-w-[260px] font-semibold">{{ row.service }}</span></template>
+    <template #cell-when="{ row }"><span class="whitespace-nowrap">{{ visitDay(row.day).label }} · <span class="font-mono">{{ row.slot }}</span></span></template>
+    <template #cell-buyerName="{ row }">
+      <span class="flex flex-col"><span>{{ row.buyerName }}</span><span v-if="row.buyerPhone" class="font-mono text-xs text-ink-muted">{{ row.buyerPhone }}</span></span>
+    </template>
+    <template #cell-dogName="{ row }">{{ row.dogName || '—' }}</template>
+    <template #cell-place="{ row }"><span class="whitespace-nowrap text-ink-muted">{{ row.place === 'home' ? 'Their home' : 'Your premises' }}</span></template>
+    <template #cell-status="{ row }">
+      <span :class="['rounded-full px-2.5 py-0.5 text-xs font-bold whitespace-nowrap', careBookingStatus[row.status as ProviderBooking['status']].tone]">{{ careBookingStatus[row.status as ProviderBooking['status']].label }}</span>
+    </template>
+  </ListTable>
 </template>
